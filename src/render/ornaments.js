@@ -58,7 +58,6 @@ export function createCraftDetails(parent){
    const x=-1.32;
    box(g,x,.62,-1.33,.91,1.12,.28,0xf0d5b6,true);arch(g,x,.15,-1.16,.61,.86,0x493d48,.02);box(g,x,1.22,-1.30,1.05,.12,.4,P.cream,true);
    for(let i=0;i<3;i++)line(g,[x-.23,.23+i*.07,-1.1],[x+.23,.25+i*.05,-1.1],.028,0x79624d);
-   for(let i=0;i<3;i++)ball(g,x-.15+i*.15,.37,-1.065,.07,.17,.018,bulb);
    halo(room.x+x,.44,-.96,1.1,.19);
    ring(g,x,1.93,-1.43,.31,.048,P.gold);const mirror=cylinder(g,x,1.93,-1.45,.285,.016,0xa9b4b2);mirror.rotation.x=Math.PI/2;
    vase(g,x+.35,1.29,-1.26,0x9eaba1);cylinder(g,x-.29,1.40,-1.29,.048,.27,0xf3d9b6);ball(g,x-.29,1.58,-1.29,.023,.051,.023,bulb);
@@ -68,7 +67,7 @@ export function createCraftDetails(parent){
   }
   if(room.id==='studio'){
    for(let i=0;i<7;i++){const x=-.35+i*.22;line(g,[x,2.78,-1.47],[x,2.70-Math.sin(i)*.07,-1.45],.006,P.gold);const flag=box(g,x,2.57-Math.sin(i)*.07,-1.42,.15,.23,.018,[0xc894a6,0x94b0a4,0xd6bb8f][i%3]);flag.rotation.z=(i-3)*.03}
-   box(g,-1.62,.29,-.37,.50,.40,.40,0xb59a7b,true);ring(g,-1.62,.5,-.37,.2,.023,P.cream,true);
+   box(g,-1.62,.29,-.37,.50,.40,.40,0xb59a81,true);ring(g,-1.62,.5,-.37,.2,.023,P.cream,true);
    for(let i=0;i<3;i++)ball(g,-1.74+i*.12,.53,-.37,.094,.084,.09,[0xbd829e,0xa2b7ad,0xe2c392][i]);
    vase(g,1.54,.75,-.66,0xc391a8);
    for(let i=0;i<6;i++)box(g,-.96+i*.06,.855,-.48,.044,.008,.10,[0xc48b9c,0xc49b76,0x859f97][i%3]);

@@ -7,6 +7,7 @@ import {createHouse,makeFurniture} from './house.js';
 import {createDolls,createGhost} from './dolls.js';
 import {createCraftDetails,createGarden} from './ornaments.js';
 import {createKeepsakeDetails} from './keepsake-details.js';
+import {createRoomEffects} from './room-effects.js';
 import {createAtmosphere} from './atmosphere.js';
 import {lighting,detail,framing} from './visual-policy.js';
 
@@ -26,7 +27,7 @@ export function createWorld(canvas,{onPick,onError}){
  const fill=new T.DirectionalLight(0xbfbadb,1.8);fill.position.set(7,6,-6);scene.add(fill);
  const floor=new T.Mesh(new T.PlaneGeometry(200,200),new T.ShadowMaterial({opacity:.15}));floor.rotation.x=-Math.PI/2;floor.position.y=-.70;floor.receiveShadow=true;scene.add(floor);
  const house=createHouse(scene), residents=createDolls(house.root),ghost=createGhost(house.root);
- createKeepsakeDetails(house.root);const details=createCraftDetails(house.root);createGarden(house.root);const atmosphere=createAtmosphere(scene);
+ createKeepsakeDetails(house.root);const details=createCraftDetails(house.root);createGarden(house.root);const atmosphere=createAtmosphere(scene),roomEffects=createRoomEffects(house.root);
  const decor=new Map(),slotTargets=[];
  const slotGroup=new T.Group();house.root.add(slotGroup);
  for(const room of ROOMS)for(let i=0;i<SLOTS.length;i++){
@@ -71,8 +72,8 @@ export function createWorld(canvas,{onPick,onError}){
    const look=lighting(nightMix);hemi.intensity=look.ambient;key.intensity=look.key;fill.intensity=look.rim;renderer.toneMappingExposure=look.exposure;
    hemi.color.set(0xe9e0d5).lerp(new T.Color(0x849bc9),nightMix);key.color.set(0xffe5c2).lerp(new T.Color(0xb8caff),nightMix);fill.color.set(0xb8cbd5).lerp(new T.Color(0x829bdb),nightMix);
    house.lights.forEach(l=>{if(l.isLight){l.intensity=look.lamps;l.color.set(0xffca8e)}});
-   house.windows.forEach(m=>{m.emissive.set(0x8baaca);m.emissiveIntensity=.14+nightMix*.44});details.update(nightMix);atmosphere.update(state,nightMix);
-   residents.update(state,dt,selected);ghost.update(state.elapsed,night,state.settings.reducedMotion||state.paused);
+   house.windows.forEach(m=>{m.emissive.set(0x8baaca);m.emissiveIntensity=.14+nightMix*.44});details.update(nightMix);atmosphere.update(state,nightMix);roomEffects.update(state,nightMix);
+   residents.update(state,dt,selected,Math.atan2(camera.position.x-controls.target.x,camera.position.z-controls.target.z));ghost.update(state.elapsed,night,state.settings.reducedMotion||state.paused,state.journal.length);
    controls.enableDamping=!state.settings.reducedMotion;controls.update();renderer.render(scene,camera);
   },
   dispose(){disposed=true;observer.disconnect();controls.dispose();canvas.removeEventListener('pointerdown',pointerdown);canvas.removeEventListener('pointermove',pointermove);canvas.removeEventListener('pointerup',pointerup);canvas.removeEventListener('pointercancel',cancel);canvas.removeEventListener('webglcontextlost',contextLost);const geos=new Set(),mats=new Set();scene.traverse(o=>{if(o.geometry)geos.add(o.geometry);if(o.material)for(const m of Array.isArray(o.material)?o.material:[o.material])mats.add(m)});geos.forEach(g=>g.dispose());mats.forEach(m=>{m.map?.dispose();m.dispose()});renderer.dispose()}
