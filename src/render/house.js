@@ -65,9 +65,6 @@ export function makeFurniture(id){const g=new T.Group();
 }
 export function createHouse(scene){
  const root=new T.Group();root.position.y=.26;scene.add(root);const staticRoot=new T.Group();root.add(staticRoot);const lights=[];
- const base=cylinder(staticRoot,0,-.31,0,6.27,.59,0xb8a198);base.scale.z=.56;
- const top=cylinder(staticRoot,0,.01,0,6.23,.07,0xeadbc7);top.scale.z=.56;
- const trim=ring(staticRoot,0,-.12,0,6.25,.026,P.gold,true);trim.scale.y=.56;
  for(let j=0;j<2;j++)box(staticRoot,0,j*3.2,0,9.85,.19,3.65,P.wood);box(staticRoot,0,6.4,-.02,9.85,.16,3.65,P.cream);
  for(const room of ROOMS){const g=new T.Group();g.position.set(room.x,room.y,0);staticRoot.add(g);
  box(g,0,1.57,-1.75,4.76,3.10,.15,room.tint);
@@ -85,8 +82,8 @@ export function createHouse(scene){
  for(const x of [-4.83,4.83])box(staticRoot,x,3.2,-.99,.14,6.4,1.35,0xd4c2b0);
  for(const y of [0,3.2,6.4]){box(staticRoot,0,y+.03,1.77,9.91,.15,.10,P.cream);box(staticRoot,0,y-.065,1.80,9.87,.03,.04,P.gold)}
  const roofShape=new T.Shape();roofShape.moveTo(-4.90,6.4);roofShape.lineTo(0,8.20);roofShape.lineTo(4.90,6.4);roofShape.closePath();const gable=new T.Mesh(new T.ExtrudeGeometry(roofShape,{depth:.15,bevelEnabled:false}),mat(0xe8d7c1));gable.position.z=-1.77;staticRoot.add(gable);
- for(const sign of [-1,1]){const roof=box(staticRoot,sign*2.56,7.30,-.05,5.5,.18,3.97,0xaf7588);roof.rotation.z=-sign*.355;
- for(let row=0;row<7;row++)for(let col=0;col<13;col++){const x=sign*(.20+col*.40),y=8.26-Math.abs(x)*.367,z=-1.88+row*.57;const tile=box(staticRoot,x,y,z,.40,.065,.51,row%2?0xbc8698:0xb78094,true);tile.rotation.z=-sign*.355}
+ for(const sign of [-1,1]){const roof=box(staticRoot,sign*2.56,7.30,-.05,5.5,.18,3.97,0x78566c);roof.rotation.z=-sign*.355;
+ for(let row=0;row<7;row++)for(let col=0;col<13;col++){const x=sign*(.20+col*.40),y=8.40-Math.abs(x)*.3707,z=-1.88+row*.57;const tile=box(staticRoot,x,y,z,.40,.065,.51,[0xa47d8c,0x94677e,0x9c758b][(row+col)%3],true);tile.rotation.z=-sign*.355}
  line(staticRoot,[0,8.30,1.99],[sign*5.17,6.37,1.99],.095,P.cream);line(staticRoot,[0,8.36,-2.05],[sign*5.17,6.44,-2.05],.07,P.cream)}
  line(staticRoot,[0,8.31,-2.08],[0,8.31,2.0],.07,P.gold);
  box(staticRoot,-3.02,7.63,-1.06,.52,.86,.60,0xe1ccb4);box(staticRoot,-3.02,8.08,-1.06,.69,.13,.77,P.cream);
@@ -96,5 +93,5 @@ export function createHouse(scene){
  // Twelve tiny outside steps make the two-storey miniature legible.
  for(let i=0;i<12;i++)box(staticRoot,5.02,.13+i*.266,1.48-i*.23,.52,.20,.31,0xc5ac94);
  line(staticRoot,[5.31,.55,1.62],[5.31,3.60,-1.18],.023,P.cream);for(let i=0;i<6;i++)line(staticRoot,[5.31,.18+i*.53,1.44-i*.46],[5.31,.73+i*.53,1.44-i*.46],.022,P.cream);
- batch(staticRoot);return {root,lights};
+ const windows=new Set();staticRoot.traverse(o=>{if(o.material?.color?.getHex()===0xb9cacc)windows.add(o.material)});batch(staticRoot);return {root,lights,windows};
 }

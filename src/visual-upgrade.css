@@ -1,0 +1,27 @@
+/* Keepsake-paper UI: the scene stays primary, closeups are one tap away. */
+:root{--ink:#53404d;--muted:#7e6670;--paper:#fbf1e1;--line:#cfb89f;--rose-dark:#775166}
+.brand h1{text-shadow:0 1px 12px #fff8e066}.brand-mark{background:#f8eddd66;box-shadow:inset 0 0 0 3px #f7ead6}
+.objective{background:linear-gradient(110deg,#f5e6d4b8,transparent);padding:15px 12px;border-radius:0 0 14px 0}
+.objective-head{color:#735b66}.objective p{color:#543f4b}
+.house-status{background:#fff2ddbb;box-shadow:inset 0 0 0 3px #fff8e433}
+.dock{box-shadow:0 8px 28px #35233525,inset 0 0 0 3px #fff8e9a0;border-color:#c9aa87;background:#f9eddbf0}
+.room-views{position:absolute;left:50%;bottom:119px;transform:translateX(-50%);display:flex;gap:5px;padding:4px 8px;background:#f7eddfb8;border:1px solid #cdb39577;border-radius:18px;backdrop-filter:blur(6px);pointer-events:auto}
+.room-views button{border:0;background:none;min-width:85px;min-height:46px;padding:5px 10px;display:flex;flex-direction:column;gap:2px;font-size:9px;border-radius:12px;line-height:1.35}
+.room-views .icon{width:18px;height:18px;color:#906478}
+.room-views button[aria-pressed=true]{background:#a8758840;box-shadow:inset 0 0 0 1px #ab7b8e}
+.scene-caption{bottom:184px;opacity:.9}.scene-caption>span{font-size:9px}
+.night .brand h1{text-shadow:0 1px 12px #131b37}.night .brand-mark{background:#39364a77;box-shadow:inset 0 0 0 3px #e8ceb210}
+.night .objective{background:linear-gradient(110deg,#252537cc,transparent)}.night .objective p{color:#f2dfcb}.night .objective-head{color:#d5bfae}
+.night .room-views{background:#302b3cc9;border-color:#ccb59844;color:#e7d2bd}
+.night .room-views .icon{color:#ddbe9e}.night .room-views button:hover{background:#765568}.night .room-views button[aria-pressed=true]{background:#956c834d;box-shadow:inset 0 0 0 1px #c4a78d}
+.night .house-status{background:#292638b8}.night .dock{background:#f6e9d5f2}.night .camera-tools{background:#292637bf}
+#ui[data-focus-room]:not([data-focus-room=""]) .scene-caption{opacity:0}
+@media(max-width:680px){
+ .objective{inset-inline-start:15px;padding:10px 6px;width:194px}.objective p{font-size:14px}
+ .room-views{bottom:131px;padding:4px 6px;gap:2px;border-radius:17px}
+ .room-views button{min-width:70px;max-width:76px;padding:5px 7px;font-size:9px}
+ .scene-caption{bottom:194px;padding-inline:20px}
+ .camera-tools{bottom:199px;inset-inline-end:12px}
+ .brand h1{font-size:24px}.dock{bottom:max(24px,env(safe-area-inset-bottom))}
+}
+@media(max-height:560px) and (min-width:681px){.room-views{left:auto;right:18px;transform:none;bottom:140px;flex-direction:column;padding:4px}.room-views button{min-width:44px;min-height:44px;padding:4px;font-size:8px}.scene-caption{display:none}}

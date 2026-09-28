@@ -2,6 +2,7 @@ import {DOLLS,SAVE_KEY} from './content.js';
 import * as sim from './simulation.js';
 import {createWorld} from './render/world.js';
 import {createUI} from './ui.js';
+import {createRoomViews} from './render/room-views.js';
 import {DollhouseAudio} from './audio.js';
 
 let stored=null;try{stored=localStorage.getItem(SAVE_KEY)}catch{}
@@ -44,7 +45,8 @@ async function dispatch(action,value){
   case 'discover':{
    const result=sim.discover(state);if(result.ok){save();audio.effect('secret');ui.open('journal');ui.toast(ui.t('newSecret'))}else ui.toast(ui.t(result.reason));break;
   }
-  case 'camera':world?.home();break;
+  case 'camera':world?.home();host.dataset.focusRoom='';break;
+  case 'focus-room':if(world?.focusRoom(value)){host.dataset.focusRoom=value;ui.tick()}break;
   case 'zoom-in':world?.zoom(1.2);break;
   case 'zoom-out':world?.zoom(1/1.2);break;
   case 'pause':manualPause=!manualPause;syncPause();ui.refresh();break;
@@ -63,6 +65,7 @@ async function dispatch(action,value){
  }
 }
 ui=createUI(host,()=>state,dispatch);
+const roomViews=createRoomViews(host,()=>state,id=>dispatch('focus-room',id));
 try{world=createWorld(canvas,{onPick:data=>{
  if(data.doll)ui.open('household',data.doll);
  if(data.ghost)dispatch('discover');
@@ -70,7 +73,7 @@ try{world=createWorld(canvas,{onPick:data=>{
 },onError:showError});document.querySelector('#loading')?.remove();}catch(error){console.error('Dollhouse renderer could not start:',error);showError('webgl')}
 let last=performance.now(),lastUI=0,lastSave=0,stopped=false;
 function frame(now){if(stopped)return;const dt=Math.min(.1,Math.max(0,(now-last)/1000));last=now;
- if(!document.hidden&&!fatal){sim.step(state,dt);world?.render(state,dt,ui.selected);audio.tick(sim.isNight(state));if(now-lastUI>250){ui.tick();lastUI=now}if(now-lastSave>8000){save();lastSave=now}}
+ if(!document.hidden&&!fatal){sim.step(state,dt);world?.render(state,dt,ui.selected);audio.tick(sim.isNight(state));if(now-lastUI>250){ui.tick();roomViews.update();lastUI=now}if(now-lastSave>8000){save();lastSave=now}}
  requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
@@ -89,5 +92,5 @@ window.addEventListener('keydown',event=>{
 });
 // Explicit opt-in diagnostics for reproducible browser verification, never enabled by default.
 if(new URLSearchParams(location.search).get('debug')==='1'){
- window.dollhouse={state:()=>structuredClone(state),stats:()=>({calls:world?.renderer.info.render.calls,triangles:world?.renderer.info.render.triangles,geometries:world?.renderer.info.memory.geometries,textures:world?.renderer.info.memory.textures}),project:id=>world?.project(id)};
+ window.dollhouse={state:()=>structuredClone(state),stats:()=>({calls:world?.renderer.info.render.calls,triangles:world?.renderer.info.render.triangles,geometries:world?.renderer.info.memory.geometries,textures:world?.renderer.info.memory.textures}),project:id=>world?.project(id),visual:()=>world?.visualStatus()};
 }
