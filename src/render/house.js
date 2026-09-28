@@ -34,7 +34,7 @@ function parlor(p){
  for(let i=0;i<3;i++){box(p,-.24+i*.64,.59,-.55,.61,.16,.65,0xe4b8c4,true);ball(p,-.26+i*.66,.92,-.90,.032,.032,.02,P.cream)}
  for(const x of [-.64,1.5])for(const z of [-.88,-.24])cylinder(p,x,.12,z,.045,.24,P.gold);
  box(p,-.46,.85,-.77,.4,.37,.12,0xf1dec8,true).rotation.z=.2;box(p,1.25,.85,-.75,.40,.37,.12,0x91b8aa,true).rotation.z=-.2;
- const table=cylinder(p,.15,.47,.45,.53,.07,P.wood);table.scale.z=.7;for(let i=0;i<3;i++){const a=i*2.1;line(p,[.15+Math.cos(a)*.4,.04,.45+Math.sin(a)*.27],[.15+Math.cos(a)*.25,.45,.45+Math.sin(a)*.18],.035,P.wood)}cup(p,.05,.51,.38);books(p,.22,.51,.6);
+ const table=cylinder(p,.15,.47,.45,.53,.07,P.wood);table.scale.z=.7;for(let i=0;i<3;i++){const a=i*2.1;line(p,[.15+Math.cos(a)*.4,.04,.45+Math.sin(a)*.27],[.15+Math.cos(a)*.25,.45,.45+Math.sin(a)*.18],.035,P.wood)}cup(p,-.18,.51,.38);
  lamp(p,-1.67,0,-.83,1.65);
  box(p,1.94,.82,-.85,.5,1.64,.54,P.wood);for(let i=0;i<3;i++){box(p,1.94,.18+i*.54,-.52,.44,.04,.56,P.cream);books(p,1.74,.2+i*.54,-.62)}
  box(p,.35,2.08,-1.51,.88,1.03,.09,P.gold,true);box(p,.35,2.08,-1.45,.75,.90,.025,0x73616f);ball(p,.35,2.18,-1.413,.18,.22,.008,0xd6b7a6);box(p,.35,1.86,-1.413,.4,.27,.008,0xa09fa4);for(const x of [.28,.42])ball(p,x,2.19,-1.396,.025,.032,.009,0x51434d);

@@ -8,7 +8,8 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def sources():
     files = {f'project/{p.relative_to(ROOT).as_posix()}': p.read_text() for p in (ROOT/'src').rglob('*.js')}
-    files['project/tests/art-scene-checks.js'] = (ROOT/'tests/art-scene-checks.js').read_text()
+    for p in (ROOT/'tests').glob('art-*-checks.js'):
+        files[f'project/tests/{p.name}'] = p.read_text()
     for name in ['three.module.min.js', 'three.core.min.js']:
         files['vendor/'+name] = (ROOT/'node_modules/three/build'/name).read_text()
     for name, source in files.items():
@@ -29,8 +30,11 @@ with sync_playwright() as p:
       for(const [id,code] of Object.entries(sources)) imports[id]=URL.createObjectURL(new Blob([code],{type:'text/javascript'}));
       imports.three=imports['vendor/three.module.min.js'];
       const map=document.createElement('script');map.type='importmap';map.textContent=JSON.stringify({imports});document.head.append(map);
-      const suite=await import('project/tests/art-scene-checks.js');
-      return await suite.runArtChecks();
+      const results=[];
+      for(const id of Object.keys(sources).filter(id=>id.startsWith('project/tests/art-')&&id.endsWith('-checks.js')).sort()){
+        const suite=await import(id);results.push(...await suite.runArtChecks());
+      }
+      return results.sort((a,b)=>a.name.localeCompare(b.name));
     }''', sources())
     browser.close()
 output = Path(os.environ.get('ART_RESULTS', ROOT/'artifacts/art-checks.json'))

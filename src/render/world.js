@@ -6,6 +6,7 @@ import {createTapGesture} from '../pointer-gesture.js';
 import {createHouse,makeFurniture} from './house.js';
 import {createDolls,createGhost} from './dolls.js';
 import {createCraftDetails,createGarden} from './ornaments.js';
+import {createKeepsakeDetails} from './keepsake-details.js';
 import {createAtmosphere} from './atmosphere.js';
 import {lighting,detail,framing} from './visual-policy.js';
 
@@ -25,7 +26,7 @@ export function createWorld(canvas,{onPick,onError}){
  const fill=new T.DirectionalLight(0xbfbadb,1.8);fill.position.set(7,6,-6);scene.add(fill);
  const floor=new T.Mesh(new T.PlaneGeometry(200,200),new T.ShadowMaterial({opacity:.15}));floor.rotation.x=-Math.PI/2;floor.position.y=-.70;floor.receiveShadow=true;scene.add(floor);
  const house=createHouse(scene), residents=createDolls(house.root),ghost=createGhost(house.root);
- const details=createCraftDetails(house.root);createGarden(house.root);const atmosphere=createAtmosphere(scene);
+ createKeepsakeDetails(house.root);const details=createCraftDetails(house.root);createGarden(house.root);const atmosphere=createAtmosphere(scene);
  const decor=new Map(),slotTargets=[];
  const slotGroup=new T.Group();house.root.add(slotGroup);
  for(const room of ROOMS)for(let i=0;i<SLOTS.length;i++){
