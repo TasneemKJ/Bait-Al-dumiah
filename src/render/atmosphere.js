@@ -1,16 +1,18 @@
 import * as T from 'three';
 import {softTexture} from './textiles.js';
+import {nightSky} from './visual-policy.js';
 const vertex=`varying vec2 vUv; void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`;
-const fragment=`varying vec2 vUv; uniform float night; void main(){
+const fragment=`varying vec2 vUv; uniform float night; uniform vec3 nightBottom; uniform vec3 nightTop; uniform vec3 nightGlow; void main(){
  vec3 day=mix(vec3(.74,.64,.64),vec3(.94,.85,.73),smoothstep(0.,.7,vUv.y));
- vec3 dusk=mix(vec3(.19,.19,.27),vec3(.08,.10,.20),vUv.y);
+ vec3 dusk=mix(nightBottom,nightTop,vUv.y);
  float halo=exp(-length((vUv-vec2(.48,.46))*vec2(2.7,2.))*3.);
- vec3 c=mix(day,dusk,night)+halo*mix(vec3(.02),vec3(.085,.055,.075),night);
+ vec3 c=mix(day,dusk,night)+halo*mix(vec3(.02),nightGlow,night);
  gl_FragColor=vec4(c,1.);
  #include <colorspace_fragment>
 }`;
 export function createAtmosphere(scene){
- const backdrop=new T.Mesh(new T.PlaneGeometry(160,90),new T.ShaderMaterial({vertexShader:vertex,fragmentShader:fragment,uniforms:{night:{value:0}},depthWrite:false}));backdrop.position.set(0,18,-28);scene.add(backdrop);
+ const sky=nightSky();
+ const backdrop=new T.Mesh(new T.PlaneGeometry(160,90),new T.ShaderMaterial({vertexShader:vertex,fragmentShader:fragment,uniforms:{night:{value:0},nightBottom:{value:new T.Vector3(...sky.bottom)},nightTop:{value:new T.Vector3(...sky.top)},nightGlow:{value:new T.Vector3(...sky.glow)}},depthWrite:false}));backdrop.position.set(0,18,-28);scene.add(backdrop);
  const soft=softTexture(),starPos=new Float32Array(140*3);
  for(let i=0;i<140;i++){starPos[i*3]=Math.sin(i*127.1)*26;starPos[i*3+1]=4+(i*2.71)%23;starPos[i*3+2]=-14-Math.cos(i*11.2)*3}
  const starGeometry=new T.BufferGeometry();starGeometry.setAttribute('position',new T.BufferAttribute(starPos,3));

@@ -24,4 +24,17 @@
  .camera-tools{bottom:199px;inset-inline-end:12px}
  .brand h1{font-size:24px}.dock{bottom:max(24px,env(safe-area-inset-bottom))}
 }
-@media(max-height:560px) and (min-width:681px){.room-views{left:auto;right:18px;transform:none;bottom:140px;flex-direction:column;padding:4px}.room-views button{min-width:44px;min-height:44px;padding:4px;font-size:8px}.scene-caption{display:none}}
+@media(max-height:560px) and (min-width:681px){
+ .room-views{left:auto;right:auto;inset-inline-start:18px;transform:none;bottom:16px;display:grid;grid-template-columns:44px 44px;gap:4px;padding:4px}
+ .room-views button{min-width:44px;min-height:44px;width:44px;height:44px;padding:4px}
+ .room-views button span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+ .scene-caption{display:none}
+ #ui .objective p{font-size:13px;line-height:1.5}
+}
+@media(max-height:360px) and (min-width:681px){
+ .objective{top:78px;padding:6px;width:173px}#ui .objective p{font-size:12px;line-height:1.3;margin:5px 0}.objective-head{font-size:8px}
+}
+
+/* Closeups can put architecture behind the time toggle; keep its text legible. */
+#ui[data-focus-room]:not([data-focus-room=""]) .time-tools{padding:3px 10px 7px;background:#f9ebdce8;border-radius:12px}
+.night #ui[data-focus-room]:not([data-focus-room=""]) .time-tools{background:#272238e8}

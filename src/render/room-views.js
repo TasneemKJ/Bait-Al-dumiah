@@ -13,6 +13,7 @@ export function createRoomViews(host,getState,onFocus){
  let locale=null;
  function update(){
   if(!nav.isConnected)host.append(nav);
+  nav.hidden=host.querySelector('.placement')?.hidden===false;
   const language=getState().settings.locale;
   if(language!==locale){locale=language;nav.setAttribute('aria-label',translate(locale,'room'));
    buttons.forEach((b,i)=>{const label=translate(locale,ROOMS[i].id);b.title=label;b.setAttribute('aria-label',label);b.querySelector('span').textContent=label});

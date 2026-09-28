@@ -50,5 +50,20 @@ with sync_playwright() as p:
   page.set_viewport_size({'width':390,'height':844})
   bounds=buttons.evaluate_all('(els)=>els.map(e=>({width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height}))')
   results.append({'name':'room closeup controls meet mobile 44px targets','passed':all(b['width']>=44 and b['height']>=44 for b in bounds)})
+  page.evaluate("fixtureUI.open('decorate')")
+  page.locator('[data-action=choose-item][data-id=plant]').click()
+  page.evaluate('fixtureViews.update()')
+  results.append({'name':'room navigation never covers decoration placement controls','passed':not page.locator('.room-views').is_visible()})
+  page.locator('[data-action=placement-cancel]').click();page.evaluate('fixtureViews.update()')
+  results.append({'name':'room navigation returns after placement cancellation','passed':page.locator('.room-views').is_visible()})
+  page.evaluate("fixtureState.settings.locale='ar';fixtureUI.refresh();fixtureViews.update()")
+  results.append({'name':'room buttons survive HUD rebuilds and translate to Arabic','passed':page.locator('.room-views button').count()==4 and 'مطبخ الشاي' in page.locator('.room-views').inner_text()})
+  for height in [390,320]:
+   page.set_viewport_size({'width':844,'height':height})
+   overlaps=page.evaluate("""()=>{
+    const a=document.querySelector('.room-views').getBoundingClientRect();
+    return ['.time-tools','.house-status','.camera-tools','.objective','.dock'].filter(selector=>{const b=document.querySelector(selector).getBoundingClientRect();return a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top})
+   }""")
+   results.append({'name':f'landscape {height}px room controls do not obscure other HUD controls','passed':not overlaps,'overlaps':overlaps})
  print(json.dumps(results,indent=2));browser.close()
  if any(not r['passed'] for r in results):raise SystemExit(1)

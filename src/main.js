@@ -60,7 +60,7 @@ async function dispatch(action,value){
    save();ui.refresh();break;
   }
   case 'reset-yes':{
-   const settings={...state.settings};ui.close();state=sim.createState();state.settings=settings;manualPause=false;syncPause();world?.home();world?.setPlacement(null);save();ui.refresh();break;
+   const settings={...state.settings};ui.close();state=sim.createState();state.settings=settings;manualPause=false;syncPause();dispatch('camera');world?.setPlacement(null);save();ui.refresh();break;
   }
  }
 }

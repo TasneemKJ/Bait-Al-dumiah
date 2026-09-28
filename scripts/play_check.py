@@ -19,6 +19,8 @@ def capture(page,name):
  # Software WebGL captures can exceed the interaction deadline on shared CI.
  # Keep every screenshot mandatory, with a separate bounded capture deadline.
  print('Capturing '+name,flush=True)
+ page.mouse.move(8,8)
+ (OUT/f'{name}-capture.json').write_text(json.dumps({'viewport':page.viewport_size,'visual':page.evaluate('window.dollhouse?.visual?.() ?? null')},indent=2))
  page.screenshot(path=str(OUT/f'{name}.png'),full_page=False,timeout=60000)
 def state(page):return page.evaluate('window.dollhouse.state()')
 def click(page,action):page.locator(f'[data-action="{action}"]:visible').click()
@@ -59,7 +61,8 @@ try:
   check('placing a decoration changes ownership and charges exact price',after['buttons']==money-8 and len(after['decor'])==1)
   click(page,'panel-decorate');page.locator('[data-action="remove"]').click();check('packing away refunds the full price',state(page)['buttons']==money and not state(page)['decor']);click(page,'close')
   click(page,'panel-decorate');page.locator('[data-action="choose-item"][data-id="musicbox"]').click();page.locator('#place-room').select_option('parlor');click(page,'place-confirm')
-  click(page,'light');page.wait_for_timeout(2200);capture(page,'desktop-night')
+  click(page,'light');page.wait_for_function('window.dollhouse.visual().nightMix>.99',timeout=60000);capture(page,'desktop-night')
+  check('night capture uses the settled lighting rather than a transition',page.evaluate('window.dollhouse.visual().nightMix')>.99)
   check('nightfall changes the simulation and reveals a visitor',state(page)['clock']>=120 and page.locator('.visitor-hint').is_visible())
   page.locator('.visitor-hint [data-action="discover"]').click();capture(page,'first-whisper');check('visitor grants an authored mystery',state(page)['journal']==['music-box'])
   money=state(page)['buttons'];page.locator('#sheet [data-action="discover"]').click();check('same-night mystery cannot be farmed',state(page)['buttons']==money and len(state(page)['journal'])==1);click(page,'close')
@@ -81,6 +84,8 @@ try:
   click(page,'panel-household');capture(page,'mobile-care');page.keyboard.press('Escape');check('Escape dismisses the sheet',not page.locator('dialog[open]').count())
   page.set_viewport_size({'width':844,'height':390});page.wait_for_timeout(800);capture(page,'mobile-landscape');check('landscape retains visible toolbar',page.locator('.dock').is_visible())
   check('landscape phone does not accidentally enable desktop shadows',page.evaluate('window.dollhouse.visual().quality==="low"'))
+  page.locator('[data-room=studio]').click();open_settings(page);click(page,'reset-prompt');click(page,'reset-yes');page.wait_for_timeout(400)
+  check('new house resets camera focus and room button state',page.evaluate('window.dollhouse.visual().focusedRoom===null && document.querySelector("#ui").dataset.focusRoom==="" && document.querySelector("[data-room=studio]").getAttribute("aria-pressed")==="false"'))
   check('complete play loop produces no browser errors',not errors)
   print(json.dumps({'checks':checks,'errors':errors,'render':stats},indent=2))
 except Exception as exc:
