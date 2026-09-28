@@ -1,4 +1,6 @@
 import * as T from 'three';
+import {batchDoll} from './doll-rig-batch.js';
+import {createArm,levelCup,balanceWalk,gaze,express,carePose} from './doll-acting.js';
 import {createApron,createOveralls,createFoot,createSock} from './doll-wardrobe.js';
 import {createHair,fabricBow} from './doll-hair.js';
 import {createSculptedHead,createPortraitEye,createBrow,closePortraitEye,createPortraitMouth,createNose,createEar,bisqueMaterial,createNeckJoint} from './doll-face.js';
@@ -30,7 +32,8 @@ function makeDoll(def){
   const leg=new T.Group();leg.name='articulated-leg';leg.position.set(sign*.12,.40,0);body.add(leg);legs.push(leg);
   const hosiery=createSock(leg,skin);leg.sock=hosiery.sock;leg.knee=hosiery.knee;ring(leg,0,-.095,0,.063,.008,def.color,true);
   leg.foot=createFoot(leg,def,sign);
-  if(def.id==='sami')ball(leg,0,0,0,.12,.19,.11,0x82718d);batch(leg);
+  if(def.id==='sami')ball(leg,0,0,0,.12,.19,.11,0x82718d);
+  const shin=new T.Group();shin.name='articulated-shin';shin.userData.noBatch=true;shin.position.y=-.058;leg.add(shin);leg.shin=shin;for(const child of [leg.sock,leg.foot]){child.position.y+=.058;shin.add(child)}batch(leg);
  }
  if(def.id!=='sami')skirt(body,def.color);
  ball(body,0,.70,0,.17,.20,.125,fabric);
@@ -39,13 +42,7 @@ function makeDoll(def){
  // A scalloped collar and tiny seams make the residents feel sewn, not conical.
  for(let i=0;i<7;i++){const a=i*Math.PI/6;ball(body,Math.cos(a)*.108,.817-Math.sin(a)*.021,Math.sin(a)*.095,.034,.016,.029,P.cream)}
  cylinder(body,0,.845,0,.057,.10,skin);createNeckJoint(body);
- const arms=[];
- for(const sign of [-1,1]){
-  const arm=new T.Group();arm.position.set(sign*.19,.73,0);body.add(arm);
-  ball(arm,0,-.055,0,.073,.105,.075,fabric);ball(arm,0,-.174,.01,.045,.087,.045,skin);
-  ring(arm,0,-.155,.012,.047,.012,P.cream,true);ball(arm,0,-.26,.016,.052,.061,.048,skin);
-  arm.rotation.z=sign*.19;arms.push(arm);
- }
+ const arms=[-1,1].map(sign=>createArm(body,sign,def,skin));
  const head=new T.Group();head.position.set(0,1.095,.008);body.add(head);
  const hairStyle=createHair(head,def);
  const faceHull=createSculptedHead(head,skin,def.id);
@@ -58,7 +55,7 @@ function makeDoll(def){
  const nose=createNose(head,skin);
  const mouth=createPortraitMouth(head);
  if(def.id==='sami'){for(const sign of [-1,1])ring(head,sign*.105,.007,.296,.071,.008,P.gold);line(head,[-.034,.010,.295],[.034,.010,.295],.007,P.gold)}
- const tea=new T.Group();tea.position.set(0,-.29,.075);tea.scale.setScalar(.85);cup(tea,0,0,0,0xf1d9b5);arms[1].add(tea);tea.visible=false;const steam=createTeaSteam(tea);
+ const tea=new T.Group();tea.position.set(0,-.025,.065);tea.scale.setScalar(.85);cup(tea,0,0,0,0xf1d9b5);arms[1].hand.add(tea);tea.visible=false;const steam=createTeaSteam(tea);
  const hit=new T.Mesh(new T.CapsuleGeometry(.38,.74,3,8),new T.MeshBasicMaterial({visible:false}));hit.position.y=.72;hit.userData.doll=def.id;root.add(hit);
  const halo=new T.Mesh(new T.RingGeometry(.37,.40,48),new T.MeshBasicMaterial({color:0xe5b471,transparent:true,opacity:.8,side:T.DoubleSide,depthWrite:false}));halo.rotation.x=-Math.PI/2;halo.position.y=.035;root.add(halo);
  const shadow=new T.Mesh(new T.PlaneGeometry(.90,.66),new T.MeshBasicMaterial({map:softTexture(),color:0x453041,transparent:true,opacity:.35,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.012;root.add(shadow);
@@ -66,7 +63,7 @@ function makeDoll(def){
  const sparkles=new T.Group();sparkles.position.y=1.65;root.add(sparkles);
  for(let i=0;i<3;i++){const s=new T.Mesh(new T.OctahedronGeometry(.037),mat(0xf0cc8b,{emissive:0xf0cc8b,emissiveIntensity:.5}));s.position.set((i-1)*.18,Math.sin(i)*.13,0);sparkles.add(s)}
  const staticBody=new T.Group();for(const o of [...body.children])if(o.isMesh)staticBody.add(o);body.add(staticBody);batch(staticBody);batch(head);
- return {root,body,head,garments,hairStyle,faceHull,brows,mouth,nose,ears,arms,legs,eyes,hit,halo,tea,steam,comfortHearts,sleepCrescent,sparkles,room:null,id:def.id};
+ return batchDoll({root,body,head,garments,hairStyle,faceHull,brows,mouth,nose,ears,arms,legs,eyes,hit,halo,tea,steam,comfortHearts,sleepCrescent,sparkles,room:null,id:def.id});
 }
 export function createDolls(parent){
  const dolls=DOLLS.map((def,i)=>{const v=makeDoll(def);parent.add(v.root);const r=ROOMS.find(x=>x.id===def.room);v.root.position.set(r.x+.85,r.y+.12,.88);return v});
@@ -75,12 +72,12 @@ export function createDolls(parent){
   const motion=!state.settings.reducedMotion&&!state.paused,t=state.elapsed;
   dolls.forEach((v,i)=>{
    const d=state.dolls.find(x=>x.id===v.id),r=ROOMS.find(x=>x.id===d.room),mates=state.dolls.filter(x=>x.room===d.room),order=mates.indexOf(d);
-   const base=mates.length>1?(order-(mates.length-1)/2)*.90:(i===1?1.35:.80);
-   if(v.room!==d.room){v.root.position.set(r.x+base,r.y+.12,.88);v.room=d.room}
-   const walk=motion&&d.action==='idle'?Math.sin(t*.13+i*2)*.26:0;
+   const base=mates.length>1?(order-(mates.length-1)/2)*1.08:(i===1?1.35:.80);
+   const formation=mates.map(m=>m.id).join(':');if(v.room!==d.room||v.formation!==formation){v.root.position.set(r.x+base,r.y+.12,.88);v.room=d.room;v.formation=formation}
+   const walk=motion&&d.action==='idle'?(mates.length>1?Math.sin(t*.13)*.10:Math.sin(t*.13+i*2)*.26):0;
    const previousX=v.root.position.x;
    v.root.position.x=state.settings.reducedMotion?r.x+base:T.MathUtils.damp(v.root.position.x,r.x+base+walk,3,dt);
-   if(!state.paused){const speed=Math.abs(v.root.position.x-previousX)/Math.max(dt,.001);v.legs.forEach((leg,j)=>{leg.rotation.x=motion&&d.action==='idle'?Math.sin(t*3.2+i+j*Math.PI)*Math.min(.16,speed*2.5):0})}
+   if(!state.paused){const speed=Math.abs(v.root.position.x-previousX)/Math.max(dt,.001);v.walkSpeed=speed;v.legs.forEach((leg,j)=>{const phase=Math.sin(t*3.2+i+j*Math.PI),strength=motion&&d.action==='idle'?Math.min(1,speed*15):0;leg.rotation.x=phase*.16*strength;leg.shin.rotation.x=Math.max(0,phase)*.22*strength;leg.position.y=.40+Math.max(0,phase)*.022*strength})}
    v.halo.visible=selected===d.id;v.tea.visible=d.action==='tea';v.steam.update(t,d.action==='tea',!motion);v.comfortHearts.update(t,d.action==='soothe',!motion);v.sleepCrescent.update(t,d.action==='rest',!motion);v.sparkles.visible=d.action==='play';
    v.sparkles.rotation.y=motion?t*.7:0;
    v.body.position.y=motion?(d.action==='play'?Math.abs(Math.sin(t*4.6))*.065:Math.sin(t*1.7+i)*.009):0;
@@ -90,7 +87,7 @@ export function createDolls(parent){
    v.eyes.forEach(e=>closePortraitEye(e,openness));
    v.arms.forEach((a,j)=>{const sign=j===0?-1:1;a.rotation.z=sign*(d.action==='play'?.55+(motion?Math.sin(t*4)*.18:0):d.action==='soothe'?.50:d.action==='rest'?.46:.19);a.rotation.x=d.action==='tea'&&j===1?-1.2:d.action==='rest'?(j===0?-.88:-.68):0});
    // The hand carries the cup; wrist pitching must not spill its surface or tilt steam sideways.
-   v.tea.quaternion.copy(v.arms[1].quaternion).invert();
+   balanceWalk(v,d,t,i,motion);gaze(v,selected,viewerYaw,motion,dt);express(v,d,!motion,dt);carePose(v,d,t,!motion);levelCup(v);
   });
  },position(id){return dolls.find(v=>v.id===id)?.root.position.clone()}};
 }

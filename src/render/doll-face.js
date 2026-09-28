@@ -64,7 +64,7 @@ export function createPortraitMouth(parent){
  const root=new T.Group();root.name='porcelain-lips';root.userData.noBatch=true;root.position.set(0,-.115,.274);parent.add(root);
  const upper=new T.Shape();upper.moveTo(-.035,.003);upper.quadraticCurveTo(-.018,.010,0,.003);upper.quadraticCurveTo(.018,.010,.035,.003);upper.quadraticCurveTo(0,-.006,-.035,.003);
  const lower=new T.Shape();lower.moveTo(-.029,0);lower.quadraticCurveTo(0,-.010,.029,0);lower.quadraticCurveTo(0,-.020,-.029,0);
- for(const [shape,color] of [[upper,0xac6c74],[lower,0xc99391]])root.add(new T.Mesh(new T.ShapeGeometry(shape,16),mat(color,{roughness:.53})));
+ for(const [shape,color] of [[upper,0xac6c74],[lower,0xc99391]]){const lip=new T.Mesh(new T.ShapeGeometry(shape,16),mat(color,{roughness:.53}));lip.name='sculpted-lip';root.add(lip)}
  return root;
 }
 

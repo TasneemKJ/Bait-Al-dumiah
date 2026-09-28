@@ -1,3 +1,4 @@
+import {rigParts} from '../src/render/doll-rig-batch.js';
 import * as T from 'three';
 import {createDolls} from '../src/render/dolls.js';
 import {createState} from '../src/simulation.js';
@@ -25,7 +26,7 @@ const view=createDolls(new T.Group());const maps=view.dolls.map(d=>d.eyes[0].iri
 });
 
 test("D05: Lid rims and lashes",()=>{
-const {doll}=fixture();for(const e of doll.eyes){assert(e.getObjectByName('upper-lash')?.geometry.type==='TubeGeometry','eye has no curved upper lash line');assert(e.getObjectByName('lower-waterline'),'eye has no delicate lower rim')}assert(doll.brows?.length===2&&doll.brows.every(b=>b.userData.noBatch),'eyebrows cannot express emotion independently');
+const {doll}=fixture();for(const e of doll.eyes){assert(rigParts(e,'upper-lash')[0]?.geometry.type==='TubeGeometry','eye has no curved upper lash line');assert(rigParts(e,'lower-waterline')[0],'eye has no delicate lower rim')}assert(doll.brows?.length===2&&doll.brows.every(b=>b.userData.noBatch),'eyebrows cannot express emotion independently');
 });
 
 test("D06: Actual closed eyelids",()=>{
@@ -33,7 +34,7 @@ const {state,view,doll,resident}=fixture();resident.action='rest';state.settings
 });
 
 test("D07: Sculpted lips",()=>{
-const {doll}=fixture();assert(doll.mouth?.children.length===2,'mouth is still a single torus');for(const lip of doll.mouth.children){assert(lip.geometry.type==='ShapeGeometry','lips are not shaped contours');lip.geometry.computeBoundingBox();assert(lip.geometry.boundingBox.getSize(new T.Vector3()).x<.08,'smile overwhelms the face')}assert(doll.mouth.userData.noBatch,'lip expression cannot move independently');
+const {doll}=fixture();const lips=rigParts(doll.mouth,'sculpted-lip');assert(lips.length===2,'mouth is still a single torus');for(const lip of lips){assert(lip.geometry.type==='ShapeGeometry','lips are not shaped contours');lip.geometry.computeBoundingBox();assert(lip.geometry.boundingBox.getSize(new T.Vector3()).x<.08,'smile overwhelms the face')}assert(doll.mouth.userData.noBatch,'lip expression cannot move independently');
 });
 
 test("D08: Soft nose bridge",()=>{
