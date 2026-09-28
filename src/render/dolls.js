@@ -2,8 +2,8 @@ import * as T from 'three';
 import {DOLLS,ROOMS} from '../content.js';
 import {palette as P,box,cylinder,ring,line,mat,cup,batch} from './primitives.js';
 import {craftMaterial,softTexture} from './textiles.js';
-const porcelainGeometry=new T.SphereGeometry(1,24,16);
-function ball(p,x,y,z,rx,ry,rz,color){const mesh=new T.Mesh(porcelainGeometry,typeof color==='number'?mat(color):color);mesh.position.set(x,y,z);mesh.scale.set(rx,ry,rz);mesh.castShadow=true;mesh.receiveShadow=true;p.add(mesh);return mesh}
+const porcelainGeometry=new T.SphereGeometry(1,24,16),beadGeometry=new T.SphereGeometry(1,12,8);
+function ball(p,x,y,z,rx,ry,rz,color){const mesh=new T.Mesh(Math.max(rx,ry,rz)<.07?beadGeometry:porcelainGeometry,typeof color==='number'?mat(color):color);mesh.position.set(x,y,z);mesh.scale.set(rx,ry,rz);mesh.castShadow=true;mesh.receiveShadow=true;p.add(mesh);return mesh}
 
 function skirt(parent,color){
  const shape=[];for(let i=0;i<14;i++){const t=i/13;shape.push(new T.Vector2(.115+.19*Math.pow(1-t,1.7),.32+t*.43))}
