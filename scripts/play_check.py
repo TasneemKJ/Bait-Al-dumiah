@@ -19,6 +19,7 @@ def capture(page,name):
  # Software WebGL captures can exceed the interaction deadline on shared CI.
  # Keep every screenshot mandatory, with a separate bounded capture deadline.
  print('Capturing '+name,flush=True)
+ page.wait_for_function('!window.dollhouse?.visual?.().cameraMoving',timeout=60000)
  page.mouse.move(8,8)
  (OUT/f'{name}-capture.json').write_text(json.dumps({'viewport':page.viewport_size,'visual':page.evaluate('window.dollhouse?.visual?.() ?? null')},indent=2))
  page.screenshot(path=str(OUT/f'{name}.png'),full_page=False,timeout=60000)
@@ -42,6 +43,7 @@ try:
   check('real 3D geometry was rendered',stats['triangles']>10000)
   check('first view keeps panels closed',not page.locator('dialog[open]').count())
   check('detailed scene stays within the first-playable geometry budget',stats['triangles']<550000 and stats['calls']<650)
+  check('forty refinements retain fewer than 400k triangles and the preceding 388-call ceiling',stats['triangles']<400000 and stats['calls']<388)
   page.locator('[data-room=studio]').click();page.wait_for_timeout(500);capture(page,'desktop-room-closeup')
   check('room closeup targets the sewing room',page.evaluate('window.dollhouse.visual().focusedRoom')=='studio')
   click(page,'camera');check('whole-house camera resets room focus',page.evaluate('window.dollhouse.visual().focusedRoom') is None)
@@ -59,7 +61,9 @@ try:
   check('all three residents have fulfilable wishes',len(state(page)['wishes'])==3)
   money=state(page)['buttons'];click(page,'panel-decorate');capture(page,'catalogue');page.locator('[data-action="choose-item"][data-id="plant"]').click()
   check('choosing a decoration does not spend money',state(page)['buttons']==money)
-  click(page,'placement-cancel');check('cancelling does not spend money',state(page)['buttons']==money and not state(page)['decor'])
+  page.wait_for_function('window.dollhouse.visual().previewVisible');capture(page,'decoration-preview')
+  check('decoration preview is valid before purchase',page.evaluate('window.dollhouse.visual().previewValid'))
+  page.locator('#place-room').focus();page.keyboard.press('Escape');check('cancel removes the 3D preview',not page.evaluate('window.dollhouse.visual().previewVisible'));check('cancelling does not spend money',state(page)['buttons']==money and not state(page)['decor'])
   click(page,'panel-decorate');page.locator('[data-action="choose-item"][data-id="plant"]').click();click(page,'place-confirm');after=state(page)
   check('placing a decoration changes ownership and charges exact price',after['buttons']==money-8 and len(after['decor'])==1)
   click(page,'panel-decorate');page.locator('[data-action="remove"]').click();check('packing away refunds the full price',state(page)['buttons']==money and not state(page)['decor']);click(page,'close')

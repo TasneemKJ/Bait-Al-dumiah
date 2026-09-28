@@ -25,11 +25,11 @@ export function createAtmosphere(scene){
  const dustGeo=new T.BufferGeometry();dustGeo.setAttribute('position',new T.BufferAttribute(coords,3));
  const dust=new T.Points(dustGeo,new T.PointsMaterial({map:soft,color:0xffdfb5,size:.055,transparent:true,opacity:.38,depthWrite:false,blending:T.AdditiveBlending}));scene.add(dust);
  // A few night moths gather near the house; they are never full-screen flashes.
- const moths=[];for(let i=0;i<5;i++){const m=new T.Sprite(new T.SpriteMaterial({map:soft,color:0xf6d6a1,opacity:.75,transparent:true,depthWrite:false,blending:T.AdditiveBlending}));m.scale.set(.07,.07,1);scene.add(m);moths.push(m)}
- return {update(state,mix){
+ const moths=[];for(let i=0;i<5;i++){const m=new T.Sprite(new T.SpriteMaterial({map:soft,color:0xf6d6a1,opacity:.75,transparent:true,depthWrite:false,blending:T.AdditiveBlending}));m.name='lantern-firefly';m.scale.set(.07,.07,1);scene.add(m);moths.push(m)}
+ return {update(state,mix,level='high'){
   backdrop.material.uniforms.night.value=mix;stars.material.opacity=mix*.78;moon.visible=mix>.05;moon.scale.setScalar(.9);
   const still=state.settings.reducedMotion||state.paused,t=state.elapsed;dust.visible=!state.settings.reducedMotion;
   if(!still){dust.rotation.y=t*.007;dust.position.y=Math.sin(t*.12)*.09}
-  moths.forEach((m,i)=>{m.visible=mix>.5&&!state.settings.reducedMotion;if(!still)m.position.set(Math.cos(t*.35+i*2.4)*(3+i*.25),1.5+i*.74+Math.sin(t*.65+i)*.16,2.15+Math.sin(t*.3+i)*.20)});
+  moths.forEach((m,i)=>{m.visible=mix>.5&&!state.settings.reducedMotion&&i<(level==='low'?3:5);if(!still){const a=t*.28+i*2.4;m.position.set((i%2?1:-1)*5.62+Math.cos(a)*.34,1.75+Math.sin(a*.73+i)*.22,1.30+Math.sin(a)*.34);m.material.opacity=.48+.22*(.5+.5*Math.sin(t*.55+i))}});
  }};
 }

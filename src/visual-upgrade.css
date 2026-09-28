@@ -38,3 +38,20 @@
 /* Closeups can put architecture behind the time toggle; keep its text legible. */
 #ui[data-focus-room]:not([data-focus-room=""]) .time-tools{padding:3px 10px 7px;background:#f9ebdce8;border-radius:12px}
 .night #ui[data-focus-room]:not([data-focus-room=""]) .time-tools{background:#272238e8}
+
+.resident-name{position:absolute;transform:translateX(-50%);max-width:130px;padding:5px 12px;border:1px solid #bea18a;border-radius:18px;background:#493545ed;color:#fff0db;font-size:11px;line-height:1.4;text-align:center;white-space:nowrap;box-shadow:0 3px 10px #21182722;z-index:1;pointer-events:none}
+
+.room-views .room-short{display:none}
+@media(max-width:680px){
+ .room-views{max-width:calc(100vw - 24px);gap:2px;padding:4px}
+ .room-views button{min-width:66px;max-width:80px;flex:1;padding:5px 6px;font-size:10.5px;line-height:1.45}
+ .room-views .room-long{display:none}.room-views .room-short{display:inline}
+ [dir=rtl] .room-views button{font-size:11px}
+}
+
+/* The existing day/night icon carries the cycle, without a second time panel. */
+#light-button{position:relative;padding-inline-start:7px}
+#light-button:before{content:"";position:absolute;inset-inline-start:1px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;background:conic-gradient(#997853 var(--day-progress,0deg),#cdbba54d 0);mask:radial-gradient(circle,transparent 57%,#000 60%);pointer-events:none}
+#light-button>.icon{margin-inline-end:7px}
+.night #light-button:before{background:conic-gradient(#e6c28f var(--day-progress,0deg),#d5b69233 0)}
+@media(max-width:680px){#light-button:before{width:28px;height:28px}#light-button>.icon{margin-inline-end:6px}}

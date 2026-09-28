@@ -1,4 +1,5 @@
 import * as T from 'three';
+import {crescentGeometry} from './resident-effects.js';
 import {drapedCurtain,valance,doily} from './fabric-shapes.js';
 import {ROOMS} from '../content.js';
 import {palette as P,box,ball,cylinder,ring,line,arch,mat,texture,texturedPlane,plant,lamp,cup,books,batch} from './primitives.js';
@@ -92,7 +93,7 @@ export function createHouse(scene){
  line(staticRoot,[0,8.31,-2.08],[0,8.31,2.0],.07,P.gold);
  box(staticRoot,-3.02,7.63,-1.06,.52,.86,.60,0xe1ccb4);box(staticRoot,-3.02,8.08,-1.06,.69,.13,.77,P.cream);
  // Hanging moon over the roof's open triangular recess.
- line(staticRoot,[0,8.10,1.72],[0,7.66,1.72],.008,P.gold);ring(staticRoot,0,7.42,1.73,.21,.05,P.gold);ball(staticRoot,.10,7.5,1.76,.17,.18,.065,0xf0dcbf);
+ line(staticRoot,[0,8.10,1.72],[0,7.66,1.72],.008,P.gold);const moon=new T.Mesh(crescentGeometry(.29),mat(P.gold));moon.name='hanging-crescent';moon.userData.noBatch=true;moon.position.set(.13,7.42,1.73);moon.rotation.z=-.18;moon.castShadow=true;staticRoot.add(moon);
  plant(staticRoot,-5.37,.045,-.56,1.48);plant(staticRoot,5.34,.045,-.65,1.25);plant(staticRoot,-5.4,.045,.79,.8);
  // Twelve tiny outside steps make the two-storey miniature legible.
  for(let i=0;i<12;i++)box(staticRoot,5.02,.13+i*.266,1.48-i*.23,.52,.20,.31,0xc5ac94);

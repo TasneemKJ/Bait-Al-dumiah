@@ -1,5 +1,6 @@
 export const strings={
  en:{
+ kitchenShort:'Kitchen',parlorShort:'Parlor',studioShort:'Studio',bedroomShort:'Bedroom',
  title:'Bait Al-dumiah',subtitle:'A home for little souls',brandArabic:'بيت الدمية',
  day:'Day',morning:'Morning light',evening:'After the last light',buttons:'buttons',cozy:'Cozy',secrets:'secrets',
  household:'Little souls',decorate:'Decorate',journal:'Whispers',settings:'Settings',close:'Close',back:'Back',
@@ -29,6 +30,7 @@ export const strings={
  allWishes:'Little wishes',newSecret:'A whisper for the journal',inspect:'Meet',noPunishment:'Your little souls wait safely while you are away.',qualityHelp:'Automatic reduces shadows and pixel density on small screens.',
  },
  ar:{
+ kitchenShort:'المطبخ',parlorShort:'الصالون',studioShort:'الخياطة',bedroomShort:'النوم',
  title:'بيت الدمية',subtitle:'بيت لأرواح صغيرة',brandArabic:'حكاية بيت صغير',day:'اليوم',morning:'ضوء الصباح',evening:'بعد آخر ضوء',buttons:'زرّ',cozy:'الدفء',secrets:'أسرار',
  household:'أرواح صغيرة',decorate:'زيّن البيت',journal:'همسات',settings:'الإعدادات',close:'إغلاق',back:'رجوع',
  hint:'اسحب لتدير البيت · قرّب بعجلة الفأرة أو بإصبعين',mobileHint:'اسحب لتدير البيت · قرّب بإصبعين',saved:'محفوظ على هذا الجهاز',savingFailed:'الحفظ غير متاح. سيبقى بيتك لهذه الزيارة فقط.',

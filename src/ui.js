@@ -51,10 +51,12 @@ export function createUI(host,getState,dispatch){
   }
  }
  function renderPlacement(){const root=host.querySelector('.placement');if(!root)return;root.hidden=!placement;if(!placement)return;const entry=CATALOG.find(c=>c.id===placement);root.innerHTML=`<div class="placement-head">${icon(entry.icon)}<div><strong>${t(placement)} · ${n(entry.price)} ${t('buttons')}</strong><p>${t('placeHint')}</p></div>${button('placement-cancel',t('cancel'),'close','class="icon-button"')}</div><div class="placement-fields"><label class="sr-only" for="place-room">${t('room')}</label><select id="place-room" data-field="place-room">${ROOMS.map(r=>`<option value="${r.id}" ${r.id===placementRoom?'selected':''}>${t(r.id)}</option>`).join('')}</select><label class="sr-only" for="place-slot">${t('placeTitle')}</label><select id="place-slot" data-field="place-slot">${['leftSpot','middleSpot','rightSpot'].map((v,i)=>`<option value="${i}" ${placementSlot===i?'selected':''} ${getState().decor.some(d=>d.room===placementRoom&&d.slot===i)?'disabled':''}>${t(v)}</option>`).join('')}</select>${button('place-confirm',t('placeConfirm'),'plus','class="primary"')}</div>`}
- function chooseItem(id){close();placement=id;placementRoom='kitchen';placementSlot=0;dispatch('placement',id);renderPlacement();host.querySelector('#place-room').focus()}
+ function previewPlacement(){dispatch('placement-preview',{item:placement,room:placementRoom,slot:placementSlot})}
+ function chooseItem(id){close();placement=id;placementRoom='kitchen';placementSlot=0;dispatch('placement',id);previewPlacement();renderPlacement();host.querySelector('#place-room').focus()}
  function clearPlacement(){placement=null;renderPlacement()}
  function tick(){
   const s=getState();document.body.classList.toggle('night',isNight(s));
+  host.style.setProperty('--day-progress',(Number.isFinite(s.clock)?Math.max(0,Math.min(240,s.clock))*1.5:0)+'deg');
   const values={buttons:n(s.buttons),cozy:n(coziness(s))+'%',wishes:`${n(s.wishes.length)} / ${n(3)}`,day:t('day')+' '+n(s.day),time:t(isNight(s)?'evening':'morning')};
   for(const [key,value] of Object.entries(values)){const el=host.querySelector(`[data-value="${key}"]`);if(el&&el.textContent!==value)el.textContent=value}
   const wish=DOLLS.find(d=>!s.wishes.includes(d.id));let copy,label,ico;
@@ -91,8 +93,8 @@ export function createUI(host,getState,dispatch){
   dispatch(action);
  };
  const change=event=>{const el=event.target;if(!el.dataset.field)return;
-  if(el.dataset.field==='place-room'){placementRoom=el.value;placementSlot=[0,1,2].find(i=>!getState().decor.some(d=>d.room===placementRoom&&d.slot===i))??0;renderPlacement();host.querySelector('#place-room').focus();return}
-  if(el.dataset.field==='place-slot'){placementSlot=Number(el.value);return}
+  if(el.dataset.field==='place-room'){placementRoom=el.value;placementSlot=[0,1,2].find(i=>!getState().decor.some(d=>d.room===placementRoom&&d.slot===i))??0;previewPlacement();renderPlacement();host.querySelector('#place-room').focus();return}
+  if(el.dataset.field==='place-slot'){placementSlot=Number(el.value);previewPlacement();return}
   if(el.dataset.field==='doll-room'){dispatch('move',{id:el.dataset.id,room:el.value});return}
   dispatch('setting',{key:el.dataset.field,value:el.type==='checkbox'?el.checked:el.value});
  };

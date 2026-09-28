@@ -1,7 +1,9 @@
+import {bindPlacementEscape} from './placement-keys.js';
 import {DOLLS,SAVE_KEY} from './content.js';
 import * as sim from './simulation.js';
 import {createWorld} from './render/world.js';
 import {createUI} from './ui.js';
+import {createResidentLabel} from './render/resident-label.js';
 import {createRoomViews} from './render/room-views.js';
 import {DollhouseAudio} from './audio.js';
 
@@ -34,6 +36,7 @@ async function dispatch(action,value){
    else ui.open('household');break;
   }
   case 'placement':world?.setPlacement(value);break;
+  case 'placement-preview':world?.setPreview(value);break;
   case 'placement-cancel':world?.setPlacement(null);break;
   case 'place':{
    const result=sim.place(state,value.item,value.room,value.slot);
@@ -67,6 +70,7 @@ async function dispatch(action,value){
  }
 }
 ui=createUI(host,()=>state,dispatch);
+const residentLabel=createResidentLabel(host);
 const roomViews=createRoomViews(host,()=>state,id=>dispatch('focus-room',id));
 try{world=createWorld(canvas,{onPick:data=>{
  if(data.doll)ui.open('household',data.doll);
@@ -75,13 +79,15 @@ try{world=createWorld(canvas,{onPick:data=>{
 },onError:showError});document.querySelector('#loading')?.remove();}catch(error){console.error('Dollhouse renderer could not start:',error);showError('webgl')}
 let last=performance.now(),lastUI=0,lastSave=0,stopped=false;
 function frame(now){if(stopped)return;const dt=Math.min(.1,Math.max(0,(now-last)/1000));last=now;
- if(!document.hidden&&!fatal){sim.step(state,dt);world?.render(state,dt,ui.selected);audio.tick(sim.isNight(state));if(now-lastUI>250){ui.tick();roomViews.update();lastUI=now}if(now-lastSave>8000){save();lastSave=now}}
+ if(!document.hidden&&!fatal){sim.step(state,dt);world?.render(state,dt,ui.selected);residentLabel.update(state,ui.selected,host.dataset.focusRoom,world?.project(ui.selected,.05),Boolean(ui.panel||ui.placement||state.paused));audio.tick(sim.isNight(state));if(now-lastUI>250){ui.tick();roomViews.update();lastUI=now}if(now-lastSave>8000){save();lastSave=now}}
  requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
 document.addEventListener('visibilitychange',()=>{syncPause();last=performance.now();if(document.hidden)save()});
 window.addEventListener('pagehide',()=>save());
+bindPlacementEscape(window,()=>{if(!ui.placement)return false;ui.clearPlacement();world?.setPlacement(null);roomViews.update();return true});
 window.addEventListener('keydown',event=>{
+ if(event.defaultPrevented)return;
  if(event.target.closest('input,select,textarea,button,dialog'))return;
  if(event.key==='Escape'){if(ui.placement){ui.clearPlacement();world?.setPlacement(null)}else if(ui.panel)ui.close();return}
  if(panelOpen)return;

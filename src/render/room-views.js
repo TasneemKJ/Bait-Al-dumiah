@@ -7,7 +7,7 @@ export function createRoomViews(host,getState,onFocus){
  const nav=document.createElement('nav');nav.className='room-views';
  const buttons=ROOMS.map((room,i)=>{
   const button=document.createElement('button');button.type='button';button.dataset.room=room.id;
-  button.innerHTML=icon(['tea','heart','play','rest'][i])+'<span></span>';
+  button.innerHTML=icon(['tea','heart','play','rest'][i])+'<span class="room-long"></span><span class="room-short" aria-hidden="true"></span>';
   button.addEventListener('click',()=>onFocus(room.id));nav.append(button);return button;
  });
  let locale=null;
@@ -16,7 +16,7 @@ export function createRoomViews(host,getState,onFocus){
   nav.hidden=host.querySelector('.placement')?.hidden===false;
   const language=getState().settings.locale;
   if(language!==locale){locale=language;nav.setAttribute('aria-label',translate(locale,'room'));
-   buttons.forEach((b,i)=>{const label=translate(locale,ROOMS[i].id);b.title=label;b.setAttribute('aria-label',label);b.querySelector('span').textContent=label});
+   buttons.forEach((b,i)=>{const label=translate(locale,ROOMS[i].id);b.title=label;b.setAttribute('aria-label',label);b.querySelector('.room-long').textContent=label;b.querySelector('.room-short').textContent=translate(locale,ROOMS[i].id+'Short')});
   }
   buttons.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.room===host.dataset.focusRoom)));
  }

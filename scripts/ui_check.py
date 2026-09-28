@@ -57,7 +57,11 @@ with sync_playwright() as p:
   page.locator('[data-action=placement-cancel]').click();page.evaluate('fixtureViews.update()')
   results.append({'name':'room navigation returns after placement cancellation','passed':page.locator('.room-views').is_visible()})
   page.evaluate("fixtureState.settings.locale='ar';fixtureUI.refresh();fixtureViews.update()")
-  results.append({'name':'room buttons survive HUD rebuilds and translate to Arabic','passed':page.locator('.room-views button').count()==4 and 'مطبخ الشاي' in page.locator('.room-views').inner_text()})
+  results.append({'name':'room buttons survive HUD rebuilds and translate to Arabic','passed':page.locator('.room-views button').count()==4 and page.locator('[data-room=kitchen]').get_attribute('aria-label')=='مطبخ الشاي' and 'المطبخ' in page.locator('.room-views').inner_text()})
+  for locale in ['en','ar']:
+   page.evaluate("locale=>{fixtureState.settings.locale=locale;fixtureUI.refresh();fixtureViews.update()}",locale)
+   readable=page.locator('.room-views .room-short').evaluate_all('(els)=>els.length===4&&els.every(e=>getComputedStyle(e).display!=="none"&&parseFloat(getComputedStyle(e).fontSize)>=10.5&&e.getBoundingClientRect().width<=e.parentElement.getBoundingClientRect().width)')
+   results.append({'name':f'{locale} phone room names are visible without tiny type or overflow','passed':readable})
   for height in [390,320]:
    page.set_viewport_size({'width':844,'height':height})
    overlaps=page.evaluate("""()=>{
