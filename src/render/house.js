@@ -1,17 +1,20 @@
 import * as T from 'three';
+import {drapedCurtain,valance,doily} from './fabric-shapes.js';
 import {ROOMS} from '../content.js';
 import {palette as P,box,ball,cylinder,ring,line,arch,mat,texture,texturedPlane,plant,lamp,cup,books,batch} from './primitives.js';
 function window(p,x,y,theme,lights){
+ valance(p,x,y+1.57,-1.18);
  arch(p,x,y,-1.655,1.05,1.65,P.cream,.10);
  const glass=mat(0xb9cacc,{emissive:0xc3bcbb,emissiveIntensity:.15});
  arch(p,x,y+.085,-1.53,.87,1.47,glass,.025);lights.push(glass);
  box(p,x,y+.75,-1.47,.05,1.35,.05,P.cream);box(p,x,y+.66,-1.47,.9,.045,.05,P.cream);
  box(p,x,y-.025,-1.48,1.3,.09,.4,P.cream,true);
- for(const side of [-1,1]){box(p,x+side*.72,y+.73,-1.53,.28,1.5,.08,theme);for(let j=0;j<7;j++)box(p,x+side*.72,y+.13+j*.18,-1.465,.23,.05,.08,P.cream);const curtain=ball(p,x+side*.49,y+1.13,-1.32,.12,.43,.11,0xf1ded4);curtain.rotation.z=side*.14;ball(p,x+side*.51,y+.50,-1.32,.09,.31,.09,0xf1ded4);ring(p,x+side*.5,y+.79,-1.3,.09,.02,P.gold,true)}
+ for(const side of [-1,1]){box(p,x+side*.72,y+.73,-1.53,.28,1.5,.08,theme);for(let j=0;j<7;j++)box(p,x+side*.72,y+.13+j*.18,-1.465,.23,.05,.08,P.cream);drapedCurtain(p,x+side*.53,y+.76,-1.28,side);ring(p,x+side*.5,y+.79,-1.3,.09,.02,P.gold,true)}
  line(p,[x-.75,y+1.67,-1.28],[x+.75,y+1.67,-1.28],.025,P.gold);
 }
 function chair(p,x,z,color,rot=0){const g=new T.Group();g.position.set(x,0,z);g.rotation.y=rot;p.add(g);box(g,0,.51,0,.48,.11,.48,color,true);box(g,0,.88,-.21,.45,.68,.07,color,true);for(const a of [-1,1])for(const b of [-1,1])box(g,a*.17,.24,b*.16,.045,.5,.045,P.wood);for(let i=0;i<3;i++)box(g,-.12+i*.12,.9,-.162,.025,.4,.03,P.cream)}
 function kitchen(p){
+ doily(p,-.52,.773,.1,.69);
  for(let i=0;i<3;i++){const x=-1.45+i*.83;box(p,x,.48,-1.1,.81,.92,.71,0x8bac9d,true);box(p,x,.5,-.722,.68,.71,.04,0xa7c5b2,true);ball(p,x+.20,.58,-.674,.035,.035,.025,P.gold)}
  box(p,-.60,.98,-1.08,2.66,.10,.82,P.cream,true);
  const sink=cylinder(p,-1.27,1.035,-1.06,.25,.025,0x839b98);sink.scale.z=.68;ring(p,-1.27,1.05,-1.06,.25,.015,P.cream,true).scale.y=.68;
@@ -26,6 +29,7 @@ function kitchen(p){
  window(p,-1.45,1.15,0x8caf9d,[]);
 }
 function parlor(p){
+ doily(p,.15,.511,.45,.66);
  box(p,.42,.36,-.63,2.45,.39,.91,0xc88fa4,true);box(p,.42,.78,-1.04,2.45,.79,.22,0xd5a2b4,true);for(const x of [-.70,1.54])box(p,x,.6,-.55,.25,.61,1.02,0xc88fa4,true);
  for(let i=0;i<3;i++){box(p,-.24+i*.64,.59,-.55,.61,.16,.65,0xe4b8c4,true);ball(p,-.26+i*.66,.92,-.90,.032,.032,.02,P.cream)}
  for(const x of [-.64,1.5])for(const z of [-.88,-.24])cylinder(p,x,.12,z,.045,.24,P.gold);

@@ -1,4 +1,5 @@
 import * as T from 'three';
+import {pleatedShade,eaveScallop} from './fabric-shapes.js';
 import {ROOMS} from '../content.js';
 import {palette as P,box,ball,cylinder,ring,line,arch,mat,plant,books,batch} from './primitives.js';
 import {craftMaterial,softTexture} from './textiles.js';
@@ -32,7 +33,7 @@ export function createCraftDetails(parent){
  function sconce(p,x,y,z,room){
   ball(p,x,y,z,.10,.20,.055,P.gold);line(p,[x,y-.06,z],[x,y-.10,z+.23],.025,P.gold);
   cylinder(p,x,y-.10,z+.23,.085,.04,P.gold);ball(p,x,y+.045,z+.23,.085,.14,.085,bulb);
-  cylinder(p,x,y+.075,z+.23,.16,.22,porcelain,1.5);ring(p,x,y-.04,z+.23,.24,.018,P.gold,true);
+  pleatedShade(p,x,y+.075,z+.23,.24,.22);ring(p,x,y-.04,z+.23,.24,.018,P.gold,true);
   halo(room.x+x,room.y+y+.07,z+.32,1.5,.25);
  }
  for(const room of ROOMS){
@@ -83,7 +84,7 @@ export function createCraftDetails(parent){
  }
  // Carved scalloped eaves and corbels: the silhouette reads as a handmade miniature.
  for(const sign of [-1,1]){
-  for(let i=0;i<17;i++){const x=sign*(.23+i*.29),y=8.14-Math.abs(x)*.367;const scallop=ball(root,x,y-.11,2.00,.095,.145,.045,0xf0dbc0);scallop.rotation.z=-sign*.35}
+  for(let i=0;i<17;i++){const x=sign*(.23+i*.29),y=8.14-Math.abs(x)*.367;eaveScallop(root,x,y-.04,1.975,-sign*.35)}
   for(const y of [.19,3.39,6.54])for(const x of [0,sign*4.84]){const support=box(root,x,y-.18,1.62,.25,.35,.27,P.cream,true);support.rotation.z=sign*.10;rosette(root,x,y-.13,1.80,.074)}
  }
  // Attic dial and a strand of steady fairy lights (no strobing).

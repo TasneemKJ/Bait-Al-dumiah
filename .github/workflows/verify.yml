@@ -39,6 +39,8 @@ jobs:
           mkdir -p artifacts
           python scripts/ui_check.py > artifacts/ui-regressions.json
           cat artifacts/ui-regressions.json
+      - name: Verify Three artwork construction
+        run: python scripts/art_check.py
       - name: Play desktop and mobile game flows
         run: npm run test:browser
       - name: Record source identity

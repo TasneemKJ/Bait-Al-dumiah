@@ -1,4 +1,6 @@
 import * as T from 'three';
+import {compactStatic} from './batching.js';
+import {pleatedShade} from './fabric-shapes.js';
 import {paintedTexture,craftMaterial} from './textiles.js';
 const materials=new Map(), geometries=new Map();
 export const palette={cream:0xeedac1,wood:0x96715e,dark:0x655061,gold:0xc59b60,rose:0xce91a4,mint:0x8fb9aa,lavender:0xb3a0c8,ink:0x352b3d};
@@ -14,9 +16,10 @@ export function arch(p,x,y,z,w,h,c,depth=.06){const r=w/2,s=new T.Shape();s.move
 export function texture(kind,colors){return paintedTexture(kind,colors)}
 export function texturedPlane(p,x,y,z,w,h,tex,flat=false){const o=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshStandardMaterial({map:tex,roughness:1,side:T.DoubleSide}));o.position.set(x,y,z);if(flat)o.rotation.x=-Math.PI/2;o.receiveShadow=true;p.add(o);return o}
 export function plant(p,x,y,z,scale=1){const g=new T.Group();g.position.set(x,y,z);g.scale.setScalar(scale);p.add(g);cylinder(g,0,.17,0,.19,.34,0xba827b,.72);ring(g,0,.34,0,.19,.025,palette.cream,true);cylinder(g,0,.34,0,.155,.015,0x68534d);for(let i=0;i<7;i++){const a=i*2.4;const end=[Math.cos(a)*.22,.65+(i%3)*.13,Math.sin(a)*.22];line(g,[0,.32,0],end,.014,0x718b62);const leaf=ball(g,...end,.13,.065,.22,i%2?0x91ad82:0x698b72);leaf.rotation.set(.45,a,.45)}return g}
-export function lamp(p,x,y,z,scale=1){const g=new T.Group();g.position.set(x,y,z);g.scale.setScalar(scale);p.add(g);cylinder(g,0,.035,0,.25,.07,palette.gold);cylinder(g,0,.47,0,.027,.9,palette.gold);const shade=cylinder(g,0,.98,0,.22,.38,0xefcda1,1.65);ring(g,0,.79,0,.36,.022,palette.gold,true);ball(g,0,1.2,0,.04,.06,.04,palette.gold);return {group:g,shade}}
-export function cup(p,x,y,z,color=palette.cream){cylinder(p,x,y+.065,z,.075,.13,color,.8);cylinder(p,x,y+.132,z,.061,.004,0x775040);ring(p,x+.078,y+.07,z,.05,.012,color);cylinder(p,x,y+.009,z,.11,.012,color)}
+export function lamp(p,x,y,z,scale=1){const g=new T.Group();g.position.set(x,y,z);g.scale.setScalar(scale);p.add(g);cylinder(g,0,.035,0,.25,.07,palette.gold);cylinder(g,0,.47,0,.027,.9,palette.gold);const shade=pleatedShade(g,0,.98,0);ring(g,0,.79,0,.36,.022,palette.gold,true);ball(g,0,1.2,0,.04,.06,.04,palette.gold);return {group:g,shade}}
+export function glaze(color){const key='glaze:'+color;if(!materials.has(key))materials.set(key,new T.MeshPhysicalMaterial({color,roughness:.28,metalness:0,clearcoat:.34,clearcoatRoughness:.24}));return materials.get(key)}
+export function cup(p,x,y,z,color=palette.cream){color=typeof color==='number'?glaze(color):color;cylinder(p,x,y+.065,z,.075,.13,color,.8);cylinder(p,x,y+.132,z,.061,.004,0x775040);ring(p,x+.078,y+.07,z,.05,.012,color);cylinder(p,x,y+.009,z,.11,.012,color)}
 export function books(p,x,y,z){for(let i=0;i<5;i++){const b=box(p,x+i*.11,y+.18+(i%2)*.03,z,.08,.36+(i%2)*.06,.24,[0xb7858a,0x829c99,0xd9bd8b,0xa198b4,0x709687][i]);b.rotation.z=(i===4?-.12:0);box(p,x+i*.11,y+.29,z+.124,.055,.013,.01,palette.gold)}}
-// Static geometry is grouped into instances by geometry/material: detail without a draw call per teacup.
-export function batch(root){root.updateMatrixWorld(true);const groups=new Map();root.traverse(o=>{if(o.isMesh&&!Array.isArray(o.material)&&!o.userData.noBatch){const key=o.geometry.uuid+o.material.uuid;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(o)}});const inverse=root.matrixWorld.clone().invert();for(const list of groups.values()){if(list.length<3)continue;const inst=new T.InstancedMesh(list[0].geometry,list[0].material,list.length);for(let i=0;i<list.length;i++)inst.setMatrixAt(i,inverse.clone().multiply(list[i].matrixWorld));inst.castShadow=true;inst.receiveShadow=true;for(const o of list)o.removeFromParent();root.add(inst)}return root}
+// Batch inside each animated root, never across articulated parts.
+export const batch=compactStatic;
 export function disposeTree(root,{shared=false}={}){const gs=new Set(),ms=new Set();root.traverse(o=>{if(o.geometry)gs.add(o.geometry);if(o.material){for(const m of Array.isArray(o.material)?o.material:[o.material])ms.add(m)}});if(!shared){for(const g of gs)g.dispose();for(const m of ms){if(m.map)m.map.dispose();m.dispose()}}root.removeFromParent()}

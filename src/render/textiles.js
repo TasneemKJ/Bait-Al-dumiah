@@ -1,5 +1,6 @@
 import * as T from 'three';
 const cache=new Map();
+let radialMask=null;
 const seeded=(i)=>{const v=Math.sin(i*127.1+311.7)*43758.5453;return v-Math.floor(v)};
 function canvas(size=512){const c=document.createElement('canvas');c.width=c.height=size;return [c,c.getContext('2d')]}
 function diamond(c,x,y,r){c.beginPath();c.moveTo(x,y-r);c.lineTo(x+r,y);c.lineTo(x,y+r);c.lineTo(x-r,y);c.closePath()}
@@ -39,13 +40,26 @@ export function paintedTexture(kind,colors){
  for(let i=0;i<4500;i++){c.globalAlpha=.028;c.fillStyle=i%2?'#fff8e6':'#312332';c.fillRect(seeded(i)*512,seeded(i+77)*512,1+seeded(i+3)*2,1)}
  c.globalAlpha=1;const tex=new T.CanvasTexture(image);tex.colorSpace=T.SRGBColorSpace;tex.anisotropy=4;return tex;
 }
+// Height data is shared, linear, and independent of the painted color layer.
+const reliefCache=new Map();
+export function reliefTexture(kind){
+ if(reliefCache.has(kind))return reliefCache.get(kind);
+ const size=256,data=new Uint8Array(size*size*4);
+ for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+  const grain=Math.sin(y*.51+Math.sin(x*.035)*1.6)*18+Math.sin(y*1.4+x*.008)*7;
+  const weave=Math.sin(x*Math.PI/2)*Math.cos(y*Math.PI/2)*18+Math.sin(y*Math.PI/2)*9;
+  const value=Math.round(128+(kind==='fabric'?weave:grain));const i=(y*size+x)*4;data[i]=data[i+1]=data[i+2]=value;data[i+3]=255;
+ }
+ const texture=new T.DataTexture(data,size,size);texture.wrapS=texture.wrapT=T.RepeatWrapping;texture.magFilter=T.LinearFilter;texture.minFilter=T.LinearMipmapLinearFilter;texture.generateMipmaps=true;texture.needsUpdate=true;texture.userData.shared=true;reliefCache.set(kind,texture);return texture;
+}
 export function craftMaterial(color,kind='fabric'){
  const key=`${kind}:${color}`;if(cache.has(key))return cache.get(key);
  const hex='#'+new T.Color(color).getHexString();const map=paintedTexture(kind,[hex,kind==='wood'?'#eccfa5':'#f5dfc4']);
- const m=new T.MeshStandardMaterial({map,roughness:kind==='wood'?.64:.96});m.userData.shared=true;cache.set(key,m);return m;
+ const m=new T.MeshStandardMaterial({map,roughness:kind==='wood'?.64:.96});if(kind==='wood'||kind==='fabric'){m.bumpMap=reliefTexture(kind);m.bumpScale=kind==='wood'?.018:.0045}m.userData.shared=true;cache.set(key,m);return m;
 }
 export function softTexture(){
+ if(radialMask)return radialMask;
  const [image,c]=canvas(128),g=c.createRadialGradient(64,64,0,64,64,64);
  g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.16,'rgba(255,255,255,.65)');g.addColorStop(.45,'rgba(255,255,255,.15)');g.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g;c.fillRect(0,0,128,128);
- return new T.CanvasTexture(image);
+ radialMask=new T.CanvasTexture(image);radialMask.userData.shared=true;return radialMask;
 }
