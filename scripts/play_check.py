@@ -15,7 +15,11 @@ checks=[];errors=[];browser=None
 def check(name,condition):
  checks.append({'name':name,'passed':bool(condition)})
  if not condition:raise AssertionError(name)
-def capture(page,name):page.screenshot(path=str(OUT/f'{name}.png'),full_page=False)
+def capture(page,name):
+ # Software WebGL captures can exceed the interaction deadline on shared CI.
+ # Keep every screenshot mandatory, with a separate bounded capture deadline.
+ print('Capturing '+name,flush=True)
+ page.screenshot(path=str(OUT/f'{name}.png'),full_page=False,timeout=60000)
 def state(page):return page.evaluate('window.dollhouse.state()')
 def click(page,action):page.locator(f'[data-action="{action}"]:visible').click()
 def open_settings(page):click(page,'panel-settings')
