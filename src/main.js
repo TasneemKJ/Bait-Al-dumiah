@@ -12,6 +12,8 @@ if(!stored)state.settings.reducedMotion=matchMedia('(prefers-reduced-motion: red
 state.settings.muted=true;
 let world=null,ui=null,manualPause=false,panelOpen=false,fatal=false,saveWarning=false;
 const audio=new DollhouseAudio(),canvas=document.querySelector('#world'),host=document.querySelector('#ui');
+// Reattach scene controls synchronously; a slow graphics frame must not hide the UI.
+function refreshUI(){ui.refresh();roomViews.update()}
 function syncPause(){state.paused=manualPause||panelOpen||document.hidden||fatal;audio.setPaused(state.paused)}
 function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));return true}catch{if(!saveWarning&&ui){ui.toast(ui.t('savingFailed'));saveWarning=true;const note=host.querySelector('.saved-note span');if(note)note.textContent=ui.t('savingFailed')}return false}}
 function notify(result,success){if(!result.ok){ui.toast(ui.t(result.reason));return false}if(success)ui.toast(ui.t(success));save();ui.tick();return true}
@@ -40,27 +42,27 @@ async function dispatch(action,value){
   case 'remove':notify(sim.remove(state,value),'packed');break;
   case 'move':if(notify(sim.moveDoll(state,value.id,value.room),'placed'))ui.close();break;
   case 'light':{
-   if(ui.panel)ui.close();sim.changeLight(state);save();ui.refresh();if(sim.isNight(state))ui.toast(ui.t('nightHint'));break;
+   if(ui.panel)ui.close();sim.changeLight(state);save();refreshUI();if(sim.isNight(state))ui.toast(ui.t('nightHint'));break;
   }
   case 'discover':{
    const result=sim.discover(state);if(result.ok){save();audio.effect('secret');ui.open('journal');ui.toast(ui.t('newSecret'))}else ui.toast(ui.t(result.reason));break;
   }
-  case 'camera':world?.home();host.dataset.focusRoom='';break;
-  case 'focus-room':if(world?.focusRoom(value)){host.dataset.focusRoom=value;ui.tick()}break;
+  case 'camera':world?.home();host.dataset.focusRoom='';roomViews.update();break;
+  case 'focus-room':if(world?.focusRoom(value)){host.dataset.focusRoom=value;ui.tick();roomViews.update()}break;
   case 'zoom-in':world?.zoom(1.2);break;
   case 'zoom-out':world?.zoom(1/1.2);break;
-  case 'pause':manualPause=!manualPause;syncPause();ui.refresh();break;
+  case 'pause':manualPause=!manualPause;syncPause();refreshUI();break;
   case 'sound':{
-   if(state.settings.muted){if(await audio.enable()){state.settings.muted=false;audio.setPaused(state.paused)}else ui.toast(ui.t('audioUnavailable'))}else{state.settings.muted=true;audio.mute()}save();ui.refresh();break;
+   if(state.settings.muted){if(await audio.enable()){state.settings.muted=false;audio.setPaused(state.paused)}else ui.toast(ui.t('audioUnavailable'))}else{state.settings.muted=true;audio.mute()}save();refreshUI();break;
   }
   case 'setting':{
    if(value.key==='locale'&&['en','ar'].includes(value.value))state.settings.locale=value.value;
    if(value.key==='quality'&&['auto','low','high'].includes(value.value))state.settings.quality=value.value;
    if(value.key==='motion')state.settings.reducedMotion=Boolean(value.value);
-   save();ui.refresh();break;
+   save();refreshUI();break;
   }
   case 'reset-yes':{
-   const settings={...state.settings};ui.close();state=sim.createState();state.settings=settings;manualPause=false;syncPause();dispatch('camera');world?.setPlacement(null);save();ui.refresh();break;
+   const settings={...state.settings};ui.close();state=sim.createState();state.settings=settings;manualPause=false;syncPause();dispatch('camera');world?.setPlacement(null);save();refreshUI();break;
   }
  }
 }
