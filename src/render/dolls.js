@@ -1,4 +1,5 @@
 import * as T from 'three';
+import {createSculptedHead,createPortraitEye,createBrow,closePortraitEye,createPortraitMouth,createNose,createEar,bisqueMaterial,createNeckJoint} from './doll-face.js';
 import {createTeaSteam,createComfortHearts,createSleepCrescent} from './resident-effects.js';
 import {DOLLS,ROOMS} from '../content.js';
 import {palette as P,box,cylinder,ring,line,mat,cup,batch} from './primitives.js';
@@ -20,7 +21,7 @@ function skirt(parent,color){
 function ribbon(parent,x,y,z,color){for(const sign of [-1,1]){const loop=ball(parent,x+sign*.06,y,z,.075,.04,.028,color);loop.rotation.z=sign*.28}ball(parent,x,y,z+.013,.028,.028,.024,color)}
 function makeDoll(def){
  const root=new T.Group(),body=new T.Group();root.add(body);
- const skin=mat(0xf3d6c1,{roughness:.37}),blush=mat(0xdba1a0,{roughness:.88});
+ const skin=bisqueMaterial();
  const fabric=craftMaterial(def.color),hair=mat(def.hair,{roughness:.42});
  const legs=[];
  for(const sign of [-1,1]){
@@ -41,7 +42,7 @@ function makeDoll(def){
  }
  // A scalloped collar and tiny seams make the residents feel sewn, not conical.
  for(let i=0;i<7;i++){const a=i*Math.PI/6;ball(body,Math.cos(a)*.108,.817-Math.sin(a)*.021,Math.sin(a)*.095,.034,.016,.029,P.cream)}
- cylinder(body,0,.845,0,.057,.10,skin);
+ cylinder(body,0,.845,0,.057,.10,skin);createNeckJoint(body);
  const arms=[];
  for(const sign of [-1,1]){
   const arm=new T.Group();arm.position.set(sign*.19,.73,0);body.add(arm);
@@ -51,23 +52,19 @@ function makeDoll(def){
  }
  const head=new T.Group();head.position.set(0,1.095,.008);body.add(head);
  ball(head,0,.015,-.014,.305,.311,.269,hair);
- ball(head,0,-.012,.029,.284,.273,.249,skin);
- for(const sign of [-1,1])ball(head,sign*.275,-.035,.021,.039,.062,.040,skin);
+ const faceHull=createSculptedHead(head,skin,def.id);
+ const ears=[-1,1].map(sign=>createEar(head,sign,skin));
  // Swept fringe with smaller curls keeps the face open and the silhouette soft.
  for(let i=0;i<7;i++){const x=-.245+i*.081;const curl=ball(head,x,.178+Math.cos(i*.48)*.025,.145,.074,.092,.093,hair);curl.rotation.z=(i-3)*-.16}
  if(def.id==='lina')for(const sign of [-1,1]){for(let j=0;j<3;j++)ball(head,sign*(.29+j*.015),.06-j*.105,-.035,.085,.075,.087,hair);ribbon(head,sign*.30,.125,.08,0xc58294)}
  if(def.id==='noor'){ball(head,.23,.25,-.11,.121,.12,.112,hair);for(let i=0;i<5;i++){const a=.3+i*.25;ball(head,Math.sin(a)*.25,.272-Math.sin(a)*.025,.147,.025,.022,.025,0xe5c998)}}
- const eyes=[];
+ const eyes=[],brows=[];
  for(const sign of [-1,1]){
-  const eye=new T.Group();eye.position.set(sign*.104,.006,.246);head.add(eye);
-  ball(eye,0,0,0,.054,.062,.026,0xfff3e1);ball(eye,0,-.006,.021,.037,.047,.015,0x4b3b40);
-  ball(eye,0,-.006,.033,.024,.033,.008,0x2d2633);ball(eye,-.012,.014,.041,.012,.014,.006,0xfffbeb);eyes.push(eye);eye.traverse(o=>{o.userData.noBatch=true});
-  const cheek=ball(head,sign*.189,-.078,.209,.045,.023,.011,blush);cheek.rotation.y=sign*.35;
-  line(head,[sign*.14,.092,.223],[sign*.075,.104,.240],.008,def.hair);
-  for(let k=0;k<2;k++)ball(head,sign*(.16+k*.025),-.070+k*.01,.232,.006,.005,.006,0xbe8980);
+  const eye=createPortraitEye(head,sign,def.id);eyes.push(eye);
+  brows.push(createBrow(head,sign,def.hair));
  }
- ball(head,0,-.062,.28,.023,.026,.031,skin);
- const smile=new T.Mesh(new T.TorusGeometry(.037,.005,5,20,Math.PI*.72),mat(0x9d6569));smile.position.set(.015,-.119,.25);smile.rotation.z=Math.PI*1.14;head.add(smile);
+ const nose=createNose(head,skin);
+ const mouth=createPortraitMouth(head);
  if(def.id==='sami'){for(const sign of [-1,1])ring(head,sign*.105,.007,.296,.071,.008,P.gold);line(head,[-.034,.010,.295],[.034,.010,.295],.007,P.gold)}
  const tea=new T.Group();tea.position.set(0,-.29,.075);tea.scale.setScalar(.85);cup(tea,0,0,0,0xf1d9b5);arms[1].add(tea);tea.visible=false;const steam=createTeaSteam(tea);
  const hit=new T.Mesh(new T.CapsuleGeometry(.38,.74,3,8),new T.MeshBasicMaterial({visible:false}));hit.position.y=.72;hit.userData.doll=def.id;root.add(hit);
@@ -77,7 +74,7 @@ function makeDoll(def){
  const sparkles=new T.Group();sparkles.position.y=1.65;root.add(sparkles);
  for(let i=0;i<3;i++){const s=new T.Mesh(new T.OctahedronGeometry(.037),mat(0xf0cc8b,{emissive:0xf0cc8b,emissiveIntensity:.5}));s.position.set((i-1)*.18,Math.sin(i)*.13,0);sparkles.add(s)}
  const staticBody=new T.Group();for(const o of [...body.children])if(o.isMesh)staticBody.add(o);body.add(staticBody);batch(staticBody);batch(head);
- return {root,body,head,arms,legs,eyes,hit,halo,tea,steam,comfortHearts,sleepCrescent,sparkles,room:null,id:def.id};
+ return {root,body,head,faceHull,brows,mouth,nose,ears,arms,legs,eyes,hit,halo,tea,steam,comfortHearts,sleepCrescent,sparkles,room:null,id:def.id};
 }
 export function createDolls(parent){
  const dolls=DOLLS.map((def,i)=>{const v=makeDoll(def);parent.add(v.root);const r=ROOMS.find(x=>x.id===def.room);v.root.position.set(r.x+.85,r.y+.12,.88);return v});
@@ -98,7 +95,7 @@ export function createDolls(parent){
    v.body.rotation.z=motion&&d.action==='play'?Math.sin(t*3.6)*.05:0;
    v.head.rotation.z=d.action==='rest'?.16:motion?Math.sin(t*.6+i)*.04:0;v.head.rotation.y=motion?T.MathUtils.damp(v.head.rotation.y,selected===d.id?T.MathUtils.clamp(Number.isFinite(viewerYaw)?viewerYaw:0,-.35,.35):Math.sin(t*.36+i)*.08,5,dt):0;v.head.rotation.x=d.action==='rest'?.23:0;
    const openness=d.action==='rest'?.12:motion?blinkOpen(t,i):1;
-   v.eyes.forEach(e=>e.scale.y=openness);
+   v.eyes.forEach(e=>closePortraitEye(e,openness));
    v.arms.forEach((a,j)=>{const sign=j===0?-1:1;a.rotation.z=sign*(d.action==='play'?.55+(motion?Math.sin(t*4)*.18:0):d.action==='soothe'?.50:d.action==='rest'?.46:.19);a.rotation.x=d.action==='tea'&&j===1?-1.2:d.action==='rest'?(j===0?-.88:-.68):0});
    // The hand carries the cup; wrist pitching must not spill its surface or tilt steam sideways.
    v.tea.quaternion.copy(v.arms[1].quaternion).invert();
