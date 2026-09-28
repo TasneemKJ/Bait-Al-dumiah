@@ -44,7 +44,7 @@ function almondGeometry(){
 }
 const almond=almondGeometry(),irisGeometry=new T.CircleGeometry(.040,32);
 export function createPortraitEye(parent,sign,id){
- const eye=new T.Group();eye.name='portrait-eye';eye.userData.noBatch=true;eye.position.set(sign*.105,.012,.257);eye.rotation.y=sign*.13;parent.add(eye);
+ const eye=new T.Group();eye.name='portrait-eye';eye.userData.noBatch=true;eye.position.set(sign*.105,.012,.266);eye.rotation.y=sign*.30;parent.add(eye);
  const aperture=new T.Group();eye.add(aperture);eye.aperture=aperture;
  const white=new T.Mesh(almond,whiteMaterial);white.name='almond-white';aperture.add(white);
  const iris=new T.Mesh(irisGeometry,irisMaterial(id));iris.name='painted-iris';iris.position.set(0,-.003,.013);aperture.add(iris);eye.iris=iris;
@@ -61,7 +61,7 @@ function lashFrame(eye){
 export function closePortraitEye(eye,value){const openness=Number.isFinite(value)?T.MathUtils.clamp(value,0,1):1;eye.aperture.scale.y=Math.max(.06,openness);eye.aperture.visible=openness>.19;eye.closedLid.visible=openness<=.19;eye.scale.y=1}
 
 export function createPortraitMouth(parent){
- const root=new T.Group();root.name='porcelain-lips';root.userData.noBatch=true;root.position.set(0,-.115,.260);parent.add(root);
+ const root=new T.Group();root.name='porcelain-lips';root.userData.noBatch=true;root.position.set(0,-.115,.274);parent.add(root);
  const upper=new T.Shape();upper.moveTo(-.035,.003);upper.quadraticCurveTo(-.018,.010,0,.003);upper.quadraticCurveTo(.018,.010,.035,.003);upper.quadraticCurveTo(0,-.006,-.035,.003);
  const lower=new T.Shape();lower.moveTo(-.029,0);lower.quadraticCurveTo(0,-.010,.029,0);lower.quadraticCurveTo(0,-.020,-.029,0);
  for(const [shape,color] of [[upper,0xac6c74],[lower,0xc99391]])root.add(new T.Mesh(new T.ShapeGeometry(shape,16),mat(color,{roughness:.53})));

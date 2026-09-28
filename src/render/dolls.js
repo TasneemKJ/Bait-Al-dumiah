@@ -1,4 +1,6 @@
 import * as T from 'three';
+import {createApron,createOveralls,createFoot,createSock} from './doll-wardrobe.js';
+import {createHair,fabricBow} from './doll-hair.js';
 import {createSculptedHead,createPortraitEye,createBrow,closePortraitEye,createPortraitMouth,createNose,createEar,bisqueMaterial,createNeckJoint} from './doll-face.js';
 import {createTeaSteam,createComfortHearts,createSleepCrescent} from './resident-effects.js';
 import {DOLLS,ROOMS} from '../content.js';
@@ -18,7 +20,7 @@ function skirt(parent,color){
  const mesh=new T.Mesh(g,craftMaterial(color));mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);
  for(let i=0;i<24;i++){const ang=i*Math.PI/12;ball(parent,Math.cos(ang)*.299,.335,Math.sin(ang)*.256,.031,.024,.024,P.cream)}
 }
-function ribbon(parent,x,y,z,color){for(const sign of [-1,1]){const loop=ball(parent,x+sign*.06,y,z,.075,.04,.028,color);loop.rotation.z=sign*.28}ball(parent,x,y,z+.013,.028,.028,.024,color)}
+const ribbon=fabricBow;
 function makeDoll(def){
  const root=new T.Group(),body=new T.Group();root.add(body);
  const skin=bisqueMaterial();
@@ -26,20 +28,14 @@ function makeDoll(def){
  const legs=[];
  for(const sign of [-1,1]){
   const leg=new T.Group();leg.name='articulated-leg';leg.position.set(sign*.12,.40,0);body.add(leg);legs.push(leg);
-  cylinder(leg,0,-.19,0,.060,.29,P.cream);ring(leg,0,-.13,0,.061,.009,def.color,true);
-  ball(leg,0,-.323,.07,.095,.065,.147,def.id==='noor'?0xb5bdb0:0x684b59);box(leg,0,-.298,.083,.18,.020,.065,P.cream,true);
+  const hosiery=createSock(leg,skin);leg.sock=hosiery.sock;leg.knee=hosiery.knee;ring(leg,0,-.095,0,.063,.008,def.color,true);
+  leg.foot=createFoot(leg,def,sign);
   if(def.id==='sami')ball(leg,0,0,0,.12,.19,.11,0x82718d);batch(leg);
  }
  if(def.id!=='sami')skirt(body,def.color);
  ball(body,0,.70,0,.17,.20,.125,fabric);
- if(def.id==='sami'){
-  box(body,0,.60,.105,.245,.28,.065,craftMaterial(0x82718d),true);
-  for(const x of [-.10,.10]){box(body,x,.74,.105,.036,.24,.045,0x82718d,true);ball(body,x,.82,.133,.02,.02,.012,P.gold)}
-  box(body,0,.62,.146,.11,.095,.01,0xaa97af,true);
- }else{
-  const apron=ball(body,0,.56,.171,.142,.20,.022,craftMaterial(0xf2dac9));apron.rotation.x=.18;
-  ribbon(body,0,.77,.139,def.id==='lina'?0xb47787:0xd7be89);
- }
+ let garments=null;
+ if(def.id==='sami')garments=createOveralls(body,def);else{garments=createApron(body,def);ribbon(body,0,.77,.139,def.id==='lina'?0xb47787:0xd7be89)}
  // A scalloped collar and tiny seams make the residents feel sewn, not conical.
  for(let i=0;i<7;i++){const a=i*Math.PI/6;ball(body,Math.cos(a)*.108,.817-Math.sin(a)*.021,Math.sin(a)*.095,.034,.016,.029,P.cream)}
  cylinder(body,0,.845,0,.057,.10,skin);createNeckJoint(body);
@@ -51,13 +47,9 @@ function makeDoll(def){
   arm.rotation.z=sign*.19;arms.push(arm);
  }
  const head=new T.Group();head.position.set(0,1.095,.008);body.add(head);
- ball(head,0,.015,-.014,.305,.311,.269,hair);
+ const hairStyle=createHair(head,def);
  const faceHull=createSculptedHead(head,skin,def.id);
  const ears=[-1,1].map(sign=>createEar(head,sign,skin));
- // Swept fringe with smaller curls keeps the face open and the silhouette soft.
- for(let i=0;i<7;i++){const x=-.245+i*.081;const curl=ball(head,x,.178+Math.cos(i*.48)*.025,.145,.074,.092,.093,hair);curl.rotation.z=(i-3)*-.16}
- if(def.id==='lina')for(const sign of [-1,1]){for(let j=0;j<3;j++)ball(head,sign*(.29+j*.015),.06-j*.105,-.035,.085,.075,.087,hair);ribbon(head,sign*.30,.125,.08,0xc58294)}
- if(def.id==='noor'){ball(head,.23,.25,-.11,.121,.12,.112,hair);for(let i=0;i<5;i++){const a=.3+i*.25;ball(head,Math.sin(a)*.25,.272-Math.sin(a)*.025,.147,.025,.022,.025,0xe5c998)}}
  const eyes=[],brows=[];
  for(const sign of [-1,1]){
   const eye=createPortraitEye(head,sign,def.id);eyes.push(eye);
@@ -74,7 +66,7 @@ function makeDoll(def){
  const sparkles=new T.Group();sparkles.position.y=1.65;root.add(sparkles);
  for(let i=0;i<3;i++){const s=new T.Mesh(new T.OctahedronGeometry(.037),mat(0xf0cc8b,{emissive:0xf0cc8b,emissiveIntensity:.5}));s.position.set((i-1)*.18,Math.sin(i)*.13,0);sparkles.add(s)}
  const staticBody=new T.Group();for(const o of [...body.children])if(o.isMesh)staticBody.add(o);body.add(staticBody);batch(staticBody);batch(head);
- return {root,body,head,faceHull,brows,mouth,nose,ears,arms,legs,eyes,hit,halo,tea,steam,comfortHearts,sleepCrescent,sparkles,room:null,id:def.id};
+ return {root,body,head,garments,hairStyle,faceHull,brows,mouth,nose,ears,arms,legs,eyes,hit,halo,tea,steam,comfortHearts,sleepCrescent,sparkles,room:null,id:def.id};
 }
 export function createDolls(parent){
  const dolls=DOLLS.map((def,i)=>{const v=makeDoll(def);parent.add(v.root);const r=ROOMS.find(x=>x.id===def.room);v.root.position.set(r.x+.85,r.y+.12,.88);return v});
