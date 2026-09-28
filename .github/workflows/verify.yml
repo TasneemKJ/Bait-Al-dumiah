@@ -1,0 +1,22 @@
+name: Verify dollhouse
+on:
+  push:
+    branches: [main, feat/living-dollhouse]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --ignore-scripts
+      - run: tar -czf dependencies.tgz node_modules/three/build node_modules/three/examples/jsm/controls/OrbitControls.js node_modules/three/LICENSE package-lock.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dependency-bootstrap
+          path: dependencies.tgz
+          retention-days: 1
