@@ -67,6 +67,12 @@ export function createUI(host,getState,dispatch){
   const light=host.querySelector('#light-button'),lightHtml=icon(isNight(s)?'sun':'moon')+`<span>${t(isNight(s)?'dawn':'night')}</span>`;if(light.innerHTML!==lightHtml)light.innerHTML=lightHtml;
   host.querySelector('.visitor-hint').hidden=!isNight(s)||s.lastSecretDay===s.day||s.journal.length===6||Boolean(placement);
   host.querySelector('.pause-overlay').hidden=!s.paused||Boolean(panel);
+  const pauseButton=host.querySelector('.dock [data-action="pause"]'),pauseLabel=t(s.paused?'resume':'pause');
+  if(pauseButton.getAttribute('aria-pressed')!==String(s.paused)||pauseButton.title!==pauseLabel){
+   pauseButton.setAttribute('aria-pressed',String(s.paused));pauseButton.title=pauseLabel;
+   pauseButton.innerHTML=icon(s.paused?'resume':'pause')+`<span>${pauseLabel}</span>`;
+  }
+
   for(const el of host.querySelectorAll('[data-need]')){const d=s.dolls.find(v=>v.id===selected);if(d){el.value=d[el.dataset.need];host.querySelector(`[data-need-text="${el.dataset.need}"]`).textContent=n(d[el.dataset.need])}}
  }
  function toast(message){if(panel){let note=host.querySelector('.panel-notice');if(!note){note=document.createElement('p');note.className='panel-notice';note.setAttribute('role','status');host.querySelector('#sheet-content').prepend(note)}note.textContent=message}const el=host.querySelector('#toast');clearTimeout(toastTimer);el.textContent=message;el.classList.add('visible');toastTimer=setTimeout(()=>el.classList.remove('visible'),4500)}
