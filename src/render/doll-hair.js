@@ -53,9 +53,10 @@ function storybookFringe(parent,def){
  const widths={lina:[.046,.049,.037,.046,.047,.036],noor:[.046,.046,.041,.035,.037],sami:[.043,.045,.036,.037,.031,.033]}[def.id];
  // Join the outer sweep to the core mass. A front-only view hid the daylight
  // gap between these two locks; the inset bridge also closes oblique views.
- if(def.id==='noor'){
-  const inner=new T.CatmullRomCurve3(starts[0].map(p=>new T.Vector3(...p))),outer=new T.CatmullRomCurve3(starts[4].map(p=>new T.Vector3(...p)));
-  const g=gridSurface(8,20,(u,v)=>{const t=.06+.93*v,a=inner.getPoint(t),b=outer.getPoint(t),p=a.lerp(b,u);return [p.x,p.y,p.z-.005*Math.sin(u*Math.PI)]});
+ if(def.id==='noor'||def.id==='sami'){
+  const pair=def.id==='noor'?[0,4]:[1,3];
+  const inner=new T.CatmullRomCurve3(starts[pair[0]].map(p=>new T.Vector3(...p))),outer=new T.CatmullRomCurve3(starts[pair[1]].map(p=>new T.Vector3(...p)));
+  const g=gridSurface(8,20,(u,v)=>{const t=.06+.93*v,a=inner.getPoint(t),b=outer.getPoint(t),p=a.lerp(b,u);return [p.x,p.y-(def.id==='sami'?.035*Math.sin(u*Math.PI)*v*v:0),p.z-.005*Math.sin(u*Math.PI)]});
   const join=new T.Mesh(g,scalpMaterial(def.hair));join.name='joined-side-sweep';join.castShadow=join.receiveShadow=true;parent.add(join);
  }
 

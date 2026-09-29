@@ -24,3 +24,5 @@ Ruling: replace the planned final portrait/camera tweaks with the two visible ga
 
 ### Final closeup review correction
 The A40 studio images exposed a background-colored gap between Noor’s outer fringe and the core hair at the .4-radian inspection angle. Direct camera rays confirmed the gap was empty space, not paint or lighting. An inset, shared-material surface now joins the two sweeps; the new raycast regression was observed failing before that correction and passing afterward. This supplements A14’s hair refinement and is not counted as a forty-first pass. The corrected rendered comparison and full-game result remain mandatory before final handoff.
+
+The corrected multi-angle review also exposed two smaller background slits in Sami’s side part. The same shared-material joining technique now closes the side-part layers, with a second failing-then-passing camera-ray regression. Both review corrections belong to the existing hair passes; the batch remains forty counted refinements. The independent spectacle-clearance regression still passes.

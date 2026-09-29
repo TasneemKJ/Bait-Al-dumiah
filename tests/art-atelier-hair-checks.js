@@ -35,3 +35,10 @@ test("Review: Noor's upper sweep has no see-through gap at a three-quarter angle
  const camera=new T.OrthographicCamera(-.43,.43,.43,-.43,.1,50);camera.position.set(0,1.23,8);camera.lookAt(0,1.11,0);camera.updateMatrixWorld(true);
  for(const [x,y] of [[680,240],[690,250],[686,246]]){const ray=new T.Raycaster();ray.setFromCamera(new T.Vector2(x/900*2-1,1-y/900*2),camera);const hits=ray.intersectObject(doll.hairStyle.root,true).filter(h=>h.object.material.visible);assert(hits.length>0,'background shows between the cap and the upper swept strand')}
 });
+
+
+test("Review: Sami's side-part layers join without background slits", ()=>{
+ const {view,state,doll}=fixture('sami');state.settings.reducedMotion=true;view.update(state,.1,'sami');doll.root.position.set(0,0,0);doll.root.rotation.y=.4;doll.root.updateMatrixWorld(true);
+ const camera=new T.OrthographicCamera(-.43,.43,.43,-.43,.1,50);camera.position.set(0,1.23,8);camera.lookAt(0,1.11,0);camera.updateMatrixWorld(true);
+ for(const [x,y] of [[712,278],[713,298],[715,305],[716,310]]){const ray=new T.Raycaster();ray.setFromCamera(new T.Vector2(x/900*2-1,1-y/900*2),camera);const hits=ray.intersectObject(doll.hairStyle.root,true).filter(h=>h.object.material.visible);assert(hits.length>0,'background shows through the side-part layers')}
+});
