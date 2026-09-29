@@ -33,7 +33,14 @@ export const SECRET_COZY=[0,0,45,52,60,68];
 export const MILESTONES=[
  {id:'first-care',reward:5},{id:'first-keepsake',reward:5},{id:'full-house',reward:8},{id:'first-friend',reward:8},
  {id:'every-room',reward:10},{id:'room-complete',reward:10},{id:'three-whispers',reward:10},{id:'cozy-home',reward:12},
- {id:'streak-3',reward:15},{id:'family',reward:20},{id:'all-whispers',reward:25},
+ {id:'streak-3',reward:15},{id:'family',reward:20},{id:'all-whispers',reward:25},{id:'door-open',reward:30},{id:'all-gifts',reward:40},
 ];
-export const SEW_SECONDS=40,SEW_DAILY=9,BASKET_MAX=18;
+export const SEW_SECONDS=40,SEW_DAILY=9,BASKET_MAX=18,WISH_REFRESH_SECONDS=60;
+// The closed door is mended in order; some steps wait for closeness or the whole story.
+export const DOOR_STEPS=[
+ {id:'hinge',cost:40},{id:'dust',cost:60},{id:'key',cost:80,needs:'sami-dear'},{id:'lamp',cost:100},{id:'open',cost:150,needs:'all-whispers'},
+];
+// After the door opens, one small gift a night is returned with a keepsake of the visitor's own.
+export const GIFT_COST=12;
+export const VISITOR_GIFTS=['pressed-jasmine','brass-thimble','paper-boat','sugar-cube','blue-bead','tiny-key','folded-letter','fifth-cup'];
 export const SAVE_KEY='bait-al-dumiah.v1';

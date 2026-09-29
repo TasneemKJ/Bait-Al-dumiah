@@ -4,7 +4,7 @@ import * as sim from '../src/simulation.js';
 import {DOLLS,MILESTONES,SEW_SECONDS,SEW_DAILY,SECRET_COZY,BASKET_MAX} from '../src/content.js';
 import {strings} from '../src/i18n.js';
 const fresh=()=>sim.createState();
-const runDay=(s)=>{sim.changeLight(s);sim.changeLight(s)};
+const runDay=(s)=>{s.dayTime=60;sim.changeLight(s);sim.changeLight(s)};
 const wait=(s,seconds)=>{for(let i=0;i<seconds;i++)sim.step(s,1)};
 
 test('day one keeps the authored wishes and later days rotate through personal wishes',()=>{
@@ -20,6 +20,16 @@ test('every rotating wish has copy in both languages',()=>{
 test('a wished-for action is welcome even when its need is nearly full',()=>{
  const s=fresh();s.dolls[0].hunger=99;assert.equal(sim.care(s,'lina','tea').ok,true);assert.deepEqual(s.wishes,['lina']);
  s.elapsed+=5;s.dolls[0].hunger=99;assert.equal(sim.care(s,'lina','tea').reason,'enough');
+});
+test('wishes refresh only after a day actually spent awake, and hurrying loses nothing',()=>{
+ const s=fresh();sim.care(s,'lina','tea');sim.changeLight(s);sim.changeLight(s);assert.equal(s.day,2);assert.deepEqual(s.wishes,['lina']);
+ assert.ok(s.events.some(e=>e.type==='dawn'&&e.fresh===false));
+ wait(s,60);sim.changeLight(s);sim.changeLight(s);assert.deepEqual(s.wishes,[]);assert.equal(s.dayTime,0);
+});
+test('skipping days with the light control cannot farm wish rewards or streaks',()=>{
+ const s=fresh();const start=s.buttons;
+ for(let day=0;day<30;day++){for(const d of s.dolls){s.elapsed+=4;sim.care(s,d.id,sim.wishFor(s,d.id))}sim.changeLight(s);sim.changeLight(s)}
+ assert.ok(s.buttons-start<200,`gained ${s.buttons-start}`);assert.ok(s.streak<5,`streak ${s.streak}`);
 });
 test('the rotated wish, not the authored one, earns the reward on later days',()=>{
  const s=fresh();runDay(s);assert.equal(s.day,2);const want=sim.wishFor(s,'lina');assert.notEqual(want,'tea');

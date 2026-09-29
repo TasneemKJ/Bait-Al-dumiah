@@ -1,4 +1,4 @@
-import {DOLLS,ROOMS,CATALOG,SLOTS,SECRETS,ACTIONS,BOND_LEVELS,SECRET_COZY,MILESTONES,SEW_SECONDS,SEW_DAILY,BASKET_MAX} from './content.js';
+import {DOLLS,ROOMS,CATALOG,SLOTS,SECRETS,ACTIONS,BOND_LEVELS,SECRET_COZY,MILESTONES,SEW_SECONDS,SEW_DAILY,BASKET_MAX,DOOR_STEPS,GIFT_COST,VISITOR_GIFTS,WISH_REFRESH_SECONDS} from './content.js';
 const clamp=(v,min=0,max=100)=>Math.max(min,Math.min(max,Number.isFinite(v)?v:min));
 const integer=(v,min,max)=>Math.floor(clamp(v,min,max));
 const has=(items,id)=>items.some(x=>x.id===id);
@@ -10,7 +10,7 @@ export function createState(){
  return {version:1,elapsed:0,clock:0,day:1,buttons:36,unease:12,cares:0,
   dolls:DOLLS.map(d=>({id:d.id,room:d.room,hunger:d.hunger,energy:d.energy,comfort:d.comfort,lastCare:-10,action:'idle',actionUntil:0,bond:0,sew:0})),
   decor:[],nextId:1,wishes:[],journal:[],lastSecretDay:0,paused:false,
-  streak:0,lastFullDay:0,sewnToday:0,basket:0,earnedToday:0,achieved:[],milestones:[],events:[],
+  streak:0,lastFullDay:0,sewnToday:0,basket:0,earnedToday:0,achieved:[],milestones:[],events:[],door:0,gifts:[],lastGiftDay:0,dayTime:0,
   settings:{locale:'en',muted:true,reducedMotion:false,quality:'auto'}};
 }
 export const isNight=s=>s.clock>=120;
@@ -40,6 +40,8 @@ const milestoneMet={
  'streak-3':s=>currentStreak(s)>=3,
  'family':s=>s.dolls.every(d=>bondLevel(d.bond)>=3),
  'all-whispers':s=>s.journal.length>=SECRETS.length,
+ 'door-open':s=>s.door>=DOOR_STEPS.length,
+ 'all-gifts':s=>s.gifts.length>=VISITOR_GIFTS.length,
 };
 // Reached milestones wait to be collected, so buttons only change on an explicit action.
 export function checkMilestones(s){
@@ -80,13 +82,16 @@ export function care(s,id,action){
  checkMilestones(s);
  return {ok:true,reward,bonus,cost:a.cost};
 }
+// Wishes and the sewing cap refresh only after a day actually spent in the house, so hurrying
+// dawn with the light control never farms rewards. Nothing is lost by hurrying either.
 function newDay(s){
- const wishes=s.wishes.length;s.day=Math.min(99999,s.day+1);s.wishes=[];s.sewnToday=0;
- emit(s,{type:'dawn',day:s.day,wishes,earned:s.earnedToday,streak:currentStreak(s)});s.earnedToday=0;
+ const wishes=s.wishes.length,fresh=s.dayTime>=WISH_REFRESH_SECONDS;s.day=Math.min(99999,s.day+1);s.dayTime=0;
+ if(fresh){s.wishes=[];s.sewnToday=0}
+ emit(s,{type:'dawn',day:s.day,wishes,fresh,earned:s.earnedToday,streak:currentStreak(s)});s.earnedToday=0;
 }
 export function step(s,dt){
  if(s.paused||!Number.isFinite(dt)||dt<=0)return;
- dt=Math.min(dt,1);s.elapsed+=dt;s.clock+=dt;
+ dt=Math.min(dt,1);s.elapsed+=dt;s.clock+=dt;s.dayTime=Math.min(1e6,s.dayTime+dt);
  if(s.clock>=240){s.clock-=240;newDay(s)}
  const comfortProtection=Math.min(.65,s.decor.length*.035);
  for(const d of s.dolls){
@@ -122,6 +127,29 @@ export function discover(s){
  checkMilestones(s);
  return {ok:true,secret,reward:5};
 }
+const doorNeeds={'sami-dear':s=>bondLevel(s.dolls.find(d=>d.id==='sami').bond)>=3,'all-whispers':s=>s.journal.length>=SECRETS.length};
+export const doorOpen=s=>s.door>=DOOR_STEPS.length;
+export const nextDoorStep=s=>DOOR_STEPS[s.door]??null;
+export const doorReady=(s,step=nextDoorStep(s))=>Boolean(step)&&(!step.needs||doorNeeds[step.needs](s));
+export function mendDoor(s){
+ const step=nextDoorStep(s);if(!step)return fail('doorDone');
+ if(!doorReady(s,step))return fail('doorNeeds',{needs:step.needs});
+ if(s.buttons<step.cost)return fail('funds');
+ s.buttons-=step.cost;s.door++;s.unease=clamp(s.unease-6);checkMilestones(s);
+ return {ok:true,step:step.id,cost:step.cost};
+}
+// Gifts cycle through the visitor's keepsakes in order, one a night, once the door is open.
+export function leaveGift(s){
+ if(!doorOpen(s))return fail('doorClosed');
+ if(!isNight(s))return fail('daylight');
+ if(s.lastGiftDay===s.day)return fail('giftTomorrow');
+ if(s.buttons<GIFT_COST)return fail('funds');
+ const gift=VISITOR_GIFTS.find(g=>!s.gifts.includes(g))??VISITOR_GIFTS[s.day%VISITOR_GIFTS.length];
+ s.buttons-=GIFT_COST;s.lastGiftDay=s.day;if(!s.gifts.includes(gift))s.gifts.push(gift);s.unease=clamp(s.unease-10);
+ for(const d of s.dolls)d.comfort=clamp(d.comfort+6);
+ checkMilestones(s);
+ return {ok:true,gift,cost:GIFT_COST};
+}
 // Whitelist all persisted fields: no saved HTML/prose, renderer objects, or wall-clock catch-up.
 // Fields added after the first release default safely, so earlier version-1 saves keep loading.
 export function restore(raw){
@@ -138,6 +166,7 @@ export function restore(raw){
  s.lastFullDay=integer(v.lastFullDay,0,s.day);s.streak=s.lastFullDay?integer(v.streak,1,999):0;
  s.sewnToday=integer(v.sewnToday,0,SEW_DAILY);s.earnedToday=integer(v.earnedToday,0,99999);
  s.basket=integer(v.basket,0,BASKET_MAX);
+ s.dayTime=clamp(v.dayTime,0,1e6);s.door=integer(v.door,0,DOOR_STEPS.length);s.gifts=Array.isArray(v.gifts)?VISITOR_GIFTS.filter(g=>v.gifts.includes(g)):[];s.lastGiftDay=integer(v.lastGiftDay,0,s.day);
  const ids=list=>Array.isArray(list)?MILESTONES.filter(m=>list.includes(m.id)).map(m=>m.id):[];
  s.milestones=ids(v.milestones);s.achieved=ids([...ids(v.achieved),...s.milestones]);
  if(v.settings&&typeof v.settings==='object'){s.settings.locale=v.settings.locale==='ar'?'ar':'en';s.settings.muted=v.settings.muted!==false;s.settings.reducedMotion=v.settings.reducedMotion===true;s.settings.quality=['auto','low','high'].includes(v.settings.quality)?v.settings.quality:'auto'}
