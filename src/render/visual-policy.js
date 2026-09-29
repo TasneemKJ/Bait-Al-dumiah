@@ -5,6 +5,12 @@ export function lighting(mix){
  const t=clamp(mix,0,1),lerp=(a,b)=>a+(b-a)*t;
  return {ambient:lerp(1.15,.50),key:lerp(2.35,.50),rim:lerp(1.05,1.70),lamps:lerp(1.4,8.4),exposure:lerp(1.08,1.03)};
 }
+export function fog(mix){
+ const t=clamp(mix,0,1),lerp=(a,b)=>a+(b-a)*t;
+ const a=0xe7d8c8,b=0x252943;
+ const channel=shift=>Math.round(lerp((a>>shift)&255,(b>>shift)&255));
+ return {density:lerp(.0012,.0105),color:(channel(16)<<16)|(channel(8)<<8)|channel(0)};
+}
 export function detail(width,height,preference='auto',dpr=1){
  const level=preference==='high'?'high':preference==='low'?'low':Math.min(width,height)<700?'low':'high';
  return {level,pixelRatio:clamp(dpr,1,level==='low'?1.25:1.75),shadows:level==='high'};
