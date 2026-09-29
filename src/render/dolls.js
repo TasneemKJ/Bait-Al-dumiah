@@ -1,6 +1,6 @@
 import * as T from 'three';
 import {batchDoll} from './doll-rig-batch.js';
-import {createArm,levelCup,balanceWalk,gaze,express,carePose} from './doll-acting.js';
+import {createArm,levelCup,balanceWalk,gaze,express,carePose,greeting,nightCuriosity,hairFollow,clothFollow} from './doll-acting.js';
 import {createApron,createOveralls,createFoot,createSock} from './doll-wardrobe.js';
 import {createHair,fabricBow} from './doll-hair.js';
 import {createSculptedHead,createPortraitEye,createBrow,closePortraitEye,createPortraitMouth,createNose,createEar,bisqueMaterial,createNeckJoint} from './doll-face.js';
@@ -16,11 +16,12 @@ const porcelainGeometry=new T.SphereGeometry(1,24,16),beadGeometry=new T.SphereG
 function ball(p,x,y,z,rx,ry,rz,color){const mesh=new T.Mesh(Math.max(rx,ry,rz)<.07?beadGeometry:porcelainGeometry,typeof color==='number'?mat(color):color);mesh.position.set(x,y,z);mesh.scale.set(rx,ry,rz);mesh.castShadow=true;mesh.receiveShadow=true;p.add(mesh);return mesh}
 
 function skirt(parent,color){
+ const pivot=new T.Group();pivot.name='cloth-skirt-pivot';pivot.userData.noBatch=true;pivot.position.y=.75;parent.add(pivot);parent=pivot;
  const shape=[];for(let i=0;i<14;i++){const t=i/13;shape.push(new T.Vector2(.115+.19*Math.pow(1-t,1.7),.32+t*.43))}
  const g=new T.LatheGeometry(shape,48),a=g.attributes.position;
- for(let i=0;i<a.count;i++){const x=a.getX(i),z=a.getZ(i),y=a.getY(i),wave=1+Math.sin(Math.atan2(z,x)*12)*.045*(.78-y)/.46;a.setXYZ(i,x*wave,y,z*wave*.86)}g.computeVertexNormals();
+ for(let i=0;i<a.count;i++){const x=a.getX(i),z=a.getZ(i),y=a.getY(i),wave=1+Math.sin(Math.atan2(z,x)*12)*.045*(.78-y)/.46;a.setXYZ(i,x*wave,y-.75,z*wave*.86)}g.computeVertexNormals();
  const mesh=new T.Mesh(g,craftMaterial(color));mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);
- for(let i=0;i<24;i++){const ang=i*Math.PI/12;ball(parent,Math.cos(ang)*.299,.335,Math.sin(ang)*.256,.031,.024,.024,P.cream)}
+ for(let i=0;i<24;i++){const ang=i*Math.PI/12;ball(parent,Math.cos(ang)*.299,.335-.75,Math.sin(ang)*.256,.031,.024,.024,P.cream)}return pivot;
 }
 const ribbon=fabricBow;
 function makeDoll(def){
@@ -35,15 +36,16 @@ function makeDoll(def){
   if(def.id==='sami')ball(leg,0,0,0,.12,.19,.11,0x82718d);
   const shin=new T.Group();shin.name='articulated-shin';shin.userData.noBatch=true;shin.position.y=-.058;leg.add(shin);leg.shin=shin;for(const child of [leg.sock,leg.foot]){child.position.y+=.058;shin.add(child)}batch(leg);
  }
- if(def.id!=='sami')skirt(body,def.color);
+ const clothSkirt=def.id!=='sami'?skirt(body,def.color):null;
  ball(body,0,.70,0,.17,.20,.125,fabric);
  let garments=null;
  if(def.id==='sami')garments=createOveralls(body,def);else{garments=createApron(body,def);ribbon(body,0,.77,.139,def.id==='lina'?0xb47787:0xd7be89)}
+ if(clothSkirt){garments.root.position.y=-.75;clothSkirt.add(garments.root)}
  // A scalloped collar and tiny seams make the residents feel sewn, not conical.
  for(let i=0;i<7;i++){const a=i*Math.PI/6;ball(body,Math.cos(a)*.108,.817-Math.sin(a)*.021,Math.sin(a)*.095,.034,.016,.029,P.cream)}
  cylinder(body,0,.845,0,.057,.10,skin);createNeckJoint(body);
  const arms=[-1,1].map(sign=>createArm(body,sign,def,skin));
- const head=new T.Group();head.position.set(0,1.095,.008);body.add(head);
+ const head=new T.Group();head.name='doll-head';head.position.set(0,1.095,.008);body.add(head);
  const hairStyle=createHair(head,def);
  const faceHull=createSculptedHead(head,skin,def.id);
  const ears=[-1,1].map(sign=>createEar(head,sign,skin));
@@ -55,7 +57,7 @@ function makeDoll(def){
  const nose=createNose(head,skin);
  const mouth=createPortraitMouth(head);
  if(def.id==='sami'){for(const sign of [-1,1])ring(head,sign*.105,.007,.296,.071,.008,P.gold);line(head,[-.034,.010,.295],[.034,.010,.295],.007,P.gold)}
- const tea=new T.Group();tea.position.set(0,-.025,.065);tea.scale.setScalar(.85);cup(tea,0,0,0,0xf1d9b5);arms[1].hand.add(tea);tea.visible=false;const steam=createTeaSteam(tea);
+ const tea=new T.Group();tea.name='held-tea';tea.position.set(0,-.025,.065);tea.scale.setScalar(.85);cup(tea,0,0,0,0xf1d9b5);arms[1].hand.add(tea);tea.visible=false;const steam=createTeaSteam(tea);
  const hit=new T.Mesh(new T.CapsuleGeometry(.38,.74,3,8),new T.MeshBasicMaterial({visible:false}));hit.position.y=.72;hit.userData.doll=def.id;root.add(hit);
  const halo=new T.Mesh(new T.RingGeometry(.37,.40,48),new T.MeshBasicMaterial({color:0xe5b471,transparent:true,opacity:.8,side:T.DoubleSide,depthWrite:false}));halo.rotation.x=-Math.PI/2;halo.position.y=.035;root.add(halo);
  const shadow=new T.Mesh(new T.PlaneGeometry(.90,.66),new T.MeshBasicMaterial({map:softTexture(),color:0x453041,transparent:true,opacity:.35,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.012;root.add(shadow);
@@ -63,13 +65,15 @@ function makeDoll(def){
  const sparkles=new T.Group();sparkles.position.y=1.65;root.add(sparkles);
  for(let i=0;i<3;i++){const s=new T.Mesh(new T.OctahedronGeometry(.037),mat(0xf0cc8b,{emissive:0xf0cc8b,emissiveIntensity:.5}));s.position.set((i-1)*.18,Math.sin(i)*.13,0);sparkles.add(s)}
  const staticBody=new T.Group();for(const o of [...body.children])if(o.isMesh)staticBody.add(o);body.add(staticBody);batch(staticBody);batch(head);
- return batchDoll({root,body,head,garments,hairStyle,faceHull,brows,mouth,nose,ears,arms,legs,eyes,hit,halo,tea,steam,comfortHearts,sleepCrescent,sparkles,room:null,id:def.id});
+ return batchDoll({root,body,head,skirt:clothSkirt,garments,hairStyle,faceHull,brows,mouth,nose,ears,arms,legs,eyes,hit,halo,tea,steam,comfortHearts,sleepCrescent,sparkles,room:null,id:def.id});
 }
 export function createDolls(parent){
  const dolls=DOLLS.map((def,i)=>{const v=makeDoll(def);parent.add(v.root);const r=ROOMS.find(x=>x.id===def.room);v.root.position.set(r.x+.85,r.y+.12,.88);return v});
+ let previousSelection=null;
  return {dolls,targets:dolls.map(v=>v.hit),update(state,dt,selected,viewerYaw=0){
   dolls.forEach(v=>{v.halo.visible=selected===v.id});if(state.paused)return;
   const motion=!state.settings.reducedMotion&&!state.paused,t=state.elapsed;
+  if(previousSelection!==null&&previousSelection!==selected){const doll=dolls.find(v=>v.id===selected);if(doll)doll.greetedAt=motion?t:-Infinity}previousSelection=selected;
   dolls.forEach((v,i)=>{
    const d=state.dolls.find(x=>x.id===v.id),r=ROOMS.find(x=>x.id===d.room),mates=state.dolls.filter(x=>x.room===d.room),order=mates.indexOf(d);
    const base=mates.length>1?(order-(mates.length-1)/2)*1.08:(i===1?1.35:.80);
@@ -85,9 +89,9 @@ export function createDolls(parent){
    v.head.rotation.z=d.action==='rest'?.16:motion?Math.sin(t*.6+i)*.04:0;v.head.rotation.y=motion?T.MathUtils.damp(v.head.rotation.y,selected===d.id?T.MathUtils.clamp(Number.isFinite(viewerYaw)?viewerYaw:0,-.35,.35):Math.sin(t*.36+i)*.08,5,dt):0;v.head.rotation.x=d.action==='rest'?.23:0;
    const openness=d.action==='rest'?.12:motion?blinkOpen(t,i):1;
    v.eyes.forEach(e=>closePortraitEye(e,openness));
-   v.arms.forEach((a,j)=>{const sign=j===0?-1:1;a.rotation.z=sign*(d.action==='play'?.55+(motion?Math.sin(t*4)*.18:0):d.action==='soothe'?.50:d.action==='rest'?.46:.19);a.rotation.x=d.action==='tea'&&j===1?-1.2:d.action==='rest'?(j===0?-.88:-.68):0});
+   v.arms.forEach((a,j)=>{const sign=j===0?-1:1;a.rotation.y=0;a.rotation.z=sign*(d.action==='play'?.55+(motion?Math.sin(t*4)*.18:0):d.action==='soothe'?.50:d.action==='rest'?.46:.19);a.rotation.x=d.action==='tea'&&j===1?-1.2:d.action==='rest'?(j===0?-.88:-.68):0});
    // The hand carries the cup; wrist pitching must not spill its surface or tilt steam sideways.
-   balanceWalk(v,d,t,i,motion);gaze(v,selected,viewerYaw,motion,dt);express(v,d,!motion,dt);carePose(v,d,t,!motion);levelCup(v);
+   balanceWalk(v,d,t,i,motion);gaze(v,selected,viewerYaw,motion,dt);express(v,d,!motion,dt);carePose(v,d,t,!motion);greeting(v,d,t,!motion);nightCuriosity(v,d,state,i,!motion);hairFollow(v,t,!motion,dt);clothFollow(v,d,t,!motion,dt);levelCup(v);
   });
  },position(id){return dolls.find(v=>v.id===id)?.root.position.clone()}};
 }

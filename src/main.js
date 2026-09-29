@@ -22,7 +22,7 @@ function notify(result,success){if(!result.ok){ui.toast(ui.t(result.reason));ret
 function showError(kind){fatal=true;syncPause();save();document.querySelector('#loading')?.remove();if(ui?.panel)ui.close();const error=document.createElement('section');error.className='error-screen';error.setAttribute('role','alert');const h=document.createElement('h2'),p=document.createElement('p'),b=document.createElement('button');h.textContent=ui.t(kind==='context'?'contextTitle':'webglTitle');p.textContent=ui.t(kind==='context'?'contextHelp':'webglHelp');b.textContent=ui.t('reload');b.addEventListener('click',()=>location.reload());error.append(h,p,b);host.append(error)}
 async function dispatch(action,value){
  switch(action){
-  case 'panel-state':panelOpen=Boolean(value);syncPause();world?.setEnabled(!panelOpen);break;
+  case 'panel-state':panelOpen=Boolean(value);syncPause();world?.setEnabled(!panelOpen);if(value==='household'&&world){try{ui.setPortraits(world.getPortraits())}catch(error){console.warn('Resident portrait unavailable:',error)}}break;
   case 'select':break;
   case 'care':{
    const result=sim.care(state,value.id,value.action);
@@ -50,8 +50,9 @@ async function dispatch(action,value){
   case 'discover':{
    const result=sim.discover(state);if(result.ok){save();audio.effect('secret');ui.open('journal');ui.toast(ui.t('newSecret'))}else ui.toast(ui.t(result.reason));break;
   }
-  case 'camera':world?.home();host.dataset.focusRoom='';roomViews.update();break;
-  case 'focus-room':if(world?.focusRoom(value)){host.dataset.focusRoom=value;ui.tick();roomViews.update()}break;
+  case 'camera':world?.home();host.dataset.focusRoom='';host.dataset.focusDoll='';roomViews.update();break;
+  case 'focus-doll':if(state.dolls.some(d=>d.id===value)){ui.close();if(world?.focusDoll(value)){host.dataset.focusDoll=value;host.dataset.focusRoom='';roomViews.update()}}break;
+  case 'focus-room':if(world?.focusRoom(value)){host.dataset.focusRoom=value;host.dataset.focusDoll='';ui.tick();roomViews.update()}break;
   case 'zoom-in':world?.zoom(1.2);break;
   case 'zoom-out':world?.zoom(1/1.2);break;
   case 'pause':manualPause=!manualPause;syncPause();refreshUI();break;
@@ -79,7 +80,7 @@ try{world=createWorld(canvas,{onPick:data=>{
 },onError:showError});document.querySelector('#loading')?.remove();}catch(error){console.error('Dollhouse renderer could not start:',error);showError('webgl')}
 let last=performance.now(),lastUI=0,lastSave=0,stopped=false;
 function frame(now){if(stopped)return;const dt=Math.min(.1,Math.max(0,(now-last)/1000));last=now;
- if(!document.hidden&&!fatal){sim.step(state,dt);world?.render(state,dt,ui.selected);residentLabel.update(state,ui.selected,host.dataset.focusRoom,world?.project(ui.selected,.05),Boolean(ui.panel||ui.placement||state.paused));audio.tick(sim.isNight(state));if(now-lastUI>250){ui.tick();roomViews.update();lastUI=now}if(now-lastSave>8000){save();lastSave=now}}
+ if(!document.hidden&&!fatal){sim.step(state,dt);world?.render(state,dt,ui.selected);residentLabel.update(state,ui.selected,host.dataset.focusRoom||(host.dataset.focusDoll?state.dolls.find(d=>d.id===host.dataset.focusDoll)?.room:''),world?.project(ui.selected,.05),Boolean(ui.panel||ui.placement||state.paused));audio.tick(sim.isNight(state));if(now-lastUI>250){ui.tick();roomViews.update();lastUI=now}if(now-lastSave>8000){save();lastSave=now}}
  requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
@@ -100,5 +101,5 @@ window.addEventListener('keydown',event=>{
 });
 // Explicit opt-in diagnostics for reproducible browser verification, never enabled by default.
 if(new URLSearchParams(location.search).get('debug')==='1'){
- window.dollhouse={state:()=>structuredClone(state),stats:()=>({calls:world?.renderer.info.render.calls,triangles:world?.renderer.info.render.triangles,geometries:world?.renderer.info.memory.geometries,textures:world?.renderer.info.memory.textures}),project:id=>world?.project(id),visual:()=>world?.visualStatus()};
+ window.dollhouse={state:()=>structuredClone(state),stats:()=>({calls:world?.renderer.info.render.calls,triangles:world?.renderer.info.render.triangles,geometries:world?.renderer.info.memory.geometries,textures:world?.renderer.info.memory.textures}),project:(id,height)=>world?.project(id,height),visual:()=>world?.visualStatus()};
 }

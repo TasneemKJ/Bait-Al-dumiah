@@ -1,3 +1,4 @@
+import {portraitMarkup} from './resident-portraits.js';
 import {DOLLS,ROOMS,CATALOG,SECRETS,ACTIONS} from './content.js';
 import {translate,number} from './i18n.js';
 import {isNight,coziness} from './simulation.js';
@@ -6,9 +7,10 @@ const actionIcon={tea:'tea',play:'play',rest:'rest',soothe:'heart'};
 const dockIcons={household:'souls',decorate:'leaf',journal:'book',settings:'settings'};
 export function createUI(host,getState,dispatch){
  let panel=null,selected='lina',placement=null,placementRoom='kitchen',placementSlot=0,previousFocus=null,toastTimer,resetConfirm=false;
+ let portraits={};
  const t=key=>translate(getState().settings.locale,key),n=value=>number(getState().settings.locale,value);
  const button=(action,label,ico,extra='')=>`<button type="button" data-action="${action}" ${extra}>${ico?icon(ico):''}<span>${label}</span></button>`;
- function avatar(id){return `<span class="avatar ${id}" aria-hidden="true"><span class="hair"></span><span class="face"><i></i><i></i></span><span class="dress"></span></span>`}
+ function avatar(id){const portrait=portraitMarkup(id,portraits[id]);if(portrait)return portrait;return `<span class="avatar ${id}" aria-hidden="true"><span class="hair"></span><span class="face"><i></i><i></i></span><span class="dress"></span></span>`}
  function build(){
   const s=getState();document.documentElement.lang=s.settings.locale;document.documentElement.dir=s.settings.locale==='ar'?'rtl':'ltr';document.title=t('title')+' · '+t('subtitle');document.querySelector('meta[name="theme-color"]').content=isNight(s)?'#302638':'#f1e7dd';
   document.body.classList.toggle('reduced-motion',s.settings.reducedMotion);document.querySelector('#world').setAttribute('aria-label',t('canvasLabel'));
@@ -34,7 +36,7 @@ export function createUI(host,getState,dispatch){
   if(panel==='household'){
    const d=s.dolls.find(x=>x.id===selected),def=DOLLS.find(x=>x.id===selected);
    root.innerHTML=`<h2 id="sheet-title">${t('household')}</h2><p class="sheet-intro">${t('noPunishment')}</p><div class="resident-tabs" role="group" aria-label="${t('household')}">${DOLLS.map(x=>`<button type="button" data-action="select" data-id="${x.id}" class="${x.id===selected?'selected':''}" aria-pressed="${x.id===selected}">${avatar(x.id)}<span>${t(x.id)}</span>${s.wishes.includes(x.id)?icon('check'):''}</button>`).join('')}</div>
-    <div class="resident-heading">${avatar(d.id)}<div><h3>${t(d.id)}</h3><p>${t(d.id+'Bio')}</p></div></div>
+    <div class="resident-heading">${avatar(d.id)}<div><h3>${t(d.id)}</h3><p>${t(d.id+'Bio')}</p></div>${button('focus-doll',t('lookCloser'),'plus',`class="doll-inspect" data-id="${d.id}" aria-label="${t('lookCloser')} · ${t(d.id)}"`)}</div>
     <div class="need-list">${['hunger','energy','comfort'].map(key=>`<div class="need"><div><span>${t(key)}</span><span data-need-text="${key}">${n(d[key])}</span></div><meter data-need="${key}" min="0" max="100" value="${d[key]}" aria-label="${t(key)}"></meter></div>`).join('')}</div>
     <div class="wish-note">${icon(s.wishes.includes(d.id)?'check':'spark')}<span>${t(s.wishes.includes(d.id)?'wishDone':d.id+'Wish')}</span>${!s.wishes.includes(d.id)?`<strong>+${n(8)} ${icon('button')}</strong>`:''}</div>
     <div class="care-grid">${Object.entries(ACTIONS).map(([key,action])=>`<button type="button" data-action="care" data-care="${key}" data-id="${d.id}" class="care-button ${key===def.wish&&!s.wishes.includes(d.id)?'wish-action':''}">${icon(actionIcon[key])}<span><strong>${t(key)}</strong><small>${t(key+'Effect')}</small></span><em>${action.cost?n(action.cost)+' '+t('buttons'):t('free')}</em></button>`).join('')}</div>
@@ -87,6 +89,7 @@ export function createUI(host,getState,dispatch){
   if(action==='choose-item')return chooseItem(target.dataset.id);
   if(action==='placement-cancel'){clearPlacement();dispatch(action);return}
   if(action==='place-confirm'){dispatch('place',{item:placement,room:placementRoom,slot:placementSlot});return}
+  if(action==='focus-doll'){dispatch(action,target.dataset.id);return}
   if(action==='care'){dispatch('care',{id:target.dataset.id,action:target.dataset.care});return}
   if(action==='remove'){dispatch('remove',Number(target.dataset.id));renderPanel();return}
   if(action==='reset-prompt'||action==='reset-no'){resetConfirm=action==='reset-prompt';renderPanel();return}
@@ -99,5 +102,5 @@ export function createUI(host,getState,dispatch){
   dispatch('setting',{key:el.dataset.field,value:el.type==='checkbox'?el.checked:el.value});
  };
  host.addEventListener('click',click);host.addEventListener('change',change);build();
- return {open,close,refresh,tick,toast,clearPlacement,get selected(){return selected},get panel(){return panel},get placement(){return placement},get t(){return t},dispose(){clearTimeout(toastTimer);host.removeEventListener('click',click);host.removeEventListener('change',change)}};
+ return {open,close,refresh,tick,toast,clearPlacement,setPortraits(values){portraits=values??{};if(panel==='household')renderPanel()},get selected(){return selected},get panel(){return panel},get placement(){return placement},get t(){return t},dispose(){clearTimeout(toastTimer);host.removeEventListener('click',click);host.removeEventListener('change',change)}};
 }

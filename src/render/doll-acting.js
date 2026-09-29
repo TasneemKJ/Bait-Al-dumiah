@@ -13,7 +13,15 @@ export function createArm(parent,sign,def,skin){
  const thumb=ball(hand,-sign*.030,.008,.006,.015,.026,.013,skin);thumb.name='porcelain-thumb';thumb.rotation.z=-sign*.38;
  arm.rotation.z=sign*.19;return arm;
 }
-export function levelCup(doll){doll.root.updateMatrixWorld(true);doll.tea.parent.getWorldQuaternion(rotation);doll.tea.quaternion.copy(rotation).invert()}
+const cupForward=new T.Vector3(),cupPoint=new T.Vector3();
+export function levelCup(doll){
+ doll.root.updateMatrixWorld(true);
+ // Wrist rotation must change neither gravity nor the cup's grip offset.
+ doll.body.getWorldQuaternion(rotation);cupForward.set(0,0,1).applyQuaternion(rotation);cupForward.y=0;cupForward.normalize().multiplyScalar(.075);
+ doll.tea.parent.getWorldPosition(cupPoint);cupPoint.add(cupForward);cupPoint.y-=.018;
+ doll.tea.position.copy(doll.tea.parent.worldToLocal(cupPoint));
+ doll.tea.parent.getWorldQuaternion(rotation);doll.tea.quaternion.copy(rotation).invert();
+}
 
 export function balanceWalk(v,d,t,index,motion){
  const strength=motion&&d.action==='idle'?Math.min(1,(v.walkSpeed||0)*15):0;
@@ -51,6 +59,10 @@ const smooth=x=>{x=T.MathUtils.clamp(x,0,1);return x*x*(3-2*x)};
 export function carePose(v,d,t,still){
  for(const arm of v.arms){arm.forearm.rotation.set(0,0,0);arm.hand.rotation.set(0,0,0)}
  v.teaPhase=0;v.body.scale.y=1;
+ if(d.action==='play'){
+  const age=Math.max(0,t-(Number.isFinite(d.lastCare)?d.lastCare:0)),gap=still?.045:.018+.052*(.5+.5*Math.cos(age*Math.PI*3.2));
+  v.arms.forEach((arm,i)=>{const sign=i===0?-1:1;aimArm(arm,[sign*gap,.763,.171]);const parent=arm.quaternion.clone().multiply(arm.forearm.quaternion);arm.hand.quaternion.copy(parent.invert()).multiply(new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),-sign*Math.PI/2))});
+ }
  if(d.action==='rest'){
   aimArm(v.arms[1],[.163,.902,.095]);aimArm(v.arms[0],[-.080,.705,.163]);
   v.head.rotation.x=.23;v.head.rotation.z=.16;v.body.position.y=still?0:.006+Math.sin(t*1.05)*.003;v.body.scale.y=still?1:1+Math.sin(t*1.05)*.004;
@@ -58,6 +70,31 @@ export function carePose(v,d,t,still){
  if(d.action==='soothe'){aimArm(v.arms[0],[-.067,.724,.181]);aimArm(v.arms[1],[.067,.714,.189]);v.head.rotation.x=.09+(still?0:Math.sin(t*1.2)*.012)}
  if(d.action==='tea'){
   const age=Math.max(0,t-(Number.isFinite(d.lastCare)?d.lastCare:t)),lift=still?1:age<.85?smooth(age/.85):age<=2.55?1:1-smooth((age-2.55)/1.30);
-  v.teaPhase=lift;aimArm(v.arms[1],[.075,.820,.198],lift);aimArm(v.arms[0],[-.055,.790,.205],lift);v.head.rotation.x=.18*lift;
+  v.teaPhase=lift;aimArm(v.arms[1],[.08,.811,.214],lift);aimArm(v.arms[0],[-.055,.790,.205],lift);v.head.rotation.x=.28*lift;
  }
+}
+
+export function greeting(v,d,t,still){
+ v.greeting=false;if(still||d.action!=='idle')return;
+ const age=t-(v.greetedAt??-Infinity);if(age<0||age>1.65)return;
+ const weight=smooth(age/.22)*(1-smooth((age-1.25)/.40));v.greeting=weight>.01;
+ aimArm(v.arms[1],[.327,.914,.048],weight);v.arms[1].hand.rotation.z=Math.sin(age*12)*.22*weight;
+}
+
+export function nightCuriosity(v,d,state,index,still){
+ v.curiosity=0;if(still||state.clock<120||d.action!=='idle'||v.greeting)return;
+ const phase=((state.elapsed+index*3.7)%16+16)%16;
+ const glance=.145*smooth((phase-9.8)/.6)*(1-smooth((phase-11.4)/.8));
+ v.curiosity=glance;v.head.rotation.y+=glance*(index%2?-1:1);
+ if(glance>.01&&v.expression==='content'){v.brows[0].position.y+=glance*.04;v.expression='curious'}
+}
+
+export function hairFollow(v,t,still,dt){
+ v.hairStyle.tails.forEach((tail,i)=>{const z=still?0:T.MathUtils.clamp(-v.head.rotation.z*.60+Math.sin(t*1.9+i)*.016,-.075,.075),x=still?0:T.MathUtils.clamp(-v.head.rotation.y*.13,-.055,.055);tail.rotation.z=still?0:T.MathUtils.damp(tail.rotation.z,z,5,dt);tail.rotation.x=still?0:T.MathUtils.damp(tail.rotation.x,x,5,dt)});
+ v.hairStyle.bows.forEach((bow,i)=>{bow.rotation.x=still?0:Math.sin(t*1.35+i)*.035});
+}
+
+export function clothFollow(v,d,t,still,dt){
+ if(!v.skirt)return;const strength=still?0:d.action==='play'?1:Math.min(.55,(v.walkSpeed||0)*10+.10);
+ const target=Math.sin(t*2.3)*.037*strength;v.skirt.rotation.z=still?0:T.MathUtils.damp(v.skirt.rotation.z,target,6,dt);v.skirt.rotation.x=still?0:Math.sin(t*1.4)*.016*strength;
 }

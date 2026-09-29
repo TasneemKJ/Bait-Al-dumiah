@@ -18,7 +18,7 @@ setup='''async()=>{
  scene.add(new T.HemisphereLight(0xfff0df,0xa391a4,1.5));const key=new T.DirectionalLight(0xffe8ce,2.8);key.position.set(-3,5,5);scene.add(key);const fill=new T.DirectionalLight(0xc6d6e8,1.1);fill.position.set(3,2,3);scene.add(fill);
  const floor=new T.Mesh(new T.PlaneGeometry(20,20),new T.MeshStandardMaterial({color:0xe7d8c6,roughness:1}));floor.rotation.x=-Math.PI/2;floor.position.y=-.005;scene.add(floor);
  window.inspector={render(id='lina',action='idle',time=1.8,yaw=0,face=false){
-  state.elapsed=time;state.settings.reducedMotion=false;state.dolls.forEach(d=>{d.action=d.id===id?action:'idle';d.lastCare=0;d.actionUntil=4});view.update(state,.1,id,0);
+  view.dolls.forEach(v=>{v.root.rotation.y=id==='all'?0:yaw});state.elapsed=time;state.settings.reducedMotion=false;state.dolls.forEach(d=>{d.action=d.id===id?action:'idle';d.lastCare=0;d.actionUntil=4});view.update(state,.1,id,0);
   view.dolls.forEach((v,i)=>{v.root.position.set(id==='all'?(i-1)*1.08:0,0,0);v.root.rotation.y=id==='all'?0:yaw;v.root.visible=id==='all'||v.id===id;v.halo.visible=false});
   const span=id==='all'?1.85:face?.43:1.02;camera.left=-span;camera.right=span;camera.top=span;camera.bottom=-span;camera.updateProjectionMatrix();const target=face?1.11:.77;camera.position.set(0,target+.12,8);camera.lookAt(0,target,0);renderer.render(scene,camera);
   document.querySelector('#label').textContent=(id==='all'?'Lina · Noor · Sami':id[0].toUpperCase()+id.slice(1))+' — '+action;
@@ -46,9 +46,9 @@ try:
    if version=='before':page.route(BASE+'/src/render/dolls.js',lambda route:route.fulfill(status=200,content_type='text/javascript',body=baseline))
    page.goto(BASE+'/inspection');page.evaluate(setup)
    samples=[('lina','idle',1.8,0,False),('noor','idle',1.8,0,False),('sami','idle',1.8,0,False),('lina','idle',1.8,.35,True),('all','idle',1.8,0,False)]
-   if version=='after':samples += [('lina','tea',1.8,0,False),('noor','rest',1.8,0,False),('sami','play',1.8,0,False),('lina','soothe',1.8,0,False)]
+   if version=='after':samples += [('lina','tea',1.8,0,False),('noor','rest',1.8,0,False),('sami','play',1.8,0,False),('lina','soothe',1.8,0,False),('lina','tea',1.3,.42,True),('lina','tea',3.8,0,False)]
    for id,action,t,yaw,face in samples:
-    label=f'{version}-{id}-{action}'+('-face' if face else '')
+    label=f'{version}-{id}-{action}'+('-face' if face else '')+('-lowered' if t==3.8 else '')
     result=page.evaluate('(args)=>window.inspector.render(...args)',[id,action,t,yaw,face]);result['capture']=label;results.append(result)
     assert result['invalid']==0 and result['triangles']>1000, result
     page.screenshot(path=str(OUT/f'{label}.png'),timeout=60000)
