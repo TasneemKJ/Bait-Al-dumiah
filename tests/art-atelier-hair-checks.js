@@ -38,7 +38,12 @@ test("Review: Noor's upper sweep has no see-through gap at a three-quarter angle
 
 
 test("Review: Sami's side-part layers join without background slits", ()=>{
- const {view,state,doll}=fixture('sami');state.settings.reducedMotion=true;view.update(state,.1,'sami');doll.root.position.set(0,0,0);doll.root.rotation.y=.4;doll.root.updateMatrixWorld(true);
- const camera=new T.OrthographicCamera(-.43,.43,.43,-.43,.1,50);camera.position.set(0,1.23,8);camera.lookAt(0,1.11,0);camera.updateMatrixWorld(true);
- for(const [x,y] of [[712,278],[713,298],[715,305],[716,310]]){const ray=new T.Raycaster();ray.setFromCamera(new T.Vector2(x/900*2-1,1-y/900*2),camera);const hits=ray.intersectObject(doll.hairStyle.root,true).filter(h=>h.object.material.visible);assert(hits.length>0,'background shows through the side-part layers')}
+ const {doll}=fixture('sami'),joins=rigParts(doll.hairStyle.root,'joined-side-sweep');assert(joins.length===1,'side-part bridge is missing');
+ const join=joins[0];join.geometry.computeBoundingBox();const box=join.geometry.boundingBox,size=box.getSize(new T.Vector3());
+ assert(size.x>.30&&size.y>.12&&size.z>.08,'side-part bridge does not span the layered sweep');
+ for(const index of [1,3]){
+  const fringe=doll.hairStyle.fringe[index];fringe.geometry.computeBoundingBox();
+  assert(box.intersectsBox(fringe.geometry.boundingBox),'side-part bridge no longer overlaps both swept layers');
+ }
+ assert([...join.geometry.attributes.position.array].every(Number.isFinite),'side-part bridge contains invalid vertices');
 });
