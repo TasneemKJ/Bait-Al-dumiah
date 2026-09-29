@@ -1,3 +1,4 @@
+import {paintLevantineLinen} from './levantine-textiles.js';
 import {gridSurface,closeSurfaceSeam,bellRadius,dollFabric,shoulderStrapGeometry} from './doll-couture.js';
 import * as T from 'three';
 import {mat,box,ball,cylinder,ring,batch} from './primitives.js';
@@ -7,25 +8,8 @@ const cloth=new Map();
 function embroideredLinen(id){
  if(cloth.has(id))return cloth.get(id);
  const image=document.createElement('canvas');image.width=256;image.height=384;const c=image.getContext('2d');
- const base=id==='noor'?'#e3e7d9':'#f2dfc8',thread=id==='noor'?'#769a94':'#b5687d';
- c.fillStyle=base;c.fillRect(0,0,256,384);
- c.globalAlpha=.12;c.strokeStyle='#ae9584';c.lineWidth=.6;
- for(let y=0;y<384;y+=3){c.beginPath();c.moveTo(0,y);c.lineTo(256,y);c.stroke()}
- c.globalAlpha=1;c.strokeStyle=thread;c.lineWidth=1.7;c.setLineDash([2,4]);
- c.beginPath();c.moveTo(14,0);c.lineTo(14,353);c.quadraticCurveTo(128,371,242,353);c.lineTo(242,0);c.stroke();c.setLineDash([]);
- c.fillStyle=thread;c.fillRect(6,110,244,8);c.strokeStyle='#f8ead7';c.lineWidth=1;c.setLineDash([2,3]);c.strokeRect(7,111,242,6);c.setLineDash([]);
- const flower=(x,y,r)=>{c.fillStyle=id==='noor'?'#f5efdd':'#d4929f';for(let k=0;k<6;k++){const a=k*Math.PI/3;c.beginPath();c.ellipse(x+Math.sin(a)*r*.6,y+Math.cos(a)*r*.6,r*.32,r*.62,-a,0,Math.PI*2);c.fill()}c.fillStyle='#c29a53';c.beginPath();c.arc(x,y,r*.24,0,Math.PI*2);c.fill()};
- for(let i=0;i<7;i++){
-  const x=30+i*33,y=314+Math.cos(i*.95)*9;c.strokeStyle='#799786';c.lineWidth=1.8;
-  c.beginPath();c.moveTo(x,y+24);c.quadraticCurveTo(x-9,y+6,x,y-10);c.stroke();
-  for(const sign of [-1,1]){c.fillStyle='#88a38b';c.beginPath();c.ellipse(x+sign*6,y+12,7,2.6,-sign*.7,0,Math.PI*2);c.fill()}
-  flower(x,y,8);flower(x-4,y-15,5);
- }
- if(id==='noor'){
-  c.fillStyle='#c5a463';c.beginPath();c.arc(128,59,23,0,Math.PI*2);c.fill();c.fillStyle=base;c.beginPath();c.arc(139,51,22,0,Math.PI*2);c.fill();
-  for(const [x,y] of [[95,47],[152,77],[108,89]]){c.fillStyle='#bca471';c.beginPath();c.moveTo(x,y-5);c.lineTo(x+2,y-1);c.lineTo(x+5,y);c.lineTo(x+2,y+2);c.lineTo(x,y+5);c.lineTo(x-2,y+1);c.lineTo(x-5,y);c.lineTo(x-2,y-2);c.closePath();c.fill()}
- }else{flower(128,52,14);flower(113,77,7);flower(145,78,8);c.strokeStyle='#799786';c.beginPath();c.moveTo(128,96);c.quadraticCurveTo(128,76,128,52);c.stroke()}
- const map=new T.CanvasTexture(image);map.colorSpace=T.SRGBColorSpace;map.anisotropy=4;
+ paintLevantineLinen(c,id);
+ const map=new T.CanvasTexture(image);map.name=`levantine-stitched-linen-${id}`;map.colorSpace=T.SRGBColorSpace;map.anisotropy=4;
  const material=new T.MeshStandardMaterial({map,roughness:.92,bumpMap:reliefTexture('fabric'),bumpScale:.002,side:T.DoubleSide});material.userData.shared=true;cloth.set(id,material);return material;
 }
 export function createApron(parent,def){

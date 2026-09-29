@@ -73,7 +73,7 @@ export function createHouse(scene){
  for(let j=0;j<2;j++)box(staticRoot,0,j*3.2,0,9.85,.19,3.65,P.wood);box(staticRoot,0,6.4,-.02,9.85,.16,3.65,P.cream);
  for(const room of ROOMS){const g=new T.Group();g.position.set(room.x,room.y,0);staticRoot.add(g);
  box(g,0,1.57,-1.75,4.76,3.10,.15,room.tint);
- const color='#'+room.tint.toString(16);texturedPlane(g,0,1.87,-1.665,4.70,2.45,texture('wall',[color,'#fff0dc']));
+ const color={kitchen:'#dfd5b8',parlor:'#d5b99c',studio:'#d6c9b2',bedroom:'#dfcca9'}[room.id];texturedPlane(g,0,1.87,-1.665,4.70,2.45,texture('wall',[color,'#fff0dc']));
  box(g,0,.45,-1.63,4.65,.82,.05,room.tint);for(let i=0;i<10;i++)box(g,-2.25+i*.50,.46,-1.59,.025,.70,.035,P.cream);box(g,0,.92,-1.60,4.72,.047,.055,P.cream);
  box(g,0,.13,-1.55,4.70,.13,.12,P.cream);box(g,0,3.08,-1.59,4.78,.15,.19,P.cream);
  texturedPlane(g,0,.101,0,4.71,3.40,texture('tile',room.id==='kitchen'?['#e7dcc5','#90aba0']:['#dfc6b5','#b0938e']),true);
@@ -87,8 +87,8 @@ export function createHouse(scene){
  for(const x of [-4.83,4.83])box(staticRoot,x,3.2,-.99,.14,6.4,1.35,0xd4c2b0);
  for(const y of [0,3.2,6.4]){box(staticRoot,0,y+.03,1.77,9.91,.15,.10,P.cream);box(staticRoot,0,y-.065,1.80,9.87,.03,.04,P.gold)}
  const roofShape=new T.Shape();roofShape.moveTo(-4.90,6.4);roofShape.lineTo(0,8.20);roofShape.lineTo(4.90,6.4);roofShape.closePath();const gable=new T.Mesh(new T.ExtrudeGeometry(roofShape,{depth:.15,bevelEnabled:false}),mat(0xe8d7c1));gable.position.z=-1.77;staticRoot.add(gable);
- for(const sign of [-1,1]){const roof=box(staticRoot,sign*2.56,7.30,-.05,5.5,.18,3.97,0x78566c);roof.rotation.z=-sign*.355;
- for(let row=0;row<7;row++)for(let col=0;col<13;col++){const x=sign*(.20+col*.40),y=8.40-Math.abs(x)*.3707,z=-1.88+row*.57;const tile=box(staticRoot,x,y,z,.40,.065,.51,[0xa47d8c,0x94677e,0x9c758b][(row+col)%3],true);tile.rotation.z=-sign*.355}
+ for(const sign of [-1,1]){const roof=box(staticRoot,sign*2.56,7.30,-.05,5.5,.18,3.97,0x8a5d4d);roof.rotation.z=-sign*.355;
+ for(let row=0;row<7;row++)for(let col=0;col<13;col++){const x=sign*(.20+col*.40),y=8.40-Math.abs(x)*.3707,z=-1.88+row*.57;const tile=box(staticRoot,x,y,z,.40,.065,.51,[0xa8755d,0x9c644e,0xb18064][(row+col)%3],true);tile.rotation.z=-sign*.355}
  line(staticRoot,[0,8.30,1.99],[sign*5.17,6.37,1.99],.095,P.cream);line(staticRoot,[0,8.36,-2.05],[sign*5.17,6.44,-2.05],.07,P.cream)}
  line(staticRoot,[0,8.31,-2.08],[0,8.31,2.0],.07,P.gold);
  box(staticRoot,-3.02,7.63,-1.06,.52,.86,.60,0xe1ccb4);box(staticRoot,-3.02,8.08,-1.06,.69,.13,.77,P.cream);
