@@ -35,7 +35,7 @@ export const MILESTONES=[
  {id:'every-room',reward:10},{id:'room-complete',reward:10},{id:'three-whispers',reward:10},{id:'cozy-home',reward:12},
  {id:'streak-3',reward:15},{id:'family',reward:20},{id:'all-whispers',reward:25},{id:'door-open',reward:30},{id:'all-gifts',reward:40},
 ];
-export const SEW_SECONDS=40,SEW_DAILY=9,BASKET_MAX=18;
+export const SEW_SECONDS=40,SEW_DAILY=9,BASKET_MAX=18,WISH_REFRESH_SECONDS=60;
 // The closed door is mended in order; some steps wait for closeness or the whole story.
 export const DOOR_STEPS=[
  {id:'hinge',cost:40},{id:'dust',cost:60},{id:'key',cost:80,needs:'sami-dear'},{id:'lamp',cost:100},{id:'open',cost:150,needs:'all-whispers'},

@@ -1,4 +1,4 @@
-import {DOLLS,ROOMS,CATALOG,SLOTS,SECRETS,ACTIONS,BOND_LEVELS,SECRET_COZY,MILESTONES,SEW_SECONDS,SEW_DAILY,BASKET_MAX,DOOR_STEPS,GIFT_COST,VISITOR_GIFTS} from './content.js';
+import {DOLLS,ROOMS,CATALOG,SLOTS,SECRETS,ACTIONS,BOND_LEVELS,SECRET_COZY,MILESTONES,SEW_SECONDS,SEW_DAILY,BASKET_MAX,DOOR_STEPS,GIFT_COST,VISITOR_GIFTS,WISH_REFRESH_SECONDS} from './content.js';
 const clamp=(v,min=0,max=100)=>Math.max(min,Math.min(max,Number.isFinite(v)?v:min));
 const integer=(v,min,max)=>Math.floor(clamp(v,min,max));
 const has=(items,id)=>items.some(x=>x.id===id);
@@ -10,7 +10,7 @@ export function createState(){
  return {version:1,elapsed:0,clock:0,day:1,buttons:36,unease:12,cares:0,
   dolls:DOLLS.map(d=>({id:d.id,room:d.room,hunger:d.hunger,energy:d.energy,comfort:d.comfort,lastCare:-10,action:'idle',actionUntil:0,bond:0,sew:0})),
   decor:[],nextId:1,wishes:[],journal:[],lastSecretDay:0,paused:false,
-  streak:0,lastFullDay:0,sewnToday:0,basket:0,earnedToday:0,achieved:[],milestones:[],events:[],door:0,gifts:[],lastGiftDay:0,
+  streak:0,lastFullDay:0,sewnToday:0,basket:0,earnedToday:0,achieved:[],milestones:[],events:[],door:0,gifts:[],lastGiftDay:0,dayTime:0,
   settings:{locale:'en',muted:true,reducedMotion:false,quality:'auto'}};
 }
 export const isNight=s=>s.clock>=120;
@@ -82,13 +82,16 @@ export function care(s,id,action){
  checkMilestones(s);
  return {ok:true,reward,bonus,cost:a.cost};
 }
+// Wishes and the sewing cap refresh only after a day actually spent in the house, so hurrying
+// dawn with the light control never farms rewards. Nothing is lost by hurrying either.
 function newDay(s){
- const wishes=s.wishes.length;s.day=Math.min(99999,s.day+1);s.wishes=[];s.sewnToday=0;
- emit(s,{type:'dawn',day:s.day,wishes,earned:s.earnedToday,streak:currentStreak(s)});s.earnedToday=0;
+ const wishes=s.wishes.length,fresh=s.dayTime>=WISH_REFRESH_SECONDS;s.day=Math.min(99999,s.day+1);s.dayTime=0;
+ if(fresh){s.wishes=[];s.sewnToday=0}
+ emit(s,{type:'dawn',day:s.day,wishes,fresh,earned:s.earnedToday,streak:currentStreak(s)});s.earnedToday=0;
 }
 export function step(s,dt){
  if(s.paused||!Number.isFinite(dt)||dt<=0)return;
- dt=Math.min(dt,1);s.elapsed+=dt;s.clock+=dt;
+ dt=Math.min(dt,1);s.elapsed+=dt;s.clock+=dt;s.dayTime=Math.min(1e6,s.dayTime+dt);
  if(s.clock>=240){s.clock-=240;newDay(s)}
  const comfortProtection=Math.min(.65,s.decor.length*.035);
  for(const d of s.dolls){
@@ -163,7 +166,7 @@ export function restore(raw){
  s.lastFullDay=integer(v.lastFullDay,0,s.day);s.streak=s.lastFullDay?integer(v.streak,1,999):0;
  s.sewnToday=integer(v.sewnToday,0,SEW_DAILY);s.earnedToday=integer(v.earnedToday,0,99999);
  s.basket=integer(v.basket,0,BASKET_MAX);
- s.door=integer(v.door,0,DOOR_STEPS.length);s.gifts=Array.isArray(v.gifts)?VISITOR_GIFTS.filter(g=>v.gifts.includes(g)):[];s.lastGiftDay=integer(v.lastGiftDay,0,s.day);
+ s.dayTime=clamp(v.dayTime,0,1e6);s.door=integer(v.door,0,DOOR_STEPS.length);s.gifts=Array.isArray(v.gifts)?VISITOR_GIFTS.filter(g=>v.gifts.includes(g)):[];s.lastGiftDay=integer(v.lastGiftDay,0,s.day);
  const ids=list=>Array.isArray(list)?MILESTONES.filter(m=>list.includes(m.id)).map(m=>m.id):[];
  s.milestones=ids(v.milestones);s.achieved=ids([...ids(v.achieved),...s.milestones]);
  if(v.settings&&typeof v.settings==='object'){s.settings.locale=v.settings.locale==='ar'?'ar':'en';s.settings.muted=v.settings.muted!==false;s.settings.reducedMotion=v.settings.reducedMotion===true;s.settings.quality=['auto','low','high'].includes(v.settings.quality)?v.settings.quality:'auto'}

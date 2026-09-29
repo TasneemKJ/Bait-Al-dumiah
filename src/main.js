@@ -28,7 +28,7 @@ function announce(event){
  if(event.type==='milestone')say(`${t('milestoneReached')} ${t('ms-'+event.id+'Title')} · +${n(event.reward)} ${t('buttons')}`);
  if(event.type==='bond'){say(`${t('bondUp')} ${t(event.id)} · ${t('bond'+event.level)} · +${n(event.reward)} ${t('buttons')}`);audio.effect('secret')}
  if(event.type==='full-house')say(`${t('fullHouse')} +${n(event.reward)} ${t('buttons')} · ${t('streakLabel')}: ${n(event.streak)}`);
- if(event.type==='dawn')say(`${t('dawnRecap')} ${n(event.wishes)} / ${n(DOLLS.length)}`);
+ if(event.type==='dawn')say(event.fresh?`${t('dawnRecap')} ${n(event.wishes)} / ${n(DOLLS.length)}`:t('dawnTooSoon'));
  if(event.type==='sewn')say(t('sewnHint'));
 }
 function showError(kind){fatal=true;syncPause();save();document.querySelector('#loading')?.remove();if(ui?.panel)ui.close();const error=document.createElement('section');error.className='error-screen';error.setAttribute('role','alert');const h=document.createElement('h2'),p=document.createElement('p'),b=document.createElement('button');h.textContent=ui.t(kind==='context'?'contextTitle':'webglTitle');p.textContent=ui.t(kind==='context'?'contextHelp':'webglHelp');b.textContent=ui.t('reload');b.addEventListener('click',()=>location.reload());error.append(h,p,b);host.append(error)}
@@ -42,7 +42,8 @@ async function dispatch(action,value){
   }
   case 'objective':{
    const next=ui.objective();
-   if(next.action==='panel')ui.open(next.value);else dispatch(next.action,next.value);break;
+   // Land on the section the suggestion is about, not the top of a long sheet.
+   if(next.action==='panel'){ui.open(next.value);if(next.focus)host.querySelector('#sheet '+next.focus)?.scrollIntoView({block:'center'})}else dispatch(next.action,next.value);break;
   }
   case 'claim':{
    const result=sim.claim(state,value);

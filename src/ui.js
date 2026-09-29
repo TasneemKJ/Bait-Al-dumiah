@@ -36,7 +36,7 @@ export function createUI(host,getState,dispatch){
  function doorMarkup(s){
   const step=nextDoorStep(s),ready=step&&doorReady(s,step);
   const done=DOOR_STEPS.slice(0,s.door).map((d,i)=>`<article><span class="entry-number">${icon('check')}</span><div><h3>${t('door_'+d.id+'Title')}</h3><p>${t('door_'+d.id+'Text')}</p></div></article>`).join('');
-  const next=step?`<div class="door-next"><div><strong>${t('door_'+step.id+'Title')}</strong><small>${ready?'':t('needs_'+step.needs)}</small></div>${button('mend-door',t('mend')+' · '+n(step.cost),'button',`class="primary" ${ready&&s.buttons>=step.cost?'':'disabled'}`)}</div><p class="door-progress" aria-label="${t('door')}">${DOOR_STEPS.map((d,i)=>`<span class="${i<s.door?'done':''}"></span>`).join('')}</p>`:'';
+  const next=step?`<div class="door-next"><div><strong>${t('door_'+step.id+'Title')}</strong><small>${ready?'':t('needs_'+step.needs)}</small></div>${button('mend-door',t('mend')+' · '+n(step.cost),'button',`class="primary" ${ready&&s.buttons>=step.cost?'':'disabled'}`)}</div><p class="door-progress" aria-hidden="true">${DOOR_STEPS.map((d,i)=>`<span class="${i<s.door?'done':''}"></span>`).join('')}</p>`:'';
   const gifts=doorOpen(s)?`<h3 class="section-heading">${t('gifts')} <small>${n(s.gifts.length)}/${n(VISITOR_GIFTS.length)}</small></h3><p class="sheet-intro">${t('giftsIntro')}</p>${button('gift',t('leaveGift')+' · '+n(GIFT_COST),'ghost',`class="primary wide" ${isNight(s)&&s.lastGiftDay!==s.day&&s.buttons>=GIFT_COST?'':'disabled'}`)}<div class="gift-grid">${VISITOR_GIFTS.map(g=>s.gifts.includes(g)?`<div class="gift"><strong>${t('gift-'+g+'Title')}</strong><small>${t('gift-'+g+'Text')}</small></div>`:`<div class="gift locked"><strong>✦</strong><small>${t('giftUnknown')}</small></div>`).join('')}</div>`:'';
   return `<h3 class="section-heading">${t('door')} <small>${n(s.door)}/${n(DOOR_STEPS.length)}</small></h3><p class="sheet-intro">${t(doorOpen(s)?'doorOpenedNote':'doorIntro')}</p><div class="journal-entries door-entries">${done}</div>${next}${gifts}`;
  }
@@ -81,10 +81,10 @@ export function createUI(host,getState,dispatch){
   const s=getState(),wish=DOLLS.find(d=>!s.wishes.includes(d.id));
   if(wish){const action=wishFor(s,wish.id);return {copy:t(wishKey(wish.id,action)),label:t(action),ico:actionIcon[action],action:'care',value:{id:wish.id,action}}}
   if(!s.decor.length)return {copy:t('objectiveDecorate'),label:t('decorate'),ico:'leaf',action:'panel',value:'decorate'};
-  if(unclaimed(s).length)return {copy:t('objectiveMilestone'),label:t('collect'),ico:'book',action:'panel',value:'journal'};
+  if(unclaimed(s).length)return {copy:t('objectiveMilestone'),label:t('collect'),ico:'book',action:'panel',value:'journal',focus:'.milestone.ready'};
   if(s.basket>0)return {copy:t('objectiveBasket'),label:t('collect')+' +'+n(s.basket),ico:'button',action:'collect-basket'};
   const step=nextDoorStep(s);
-  if(step&&doorReady(s,step)&&s.buttons>=step.cost)return {copy:t('objectiveDoor'),label:t('mend')+' · '+n(step.cost),ico:'home',action:'panel',value:'journal'};
+  if(step&&doorReady(s,step)&&s.buttons>=step.cost)return {copy:t('objectiveDoor'),label:t('mend')+' · '+n(step.cost),ico:'home',action:'panel',value:'journal',focus:'.door-next'};
   if(s.journal.length<SECRETS.length){
    if(isNight(s)&&s.lastSecretDay===s.day)return {copy:t('tomorrow'),label:t('dawn'),ico:'sun',action:'light'};
    if(isNight(s)&&coziness(s)<secretCozyNeeded(s))return {copy:t('objectiveShy'),label:t('decorate'),ico:'leaf',action:'panel',value:'decorate'};
