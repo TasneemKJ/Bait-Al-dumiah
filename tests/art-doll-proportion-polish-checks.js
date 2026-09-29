@@ -13,12 +13,13 @@ export function runArtChecks(){
   check(`Proportion ${doll.id}: upper bodice keeps a visible shoulder line`,upper>=.125);
  }
  const sami=view.dolls.find(d=>d.id==='sami');
- const rims=[];sami.spectacles.root.traverse(o=>{if(o.isMesh&&o.geometry?.type==='TorusGeometry')rims.push(o.geometry)});
+ const sources=[];const visit=o=>{if(o.isMesh&&o.geometry?.type==='TorusGeometry')sources.push(o);if(o.bakedParts)for(const p of o.bakedParts)visit(p.source);for(const c of o.children||[])visit(c)};
+ visit(sami.spectacles.root);
+ const rims=sources.slice(0,2);
  check('Proportion Sami: spectacles frame the eyes instead of dominating the face',
-   rims.length===2&&rims.every(g=>g.parameters.radius<=.062&&g.parameters.tube<=.007));
+   rims.length===2&&rims.every(m=>m.geometry.parameters.radius*m.scale.x<=.062&&m.geometry.parameters.tube*m.scale.x<=.007));
  const eyeSpan=Math.abs(sami.eyes[1].position.x-sami.eyes[0].position.x);
- const rimSpan=Math.abs(rims[1] ? sami.spectacles.root.children.filter(o=>o.geometry?.type==='TorusGeometry')[1].position.x -
-   sami.spectacles.root.children.filter(o=>o.geometry?.type==='TorusGeometry')[0].position.x : 1);
+ const rimSpan=rims.length===2?Math.abs(rims[1].position.x-rims[0].position.x):1;
  check('Proportion Sami: spectacle centers remain aligned near the painted eyes',Math.abs(rimSpan-eyeSpan)<=.012);
  return checks;
 }
