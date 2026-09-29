@@ -64,7 +64,7 @@ export function createLevantineSetting(parent){
  return {root,staticRoot,water,shadow,doorGlow,ripple,update(state,mix){
   const f=nightFrame(state.elapsed,mix,state.settings.reducedMotion);
   shadow.visible=f.shadow>.001;shadow.material.opacity=f.shadow;shadow.position.x=-3.75+f.shadowX;
-  doorGlow.material.opacity=f.door;
+  doorGlow.material.opacity=f.door;doorGlow.visible=f.door>0;
   water.material.opacity=.80+.025*f.ripple;
   ripple.scale.setScalar(state.settings.reducedMotion?1:.70+f.ripple*1.50);ripple.material.opacity=state.settings.reducedMotion?.12:.09+.12*(1-f.ripple);
   root.userData.nightCue={shadow:f.shadow,door:f.door,lamp:f.lamp};return f;
