@@ -26,6 +26,11 @@ def capture(page,name):
 def state(page):return page.evaluate('window.dollhouse.state()')
 def click(page,action):page.locator(f'[data-action="{action}"]:visible').click()
 def open_settings(page):click(page,'panel-settings')
+def reload_game(page):
+ # After a long software-WebGL session, teardown/re-init can exceed the 12s click deadline.
+ # The game ships only local runtime assets, so app readiness is the meaningful persistence gate.
+ page.reload(wait_until='domcontentloaded',timeout=60000)
+ page.wait_for_function('window.dollhouse?.state && !document.querySelector("#loading")',timeout=60000)
 try:
  with sync_playwright() as p:
   opts={'headless':True,'args':['--no-sandbox','--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']}
@@ -82,7 +87,7 @@ try:
   money=state(page)['buttons'];page.locator('#sheet [data-action="discover"]').click();check('same-night mystery cannot be farmed',state(page)['buttons']==money and len(state(page)['journal'])==1);click(page,'close')
   page.locator('[data-room=parlor]').click();page.wait_for_timeout(400);capture(page,'parlor-night');click(page,'camera')
   click(page,'pause');elapsed=state(page)['elapsed'];page.wait_for_timeout(700);check('pause freezes simulation',state(page)['elapsed']==elapsed);page.locator('.pause-overlay [data-action="pause"]').click()
-  saved=state(page);page.reload(wait_until='networkidle');page.wait_for_timeout(1000);after=state(page)
+  saved=state(page);reload_game(page);page.wait_for_timeout(1000);after=state(page)
   check('reload preserves ownership, money and journal',after['buttons']==saved['buttons'] and [(d['item'],d['room'],d['slot']) for d in after['decor']]==[(d['item'],d['room'],d['slot']) for d in saved['decor']] and after['journal']==saved['journal'])
   open_settings(page);page.locator('[data-field="motion"]').check();page.locator('[data-field="locale"]').select_option('ar');capture(page,'arabic-settings');click(page,'close')
   check('Arabic switches document direction and visible content',page.locator('html').get_attribute('dir')=='rtl' and 'أهل البيت' in page.locator('.dock').inner_text())
