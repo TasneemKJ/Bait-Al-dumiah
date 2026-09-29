@@ -8,7 +8,10 @@ export async function runArtChecks(){
  for(const id of ['lina','noor']){
   const apron=rigParts(view.dolls.find(d=>d.id===id).root,'embroidered-apron')[0],map=apron.material.map;
   check(`Levantine ${id}: original cross-stitched cloth atlas`,map.name===`levantine-stitched-linen-${id}`);
-  const p=map.image.getContext('2d').getImageData(0,0,256,384).data;let dyed=0;
+  // Sample the same canonical atlas area regardless of authored resolution.
+  const sample=document.createElement('canvas');sample.width=256;sample.height=384;
+  const context=sample.getContext('2d');context.drawImage(map.image,0,0,256,384);
+  const p=context.getImageData(0,0,256,384).data;let dyed=0;
   for(let y=32;y<105;y++)for(let x=70;x<187;x++){const i=(y*256+x)*4;if(p[i]<185&&p[i+1]<155&&p[i+2]<155)dyed++}
   check(`Levantine ${id}: visible chest stitching rather than a token symbol`,dyed>750);
   check(`Levantine ${id}: cloth keeps woven relief`,apron.material.bumpMap&&apron.material.bumpScale>0);

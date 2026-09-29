@@ -1,3 +1,4 @@
+import {surfaceFinish} from './atelier-surfaces.js';
 import * as T from 'three';
 import {reliefTexture} from './textiles.js';
 
@@ -67,7 +68,7 @@ export function dollFabric(id) {
  c.globalAlpha=.1;c.strokeStyle='#f8e4cf';c.lineWidth=.6;
  for(let i=1;i<256;i+=4){c.beginPath();c.moveTo(i,0);c.lineTo(i,256);c.moveTo(0,i);c.lineTo(256,i);c.stroke()}
  const map=new T.CanvasTexture(image);map.colorSpace=T.SRGBColorSpace;map.anisotropy=4;
- const m=new T.MeshStandardMaterial({map,roughness:.88,bumpMap:reliefTexture('fabric'),bumpScale:.002,side:T.DoubleSide});m.userData.shared=true;fabrics.set(id,m);return m;
+ const m=new T.MeshStandardMaterial({map,roughness:.88,bumpMap:surfaceFinish('fabric'),roughnessMap:surfaceFinish('fabric'),bumpScale:.002,side:T.DoubleSide});m.userData.shared=true;fabrics.set(id,m);return m;
 }
 
 let bodice=null;
@@ -105,7 +106,7 @@ export function shirtFabric(id){
  const canvas=document.createElement('canvas');canvas.width=canvas.height=128;const c=canvas.getContext('2d');c.fillStyle={lina:'#dbaeb1',noor:'#bbd0bc',sami:'#d8c9ac'}[id]||'#d8c9ac';c.fillRect(0,0,128,128);
  c.lineWidth=.6;c.strokeStyle='rgba(255,245,226,.25)';for(let i=1;i<128;i+=4){c.beginPath();c.moveTo(i,0);c.lineTo(i,128);c.moveTo(0,i);c.lineTo(128,i);c.stroke()}
  if(id==='sami'){c.fillStyle='rgba(140,109,87,.15)';for(let y=5;y<128;y+=18)c.fillRect(0,y,128,2)}
- const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;const m=new T.MeshStandardMaterial({map,roughness:.91,bumpMap:reliefTexture('fabric'),bumpScale:.0015,side:T.DoubleSide});m.userData.shared=true;shirts.set(id,m);return m;
+ const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;const m=new T.MeshStandardMaterial({map,roughness:.91,bumpMap:surfaceFinish('fabric'),roughnessMap:surfaceFinish('fabric'),bumpScale:.0015,side:T.DoubleSide});m.userData.shared=true;shirts.set(id,m);return m;
 }
 
 // Project sewn details onto the same sampled bodice profile used by the mesh.

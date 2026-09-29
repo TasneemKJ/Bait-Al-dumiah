@@ -52,6 +52,15 @@ jobs:
           name: doll-model-preview
           path: artifacts/dolls/
           retention-days: 7
+      - name: Capture fine craft studies
+        env:
+          ART_BASELINE: 967feea3d9582801e07fe3c87f4d4c5d839ef1f4
+        run: python scripts/craft_capture.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: craft-detail-preview
+          path: artifacts/craft/
+          retention-days: 7
       - name: Verify courtyard, Shami and audio
         run: python scripts/atmosphere_check.py
       - uses: actions/upload-artifact@v4

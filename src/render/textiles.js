@@ -1,3 +1,4 @@
+import {surfaceFinish,walnutColor} from './atelier-surfaces.js';
 import * as T from 'three';
 const cache=new Map();
 let radialMask=null;
@@ -6,6 +7,7 @@ function canvas(size=512){const c=document.createElement('canvas');c.width=c.hei
 function diamond(c,x,y,r){c.beginPath();c.moveTo(x,y-r);c.lineTo(x+r,y);c.lineTo(x,y+r);c.lineTo(x-r,y);c.closePath()}
 function flower(c,x,y,r,ink){c.fillStyle=ink;for(let k=0;k<5;k++){const a=k*Math.PI*2/5;c.beginPath();c.ellipse(x+Math.sin(a)*r*.55,y+Math.cos(a)*r*.55,r*.33,r*.60,-a,0,Math.PI*2);c.fill()}c.fillStyle='#e7c181';c.beginPath();c.arc(x,y,r*.22,0,Math.PI*2);c.fill()}
 export function paintedTexture(kind,colors){
+ if(kind==='wood')return walnutColor(colors[0]);
  const [image,c]=canvas();c.fillStyle=colors[0];c.fillRect(0,0,512,512);c.lineWidth=1.2;
  if(kind==='wall'){
   // Hand-painted branching jasmine, not a generic geometric wallpaper.
@@ -55,7 +57,7 @@ export function reliefTexture(kind){
 export function craftMaterial(color,kind='fabric'){
  const key=`${kind}:${color}`;if(cache.has(key))return cache.get(key);
  const hex='#'+new T.Color(color).getHexString();const map=paintedTexture(kind,[hex,kind==='wood'?'#eccfa5':'#f5dfc4']);
- const m=new T.MeshStandardMaterial({map,roughness:kind==='wood'?.64:.96});if(kind==='wood'||kind==='fabric'){m.bumpMap=reliefTexture(kind);m.bumpScale=kind==='wood'?.018:.0045}m.userData.shared=true;cache.set(key,m);return m;
+ const m=new T.MeshStandardMaterial({map,roughness:kind==='wood'?.72:.98});if(kind==='wood'||kind==='fabric'){m.bumpMap=surfaceFinish(kind);m.roughnessMap=m.bumpMap;m.bumpScale=kind==='wood'?.0075:.0025}m.userData.shared=true;cache.set(key,m);return m;
 }
 export function softTexture(){
  if(radialMask)return radialMask;

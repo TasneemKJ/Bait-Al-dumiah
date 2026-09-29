@@ -1,4 +1,4 @@
-import {paintLevantineLinen} from './levantine-textiles.js';
+import {paintLevantineLinen,embroideryFinish} from './levantine-textiles.js';
 import {gridSurface,closeSurfaceSeam,bellRadius,dollFabric,shoulderStrapGeometry} from './doll-couture.js';
 import * as T from 'three';
 import {mat,box,ball,cylinder,ring,batch} from './primitives.js';
@@ -7,10 +7,10 @@ import {crescentGeometry} from './resident-effects.js';
 const cloth=new Map();
 function embroideredLinen(id){
  if(cloth.has(id))return cloth.get(id);
- const image=document.createElement('canvas');image.width=256;image.height=384;const c=image.getContext('2d');
+ const image=document.createElement('canvas');image.width=512;image.height=768;const c=image.getContext('2d');
  paintLevantineLinen(c,id);
  const map=new T.CanvasTexture(image);map.name=`levantine-stitched-linen-${id}`;map.colorSpace=T.SRGBColorSpace;map.anisotropy=4;
- const material=new T.MeshStandardMaterial({map,roughness:.92,bumpMap:reliefTexture('fabric'),bumpScale:.002,side:T.DoubleSide});material.userData.shared=true;cloth.set(id,material);return material;
+ const material=new T.MeshStandardMaterial({map,roughness:.98,bumpMap:embroideryFinish(id),roughnessMap:embroideryFinish(id),bumpScale:.0016,side:T.DoubleSide});material.userData.shared=true;cloth.set(id,material);return material;
 }
 export function createApron(parent,def){
  const root=new T.Group();root.name='sewn-pinafore';root.userData.noBatch=true;parent.add(root);
