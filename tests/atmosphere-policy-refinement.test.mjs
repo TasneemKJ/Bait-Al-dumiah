@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {framing,lighting,nightSky} from '../src/render/visual-policy.js';
+import {framing,lighting,nightSky,fog} from '../src/render/visual-policy.js';
 import {nightFrame} from '../src/night-score.js';
 
 test('portrait whole-house framing keeps the miniature large enough to read',()=>{
@@ -29,4 +29,13 @@ test('midnight sky preserves a darker top than horizon and a low glow',()=>{
  const sum=a=>a.reduce((x,y)=>x+y,0);
  assert.ok(sum(sky.top)<sum(sky.bottom));
  assert.ok(sum(sky.glow)<sum(sky.bottom));
+});
+
+test('night depth haze stays subtle and deterministic',()=>{
+ const day=fog(0),night=fog(1);
+ assert.ok(day.density<=.002,`day density ${day.density}`);
+ assert.ok(night.density>=.008&&night.density<=.012,`night density ${night.density}`);
+ assert.notEqual(day.color,night.color);
+ assert.deepEqual(fog(-2),day);
+ assert.deepEqual(fog(5),night);
 });
