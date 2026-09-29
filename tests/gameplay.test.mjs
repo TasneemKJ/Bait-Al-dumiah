@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as sim from '../src/simulation.js';
-import {DOLLS,MILESTONES,SEW_SECONDS,SEW_DAILY,SECRET_COZY} from '../src/content.js';
+import {DOLLS,MILESTONES,SEW_SECONDS,SEW_DAILY,SECRET_COZY,BASKET_MAX} from '../src/content.js';
 import {strings} from '../src/i18n.js';
 const fresh=()=>sim.createState();
 const runDay=(s)=>{sim.changeLight(s);sim.changeLight(s)};
@@ -92,6 +92,14 @@ test('new progression fields roundtrip and reject tampering',()=>{
  const s=fresh();sim.care(s,'lina','tea');sim.claim(s,'first-care');s.basket=4;s.streak=2;s.lastFullDay=1;s.sewnToday=3;
  const r=sim.restore(JSON.stringify(s));assert.deepEqual(r.milestones,['first-care']);assert.deepEqual(r.achieved,['first-care']);assert.equal(r.basket,4);assert.equal(r.streak,2);assert.equal(r.sewnToday,3);assert.deepEqual(r.events,[]);
  const bad=sim.restore(JSON.stringify({...s,basket:1e9,streak:-5,lastFullDay:999,sewnToday:99,milestones:['bogus','family','family'],achieved:'x'}));
- assert.equal(bad.basket,SEW_DAILY*2);assert.equal(bad.lastFullDay,1);assert.equal(bad.sewnToday,SEW_DAILY);assert.deepEqual(bad.milestones,['family']);assert.deepEqual(bad.achieved,['family']);
+ assert.equal(bad.basket,BASKET_MAX);assert.equal(bad.lastFullDay,1);assert.equal(bad.sewnToday,SEW_DAILY);assert.deepEqual(bad.milestones,['family']);assert.deepEqual(bad.achieved,['family']);
  assert.equal(sim.claim(bad,'family').reason,'claimed');
+});
+test('an uncollected basket stops sewing at its cap and reloads without losing buttons',()=>{
+ const s=fresh();for(let day=0;day<4;day++){for(let i=0;i<130;i++){for(const d of s.dolls)d.hunger=d.energy=d.comfort=100;sim.step(s,1)}sim.changeLight(s);if(sim.isNight(s))sim.changeLight(s)}
+ assert.equal(s.basket,BASKET_MAX);assert.equal(sim.restore(JSON.stringify(s)).basket,BASKET_MAX);
+});
+test('packing a keepsake away returns the comfort it gave, so place/refund loops earn nothing',()=>{
+ const s=fresh();s.dolls[0].comfort=10;for(let i=0;i<5;i++){sim.place(s,'musicbox','kitchen',0);sim.remove(s,s.decor[0].id)}
+ assert.equal(s.dolls[0].comfort,10);assert.equal(s.buttons,36);
 });

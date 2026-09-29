@@ -235,7 +235,7 @@ export const strings={
   "objectiveBasket":"The dolls sewed you some buttons.",
   "lovedPlaced":"a treasured keepsake!",
   "favoriteMoved":"This is a favourite room.",
-  "wishBonus":"bonus",
+  "basketFull":"The sewing basket is full. Collect it so they can keep sewing.",
  },
  ar:{
   "lookCloser":"قرّب شوي",
@@ -472,7 +472,7 @@ export const strings={
   "objectiveBasket":"الدمى خيّطولك شوية أزرار.",
   "lovedPlaced":"تذكار غالي عالقلب!",
   "favoriteMoved":"هاي الغرفة المفضّلة.",
-  "wishBonus":"زيادة",
+  "basketFull":"سلّة الخياطة مليانة. لمّها ليكمّلوا خياطة.",
  },
 };
 export function translate(locale,key){return strings[locale]?.[key]??strings.en[key]??key}

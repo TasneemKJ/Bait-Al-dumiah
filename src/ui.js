@@ -1,5 +1,5 @@
 import {portraitMarkup} from './resident-portraits.js';
-import {DOLLS,ROOMS,CATALOG,SECRETS,ACTIONS,MILESTONES,SEW_DAILY} from './content.js';
+import {DOLLS,ROOMS,CATALOG,SECRETS,ACTIONS,MILESTONES,SEW_DAILY,BASKET_MAX} from './content.js';
 import {translate,number} from './i18n.js';
 import {isNight,coziness,wishFor,wishReward,bondLevel,nextBond,isContent,contentThreshold,delighted,inFavoriteRoom,currentStreak,unclaimed,secretCozyNeeded} from './simulation.js';
 import {icon} from './icons.js';
@@ -31,9 +31,12 @@ export function createUI(host,getState,dispatch){
   if(panel){renderPanel();sheet.showModal()}renderPlacement();tick();
  }
  function open(name,id){if(placement){placement=null;dispatch('placement-cancel')}panel=name;resetConfirm=false;if(id)selected=id;previousFocus=document.activeElement;renderPanel();host.querySelector('#sheet').showModal();dispatch('panel-state',name);host.querySelector('#sheet [data-action="close"]').focus()}
- function close(){const sheet=host.querySelector('#sheet');sheet?.close();panel=null;resetConfirm=false;dispatch('panel-state',null);if(previousFocus?.isConnected)previousFocus.focus();else host.querySelector('[data-action="panel-household"]')?.focus()}
+ function close(){const sheet=host.querySelector('#sheet');sheet?.close();panel=null;renderedPanel=null;resetConfirm=false;dispatch('panel-state',null);if(previousFocus?.isConnected)previousFocus.focus();else host.querySelector('[data-action="panel-household"]')?.focus()}
+ let renderedPanel=null;
  function renderPanel(){
   const s=getState(),root=host.querySelector('#sheet-content');if(!panel)return;
+  // Re-rendering the same sheet keeps its latest notice, so a collected reward stays visible.
+  const notice=renderedPanel===panel?root.querySelector('.panel-notice')?.textContent:null;renderedPanel=panel;
   if(panel==='household'){
    const d=s.dolls.find(x=>x.id===selected),def=DOLLS.find(x=>x.id===selected);
    const level=bondLevel(d.bond),next=nextBond(d.bond),wished=wishFor(s,d.id),threshold=contentThreshold(s,d),fav=CATALOG.find(c=>c.id===def.favItem);
@@ -44,7 +47,7 @@ export function createUI(host,getState,dispatch){
     <div class="wish-note">${icon(s.wishes.includes(d.id)?'check':'spark')}<span>${t(s.wishes.includes(d.id)?'wishDone':wishKey(d.id,wished))}</span>${!s.wishes.includes(d.id)?`<strong>+${n(wishReward(d))} ${icon('button')}</strong>`:''}</div>
     <div class="care-grid">${Object.entries(ACTIONS).map(([key,action])=>`<button type="button" data-action="care" data-care="${key}" data-id="${d.id}" class="care-button ${key===wished&&!s.wishes.includes(d.id)?'wish-action':''}">${icon(actionIcon[key])}<span><strong>${t(key)}</strong><small>${t(key+'Effect')}</small></span><em>${action.cost?n(action.cost)+' '+t('buttons'):t('free')}</em></button>`).join('')}</div>
     <label class="room-select">${t('move')}<select data-field="doll-room" data-id="${d.id}">${ROOMS.map(r=>`<option value="${r.id}" ${r.id===d.room?'selected':''}>${t(r.id)}${r.id===def.favRoom?' ♡':''}</option>`).join('')}</select></label>
-    <p class="mood-note ${isContent(s,d)?'content':''}">${icon(isContent(s,d)?'heart':'spark')}<span>${isContent(s,d)?t(s.sewnToday>=SEW_DAILY?'sewnDoneNote':'contentNote'):t('notContentNote').replace('{x}',n(threshold))}</span></p>
+    <p class="mood-note ${isContent(s,d)?'content':''}">${icon(isContent(s,d)?'heart':'spark')}<span>${isContent(s,d)?t(s.basket>=BASKET_MAX?'basketFull':s.sewnToday>=SEW_DAILY?'sewnDoneNote':'contentNote'):t('notContentNote').replace('{x}',n(threshold))}</span></p>
     <div class="favorites"><p class="${delighted(s,d)?'met':''}">${icon(fav.icon)}<span>${t('loves')}<strong>${t(fav.id)}</strong></span>${delighted(s,d)?icon('check'):''}</p><p class="${inFavoriteRoom(d)?'met':''}">${icon('home')}<span>${t('favRoomLabel')}<strong>${t(def.favRoom)}</strong></span>${inFavoriteRoom(d)?icon('check'):''}</p></div>
     <p class="sheet-intro">${delighted(s,d)?t('delightedNote'):''} ${inFavoriteRoom(d)?t('favRoomNote'):''}</p>
     <h3 class="section-heading">${t('memories')}</h3><div class="memories">${[1,2,3].map(i=>level>=i?`<p>${t(d.id+'Memory'+i)}</p>`:`<p class="locked">${icon('moon')}<span>${t('memoryLocked')} · ${t('bond'+i)}</span></p>`).join('')}</div>`;
@@ -59,6 +62,7 @@ export function createUI(host,getState,dispatch){
   if(panel==='settings'){
    root.innerHTML=`<h2 id="sheet-title">${t('settings')}</h2><div class="settings-list"><label><span>${t('language')}</span><select data-field="locale"><option value="en" ${s.settings.locale==='en'?'selected':''}>English</option><option value="ar" ${s.settings.locale==='ar'?'selected':''}>${t('languageArabic')}</option></select></label><div class="setting-row"><span>${t('sound')}</span>${button('sound',t(s.settings.muted?'soundOff':'soundOn'),s.settings.muted?'muted':'volume',`aria-pressed="${!s.settings.muted}"`)}</div><p>${t('soundHelp')}</p><label><span>${t('motion')}</span><input data-field="motion" type="checkbox" ${s.settings.reducedMotion?'checked':''}></label><p>${t('motionHelp')}</p><label><span>${t('quality')}</span><select data-field="quality">${['auto','low','high'].map(q=>`<option value="${q}" ${s.settings.quality===q?'selected':''}>${t(q)}</option>`).join('')}</select></label><p>${t('qualityHelp')}</p></div><details><summary>${t('helpTitle')}</summary><p>${t('help')}</p><p>${t('controlsHelp')}</p></details><div class="reset-section">${resetConfirm?`<p>${t('resetConfirm')}</p><div class="row">${button('reset-yes',t('resetYes'),null,'class="danger"')}${button('reset-no',t('resetNo'))}</div>`:button('reset-prompt',t('reset'),null,'class="text-button"')}</div>`;
   }
+  if(notice){const note=document.createElement('p');note.className='panel-notice';note.setAttribute('role','status');note.textContent=notice;root.prepend(note)}
  }
  function renderPlacement(){const root=host.querySelector('.placement');if(!root)return;root.hidden=!placement;if(!placement)return;const entry=CATALOG.find(c=>c.id===placement);root.innerHTML=`<div class="placement-head">${icon(entry.icon)}<div><strong>${t(placement)} · ${n(entry.price)} ${t('buttons')}</strong><p>${t('placeHint')}</p></div>${button('placement-cancel',t('cancel'),'close','class="icon-button"')}</div><div class="placement-fields"><label class="sr-only" for="place-room">${t('room')}</label><select id="place-room" data-field="place-room">${ROOMS.map(r=>`<option value="${r.id}" ${r.id===placementRoom?'selected':''}>${t(r.id)}</option>`).join('')}</select><label class="sr-only" for="place-slot">${t('placeTitle')}</label><select id="place-slot" data-field="place-slot">${['leftSpot','middleSpot','rightSpot'].map((v,i)=>`<option value="${i}" ${placementSlot===i?'selected':''} ${getState().decor.some(d=>d.room===placementRoom&&d.slot===i)?'disabled':''}>${t(v)}</option>`).join('')}</select>${button('place-confirm',t('placeConfirm'),'plus','class="primary"')}</div>`}
  function previewPlacement(){dispatch('placement-preview',{item:placement,room:placementRoom,slot:placementSlot})}
@@ -72,6 +76,7 @@ export function createUI(host,getState,dispatch){
   if(unclaimed(s).length)return {copy:t('objectiveMilestone'),label:t('collect'),ico:'book',action:'panel',value:'journal'};
   if(s.basket>0)return {copy:t('objectiveBasket'),label:t('collect')+' +'+n(s.basket),ico:'button',action:'collect-basket'};
   if(s.journal.length<SECRETS.length){
+   if(isNight(s)&&s.lastSecretDay===s.day)return {copy:t('tomorrow'),label:t('dawn'),ico:'sun',action:'light'};
    if(isNight(s)&&coziness(s)<secretCozyNeeded(s))return {copy:t('objectiveShy'),label:t('decorate'),ico:'leaf',action:'panel',value:'decorate'};
    return {copy:t('objectiveNight'),label:t(isNight(s)?'investigate':'night'),ico:isNight(s)?'ghost':'moon',action:isNight(s)?'discover':'light'};
   }

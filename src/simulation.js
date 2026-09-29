@@ -1,4 +1,4 @@
-import {DOLLS,ROOMS,CATALOG,SLOTS,SECRETS,ACTIONS,BOND_LEVELS,SECRET_COZY,MILESTONES,SEW_SECONDS,SEW_DAILY} from './content.js';
+import {DOLLS,ROOMS,CATALOG,SLOTS,SECRETS,ACTIONS,BOND_LEVELS,SECRET_COZY,MILESTONES,SEW_SECONDS,SEW_DAILY,BASKET_MAX} from './content.js';
 const clamp=(v,min=0,max=100)=>Math.max(min,Math.min(max,Number.isFinite(v)?v:min));
 const integer=(v,min,max)=>Math.floor(clamp(v,min,max));
 const has=(items,id)=>items.some(x=>x.id===id);
@@ -92,7 +92,7 @@ export function step(s,dt){
  for(const d of s.dolls){
   d.hunger=clamp(d.hunger-dt*.13);d.energy=clamp(d.energy-dt*.095);d.comfort=clamp(d.comfort-dt*.085*(1-comfortProtection)*(inFavoriteRoom(d)?.6:1));if(s.elapsed>d.actionUntil)d.action='idle';
   // Content residents sew a few buttons into the basket each day; nothing is taken from unhappy ones.
-  if(isContent(s,d)&&s.sewnToday<SEW_DAILY){d.sew+=dt;if(d.sew>=SEW_SECONDS){d.sew=0;s.sewnToday++;s.basket++;if(s.basket===1)emit(s,{type:'sewn',id:d.id})}}
+  if(isContent(s,d)&&s.sewnToday<SEW_DAILY&&s.basket<BASKET_MAX){d.sew+=dt;if(d.sew>=SEW_SECONDS){d.sew=0;s.sewnToday++;s.basket++;if(s.basket===1)emit(s,{type:'sewn',id:d.id})}}
  }
  const target=isNight(s)?48-coziness(s)*.22:12;
  s.unease=clamp(s.unease+(target-s.unease)*dt*.008);
@@ -109,7 +109,8 @@ export function place(s,item,room,slot){
  checkMilestones(s);
  return {ok:true,cost:entry.price,loved};
 }
-export function remove(s,id){const index=s.decor.findIndex(d=>d.id===id);if(index<0)return fail('invalid');const item=s.decor.splice(index,1)[0];const refund=CATALOG.find(i=>i.id===item.item).price;s.buttons=Math.min(9999,s.buttons+refund);return {ok:true,refund}}
+// Packing away returns the price and the comfort that placing gave, so a place/refund loop earns nothing.
+export function remove(s,id){const index=s.decor.findIndex(d=>d.id===id);if(index<0)return fail('invalid');const item=s.decor.splice(index,1)[0],entry=CATALOG.find(i=>i.id===item.item),refund=entry.price;for(const d of s.dolls)if(d.room===item.room)d.comfort=clamp(d.comfort-entry.cozy);s.buttons=Math.min(9999,s.buttons+refund);return {ok:true,refund}}
 export function moveDoll(s,id,room){const doll=s.dolls.find(d=>d.id===id);if(!doll||!has(ROOMS,room))return fail('invalid');doll.room=room;return {ok:true,favorite:inFavoriteRoom(doll)}}
 export function changeLight(s){if(isNight(s)){s.clock=0;newDay(s)}else{s.clock=120}return {ok:true}}
 export function discover(s){
@@ -136,7 +137,7 @@ export function restore(raw){
  s.lastSecretDay=integer(v.lastSecretDay,0,s.day);
  s.lastFullDay=integer(v.lastFullDay,0,s.day);s.streak=s.lastFullDay?integer(v.streak,1,999):0;
  s.sewnToday=integer(v.sewnToday,0,SEW_DAILY);s.earnedToday=integer(v.earnedToday,0,99999);
- s.basket=integer(v.basket,0,SEW_DAILY*2);
+ s.basket=integer(v.basket,0,BASKET_MAX);
  const ids=list=>Array.isArray(list)?MILESTONES.filter(m=>list.includes(m.id)).map(m=>m.id):[];
  s.milestones=ids(v.milestones);s.achieved=ids([...ids(v.achieved),...s.milestones]);
  if(v.settings&&typeof v.settings==='object'){s.settings.locale=v.settings.locale==='ar'?'ar':'en';s.settings.muted=v.settings.muted!==false;s.settings.reducedMotion=v.settings.reducedMotion===true;s.settings.quality=['auto','low','high'].includes(v.settings.quality)?v.settings.quality:'auto'}

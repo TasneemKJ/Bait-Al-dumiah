@@ -35,5 +35,5 @@ export const MILESTONES=[
  {id:'every-room',reward:10},{id:'room-complete',reward:10},{id:'three-whispers',reward:10},{id:'cozy-home',reward:12},
  {id:'streak-3',reward:15},{id:'family',reward:20},{id:'all-whispers',reward:25},
 ];
-export const SEW_SECONDS=40,SEW_DAILY=9;
+export const SEW_SECONDS=40,SEW_DAILY=9,BASKET_MAX=18;
 export const SAVE_KEY='bait-al-dumiah.v1';
