@@ -18,12 +18,23 @@ export function paintedTexture(kind,colors){
  if(kind==='wood')return walnutColor(colors[0]);
  const [image,c]=canvas();c.fillStyle=colors[0];c.fillRect(0,0,512,512);c.lineWidth=1.2;
  if(kind==='wall'){
-  // Hand-painted branching jasmine, not a generic geometric wallpaper.
-  for(let row=-1;row<6;row++)for(let col=-1;col<6;col++){
-   const x=col*104+(row%2)*52,y=row*112;c.strokeStyle=colors[1];c.globalAlpha=.42;
-   c.beginPath();c.moveTo(x,y+42);c.bezierCurveTo(x+33,y+14,x-18,y-18,x+2,y-44);c.stroke();
-   for(let j=0;j<4;j++){const yy=y-30+j*18,xx=x+Math.sin(j*1.8)*9;c.fillStyle=colors[1];c.beginPath();c.ellipse(xx+(j%2?9:-9),yy,10,3.8,j%2?-.6:.6,0,Math.PI*2);c.fill()}
-   c.globalAlpha=.82;flower(c,x+1,y-41,7.5,colors[1]);flower(c,x+16,y+6,5,colors[1]);
+  // Quiet limewashed field with an original geometric frieze and sparse jasmine.
+  // Keep the wall subordinate to residents and furniture at miniature scale.
+  c.globalAlpha=.18;c.strokeStyle=colors[1];c.lineWidth=1.1;
+  for(const y of [66,446]){
+   c.beginPath();c.moveTo(0,y);c.lineTo(512,y);c.stroke();
+   c.globalAlpha=.34;c.fillStyle=colors[1];
+   for(let x=18;x<512;x+=32){steppedLozenge(c,x,y,7,5,2);c.fill()}
+   c.globalAlpha=.18;
+  }
+  for(const [x,y,flip] of [[92,258,1],[256,218,-1],[416,286,1]]){
+   c.strokeStyle=colors[1];c.globalAlpha=.30;c.lineWidth=1.25;
+   c.beginPath();c.moveTo(x,y+54);c.bezierCurveTo(x+flip*20,y+28,x-flip*12,y-6,x+flip*5,y-48);c.stroke();
+   for(let j=0;j<4;j++){
+    const yy=y+34-j*24,xx=x+flip*(j%2?9:-5);c.fillStyle=colors[1];c.globalAlpha=.25;
+    c.beginPath();c.ellipse(xx+flip*8,yy,8.5,3.2,flip*.58,0,Math.PI*2);c.fill();
+   }
+   c.globalAlpha=.52;flower(c,x+flip*4,y-48,5.5,colors[1]);
   }
  }else if(kind==='tile'){
   const size=64;
@@ -54,7 +65,7 @@ export function paintedTexture(kind,colors){
  }
  // Fine paper/fibre variation is baked once rather than animated screen noise.
  for(let i=0;i<4500;i++){c.globalAlpha=.028;c.fillStyle=i%2?'#fff8e6':'#312332';c.fillRect(seeded(i)*512,seeded(i+77)*512,1+seeded(i+3)*2,1)}
- c.globalAlpha=1;const tex=new T.CanvasTexture(image);tex.colorSpace=T.SRGBColorSpace;tex.anisotropy=4;if(kind==='rug')tex.userData.pattern='stepped-lozenge-weave';if(kind==='tile')tex.userData.pattern='eight-point-stone-star';return tex;
+ c.globalAlpha=1;const tex=new T.CanvasTexture(image);tex.colorSpace=T.SRGBColorSpace;tex.anisotropy=4;if(kind==='wall')tex.userData.pattern='limewash-jasmine-frieze';if(kind==='rug')tex.userData.pattern='stepped-lozenge-weave';if(kind==='tile')tex.userData.pattern='eight-point-stone-star';return tex;
 }
 // Height data is shared, linear, and independent of the painted color layer.
 const reliefCache=new Map();
