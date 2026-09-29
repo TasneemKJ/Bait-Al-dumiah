@@ -18,7 +18,19 @@ const audio=new DollhouseAudio(),canvas=document.querySelector('#world'),host=do
 function refreshUI(){ui.refresh();roomViews.update()}
 function syncPause(){state.paused=manualPause||panelOpen||document.hidden||fatal;audio.setPaused(state.paused)}
 function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));return true}catch{if(!saveWarning&&ui){ui.toast(ui.t('savingFailed'));saveWarning=true;const note=host.querySelector('.saved-note span');if(note)note.textContent=ui.t('savingFailed')}return false}}
-function notify(result,success){if(!result.ok){ui.toast(ui.t(result.reason));return false}if(success)ui.toast(ui.t(success));save();ui.tick();return true}
+function notify(result,success){if(!result.ok){say(ui.t(result.reason));return false}if(success)say(ui.t(success));save();ui.tick();return true}
+// Notices queue so a reward, a level-up and a milestone never overwrite one another.
+const notices=[];let noticeAt=0;
+function say(message){if(notices.length<8)notices.push(message);if(notices.length===1&&performance.now()>=noticeAt)showNotice(performance.now())}
+function showNotice(now){if(!notices.length)return;ui.toast(notices.shift());noticeAt=now+2400}
+function announce(event){
+ const t=ui.t,n=ui.n;
+ if(event.type==='milestone')say(`${t('milestoneReached')} ${t('ms-'+event.id+'Title')} · +${n(event.reward)} ${t('buttons')}`);
+ if(event.type==='bond'){say(`${t('bondUp')} ${t(event.id)} · ${t('bond'+event.level)} · +${n(event.reward)} ${t('buttons')}`);audio.effect('secret')}
+ if(event.type==='full-house')say(`${t('fullHouse')} +${n(event.reward)} ${t('buttons')} · ${t('streakLabel')}: ${n(event.streak)}`);
+ if(event.type==='dawn')say(`${t('dawnRecap')} ${n(event.wishes)} / ${n(DOLLS.length)}`);
+ if(event.type==='sewn')say(t('sewnHint'));
+}
 function showError(kind){fatal=true;syncPause();save();document.querySelector('#loading')?.remove();if(ui?.panel)ui.close();const error=document.createElement('section');error.className='error-screen';error.setAttribute('role','alert');const h=document.createElement('h2'),p=document.createElement('p'),b=document.createElement('button');h.textContent=ui.t(kind==='context'?'contextTitle':'webglTitle');p.textContent=ui.t(kind==='context'?'contextHelp':'webglHelp');b.textContent=ui.t('reload');b.addEventListener('click',()=>location.reload());error.append(h,p,b);host.append(error)}
 async function dispatch(action,value){
  switch(action){
@@ -26,29 +38,34 @@ async function dispatch(action,value){
   case 'select':break;
   case 'care':{
    const result=sim.care(state,value.id,value.action);
-   if(result.ok){ui.close();ui.toast(ui.t(value.action+'Success')+(result.reward?` +${result.reward} ${ui.t('reward')}`:''));audio.effect('care');save();ui.tick()}else ui.toast(ui.t(result.reason));break;
+   if(result.ok){ui.close();say(ui.t(value.action+'Success')+(result.reward?` +${ui.n(result.reward)} ${ui.t('reward')}`:''));audio.effect('care');save();ui.tick()}else say(ui.t(result.reason));break;
   }
   case 'objective':{
-   const wish=DOLLS.find(d=>!state.wishes.includes(d.id));
-   if(wish)dispatch('care',{id:wish.id,action:wish.wish});
-   else if(!state.decor.length)ui.open('decorate');
-   else if(state.journal.length<6)dispatch(sim.isNight(state)?'discover':'light');
-   else ui.open('household');break;
+   const next=ui.objective();
+   if(next.action==='panel')ui.open(next.value);else dispatch(next.action,next.value);break;
+  }
+  case 'claim':{
+   const result=sim.claim(state,value);
+   if(result.ok){say(ui.t('milestoneCollected')+` +${ui.n(result.reward)} ${ui.t('buttons')}`);audio.effect('place');save();ui.tick()}else say(ui.t(result.reason));break;
+  }
+  case 'collect-basket':{
+   const result=sim.collectBasket(state);
+   if(result.ok){say(ui.t('basketCollected')+` +${ui.n(result.reward)}`);audio.effect('place');save();ui.tick()}else say(ui.t(result.reason));break;
   }
   case 'placement':world?.setPlacement(value);break;
   case 'placement-preview':world?.setPreview(value);break;
   case 'placement-cancel':world?.setPlacement(null);break;
   case 'place':{
    const result=sim.place(state,value.item,value.room,value.slot);
-   if(notify(result,'placed')){ui.clearPlacement();world?.setPlacement(null);audio.effect('place')}break;
+   if(notify(result,'placed')){ui.clearPlacement();world?.setPlacement(null);audio.effect('place');for(const id of result.loved)say(ui.t(id)+' · '+ui.t('lovedPlaced'))}break;
   }
   case 'remove':notify(sim.remove(state,value),'packed');break;
-  case 'move':if(notify(sim.moveDoll(state,value.id,value.room),'placed'))ui.close();break;
+  case 'move':{const result=sim.moveDoll(state,value.id,value.room);if(notify(result,result.favorite?'favoriteMoved':'placed'))ui.close();break}
   case 'light':{
-   if(ui.panel)ui.close();sim.changeLight(state);save();refreshUI();if(sim.isNight(state))ui.toast(ui.t('nightHint'));break;
+   if(ui.panel)ui.close();sim.changeLight(state);save();refreshUI();if(sim.isNight(state))say(ui.t('nightHint'));break;
   }
   case 'discover':{
-   const result=sim.discover(state);if(result.ok){save();audio.effect('secret');ui.open('journal');ui.toast(ui.t('newSecret'))}else ui.toast(ui.t(result.reason));break;
+   const result=sim.discover(state);if(result.ok){save();audio.effect('secret');ui.open('journal');say(ui.t('newSecret'))}else say(ui.t(result.reason)+(result.needed?` ${ui.t('shyNeed')} ${ui.n(result.needed)}%`:''));break;
   }
   case 'camera':world?.home();host.dataset.focusRoom='';host.dataset.focusDoll='';roomViews.update();break;
   case 'focus-doll':if(state.dolls.some(d=>d.id===value)){ui.close();if(world?.focusDoll(value)){host.dataset.focusDoll=value;host.dataset.focusRoom='';roomViews.update()}}break;
@@ -66,7 +83,7 @@ async function dispatch(action,value){
    save();refreshUI();break;
   }
   case 'reset-yes':{
-   const settings={...state.settings};ui.close();state=sim.createState();state.settings=settings;manualPause=false;syncPause();dispatch('camera');world?.setPlacement(null);save();refreshUI();break;
+   notices.length=0;const settings={...state.settings};ui.close();state=sim.createState();state.settings=settings;manualPause=false;syncPause();dispatch('camera');world?.setPlacement(null);save();refreshUI();break;
   }
  }
 }
@@ -80,7 +97,7 @@ try{world=createWorld(canvas,{onPick:data=>{
 },onError:showError});document.querySelector('#loading')?.remove();}catch(error){console.error('Dollhouse renderer could not start:',error);showError('webgl')}
 let last=performance.now(),lastUI=0,lastSave=0,stopped=false;
 function frame(now){if(stopped)return;const dt=Math.min(.1,Math.max(0,(now-last)/1000));last=now;
- if(!document.hidden&&!fatal){sim.step(state,dt);world?.render(state,dt,ui.selected);residentLabel.update(state,ui.selected,host.dataset.focusRoom||(host.dataset.focusDoll?state.dolls.find(d=>d.id===host.dataset.focusDoll)?.room:''),world?.project(ui.selected,.05),Boolean(ui.panel||ui.placement||state.paused));audio.tick(sim.isNight(state));if(now-lastUI>250){ui.tick();roomViews.update();lastUI=now}if(now-lastSave>8000){save();lastSave=now}}
+ if(!document.hidden&&!fatal){sim.step(state,dt);if(state.events.length)for(const event of state.events.splice(0))announce(event);if(notices.length&&now>=noticeAt)showNotice(now);world?.render(state,dt,ui.selected);residentLabel.update(state,ui.selected,host.dataset.focusRoom||(host.dataset.focusDoll?state.dolls.find(d=>d.id===host.dataset.focusDoll)?.room:''),world?.project(ui.selected,.05),Boolean(ui.panel||ui.placement||state.paused));audio.tick(sim.isNight(state));if(now-lastUI>250){ui.tick();roomViews.update();lastUI=now}if(now-lastSave>8000){save();lastSave=now}}
  requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
