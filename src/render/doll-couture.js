@@ -89,10 +89,14 @@ export function forearmGeometry(){
  return forearm;
 }
 
-let trouser=null;
-export function trouserLegGeometry(){
- if(!trouser)trouser=closeSurfaceSeam(gridSurface(32,16,(u,v)=>{const a=u*Math.PI*2,r=.061+.019*v+.006*Math.sin(v*Math.PI),seam=1+.018*Math.cos(a*2);return [Math.cos(a)*r*seam,-.074+.26*v,Math.sin(a)*r*.93]}),32,16);
- return trouser;
+const trousers=new Map();
+export function trouserLegGeometry(sign=1){
+ if(trousers.has(sign))return trousers.get(sign);
+ const g=closeSurfaceSeam(gridSurface(32,16,(u,v)=>{
+  const a=u*Math.PI*2,r=.066+.018*Math.sin(v*Math.PI)-.004*v,seam=1+.012*Math.cos(a*2);
+  const t=T.MathUtils.clamp((v-.55)/.45,0,1),inset=-sign*.0315*t*t*(3-2*t);
+  return [inset+Math.cos(a)*r*seam,-.085+.365*v,Math.sin(a)*r*.98];
+ }),32,16);trousers.set(sign,g);return g;
 }
 
 const shirts=new Map();
@@ -111,4 +115,24 @@ export function bodiceFront(x,y){
  const a=row*stride,b=(row+1)*stride,t=T.MathUtils.clamp((y-p.getY(a))/(p.getY(b)-p.getY(a)),0,1);
  const width=T.MathUtils.lerp(p.getX(a),p.getX(b),t),depth=T.MathUtils.lerp(p.getZ(a+8),p.getZ(b+8),t);
  return depth*Math.sqrt(Math.max(.01,1-(x/width)**2));
+}
+
+// Highest point of the existing upper bodice at a shoulder's x/z. Garment
+// straps wrap this surface, not an unrelated floating spline above the collar.
+export function bodiceTop(x,z){
+ const p=bodiceGeometry().attributes.position,stride=33;
+ const inside=(row)=>{const w=p.getX(row*stride),d=p.getZ(row*stride+8);return (x/w)**2+(z/d)**2<=1};
+ let row=23;while(row>0&&!inside(row))row--;
+ let a=0,b=1;for(let i=0;i<12;i++){const t=(a+b)/2,w=T.MathUtils.lerp(p.getX(row*stride),p.getX((row+1)*stride),t),d=T.MathUtils.lerp(p.getZ(row*stride+8),p.getZ((row+1)*stride+8),t);if((x/w)**2+(z/d)**2<=1)a=t;else b=t}
+ return T.MathUtils.lerp(p.getY(row*stride),p.getY((row+1)*stride),(a+b)/2);
+}
+const shoulderStraps=new Map();
+export function shoulderStrapGeometry(sign){
+ if(shoulderStraps.has(sign))return shoulderStraps.get(sign);
+ const g=gridSurface(4,28,(u,v)=>{
+  const x=sign*(.086+.003*Math.sin(v*Math.PI))+(u-.5)*.027,z=.156-.30*v,edge=.095;
+  const surface=bodiceTop(x,T.MathUtils.clamp(z,-edge,edge))+.007;
+  const y=z>edge?T.MathUtils.lerp(.757,surface,(.156-z)/(.156-edge)):z<-edge?T.MathUtils.lerp(surface,.714,(-z-edge)/(.144-edge)):surface;
+  return [x,y,z];
+ },true);shoulderStraps.set(sign,g);return g;
 }

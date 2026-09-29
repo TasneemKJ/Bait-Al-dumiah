@@ -1,4 +1,4 @@
-import {gridSurface,closeSurfaceSeam,bellRadius,dollFabric} from './doll-couture.js';
+import {gridSurface,closeSurfaceSeam,bellRadius,dollFabric,shoulderStrapGeometry} from './doll-couture.js';
 import * as T from 'three';
 import {mat,box,ball,cylinder,ring,batch} from './primitives.js';
 import {craftMaterial,reliefTexture} from './textiles.js';
@@ -44,8 +44,7 @@ export function createApron(parent,def){
  const puv=pocket.geometry.attributes.uv;for(let i=0;i<puv.count;i++)puv.setXY(i,.30+puv.getX(i)*.14,.32+puv.getY(i)*.18);
  const straps=[];
  for(const sign of [-1,1]){
-  const path=new T.CatmullRomCurve3([[sign*.096,.751,.157],[sign*.123,.830,.065],[sign*.131,.810,-.064],[sign*.116,.707,-.142]].map(p=>new T.Vector3(...p)));
-  const strap=new T.Mesh(gridSurface(4,20,(u,v)=>{const c=path.getPoint(v);return [c.x+(u-.5)*.035,c.y+Math.sin(u*Math.PI)*.003,c.z]},true),embroideredLinen(def.id));
+  const strap=new T.Mesh(shoulderStrapGeometry(sign).clone(),embroideredLinen(def.id));
   const uv=strap.geometry.attributes.uv;for(let i=0;i<uv.count;i++)uv.setXY(i,.12+uv.getX(i)*.10,.48+uv.getY(i)*.22);
   strap.name='pinafore-shoulder-strap';strap.castShadow=strap.receiveShadow=true;root.add(strap);straps.push(strap);
  }
@@ -58,9 +57,9 @@ export function createOveralls(parent,def){
  const bib=new T.Mesh(gridSurface(20,18,(u,v)=>{const x=(u-.5)*.254,w=1-.13*Math.pow(Math.abs(v-.5)*2,5);return [x*w,.77-v*.32,.139+.018*Math.cos((u-.5)*Math.PI)-.025*Math.pow((u-.5)*2,2)]},true),material);bib.name='curved-corduroy-bib';bib.castShadow=bib.receiveShadow=true;root.add(bib);
  const pocket=new T.Mesh(gridSurface(16,10,(u,v)=>[(u-.5)*.113*(1-.35*Math.pow(v,4)),(.5-v)*.087,.004+Math.sin(v*Math.PI)*.005+Math.cos((u-.5)*Math.PI)*.003],true),material),buckles=[];pocket.name='curved-bib-pocket';pocket.position.set(0,.614,.172);pocket.castShadow=true;root.add(pocket);
  for(const sign of [-1,1]){
-  box(root,sign*.098,.76,.119,.035,.225,.029,material,true);
+  const strap=new T.Mesh(shoulderStrapGeometry(sign),material);strap.name='overall-shoulder-strap';strap.castShadow=strap.receiveShadow=true;root.add(strap);
   const shape=new T.Shape();shape.moveTo(-.022,-.021);shape.lineTo(.022,-.021);shape.lineTo(.022,.021);shape.lineTo(-.022,.021);shape.closePath();const hole=new T.Path();hole.moveTo(-.012,-.012);hole.lineTo(-.012,.012);hole.lineTo(.012,.012);hole.lineTo(.012,-.012);hole.closePath();shape.holes.push(hole);
-  const buckle=new T.Mesh(new T.ExtrudeGeometry(shape,{depth:.005,bevelEnabled:false}),mat(0xc59b60));buckle.name='open-brace-buckle';buckle.position.set(sign*.098,.788,.146);root.add(buckle);buckles.push(buckle);
+  const buckle=new T.Mesh(new T.ExtrudeGeometry(shape,{depth:.005,bevelEnabled:false}),mat(0xc59b60));buckle.name='open-brace-buckle';buckle.position.set(sign*.086,.762,.165);root.add(buckle);buckles.push(buckle);
   for(let j=0;j<8;j++)box(root,sign*.105,.48+j*.033,.15,.003,.012,.003,0xe0c7ad);
  }
  for(let i=0;i<7;i++)box(root,-.046+i*.015,.575,.184,.007,.003,.002,0xe0c7ad);

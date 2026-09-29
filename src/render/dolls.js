@@ -3,7 +3,7 @@ import * as T from 'three';
 import {createLaceHem,createCollar} from './doll-trimmings.js';
 import {createSpectacles} from './doll-spectacles.js';
 import {batchDoll} from './doll-rig-batch.js';
-import {createArm,levelCup,balanceWalk,gaze,express,carePose,greeting,nightCuriosity,hairFollow,clothFollow} from './doll-acting.js';
+import {createArm,levelCup,balanceWalk,gaze,express,carePose,greeting,nightCuriosity,hairFollow,clothFollow,groundWalkingFeet} from './doll-acting.js';
 import {createApron,createOveralls,createFoot,createSock} from './doll-wardrobe.js';
 import {createHair,fabricBow} from './doll-hair.js';
 import {createSculptedHead,createPortraitEye,createBrow,closePortraitEye,createPortraitMouth,createNose,createEar,bisqueMaterial,createNeckJoint} from './doll-face.js';
@@ -34,7 +34,7 @@ function makeDoll(def){
   const leg=new T.Group();leg.name='articulated-leg';leg.position.set(sign*.12,.40,0);body.add(leg);legs.push(leg);
   const hosiery=createSock(leg,skin);leg.sock=hosiery.sock;leg.knee=hosiery.knee;ring(leg,0,-.095,0,.063,.008,def.color,true);
   leg.foot=createFoot(leg,def,sign);
-  if(def.id==='sami'){const trousers=new T.Mesh(trouserLegGeometry(),dollFabric(def.id));trousers.name='tailored-trouser-leg';trousers.castShadow=trousers.receiveShadow=true;leg.add(trousers);leg.trousers=trousers;}
+  if(def.id==='sami'){const trousers=new T.Mesh(trouserLegGeometry(sign),dollFabric(def.id));trousers.name='tailored-trouser-leg';trousers.castShadow=trousers.receiveShadow=true;leg.add(trousers);leg.trousers=trousers;}
   const shin=new T.Group();shin.name='articulated-shin';shin.userData.noBatch=true;shin.position.y=-.058;leg.add(shin);leg.shin=shin;for(const child of [leg.sock,leg.foot]){child.position.y+=.058;shin.add(child)}batch(leg);
  }
  const clothSkirt=def.id!=='sami'?skirt(body,def.id):null;
@@ -92,7 +92,7 @@ export function createDolls(parent){
    v.eyes.forEach(e=>closePortraitEye(e,openness));
    v.arms.forEach((a,j)=>{const sign=j===0?-1:1;a.rotation.y=0;a.rotation.z=sign*(d.action==='play'?.55+(motion?Math.sin(t*4)*.18:0):d.action==='soothe'?.50:d.action==='rest'?.46:.19);a.rotation.x=d.action==='tea'&&j===1?-1.2:d.action==='rest'?(j===0?-.88:-.68):0});
    // The hand carries the cup; wrist pitching must not spill its surface or tilt steam sideways.
-   balanceWalk(v,d,t,i,motion);gaze(v,selected,viewerYaw,motion,dt);express(v,d,!motion,dt);carePose(v,d,t,!motion);greeting(v,d,t,!motion);nightCuriosity(v,d,state,i,!motion);hairFollow(v,t,!motion,dt);clothFollow(v,d,t,!motion,dt);levelCup(v);
+   balanceWalk(v,d,t,i,motion);groundWalkingFeet(v,d,motion);gaze(v,selected,viewerYaw,motion,dt,d);express(v,d,!motion,dt);carePose(v,d,t,!motion);greeting(v,d,t,!motion);nightCuriosity(v,d,state,i,!motion);hairFollow(v,t,!motion,dt);clothFollow(v,d,t,!motion,dt);levelCup(v);
   });
  },position(id){return dolls.find(v=>v.id===id)?.root.position.clone()}};
 }

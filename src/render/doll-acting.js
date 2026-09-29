@@ -29,12 +29,15 @@ export function levelCup(doll){
 export function balanceWalk(v,d,t,index,motion){
  const strength=motion&&d.action==='idle'?Math.min(1,(v.walkSpeed||0)*15):0;
  v.body.rotation.y=Math.sin(t*3.2+index)*.024*strength;
+ v.body.position.x=Math.sin(t*3.2+index)*.006*strength;
+ v.legs.forEach((leg,j)=>{leg.position.x=(j===0?-.12:.12)-v.body.position.x});
  if(d.action==='idle')v.arms.forEach((arm,j)=>arm.rotation.x=-Math.sin(t*3.2+index+j*Math.PI)*.13*strength);
 }
 
-export function gaze(v,selected,yaw,motion,dt){
+export function gaze(v,selected,yaw,motion,dt,resident){
  const target=motion&&selected===v.id?T.MathUtils.clamp(Number.isFinite(yaw)?yaw:0,-.35,.35)*.014:0;
- for(const eye of v.eyes)eye.iris.position.x=motion?T.MathUtils.damp(eye.iris.position.x,target,8,dt):0;
+ const vertical=-.003+(resident?.action==='tea'?-.0045:resident?.action==='play'?.001:0);
+ for(const eye of v.eyes){eye.iris.position.x=motion?T.MathUtils.damp(eye.iris.position.x,target,8,dt):0;eye.iris.position.y=motion?T.MathUtils.damp(eye.iris.position.y,vertical,8,dt):vertical;}
 }
 
 export function express(v,d,still,dt){
@@ -63,17 +66,23 @@ export function carePose(v,d,t,still){
  for(const arm of v.arms){arm.forearm.rotation.set(0,0,0);arm.hand.rotation.set(0,0,0)}
  v.teaPhase=0;v.body.scale.y=1;
  if(d.action==='play'){
-  const age=Math.max(0,t-(Number.isFinite(d.lastCare)?d.lastCare:0)),gap=still?.045:.018+.052*(.5+.5*Math.cos(age*Math.PI*3.2));
+  const age=Math.max(0,t-(Number.isFinite(d.lastCare)?d.lastCare:0)),gap=still?.044:.028+.055*(.5+.5*Math.cos(age*Math.PI*3.2));
   v.arms.forEach((arm,i)=>{const sign=i===0?-1:1;aimArm(arm,[sign*gap,.763,.171]);const parent=arm.quaternion.clone().multiply(arm.forearm.quaternion);arm.hand.quaternion.copy(parent.invert()).multiply(new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),-sign*Math.PI/2))});
  }
  if(d.action==='rest'){
-  aimArm(v.arms[1],[.163,.902,.095]);aimArm(v.arms[0],[-.080,.705,.163]);
-  v.head.rotation.x=.23;v.head.rotation.z=.16;v.body.position.y=still?0:.006+Math.sin(t*1.05)*.003;v.body.scale.y=still?1:1+Math.sin(t*1.05)*.004;
+  aimArm(v.arms[1],[.178,.943,.110]);aimArm(v.arms[0],[-.080,.705,.163]);
+  const wrist=v.arms[1],parent=wrist.quaternion.clone().multiply(wrist.forearm.quaternion);
+  wrist.hand.quaternion.copy(parent.invert()).multiply(new T.Quaternion().setFromUnitVectors(new T.Vector3(0,0,1),new T.Vector3(0,1,.10).normalize()));
+  v.head.rotation.x=.23;v.head.rotation.z=.16;v.body.position.y=0;v.body.scale.y=still?1:1+Math.sin(t*1.05)*.004;
  }
- if(d.action==='soothe'){aimArm(v.arms[0],[-.067,.724,.181]);aimArm(v.arms[1],[.067,.714,.189]);v.head.rotation.x=.09+(still?0:Math.sin(t*1.2)*.012)}
+ if(d.action==='soothe'){
+  aimArm(v.arms[0],[-.055,.731,.175]);aimArm(v.arms[1],[.055,.709,.185]);
+  v.arms.forEach((arm,i)=>{const parent=arm.quaternion.clone().multiply(arm.forearm.quaternion),palm=new T.Quaternion().setFromAxisAngle(new T.Vector3(0,0,1),i===0?.65:-.65).multiply(new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),Math.PI));arm.hand.quaternion.copy(parent.invert()).multiply(palm)});
+  v.head.rotation.x=.09+(still?0:Math.sin(t*1.2)*.012);
+ }
  if(d.action==='tea'){
   const age=Math.max(0,t-(Number.isFinite(d.lastCare)?d.lastCare:t)),lift=still?1:age<.85?smooth(age/.85):age<=2.55?1:1-smooth((age-2.55)/1.30);
-  v.teaPhase=lift;aimArm(v.arms[1],[.08,.811,.214],lift);aimArm(v.arms[0],[-.030,.778,.185],lift);v.head.rotation.x=.28*lift;
+  v.teaPhase=lift;aimArm(v.arms[1],[.085,.837,.204],lift);aimArm(v.arms[0],[-.025,.804,.175],lift);v.head.rotation.x=.28*lift;
   v.arms.forEach((arm,i)=>{const parent=arm.quaternion.clone().multiply(arm.forearm.quaternion),palm=new T.Quaternion().setFromAxisAngle(new T.Vector3(1,0,0),i===0?-Math.PI/2:-.35);arm.hand.quaternion.slerp(parent.invert().multiply(palm),lift)});
  }
 }
@@ -101,4 +110,19 @@ export function hairFollow(v,t,still,dt){
 export function clothFollow(v,d,t,still,dt){
  if(!v.skirt)return;const strength=still?0:d.action==='play'?1:Math.min(.55,(v.walkSpeed||0)*10+.10);
  const target=Math.sin(t*2.3)*.037*strength;v.skirt.rotation.z=still?0:T.MathUtils.damp(v.skirt.rotation.z,target,6,dt);v.skirt.rotation.x=still?0:Math.sin(t*1.4)*.016*strength;
+}
+
+const soleTransform=new T.Matrix4();
+// Evaluate the existing sole vertices in body space. No scene bounds or new
+// geometry are allocated during a frame; a lifted step keeps its authored lift.
+export function groundWalkingFeet(v,d,motion){
+ if(!motion||d.action!=='idle')return;
+ for(const leg of v.legs){
+  const foot=leg.foot,sole=foot.sole,lift=Math.max(0,leg.position.y-.40);
+  leg.updateMatrix();leg.shin.updateMatrix();foot.updateMatrix();sole.updateMatrix();
+  soleTransform.multiplyMatrices(leg.matrix,leg.shin.matrix).multiply(foot.matrix).multiply(sole.matrix);
+  const p=sole.geometry.attributes.position,m=soleTransform.elements;let minimum=Infinity;
+  for(let i=0;i<p.count;i++)minimum=Math.min(minimum,m[1]*p.getX(i)+m[5]*p.getY(i)+m[9]*p.getZ(i)+m[13]);
+  leg.position.y+=Math.max(0,lift-minimum);
+ }
 }

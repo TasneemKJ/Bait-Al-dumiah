@@ -34,3 +34,13 @@ Base: b99bf28e8eba7dd525381ff8ec99d64bdf35a715. Each row is a separate local sou
 | 28 | Sew curved patch pockets with rounded bottoms and distinct placement | `dc04de4` | 138 |
 | 29 | Build flat grounded shoe soles and individual low-cut instep shapes | `bbd244d` | 139 |
 | 30 | Fit the linen collars and stitches to the shoulders instead of floating over the chest | `7b3b225` | 140 |
+| 31 | Keep every moving shoe above the floor while preserving the lifted swing foot | `75b4228` | 141 |
+| 32 | Let the torso settle over the supporting foot without sliding the planted legs | `38062b8` | 142 |
+| 33 | Raise the supported teacup toward the mouth without piercing the chin | `300f9f7` | 143 |
+| 34 | Clap with touching rather than intersecting palms and an open recovery pose | `0066c0a` | 144 |
+| 35 | Support the sleeping cheek with a relaxed palm while keeping both feet grounded | `2433e6e` | 145 |
+| 36 | Turn the reassurance palms inward with a softly staggered fold over the heart | `f703e00` | 146 |
+| 37 | Let both eyes follow the tea cup together and return to a neutral gaze | `a4e3748` | 147 |
+| 38 | Stop rebuilding settled smile geometry while retaining immediate expressive care reactions | `fe83b98` | 148 |
+| 39 | Fit the pinafore and overall straps over the shoulders rather than leaving upright tabs | `43e12c8` | 149 |
+| 40 | Blend the trouser tops into Sami’s body and keep knit socks inside the cuffs | `209a2ea` | 150 |

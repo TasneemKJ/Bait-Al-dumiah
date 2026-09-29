@@ -10,5 +10,14 @@ A11–A20 reshape hair: a fitted lower scalp, thinner asymmetrically tapered loc
 
 Author self-review. Same strict game/render-budget gates; no merge or production promotion. Physical-phone frame rates and Safari remain unverified.
 
-## Pass 30 — pending rendered verification
+## Pass 30 — af99a39
 The ten new passes replace the torso, sleeves and forearms, tailor Sami’s trousers, separately drape the two dresses, round the apron/pocket silhouettes, separate shirt fabrics, shape flat shoe soles and project collars onto the actual bodice surface. All 140 art checks, 36 unit tests/build and 12 UI checks pass locally. The old absolute skirt-width and apron-depth assumptions were explicitly replaced with fitted garment bounds; cutout lace, rounded-hem, surface topology, gameplay and budget checks remain. Pass 27’s texture sample was corrected to use a normalized canvas coordinate and rerun RED against the preceding implementation before confirming GREEN. No artistic result is claimed from test totals alone.
+
+CI run 36541212211 passed: 140 artwork checks, 36 unit tests/build, 12 UI checks and 41 full-game checks; no browser errors. First scene: 379 calls / 375,685 triangles. Both early model and full evidence ZIP digests match GitHub metadata. Inspected the trio, Lina tea, Sami body and normal phone Noor closeup. Fitted shirts, smaller aprons and separate fabric palettes are visible in both studio and normal gameplay. Review found straps standing away from the shoulder and socks cutting through Sami's cuffs; the final two passes address those concrete problems rather than the lower-priority camera changes originally queued.
+
+## Pass 40 — implemented, final rendered gate pending
+A31–A38 add sole-vertex-based floor correction, support-leg weight shift, a closer two-hand tea hold, non-intersecting claps, a cheek-supporting sleep palm without floating feet, inward reassurance palms, coordinated care gaze and settled-expression geometry caching. A39–A40 fit both kinds of shoulder straps to the actual bodice surface and blend trouser tops/cuffs around the body and knit socks. The existing portrait/camera controls are preserved.
+
+All 150 art checks, 36 unit tests/build and 12 UI checks pass locally. Each of the forty pass records includes an observed failing new assertion, a passing cumulative gate, a separate local commit and a source diff. A31's initial bounding-box test counted empty corners of a rotated bounding box; it was replaced with a check of actual transformed shoe vertices, then rerun RED against the preceding source before GREEN. A40's first shape exceeded the unchanged A24 width limit; reducing its upper inset resolved that failure without changing the test.
+
+Ruling: replace the planned final portrait/camera tweaks with the two visible garment-contact defects from checkpoint 30. Their raycast tests pin actual contact and occlusion. No additional iteration count is assigned to test-harness corrections or documentation. The final CI source identity, result, visual review and build evidence will be recorded on PR #1 after they are obtained.
