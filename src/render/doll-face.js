@@ -89,19 +89,19 @@ function irisMaterial(id) {
  const g = c.createRadialGradient(64, 58, 5, 64, 60, 60);
  g.addColorStop(0, '#291f23'); g.addColorStop(.43, '#39292a'); g.addColorStop(.76, tint); g.addColorStop(1, tint);
  c.fillStyle = g; c.beginPath(); c.arc(64, 64, 61, 0, Math.PI * 2); c.fill();
- c.fillStyle = '#fff1d9'; c.beginPath(); c.ellipse(45, 38, 8, 9, -.2, 0, Math.PI * 2); c.fill();
+ c.fillStyle = '#fff1d9'; c.beginPath(); c.ellipse(45, 38, 5.2, 6, -.2, 0, Math.PI * 2); c.fill();
  c.fillStyle = 'rgba(255,231,201,.35)'; c.beginPath(); c.arc(82, 85, 3, 0, Math.PI * 2); c.fill();
  const map = new T.CanvasTexture(canvas); map.colorSpace = T.SRGBColorSpace;
- const material = new T.MeshStandardMaterial({map, transparent: true, alphaTest: .04, roughness: .48});
+ const material = new T.MeshStandardMaterial({map, transparent: false, roughness: .64});
  irises.set(id, material); return material;
 }
-const irisGeometry = new T.CircleGeometry(.033, 32);
+const irisGeometry = new T.CircleGeometry(.030, 32);
 // Follow the cheek surface instead of floating a large flat iris over a socket.
 {
  const p = irisGeometry.attributes.position;
  for (let i = 0; i < p.count; i++) {
   const x = p.getX(i), y = p.getY(i);
-  p.setXYZ(i, x * 1.08, y * 1.22, .0045 * (1 - (x*x + y*y) / (.033*.033)));
+  p.setXYZ(i, x * 1.03, y * 1.12, .0038 * (1 - (x*x + y*y) / (.030*.030)));
  }
  irisGeometry.computeVertexNormals();
 }
@@ -111,9 +111,9 @@ export function createPortraitEye(parent, sign, id) {
  const aperture = new T.Group(); eye.add(aperture); eye.aperture = aperture;
  const iris = new T.Mesh(irisGeometry, irisMaterial(id)); iris.name = 'painted-iris';
  iris.position.set(0, -.003, .002); aperture.add(iris); eye.iris = iris;
- eye.closedLid = faceStroke(eye, 'closed-bisque-lid', [[-.027,0,.005],[0,-.008,.008],[.027,0,.005]], .0026, 0x795447);
+ eye.closedLid = faceStroke(eye, 'closed-bisque-lid', [[-.027,0,.005],[0,-.007,.007],[.027,0,.005]], .0022, 0x795447);
  eye.closedLid.visible = false;
- eye.upperLid=faceStroke(eye,'painted-upper-lid',[[-.032,.015,.005],[-.017,.033,.007],[.001,.038,.007],[.020,.030,.007],[.032,.014,.005]],.0017,0x64483e);
+ eye.upperLid=faceStroke(eye,'painted-upper-lid',[[-.030,.012,.005],[-.016,.024,.006],[0,.028,.006],[.017,.023,.006],[.030,.011,.005]],.00125,0x70574f);
  eye.upperLid.userData.noBatch=true;return eye;
 }
 export function faceStroke(parent, name, points, radius, color) {

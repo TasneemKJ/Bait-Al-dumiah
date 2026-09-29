@@ -15,7 +15,7 @@ test("A02: Sculpt a rounded chin below the cheeks instead of a wide lower-face s
 
 test("A03: Seat eyes and smiles on the sculpt rather than floating in front of it", ()=>{const {view}=fixture();for(const d of view.dolls){d.root.updateMatrixWorld(true);for(const eye of d.eyes){const p=eye.iris.getWorldPosition(new T.Vector3()),ray=new T.Raycaster(p.clone().add(new T.Vector3(0,0,1)),new T.Vector3(0,0,-1));const h=ray.intersectObject(d.faceHull,false)[0];assert(h&&h.distance>1&&h.distance<1.009,`${d.id} eye gap ${h?.distance-1}`)}}});
 
-test("A04: Give the painted eyes a taller convex surface and softer iris color", ()=>{for(const d of fixture().view.dolls)for(const e of d.eyes){const s=size(e.iris.geometry);assert(s.y>.076&&s.y<.085&&s.z>.003&&s.z<.008,'eyes remain small flat dots');assert(e.iris.material.roughness<.55,'painted iris has no restrained gloss')}});
+test("A04: Keep painted eyes softly convex without turning them into glossy beads", ()=>{for(const d of fixture().view.dolls)for(const e of d.eyes){const s=size(e.iris.geometry);assert(s.y>.060&&s.y<.073&&s.z>.003&&s.z<.006,'painted eye lost its small softly convex form');assert(e.iris.material.roughness>=.60&&!e.iris.material.transparent,'painted iris returned to a glossy bead finish')}});
 
 test("A05: Add fine upper-lid strokes that close with the painted eyes", ()=>{const {doll,view,state,resident}=fixture();for(const e of doll.eyes){assert(e.upperLid?.geometry.type==='TubeGeometry','upper eyelid stroke missing');assert(e.upperLid.geometry.parameters.radius<.002,'eyelid reads as a heavy ring')}resident.action='rest';state.settings.reducedMotion=true;view.update(state,.1,'lina');assert(doll.eyes.every(e=>!e.upperLid.visible&&e.closedLid.visible),'sleep shows an open upper lash')});
 
