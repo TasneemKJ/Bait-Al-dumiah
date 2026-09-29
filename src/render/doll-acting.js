@@ -1,4 +1,4 @@
-import {dollFabric} from './doll-couture.js';
+import {dollFabric,sleeveGeometry,forearmGeometry,shirtFabric} from './doll-couture.js';
 import * as T from 'three';
 import {shapeMouth} from './doll-expression.js';
 import {ball,ring} from './primitives.js';
@@ -6,13 +6,13 @@ import {craftMaterial} from './textiles.js';
 const rotation=new T.Quaternion();
 export function createArm(parent,sign,def,skin){
  const arm=new T.Group();arm.name='upper-arm';arm.position.set(sign*.19,.73,0);parent.add(arm);
- ball(arm,0,-.052,0,.073,.095,.075,dollFabric(def.id));
+ const sleeve=new T.Mesh(sleeveGeometry(),shirtFabric(def.id));sleeve.name='gathered-sleeve';sleeve.castShadow=sleeve.receiveShadow=true;arm.add(sleeve);arm.sleeve=sleeve;
  const elbow=ball(arm,0,-.132,0,.044,.043,.044,skin);elbow.name='bisque-elbow';
  const forearm=new T.Group();forearm.name='articulated-forearm';forearm.userData.noBatch=true;forearm.position.set(0,-.132,0);arm.add(forearm);arm.forearm=forearm;
- ball(forearm,0,-.051,0,.047,.068,.043,skin);ring(forearm,0,-.096,0,.04,.005,0xe6d3bc,true);
+ const shell=new T.Mesh(forearmGeometry(),skin);shell.name='sculpted-forearm';shell.castShadow=shell.receiveShadow=true;forearm.add(shell);arm.forearmShell=shell;ring(forearm,0,-.096,0,.04,.005,0xe6d3bc,true);
  const hand=new T.Group();hand.name='articulated-hand';hand.userData.noBatch=true;hand.position.set(0,-.129,.01);forearm.add(hand);arm.hand=hand;
  const palm=ball(hand,0,.004,0,.039,.037,.027,skin);palm.name='porcelain-palm';
- for(let i=0;i<4;i++){const length=[.012,.016,.014,.010][i],finger=new T.Mesh(new T.CapsuleGeometry(.009,length,3,8),skin);finger.name='porcelain-finger';finger.position.set(-.0225+i*.015,-.028-length/2,0);finger.castShadow=true;hand.add(finger)}
+ for(let i=0;i<4;i++){const length=[.012,.016,.014,.010][i],finger=new T.Mesh(new T.CapsuleGeometry(.009,length,3,8),skin);finger.name='porcelain-finger';finger.position.set(-.0225+i*.015,-.028-length/2,0);finger.rotation.x=-.17-(i%2)*.04;finger.rotation.z=(i-1.5)*-.03;finger.position.z=.003;finger.castShadow=true;hand.add(finger)}
  const thumb=ball(hand,-sign*.030,.008,.006,.015,.026,.013,skin);thumb.name='porcelain-thumb';thumb.rotation.z=-sign*.38;
  arm.rotation.z=sign*.19;return arm;
 }

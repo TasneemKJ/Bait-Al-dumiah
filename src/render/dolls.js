@@ -1,4 +1,4 @@
-import {gatheredDressGeometry,dollFabric} from './doll-couture.js';
+import {gatheredDressGeometry,dollFabric,bodiceGeometry,trouserLegGeometry,shirtFabric} from './doll-couture.js';
 import * as T from 'three';
 import {createLaceHem,createCollar} from './doll-trimmings.js';
 import {createSpectacles} from './doll-spectacles.js';
@@ -20,9 +20,9 @@ function ball(p,x,y,z,rx,ry,rz,color){const mesh=new T.Mesh(Math.max(rx,ry,rz)<.
 
 function skirt(parent,color){
  const pivot=new T.Group();pivot.name='cloth-skirt-pivot';pivot.userData.noBatch=true;pivot.position.y=.75;parent.add(pivot);parent=pivot;
- const mesh=new T.Mesh(gatheredDressGeometry(),dollFabric(color));mesh.name='gathered-dress';
+ const mesh=new T.Mesh(gatheredDressGeometry(color),dollFabric(color));mesh.name='gathered-dress';
  mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);
- createLaceHem(parent);return pivot;
+ createLaceHem(parent,color);return pivot;
 }
 const ribbon=fabricBow;
 function makeDoll(def){
@@ -34,11 +34,11 @@ function makeDoll(def){
   const leg=new T.Group();leg.name='articulated-leg';leg.position.set(sign*.12,.40,0);body.add(leg);legs.push(leg);
   const hosiery=createSock(leg,skin);leg.sock=hosiery.sock;leg.knee=hosiery.knee;ring(leg,0,-.095,0,.063,.008,def.color,true);
   leg.foot=createFoot(leg,def,sign);
-  if(def.id==='sami')ball(leg,0,0,0,.112,.18,.108,dollFabric(def.id));
+  if(def.id==='sami'){const trousers=new T.Mesh(trouserLegGeometry(),dollFabric(def.id));trousers.name='tailored-trouser-leg';trousers.castShadow=trousers.receiveShadow=true;leg.add(trousers);leg.trousers=trousers;}
   const shin=new T.Group();shin.name='articulated-shin';shin.userData.noBatch=true;shin.position.y=-.058;leg.add(shin);leg.shin=shin;for(const child of [leg.sock,leg.foot]){child.position.y+=.058;shin.add(child)}batch(leg);
  }
  const clothSkirt=def.id!=='sami'?skirt(body,def.id):null;
- ball(body,0,.70,0,.174,.20,.13,fabric);
+ const torso=new T.Mesh(bodiceGeometry(),shirtFabric(def.id));torso.name='tailored-bodice';torso.castShadow=torso.receiveShadow=true;body.add(torso);
  let garments=null;
  if(def.id==='sami')garments=createOveralls(body,def);else{garments=createApron(body,def);ribbon(body,0,.74,.153,def.id==='lina'?0xb47787:0xd7be89)}
  if(clothSkirt){garments.root.position.y=-.75;clothSkirt.add(garments.root)}
@@ -66,7 +66,7 @@ function makeDoll(def){
  const sparkles=new T.Group();sparkles.position.y=1.65;root.add(sparkles);
  for(let i=0;i<3;i++){const s=new T.Mesh(new T.OctahedronGeometry(.037),mat(0xf0cc8b,{emissive:0xf0cc8b,emissiveIntensity:.5}));s.position.set((i-1)*.18,Math.sin(i)*.13,0);sparkles.add(s)}
  const staticBody=new T.Group();for(const o of [...body.children])if(o.isMesh)staticBody.add(o);body.add(staticBody);batch(staticBody);
- return batchDoll({root,body,head,spectacles,skirt:clothSkirt,garments,hairStyle,faceHull,brows,mouth,nose,ears,arms,legs,eyes,hit,halo,tea,steam,comfortHearts,sleepCrescent,sparkles,room:null,id:def.id});
+ return batchDoll({root,body,torso,head,spectacles,skirt:clothSkirt,garments,hairStyle,faceHull,brows,mouth,nose,ears,arms,legs,eyes,hit,halo,tea,steam,comfortHearts,sleepCrescent,sparkles,room:null,id:def.id});
 }
 export function createDolls(parent){
  const dolls=DOLLS.map((def,i)=>{const v=makeDoll(def);parent.add(v.root);const r=ROOMS.find(x=>x.id===def.room);v.root.position.set(r.x+.85,r.y+.12,.88);return v});

@@ -24,3 +24,13 @@ Base: b99bf28e8eba7dd525381ff8ec99d64bdf35a715. Each row is a separate local sou
 | 18 | Shape fine tapered temple locks on all three dolls without framing the eyes | `7d60539` | 128 |
 | 19 | Scale hair ribbons to sewn ties instead of oversized bow ornaments | `3a5b04e` | 129 |
 | 20 | Paint directional hair tones with shared color maps rather than a single flat cap | `a3805ef` | 130 |
+| 21 | Replace the turtleneck-like body ellipsoid with a fitted shoulder and waist sculpt | `5f515c3` | 131 |
+| 22 | Replace spherical shoulder puffs with tapered gathered sleeves and fitted cuffs | `04b2eef` | 132 |
+| 23 | Sculpt tapered forearms and softly curled resting fingers instead of bead segments | `6b49776` | 133 |
+| 24 | Tailor Sami’s trouser legs with clear knees instead of balloon-shaped thighs | `c276e1b` | 134 |
+| 25 | Give Lina and Noor separately draped dresses with defined waists and fitted lace hems | `1d0b131` | 135 |
+| 26 | Reshape the apron into a rounded sewn panel that reveals the colored dress | `1fc0627` | 136 |
+| 27 | Separate softly colored shirts from the darker pinafores and corduroy overalls | `e9a58f4` | 137 |
+| 28 | Sew curved patch pockets with rounded bottoms and distinct placement | `dc04de4` | 138 |
+| 29 | Build flat grounded shoe soles and individual low-cut instep shapes | `bbd244d` | 139 |
+| 30 | Fit the linen collars and stitches to the shoulders instead of floating over the chest | `7b3b225` | 140 |

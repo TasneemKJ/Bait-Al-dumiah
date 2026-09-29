@@ -24,15 +24,17 @@ export function closeSurfaceSeam(g, columns, rows) {
  }
  return g;
 }
-export function bellRadius(y) {
- const t=T.MathUtils.clamp((y-.337)/.398,0,1);
- return .126+.177*Math.pow(Math.cos(t*Math.PI/2),.85)-.024*Math.exp(-Math.pow(t/.070,2));
+export function bellRadius(y,id='lina') {
+ const t=T.MathUtils.clamp((y-.337)/.398,0,1),noor=id==='noor';
+ return (noor?.132:.131)+(noor?.149:.164)*Math.pow(Math.cos(t*Math.PI/2),noor?1.52:1.35)-.033*Math.exp(-Math.pow(t/.065,2));
 }
-export function gatheredDressGeometry() {
- return closeSurfaceSeam(gridSurface(64,24,(u,v)=>{
-  const a=u*Math.PI*2,y=.337+v*.398,r=bellRadius(y),fold=.006*Math.sin(a*14+.12)*(1-v*.75);
+const dresses=new Map();
+export function gatheredDressGeometry(id='lina') {
+ if(dresses.has(id))return dresses.get(id);
+ const g=closeSurfaceSeam(gridSurface(64,24,(u,v)=>{
+  const a=u*Math.PI*2,y=.337+v*.398,r=bellRadius(y,id),fold=(id==='noor'?.006:.008)*Math.sin(a*(id==='noor'?12:10)+.12)*(1-v*.75);
   return [Math.cos(a)*(r+fold),y-.75,Math.sin(a)*(r+fold)*.86];
- }),64,24);
+ }),64,24);dresses.set(id,g);return g;
 }
 
 // A broad lock with an elliptical section and tapered tip, rather than a tube
@@ -66,4 +68,47 @@ export function dollFabric(id) {
  for(let i=1;i<256;i+=4){c.beginPath();c.moveTo(i,0);c.lineTo(i,256);c.moveTo(0,i);c.lineTo(256,i);c.stroke()}
  const map=new T.CanvasTexture(image);map.colorSpace=T.SRGBColorSpace;map.anisotropy=4;
  const m=new T.MeshStandardMaterial({map,roughness:.88,bumpMap:reliefTexture('fabric'),bumpScale:.002,side:T.DoubleSide});m.userData.shared=true;fabrics.set(id,m);return m;
+}
+
+let bodice=null;
+export function bodiceGeometry(){
+ if(bodice)return bodice;
+ const shape=new T.CatmullRomCurve3([[.122,.540,.105],[.133,.627,.109],[.166,.716,.118],[.163,.775,.101],[.112,.816,.078],[.069,.838,.060]].map(p=>new T.Vector3(...p)));
+ bodice=closeSurfaceSeam(gridSurface(32,24,(u,v)=>{const p=shape.getPoint(v),a=u*Math.PI*2;return [Math.cos(a)*p.x,p.y,Math.sin(a)*p.z]}),32,24);return bodice;
+}
+
+let sleeve=null;
+export function sleeveGeometry(){
+ if(!sleeve)sleeve=closeSurfaceSeam(gridSurface(32,16,(u,v)=>{const a=u*Math.PI*2,r=.041+.017*Math.sin(v*Math.PI)-.021*Math.pow(v,6),fold=1+.024*Math.cos(a*12)*Math.sin(v*Math.PI);return [Math.cos(a)*r*fold,-.112+.124*v,Math.sin(a)*r*fold*.91]}),32,16);
+ return sleeve;
+}
+
+let forearm=null;
+export function forearmGeometry(){
+ if(!forearm)forearm=closeSurfaceSeam(gridSurface(24,14,(u,v)=>{const a=u*Math.PI*2,r=.029+.010*Math.pow(Math.sin(v*Math.PI),.7)+.003*v;return [Math.cos(a)*r,-.117+.128*v,Math.sin(a)*r*.93+.006*Math.sin(v*Math.PI)]}),24,14);
+ return forearm;
+}
+
+let trouser=null;
+export function trouserLegGeometry(){
+ if(!trouser)trouser=closeSurfaceSeam(gridSurface(32,16,(u,v)=>{const a=u*Math.PI*2,r=.061+.019*v+.006*Math.sin(v*Math.PI),seam=1+.018*Math.cos(a*2);return [Math.cos(a)*r*seam,-.074+.26*v,Math.sin(a)*r*.93]}),32,16);
+ return trouser;
+}
+
+const shirts=new Map();
+export function shirtFabric(id){
+ if(shirts.has(id))return shirts.get(id);
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=128;const c=canvas.getContext('2d');c.fillStyle={lina:'#dbaeb1',noor:'#bbd0bc',sami:'#d8c9ac'}[id]||'#d8c9ac';c.fillRect(0,0,128,128);
+ c.lineWidth=.6;c.strokeStyle='rgba(255,245,226,.25)';for(let i=1;i<128;i+=4){c.beginPath();c.moveTo(i,0);c.lineTo(i,128);c.moveTo(0,i);c.lineTo(128,i);c.stroke()}
+ if(id==='sami'){c.fillStyle='rgba(140,109,87,.15)';for(let y=5;y<128;y+=18)c.fillRect(0,y,128,2)}
+ const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;const m=new T.MeshStandardMaterial({map,roughness:.91,bumpMap:reliefTexture('fabric'),bumpScale:.0015,side:T.DoubleSide});m.userData.shared=true;shirts.set(id,m);return m;
+}
+
+// Project sewn details onto the same sampled bodice profile used by the mesh.
+export function bodiceFront(x,y){
+ const p=bodiceGeometry().attributes.position,stride=33;let row=0;
+ while(row<23&&p.getY((row+1)*stride)<y)row++;
+ const a=row*stride,b=(row+1)*stride,t=T.MathUtils.clamp((y-p.getY(a))/(p.getY(b)-p.getY(a)),0,1);
+ const width=T.MathUtils.lerp(p.getX(a),p.getX(b),t),depth=T.MathUtils.lerp(p.getZ(a+8),p.getZ(b+8),t);
+ return depth*Math.sqrt(Math.max(.01,1-(x/width)**2));
 }

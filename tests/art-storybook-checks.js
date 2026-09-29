@@ -23,7 +23,7 @@ export async function runArtChecks(){
  });
  check('Storybook: pinafore has dimensional straps and a rounded skirt drape',()=>{
   for(const d of view.dolls.filter(d=>d.skirt)){assert(rigParts(d.garments.root,'pinafore-shoulder-strap').length===2,'missing fitted shoulder straps');
-   const p=d.garments.apron.geometry.attributes.position;assert(p.count>=300,'apron has too few folds');d.garments.apron.geometry.computeBoundingBox();assert(d.garments.apron.geometry.boundingBox.max.z>.26,'apron no longer wraps the skirt')}
+   const p=d.garments.apron.geometry.attributes.position;assert(p.count>=300,'apron has too few folds');d.garments.apron.geometry.computeBoundingBox();assert(d.garments.apron.geometry.boundingBox.max.z>.23&&d.garments.apron.geometry.boundingBox.max.z<.30,'apron no longer wraps the skirt')}
  });
  check('Storybook: shoes have sculpted toe boxes instead of ellipsoid beads',()=>{
   for(const d of view.dolls)for(const leg of d.legs){assert(leg.foot.upper.geometry.type==='BufferGeometry','shoe upper is still a sphere');assert(leg.foot.upper.geometry.attributes.position.count<900,'shoe exceeds small-model budget')}
