@@ -21,9 +21,19 @@ export function createRoomEffects(parent){
 
 let windowMask=null;
 function createWindowPatches(parent){
- if(!windowMask){const canvas=document.createElement('canvas');canvas.width=canvas.height=128;const c=canvas.getContext('2d');c.shadowColor='white';c.shadowBlur=7;c.fillStyle='rgba(255,255,255,.8)';for(const x of [12,72])for(const y of [12,72])c.fillRect(x,y,44,44);c.clearRect(60,0,8,128);c.clearRect(0,60,128,8);windowMask=new T.CanvasTexture(canvas);windowMask.userData.shared=true}
+ if(!windowMask){
+  const canvas=document.createElement('canvas');canvas.width=canvas.height=128;const c=canvas.getContext('2d');
+  c.shadowColor='white';c.shadowBlur=5;c.strokeStyle='rgba(255,255,255,.78)';c.lineWidth=9;c.lineCap='round';
+  // An original arched-lattice light pattern: diagonals plus a softened crown.
+  for(let i=-1;i<5;i++){
+   c.beginPath();c.moveTo(-20+i*38,128);c.lineTo(70+i*38,0);c.stroke();
+   c.beginPath();c.moveTo(148-i*38,128);c.lineTo(58-i*38,0);c.stroke();
+  }
+  c.beginPath();c.arc(64,44,46,Math.PI,0);c.stroke();
+  windowMask=new T.CanvasTexture(canvas);windowMask.userData.shared=true;
+ }
  return [[-3.85,.128,-.12],[-3.75,3.328,-.12],[2.90,3.328,-.12]].map(at=>{
   const geometry=new T.PlaneGeometry(1.05,1.72,1,1);geometry.rotateX(-Math.PI/2);const p=geometry.attributes.position;for(let i=0;i<p.count;i++)p.setX(i,p.getX(i)+p.getZ(i)*.18);
-  const material=new T.MeshBasicMaterial({map:windowMask,color:0xf0d1a0,transparent:true,opacity:.15,depthWrite:false,blending:T.AdditiveBlending});const mesh=new T.Mesh(geometry,material);mesh.name='window-light-patch';mesh.position.fromArray(at);parent.add(mesh);return mesh;
+  const material=new T.MeshBasicMaterial({map:windowMask,color:0xf0d1a0,transparent:true,opacity:.15,depthWrite:false,blending:T.AdditiveBlending});const mesh=new T.Mesh(geometry,material);mesh.name='window-light-patch';mesh.userData.pattern='arched-lattice';mesh.position.fromArray(at);parent.add(mesh);return mesh;
  });
 }

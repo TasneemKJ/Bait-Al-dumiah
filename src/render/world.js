@@ -15,13 +15,14 @@ import {createRoomFrame} from './room-frame.js';
 import {createRoomEffects} from './room-effects.js';
 import {createCameraMove} from './camera-motion.js';
 import {createAtmosphere} from './atmosphere.js';
-import {lighting,detail,framing} from './visual-policy.js';
+import {lighting,detail,framing,fog as fogPolicy} from './visual-policy.js';
 
 export function createWorld(canvas,{onPick,onError}){
  const renderer=new T.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'});
  renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
  renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
  const scene=new T.Scene(), camera=new T.OrthographicCamera(-10,10,6,-6,.1,100);
+ const depthFog=new T.FogExp2(0xe7d8c8,.0012);scene.fog=depthFog;
  const controls=new OrbitControls(camera,canvas);controls.enablePan=false;controls.enableDamping=true;controls.dampingFactor=.10;controls.minAzimuthAngle=-.48;controls.maxAzimuthAngle=.48;controls.minPolarAngle=1.10;controls.maxPolarAngle=1.50;controls.minZoom=.8;controls.maxZoom=3.5;
  controls.touches.ONE=T.TOUCH.ROTATE;controls.touches.TWO=T.TOUCH.DOLLY_ROTATE;
  let focusedRoom=null,focusedDoll=null,reducedMotion=false;const cameraMove=createCameraMove(camera,controls);const cancelCameraMove=()=>cameraMove.cancel();controls.addEventListener('start',cancelCameraMove);
@@ -81,7 +82,7 @@ export function createWorld(canvas,{onPick,onError}){
    slotGroup.children.forEach(o=>{o.visible=!state.decor.some(d=>d.room===o.userData.slot.room&&d.slot===o.userData.slot.slot)});
    // Exponential interpolation is frame-rate independent; reduced motion switches instantly.
    const night=isNight(state);nightMix=state.settings.reducedMotion?Number(night):T.MathUtils.damp(nightMix,Number(night),2.2,dt);
-   const cue=courtyard.update(state,nightMix),look=lighting(nightMix);hemi.intensity=look.ambient;key.intensity=look.key;fill.intensity=look.rim;renderer.toneMappingExposure=look.exposure;
+   const cue=courtyard.update(state,nightMix),look=lighting(nightMix),haze=fogPolicy(nightMix);hemi.intensity=look.ambient;key.intensity=look.key;fill.intensity=look.rim;renderer.toneMappingExposure=look.exposure;depthFog.density=haze.density;depthFog.color.setHex(haze.color);
    hemi.color.set(0xe9e0d5).lerp(new T.Color(0x849bc9),nightMix);key.color.set(0xffe5c2).lerp(new T.Color(0xb8caff),nightMix);fill.color.set(0xb8cbd5).lerp(new T.Color(0x829bdb),nightMix);
    house.lights.forEach(l=>{if(l.isLight){l.intensity=look.lamps*cue.lamp;l.color.set(0xffca8e)}});
    house.windows.forEach(m=>{m.emissive.set(0x8baaca);m.emissiveIntensity=.14+nightMix*.44});details.update(nightMix);atmosphere.update(state,nightMix,quality);roomEffects.update(state,nightMix);roomFrame.show(focusedRoom);preview.update(previewPose,state);

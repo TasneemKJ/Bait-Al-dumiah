@@ -8,9 +8,9 @@ export function nightFrame(elapsed, nightMix, reducedMotion = false) {
  const passage = smooth((phase-12)/5) * (1-smooth((phase-23)/6));
  const breath = reducedMotion ? .5 : .5+.5*Math.sin(t*.17);
  return {
-  shadow: reducedMotion ? 0 : night*.24*passage,
+  shadow: reducedMotion ? 0 : night*.18*passage,
   shadowX: reducedMotion ? 0 : -.22+.44*smooth((phase-12)/17),
-  door: night*(.12+.18*breath),
+  door: night*(.10+.14*breath),
   lamp: 1-night*(reducedMotion ? .02 : .02+.02*Math.sin(t*.29)),
   ripple: reducedMotion ? 0 : .5+.5*Math.sin(t*.63),
  };

@@ -21,7 +21,18 @@ function floorMap(){
 }
 function passingShadow(){
  const c=document.createElement('canvas');c.width=128;c.height=256;const x=c.getContext('2d');
- x.filter='blur(9px)';x.fillStyle='#fff';x.beginPath();x.ellipse(64,58,20,24,0,0,Math.PI*2);x.fill();x.beginPath();x.moveTo(38,91);x.quadraticCurveTo(64,77,88,96);x.lineTo(112,244);x.lineTo(17,244);x.closePath();x.fill();
+ // Ambiguous lattice and jasmine leaves: enough movement to suggest a presence
+ // without drawing a person or changing a resident's face.
+ x.filter='blur(6px)';x.strokeStyle='rgba(255,255,255,.78)';x.lineWidth=7;x.lineCap='round';
+ for(let i=-1;i<5;i++){
+  x.beginPath();x.moveTo(-22+i*36,256);x.lineTo(96+i*36,0);x.stroke();
+  x.beginPath();x.moveTo(150-i*36,256);x.lineTo(32-i*36,0);x.stroke();
+ }
+ x.fillStyle='rgba(255,255,255,.72)';
+ for(let i=0;i<7;i++){
+  const y=34+i*29,side=i%2?1:-1,cx=64+side*(17+(i%3)*5);
+  x.beginPath();x.ellipse(cx,y,10,5,side*.55,0,Math.PI*2);x.fill();
+ }
  return new T.CanvasTexture(c);
 }
 export function createLevantineSetting(parent){
@@ -49,7 +60,7 @@ export function createLevantineSetting(parent){
  // Walnut lattice above the roof recess; its light gaps are real open geometry.
  for(let i=0;i<17;i++){const x=-1.8+i*.225;box(staticRoot,x,6.89,1.05,.028,.52,.045,wood);}
  for(const y of [6.63,6.80,6.97,7.15])box(staticRoot,0,y,1.05,3.70,.034,.048,wood);
- const shadow=new T.Mesh(new T.PlaneGeometry(.42,.95),new T.MeshBasicMaterial({map:passingShadow(),color:0x172031,transparent:true,opacity:0,depthWrite:false}));shadow.name='shutter-passing-shadow';shadow.position.set(-3.75,5.34,-1.497);root.add(shadow);
+ const shadow=new T.Mesh(new T.PlaneGeometry(.42,.95),new T.MeshBasicMaterial({map:passingShadow(),color:0x172031,transparent:true,opacity:0,depthWrite:false}));shadow.name='shutter-passing-shadow';shadow.userData.motif='jasmine-lattice';shadow.position.set(-3.75,5.34,-1.497);root.add(shadow);
  const doorGlow=new T.Mesh(new T.PlaneGeometry(.72,1.05),new T.MeshBasicMaterial({map:softTexture(),color:0xf0ae5d,transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending}));doorGlow.name='closed-door-light';doorGlow.rotation.x=-Math.PI/2;doorGlow.position.set(0,.12,-.94);root.add(doorGlow);
  // Keep the fountain clear of the centered room toolbar in whole-house views.
  for(const part of [basin,water,ripple,stem,spout])part.position.x=-3.4;
