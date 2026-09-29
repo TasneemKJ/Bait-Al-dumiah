@@ -85,7 +85,7 @@ try:
   saved=state(page);page.reload(wait_until='networkidle');page.wait_for_timeout(1000);after=state(page)
   check('reload preserves ownership, money and journal',after['buttons']==saved['buttons'] and [(d['item'],d['room'],d['slot']) for d in after['decor']]==[(d['item'],d['room'],d['slot']) for d in saved['decor']] and after['journal']==saved['journal'])
   open_settings(page);page.locator('[data-field="motion"]').check();page.locator('[data-field="locale"]').select_option('ar');capture(page,'arabic-settings');click(page,'close')
-  check('Arabic switches document direction and visible content',page.locator('html').get_attribute('dir')=='rtl' and 'أرواح صغيرة' in page.locator('.dock').inner_text())
+  check('Arabic switches document direction and visible content',page.locator('html').get_attribute('dir')=='rtl' and 'أهل البيت' in page.locator('.dock').inner_text())
   check('reduced motion is applied and saved',state(page)['settings']['reducedMotion'] and 'reduced-motion' in page.locator('body').get_attribute('class'))
   page.set_viewport_size({'width':390,'height':844});page.wait_for_timeout(800);capture(page,'mobile-arabic-night')
   check('mobile viewport has no horizontal overflow',page.evaluate('document.documentElement.scrollWidth<=innerWidth'))

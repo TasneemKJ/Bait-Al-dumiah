@@ -11,7 +11,7 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -54,6 +54,8 @@ jobs:
           retention-days: 7
       - name: Play desktop and mobile game flows
         run: npm run test:browser
+      - name: Verify courtyard, Shami and audio
+        run: python scripts/atmosphere_check.py
       - name: Record source identity
         if: always()
         run: |

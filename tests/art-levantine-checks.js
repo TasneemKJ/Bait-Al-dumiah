@@ -21,8 +21,8 @@ export async function runArtChecks(){
   const named=n=>parts.filter(o=>o.name===n);
   check('Courtyard: four shaped arch bands stay above the residents',named('courtyard-arch').length===4&&named('courtyard-arch').every(o=>{o.geometry.computeBoundingBox();return o.geometry.boundingBox.min.y>2.35}));
   check('Courtyard: carved door and octagonal basin are real geometry',named('closed-walnut-door').length===1&&named('octagonal-basin').length===1);
-  check('Courtyard: fountain stays outside furniture placement rows',v.water.position.z>2.6&&v.water.position.y<.4);
-  let calls=0;root.traverseVisible(o=>{if(o.isMesh&&o.material.visible)calls++});check('Courtyard: detailed scene uses at most twelve visible submissions',calls<=12);
+  check('Courtyard: fountain stays outside furniture placement rows',v.water.position.z>2.6&&v.water.position.y<.4&&v.water.position.x<-2.5);
+  let calls=0;root.traverseVisible(o=>{if(o.isMesh&&o.material.visible)calls++});check('Courtyard: detailed scene uses at most ten visible submissions',calls<=10);
   s.elapsed=19;v.update(s,1);check('Courtyard: night shadow is restrained and does not write depth',v.shadow.material.opacity>0&&v.shadow.material.opacity<=.24&&!v.shadow.material.depthWrite);
   const before=JSON.stringify([v.shadow.position.toArray(),v.shadow.material.opacity,v.doorGlow.material.opacity,v.water.material.opacity]);s.paused=true;v.update(s,1);check('Courtyard: pause holds the exact existing cue pose',before===JSON.stringify([v.shadow.position.toArray(),v.shadow.material.opacity,v.doorGlow.material.opacity,v.water.material.opacity]));
   s.settings.reducedMotion=true;v.update(s,1);check('Courtyard: reduced motion suppresses the passing shadow',!v.shadow.visible);
