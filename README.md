@@ -21,10 +21,15 @@ Deploy `dist/` to any static web host. Runtime assets and Three.js are local; th
 ## The first playable
 
 - Four furnished cutaway rooms: tea kitchen, rose parlor, sewing room and moon bedroom.
-- Three authored dolls with animated reactions, fullness, energy, comfort and daily wishes.
-- Tea, play, naps and reassurance. Wishes earn buttons; tea costs two. Decorating changes the 3D room and household coziness.
+- Three authored dolls with animated reactions, fullness, energy, comfort and daily wishes that rotate through each doll's personal list after day one.
+- Tea, play, naps and reassurance. Wishes earn buttons; tea costs two. A wished-for action is always welcome, even when that need is nearly full. Decorating changes the 3D room and household coziness; filling all three spots in a room adds extra coziness.
+- Closeness: care brings each doll through five levels (Shy to Family). Each level gives a button gift, raises that doll's wish reward and unlocks one of three memories.
+- Favourites: each doll has a treasured keepsake and a favourite room. In the favourite room, comfort fades more slowly and care builds closeness faster. With the treasured keepsake in the same room, the doll is content at a lower need level.
+- Sewing basket: a doll whose needs are all high sews buttons into a basket (at most nine a day). Nothing is taken from unhappy dolls, and buttons arrive only when you collect them.
+- A full house (all three wishes in one day) pays a bonus that grows with a day-in-a-row streak.
+- Eleven milestones in the journal. Each one's reward is paid only when you collect it.
 - Six keepsakes, three placement slots per room, clear prices, cancellation without charge and full refunds on packing away.
-- A four-minute day/night cycle, a manual evening/morning control, a shy sheet ghost and six journal discoveries (one per in-game night).
+- A four-minute day/night cycle, a manual evening/morning control, a shy sheet ghost and six journal discoveries (one per in-game night). From the third whisper on, the visitor waits for a cozier house (45% to 68%).
 - Original procedural music-box notes, gesture-gated sound, pause, reduced motion and adjustable rendering detail.
 - Versioned local saves. Hidden tabs pause. English/Arabic copy and direction switch together.
 

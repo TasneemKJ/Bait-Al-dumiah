@@ -17,7 +17,7 @@ with sync_playwright() as p:
  if os.environ.get('CHROMIUM_PATH'):options['executable_path']=os.environ['CHROMIUM_PATH']
  browser=p.chromium.launch(**options)
  page=browser.new_page(viewport={'width':1440,'height':1000})
- css='\n'.join(((ROOT/'src'/name).read_text() if (ROOT/'src'/name).exists() else '') for name in ['styles.css','accessibility.css','visual-upgrade.css','doll-portraits.css'])
+ css='\n'.join(((ROOT/'src'/name).read_text() if (ROOT/'src'/name).exists() else '') for name in ['styles.css','accessibility.css','visual-upgrade.css','doll-portraits.css','gameplay.css'])
  page.set_content('<html><head><meta name="theme-color" content="#fff"><style>'+css+'</style></head><body><div id="app"><canvas id="world"></canvas><div id="ui"></div></div></body></html>')
  modules={}
  for name in ['content','simulation','i18n','icons','resident-portraits','ui','render/room-views']:
