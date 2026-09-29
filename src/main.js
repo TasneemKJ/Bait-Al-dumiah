@@ -48,6 +48,14 @@ async function dispatch(action,value){
    const result=sim.claim(state,value);
    if(result.ok){say(ui.t('milestoneCollected')+` +${ui.n(result.reward)} ${ui.t('buttons')}`);audio.effect('place');save();ui.tick()}else say(ui.t(result.reason));break;
   }
+  case 'mend-door':{
+   const result=sim.mendDoor(state);
+   if(result.ok){say(ui.t(sim.doorOpen(state)?'doorOpenedNote':'doorStepDone'));audio.effect('secret');save();ui.tick()}else say(result.needs?ui.t('needs_'+result.needs):ui.t(result.reason));break;
+  }
+  case 'gift':{
+   const result=sim.leaveGift(state);
+   if(result.ok){say(`${ui.t('giftReceived')} ${ui.t('gift-'+result.gift+'Title')}`);audio.effect('secret');save();ui.tick();if(!ui.panel)ui.open('journal')}else say(ui.t(result.reason));break;
+  }
   case 'collect-basket':{
    const result=sim.collectBasket(state);
    if(result.ok){say(ui.t('basketCollected')+` +${ui.n(result.reward)}`);audio.effect('place');save();ui.tick()}else say(ui.t(result.reason));break;

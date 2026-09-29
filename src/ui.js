@@ -1,7 +1,7 @@
 import {portraitMarkup} from './resident-portraits.js';
-import {DOLLS,ROOMS,CATALOG,SECRETS,ACTIONS,MILESTONES,SEW_DAILY,BASKET_MAX} from './content.js';
+import {DOLLS,ROOMS,CATALOG,SECRETS,ACTIONS,MILESTONES,SEW_DAILY,BASKET_MAX,DOOR_STEPS,GIFT_COST,VISITOR_GIFTS} from './content.js';
 import {translate,number} from './i18n.js';
-import {isNight,coziness,wishFor,wishReward,bondLevel,nextBond,isContent,contentThreshold,delighted,inFavoriteRoom,currentStreak,unclaimed,secretCozyNeeded} from './simulation.js';
+import {isNight,coziness,wishFor,wishReward,bondLevel,nextBond,isContent,contentThreshold,delighted,inFavoriteRoom,currentStreak,unclaimed,secretCozyNeeded,doorOpen,nextDoorStep,doorReady} from './simulation.js';
 import {icon} from './icons.js';
 const actionIcon={tea:'tea',play:'play',rest:'rest',soothe:'heart'};
 const wishKey=(id,action)=>DOLLS.find(d=>d.id===id).wish===action?id+'Wish':id+'Wish_'+action;
@@ -33,6 +33,13 @@ export function createUI(host,getState,dispatch){
  function open(name,id){if(placement){placement=null;dispatch('placement-cancel')}panel=name;resetConfirm=false;if(id)selected=id;previousFocus=document.activeElement;renderPanel();host.querySelector('#sheet').showModal();dispatch('panel-state',name);host.querySelector('#sheet [data-action="close"]').focus()}
  function close(){const sheet=host.querySelector('#sheet');sheet?.close();panel=null;renderedPanel=null;resetConfirm=false;dispatch('panel-state',null);if(previousFocus?.isConnected)previousFocus.focus();else host.querySelector('[data-action="panel-household"]')?.focus()}
  let renderedPanel=null;
+ function doorMarkup(s){
+  const step=nextDoorStep(s),ready=step&&doorReady(s,step);
+  const done=DOOR_STEPS.slice(0,s.door).map((d,i)=>`<article><span class="entry-number">${icon('check')}</span><div><h3>${t('door_'+d.id+'Title')}</h3><p>${t('door_'+d.id+'Text')}</p></div></article>`).join('');
+  const next=step?`<div class="door-next"><div><strong>${t('door_'+step.id+'Title')}</strong><small>${ready?'':t('needs_'+step.needs)}</small></div>${button('mend-door',t('mend')+' · '+n(step.cost),'button',`class="primary" ${ready&&s.buttons>=step.cost?'':'disabled'}`)}</div><p class="door-progress" aria-label="${t('door')}">${DOOR_STEPS.map((d,i)=>`<span class="${i<s.door?'done':''}"></span>`).join('')}</p>`:'';
+  const gifts=doorOpen(s)?`<h3 class="section-heading">${t('gifts')} <small>${n(s.gifts.length)}/${n(VISITOR_GIFTS.length)}</small></h3><p class="sheet-intro">${t('giftsIntro')}</p>${button('gift',t('leaveGift')+' · '+n(GIFT_COST),'ghost',`class="primary wide" ${isNight(s)&&s.lastGiftDay!==s.day&&s.buttons>=GIFT_COST?'':'disabled'}`)}<div class="gift-grid">${VISITOR_GIFTS.map(g=>s.gifts.includes(g)?`<div class="gift"><strong>${t('gift-'+g+'Title')}</strong><small>${t('gift-'+g+'Text')}</small></div>`:`<div class="gift locked"><strong>✦</strong><small>${t('giftUnknown')}</small></div>`).join('')}</div>`:'';
+  return `<h3 class="section-heading">${t('door')} <small>${n(s.door)}/${n(DOOR_STEPS.length)}</small></h3><p class="sheet-intro">${t(doorOpen(s)?'doorOpenedNote':'doorIntro')}</p><div class="journal-entries door-entries">${done}</div>${next}${gifts}`;
+ }
  function renderPanel(){
   const s=getState(),root=host.querySelector('#sheet-content');if(!panel)return;
   // Re-rendering the same sheet keeps its latest notice, so a collected reward stays visible.
@@ -57,6 +64,7 @@ export function createUI(host,getState,dispatch){
   }
   if(panel==='journal'){
    root.innerHTML=`<h2 id="sheet-title">${t('journal')} <small>${n(s.journal.length)}/${n(SECRETS.length)}</small></h2><p class="sheet-intro">${t('whispersIntro')}</p><div class="journal-illustration">${icon('ghost')}<span>✦</span>${icon('moon')}</div>${!s.journal.length?`<p class="empty-note">${t('noSecrets')}</p>`:''}<div class="journal-entries">${s.journal.map((id,i)=>`<article><span class="entry-number">${n(i+1).padStart(2,'0')}</span><div><h3>${t(id+'Title')}</h3><p>${t(id+'Text')}</p></div></article>`).join('')}</div>${s.journal.length<SECRETS.length?button(isNight(s)?'discover':'light',t(isNight(s)?'investigate':'night'),isNight(s)?'ghost':'moon','class="primary wide"'):`<p class="ending-note">${t('complete')}</p>`}${isNight(s)&&s.journal.length<SECRETS.length&&coziness(s)<secretCozyNeeded(s)?`<p class="shy-note">${t('shyNeed')} ${n(secretCozyNeeded(s))}% · ${t('cozy')} ${n(coziness(s))}%</p>`:''}
+    ${doorMarkup(s)}
     <h3 class="section-heading">${t('milestones')} <small>${n(s.milestones.length)}/${n(MILESTONES.length)}</small></h3><p class="sheet-intro">${t('milestonesIntro')} ${t('streakLabel')}: <strong>${n(currentStreak(s))}</strong></p><div class="milestones">${MILESTONES.map(m=>{const got=s.milestones.includes(m.id),ready=s.achieved.includes(m.id)&&!got;return `<div class="milestone ${got?'claimed':ready?'ready':''}">${icon(got?'check':ready?'spark':'button')}<div><strong>${t('ms-'+m.id+'Title')}</strong><small>${t('ms-'+m.id+'Text')}</small></div>${ready?button('claim',t('collect')+' +'+n(m.reward),null,`data-id="${m.id}" class="primary"`):`<em>${got?t('collected'):'+'+n(m.reward)}</em>`}</div>`}).join('')}</div>`;
   }
   if(panel==='settings'){
@@ -75,11 +83,14 @@ export function createUI(host,getState,dispatch){
   if(!s.decor.length)return {copy:t('objectiveDecorate'),label:t('decorate'),ico:'leaf',action:'panel',value:'decorate'};
   if(unclaimed(s).length)return {copy:t('objectiveMilestone'),label:t('collect'),ico:'book',action:'panel',value:'journal'};
   if(s.basket>0)return {copy:t('objectiveBasket'),label:t('collect')+' +'+n(s.basket),ico:'button',action:'collect-basket'};
+  const step=nextDoorStep(s);
+  if(step&&doorReady(s,step)&&s.buttons>=step.cost)return {copy:t('objectiveDoor'),label:t('mend')+' · '+n(step.cost),ico:'home',action:'panel',value:'journal'};
   if(s.journal.length<SECRETS.length){
    if(isNight(s)&&s.lastSecretDay===s.day)return {copy:t('tomorrow'),label:t('dawn'),ico:'sun',action:'light'};
    if(isNight(s)&&coziness(s)<secretCozyNeeded(s))return {copy:t('objectiveShy'),label:t('decorate'),ico:'leaf',action:'panel',value:'decorate'};
    return {copy:t('objectiveNight'),label:t(isNight(s)?'investigate':'night'),ico:isNight(s)?'ghost':'moon',action:isNight(s)?'discover':'light'};
   }
+  if(doorOpen(s)&&isNight(s)&&s.lastGiftDay!==s.day&&s.buttons>=GIFT_COST)return {copy:t('objectiveGift'),label:t('leaveGift')+' · '+n(GIFT_COST),ico:'ghost',action:'gift'};
   return {copy:t('objectiveReturn'),label:t('household'),ico:'souls',action:'panel',value:'household'};
  }
  function tick(){
@@ -115,7 +126,7 @@ export function createUI(host,getState,dispatch){
   if(action==='focus-doll'){dispatch(action,target.dataset.id);return}
   if(action==='care'){dispatch('care',{id:target.dataset.id,action:target.dataset.care});return}
   if(action==='remove'){dispatch('remove',Number(target.dataset.id));renderPanel();return}
-  if(action==='claim'||action==='collect-basket'){dispatch(action,target.dataset.id);if(panel)renderPanel();return}
+  if(action==='claim'||action==='collect-basket'||action==='mend-door'||action==='gift'){dispatch(action,target.dataset.id);if(panel)renderPanel();return}
   if(action==='reset-prompt'||action==='reset-no'){resetConfirm=action==='reset-prompt';renderPanel();return}
   dispatch(action);
  };

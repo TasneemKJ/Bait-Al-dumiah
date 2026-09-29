@@ -27,7 +27,8 @@ Deploy `dist/` to any static web host. Runtime assets and Three.js are local; th
 - Favourites: each doll has a treasured keepsake and a favourite room. In the favourite room, comfort fades more slowly and care builds closeness faster. With the treasured keepsake in the same room, the doll is content at a lower need level.
 - Sewing basket: a doll whose needs are all high sews buttons into a basket (at most nine a day). Nothing is taken from unhappy dolls, and buttons arrive only when you collect them.
 - A full house (all three wishes in one day) pays a bonus that grows with a day-in-a-row streak.
-- Eleven milestones in the journal. Each one's reward is paid only when you collect it.
+- Thirteen milestones in the journal. Each one's reward is paid only when you collect it.
+- The closed door: a five-step project in the journal that costs 430 buttons in all. The key step needs you to be dear to Sami, and opening the door needs all six whispers. Once the fifth room is open, you can leave the visitor one small gift a night (12 buttons) and collect the eight things they leave in return.
 - Six keepsakes, three placement slots per room, clear prices, cancellation without charge and full refunds on packing away.
 - A four-minute day/night cycle, a manual evening/morning control, a shy sheet ghost and six journal discoveries (one per in-game night). From the third whisper on, the visitor waits for a cozier house (45% to 68%).
 - Original procedural music-box notes, gesture-gated sound, pause, reduced motion and adjustable rendering detail.

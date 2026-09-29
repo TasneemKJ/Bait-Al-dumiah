@@ -18,3 +18,10 @@ The save key and `version: 1` are unchanged. New fields (`streak`, `lastFullDay`
 
 ## Boundaries kept
 No offline decay, no loss, no punishment: nothing is taken away, and a streak that lapses just starts again. All copy is in English and Shami Arabic, with gender-neutral phrasing wherever a shared string names Lina (feminine) or Noor/Sami (masculine).
+
+## Iteration 2: the closed door
+A scripted 14-day playthrough found that a reasonable player reached Family, every whisper and a fully decorated house by about day 6 (around 22 minutes of active play). After that, buttons piled up with nothing to buy (about 960 by day 14).
+- **The closed door** (`DOOR_STEPS`) is a lore-tied button sink of 40/60/80/100/150. *Borrow the eleventh key* needs closeness level 3 with Sami, which pays off his third memory. *Open the fifth room* needs all six whispers. Each step is authored text, and the ending keeps the mystery.
+- **Visitor gifts** (`GIFT_COST` 12, one a night, only after the door opens) give back the eight `VISITOR_GIFTS` in order. After all eight, it stays a small soothing nightly ritual.
+- Two more milestones: `door-open` (30) and `all-gifts` (40).
+- In the same playthrough, the door finishes on day 6 and the last gift arrives on day 13 (about 50 minutes). Spending on the door and gifts cuts day-14 savings from about 960 to about 540 buttons.
