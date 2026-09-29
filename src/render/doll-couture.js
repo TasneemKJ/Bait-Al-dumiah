@@ -64,10 +64,21 @@ export function dollFabric(id) {
  }else{
   c.strokeStyle=palette[1];c.globalAlpha=.33;c.lineWidth=2;
   for(let x=0;x<256;x+=8){c.beginPath();c.moveTo(x,0);c.lineTo(x,256);c.stroke()}
+  // Original woven/stitch band for Sami's bib. It lives in the top atlas zone;
+  // trouser UVs are remapped below so one shared material still serves both.
+  c.globalAlpha=.92;c.strokeStyle='#c88d68';c.lineWidth=2;c.lineCap='round';
+  for(let x=10;x<256;x+=18){
+   c.beginPath();c.moveTo(x,18);c.lineTo(x+7,25);c.lineTo(x,32);c.lineTo(x-7,25);c.closePath();c.stroke();
+   c.beginPath();c.moveTo(x,48);c.lineTo(x+6,54);c.lineTo(x,60);c.lineTo(x-6,54);c.closePath();c.stroke();
+   c.beginPath();c.moveTo(x-5,76);c.lineTo(x+5,86);c.moveTo(x+5,76);c.lineTo(x-5,86);c.stroke();
+  }
+  c.globalAlpha=.38;c.strokeStyle='#e7c08b';c.lineWidth=1;
+  for(const y of [10,39,68,94]){c.beginPath();c.moveTo(0,y);c.lineTo(256,y);c.stroke()}
  }
  c.globalAlpha=.1;c.strokeStyle='#f8e4cf';c.lineWidth=.6;
  for(let i=1;i<256;i+=4){c.beginPath();c.moveTo(i,0);c.lineTo(i,256);c.moveTo(0,i);c.lineTo(256,i);c.stroke()}
  const map=new T.CanvasTexture(image);map.colorSpace=T.SRGBColorSpace;map.anisotropy=4;
+ if(id==='sami')map.userData.pattern='sami-woven-bib-band';
  const m=new T.MeshStandardMaterial({map,roughness:.88,bumpMap:surfaceFinish('fabric'),roughnessMap:surfaceFinish('fabric'),bumpScale:.002,side:T.DoubleSide});m.userData.shared=true;fabrics.set(id,m);return m;
 }
 
@@ -97,7 +108,11 @@ export function trouserLegGeometry(sign=1){
   const a=u*Math.PI*2,r=.066+.018*Math.sin(v*Math.PI)-.004*v,seam=1+.012*Math.cos(a*2);
   const t=T.MathUtils.clamp((v-.55)/.45,0,1),inset=-sign*.0315*t*t*(3-2*t);
   return [inset+Math.cos(a)*r*seam,-.085+.365*v,Math.sin(a)*r*.98];
- }),32,16);trousers.set(sign,g);return g;
+ }),32,16);
+ // Reserve the atlas top for the bib's stitched band. Trousers sample only
+ // the quieter corduroy field, keeping the shared material/draw submission.
+ const uv=g.attributes.uv;for(let i=0;i<uv.count;i++)uv.setY(i,uv.getY(i)*.60);
+ trousers.set(sign,g);return g;
 }
 
 const shirts=new Map();
