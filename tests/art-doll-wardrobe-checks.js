@@ -22,7 +22,7 @@ const {doll}=fixture('noor');const bun=doll.hairStyle.bun;assert(bun?.strands.le
 });
 
 test("D14: Sami side part",()=>{
-const {doll}=fixture('sami');const locks=doll.hairStyle.fringe;assert(locks?.length===4,'Sami has no individual side-part fringe');assert(locks.every(o=>o.geometry.type==='TubeGeometry'),'fringe is still made of beads');let front=0;for(const lock of locks){lock.geometry.computeBoundingBox();front=Math.max(front,lock.geometry.boundingBox.max.z)}assert(front>.24,'side-swept locks are buried in the scalp');
+const {doll}=fixture('sami');const locks=doll.hairStyle.fringe;assert(locks?.length===4,'Sami has no individual side-part fringe');assert(locks.every(o=>o.geometry.type==='BufferGeometry'),'fringe is not a lofted, tapered mass');let front=0;for(const lock of locks){lock.geometry.computeBoundingBox();front=Math.max(front,lock.geometry.boundingBox.max.z)}assert(front>.24,'side-swept locks are buried in the scalp');
 });
 
 test("D15: Fabric ribbon folds",()=>{

@@ -3,10 +3,10 @@ import {mat} from './primitives.js';
 
 // Painted toy faces, not miniature realistic human faces. The house carries
 // the unsettling tone; residents use round cheeks and quiet, friendly marks.
-let headGeometry = null;
+const headGeometries = new Map();
 const faceMaps = new Map(), faceMaterials = new Map(), irises = new Map();
 const bisque = new T.MeshPhysicalMaterial({
- color: 0xf5d3b3, roughness: .68, clearcoat: .14,
+ color: 0xeec6aa, roughness: .68, clearcoat: .14,
  clearcoatRoughness: .62, metalness: 0,
  emissive: 0x8a4930, emissiveIntensity: .035,
 });
@@ -23,10 +23,11 @@ export function paintedFace(id) {
  if (faceMaps.has(id)) return faceMaps.get(id);
  const canvas = document.createElement('canvas'); canvas.width = canvas.height = 512;
  const c = canvas.getContext('2d');
- c.fillStyle = '#f5d3b3'; c.fillRect(0, 0, 512, 512);
- for (const x of [70, 186]) {
-  const g = c.createRadialGradient(x, 293, 2, x, 293, 32);
-  g.addColorStop(0, 'rgba(211,105,105,.57)');
+ c.fillStyle = '#eec6aa'; c.fillRect(0, 0, 512, 512);
+ // Feathered blush remains baked into the ceramic, not separate cheek spheres.
+ for (const x of [76, 180]) {
+  const g = c.createRadialGradient(x, 297, 2, x, 297, 37);
+  g.addColorStop(0, 'rgba(211,112,112,.57)');
   g.addColorStop(.45, 'rgba(222,133,118,.30)');
   g.addColorStop(1, 'rgba(222,133,118,0)');
   c.fillStyle = g; c.fillRect(x - 34, 257, 68, 72);
@@ -46,17 +47,21 @@ function faceMaterial(base, id) {
 }
 
 export function createSculptedHead(parent, material, id) {
- if (!headGeometry) {
-  headGeometry = new T.SphereGeometry(1, 36, 28);
+ const key=id||'lina';
+ if (!headGeometries.has(key)) {
+  const headGeometry = new T.SphereGeometry(1, 36, 28);
   const p = headGeometry.attributes.position;
+  const form={lina:[.290,.276,.060],noor:[.281,.286,.068],sami:[.302,.270,.050]}[key]||[.290,.276,.06];
   for (let i = 0; i < p.count; i++) {
-   const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
-   // Keep width low in the cheeks. The old jaw tapered into a sharp wedge.
-   const cheek = .065 * Math.exp(-Math.pow((y + .60) / .45, 2));
-   p.setXYZ(i, x * (.290 + cheek), y * .258 - .003, z * .247 + .028);
+   const x=p.getX(i),y=p.getY(i),z=p.getZ(i);
+   const cheek=form[2]*Math.exp(-Math.pow((y+.59)/.46,2));
+   const px=x*(form[0]+cheek),py=y*form[1]-.003;
+   const cheekRelief=.012*Math.exp(-Math.pow((Math.abs(px)-.16)/.085,2)-Math.pow((py+.085)/.09,2))*Math.max(0,z);
+   p.setXYZ(i,px,py,z*.247+.028+cheekRelief);
   }
-  headGeometry.computeVertexNormals(); headGeometry.computeBoundingSphere();
+  headGeometry.computeVertexNormals();headGeometry.computeBoundingSphere();headGeometries.set(key,headGeometry);
  }
+ const headGeometry=headGeometries.get(key);
  const mesh = new T.Mesh(headGeometry, faceMaterial(material, id));
  mesh.name = 'porcelain-head'; mesh.userData.noBatch = true;
  mesh.castShadow = mesh.receiveShadow = true; parent.add(mesh); return mesh;
@@ -71,7 +76,7 @@ function irisMaterial(id) {
  // No white sclera, radial iris spokes, or encircling socket outlines.
  c.fillStyle = tint; c.beginPath(); c.arc(64, 64, 62, 0, Math.PI * 2); c.fill();
  const g = c.createRadialGradient(64, 58, 5, 64, 60, 60);
- g.addColorStop(0, '#30272a'); g.addColorStop(.72, '#392d2d'); g.addColorStop(1, tint);
+ g.addColorStop(0, '#291f23'); g.addColorStop(.56, '#39292a'); g.addColorStop(1, tint);
  c.fillStyle = g; c.beginPath(); c.arc(64, 64, 61, 0, Math.PI * 2); c.fill();
  c.fillStyle = '#fff1d9'; c.beginPath(); c.ellipse(45, 38, 8, 9, -.2, 0, Math.PI * 2); c.fill();
  c.fillStyle = 'rgba(255,231,201,.35)'; c.beginPath(); c.arc(82, 85, 3, 0, Math.PI * 2); c.fill();
@@ -85,7 +90,7 @@ const irisGeometry = new T.CircleGeometry(.033, 32);
  const p = irisGeometry.attributes.position;
  for (let i = 0; i < p.count; i++) {
   const x = p.getX(i), y = p.getY(i);
-  p.setXYZ(i, x * .84, y, .002 * (1 - (x*x + y*y) / (.033*.033)));
+  p.setXYZ(i, x * .92, y * 1.04, .002 * (1 - (x*x + y*y) / (.033*.033)));
  }
  irisGeometry.computeVertexNormals();
 }

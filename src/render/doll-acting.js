@@ -1,3 +1,4 @@
+import {dollFabric} from './doll-couture.js';
 import * as T from 'three';
 import {shapeMouth} from './doll-expression.js';
 import {ball,ring} from './primitives.js';
@@ -5,7 +6,7 @@ import {craftMaterial} from './textiles.js';
 const rotation=new T.Quaternion();
 export function createArm(parent,sign,def,skin){
  const arm=new T.Group();arm.name='upper-arm';arm.position.set(sign*.19,.73,0);parent.add(arm);
- ball(arm,0,-.052,0,.073,.095,.075,craftMaterial(def.color));
+ ball(arm,0,-.052,0,.073,.095,.075,dollFabric(def.id));
  const elbow=ball(arm,0,-.132,0,.044,.043,.044,skin);elbow.name='bisque-elbow';
  const forearm=new T.Group();forearm.name='articulated-forearm';forearm.userData.noBatch=true;forearm.position.set(0,-.132,0);arm.add(forearm);arm.forearm=forearm;
  ball(forearm,0,-.051,0,.047,.068,.043,skin);ring(forearm,0,-.096,0,.04,.005,0xe6d3bc,true);

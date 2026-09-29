@@ -7,7 +7,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'artifacts/dolls';OUT.mkdir(parents=True,exist_ok=True)
-BASE='http://127.0.0.1:4188'; BEFORE=os.environ.get('DOLL_BASELINE','f77a7eafc8e179cbc56fef8fcbec39b6e45811ab')
+BASE='http://127.0.0.1:4188'; BEFORE=os.environ.get('DOLL_BASELINE','15d2bd80ed67e786d40094b425be5cd8261d9727')
 server=subprocess.Popen(['node','scripts/serve.mjs','dist'],cwd=ROOT,env={**os.environ,'PORT':'4188'},stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
 html='''<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;background:#f1e6d7;font:15px Georgia;color:#65505a}canvas{display:block;width:900px;height:900px}header{position:absolute;top:25px;left:30px}small{display:block;font:11px sans-serif;letter-spacing:1px;margin-top:7px}</style><script type="importmap">{"imports":{"three":"/vendor/three.module.min.js"}}</script></head><body><header><span id="label"></span><small>RESIDENT MODEL INSPECTION · ACTUAL GAME GEOMETRY</small></header><canvas id="model"></canvas></body></html>'''
 setup='''async()=>{
@@ -54,7 +54,7 @@ try:
      route.fulfill(status=200,content_type='text/javascript',body=baseline[path])
     page.route(BASE+'/src/**',original_source)
    page.goto(BASE+'/inspection');page.evaluate(setup)
-   samples=[('lina','idle',1.8,0,False),('noor','idle',1.8,0,False),('sami','idle',1.8,0,False),('lina','idle',1.8,.35,True),('all','idle',1.8,0,False)]
+   samples=[('lina','idle',1.8,0,False),('noor','idle',1.8,0,False),('sami','idle',1.8,0,False),('lina','idle',1.8,.35,True),('all','idle',1.8,0,False),('noor','idle',1.8,.40,True),('sami','idle',1.8,.40,True)]
    if version=='after':samples += [('lina','tea',1.8,0,False),('noor','rest',1.8,0,False),('sami','play',1.8,0,False),('lina','soothe',1.8,0,False),('lina','tea',1.3,.42,True),('lina','tea',3.8,0,False)]
    for id,action,t,yaw,face in samples:
     label=f'{version}-{id}-{action}'+('-face' if face else '')+('-lowered' if t==3.8 else '')

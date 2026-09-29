@@ -1,3 +1,4 @@
+import {gatheredDressGeometry,dollFabric} from './doll-couture.js';
 import * as T from 'three';
 import {createLaceHem,createCollar} from './doll-trimmings.js';
 import {createSpectacles} from './doll-spectacles.js';
@@ -19,29 +20,27 @@ function ball(p,x,y,z,rx,ry,rz,color){const mesh=new T.Mesh(Math.max(rx,ry,rz)<.
 
 function skirt(parent,color){
  const pivot=new T.Group();pivot.name='cloth-skirt-pivot';pivot.userData.noBatch=true;pivot.position.y=.75;parent.add(pivot);parent=pivot;
- const shape=[];for(let i=0;i<14;i++){const t=i/13;shape.push(new T.Vector2(.115+.19*Math.pow(1-t,1.7),.32+t*.43))}
- const g=new T.LatheGeometry(shape,48),a=g.attributes.position;
- for(let i=0;i<a.count;i++){const x=a.getX(i),z=a.getZ(i),y=a.getY(i),wave=1+Math.sin(Math.atan2(z,x)*12)*.045*(.78-y)/.46;a.setXYZ(i,x*wave,y-.75,z*wave*.86)}g.computeVertexNormals();
- const mesh=new T.Mesh(g,craftMaterial(color));mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);
+ const mesh=new T.Mesh(gatheredDressGeometry(),dollFabric(color));mesh.name='gathered-dress';
+ mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);
  createLaceHem(parent);return pivot;
 }
 const ribbon=fabricBow;
 function makeDoll(def){
  const root=new T.Group(),body=new T.Group();root.add(body);
  const skin=bisqueMaterial();
- const fabric=craftMaterial(def.color),hair=mat(def.hair,{roughness:.42});
+ const fabric=dollFabric(def.id),hair=mat(def.hair,{roughness:.42});
  const legs=[];
  for(const sign of [-1,1]){
   const leg=new T.Group();leg.name='articulated-leg';leg.position.set(sign*.12,.40,0);body.add(leg);legs.push(leg);
   const hosiery=createSock(leg,skin);leg.sock=hosiery.sock;leg.knee=hosiery.knee;ring(leg,0,-.095,0,.063,.008,def.color,true);
   leg.foot=createFoot(leg,def,sign);
-  if(def.id==='sami')ball(leg,0,0,0,.12,.19,.11,0x82718d);
+  if(def.id==='sami')ball(leg,0,0,0,.112,.18,.108,dollFabric(def.id));
   const shin=new T.Group();shin.name='articulated-shin';shin.userData.noBatch=true;shin.position.y=-.058;leg.add(shin);leg.shin=shin;for(const child of [leg.sock,leg.foot]){child.position.y+=.058;shin.add(child)}batch(leg);
  }
- const clothSkirt=def.id!=='sami'?skirt(body,def.color):null;
- ball(body,0,.70,0,.17,.20,.125,fabric);
+ const clothSkirt=def.id!=='sami'?skirt(body,def.id):null;
+ ball(body,0,.70,0,.174,.20,.13,fabric);
  let garments=null;
- if(def.id==='sami')garments=createOveralls(body,def);else{garments=createApron(body,def);ribbon(body,0,.77,.139,def.id==='lina'?0xb47787:0xd7be89)}
+ if(def.id==='sami')garments=createOveralls(body,def);else{garments=createApron(body,def);ribbon(body,0,.74,.153,def.id==='lina'?0xb47787:0xd7be89)}
  if(clothSkirt){garments.root.position.y=-.75;clothSkirt.add(garments.root)}
  // A scalloped collar and tiny seams make the residents feel sewn, not conical.
  createCollar(body);
