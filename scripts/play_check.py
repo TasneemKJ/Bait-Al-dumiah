@@ -1,0 +1,127 @@
+"""Exercise the built 3D game over HTTP and retain visual evidence."""
+import json,os,subprocess,time,traceback,urllib.request
+from pathlib import Path
+from playwright.sync_api import sync_playwright
+ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'artifacts';OUT.mkdir(exist_ok=True)
+BASE=os.environ.get('PLAY_URL','http://127.0.0.1:4177')
+server=None
+if not os.environ.get('PLAY_URL'):
+ server=subprocess.Popen(['node','scripts/serve.mjs','dist'],cwd=ROOT,stdout=(OUT/'browser-server.log').open('w'),stderr=subprocess.STDOUT)
+ for _ in range(100):
+  try: urllib.request.urlopen(BASE,timeout=1);break
+  except Exception:time.sleep(.1)
+checks=[];errors=[];browser=None
+
+def check(name,condition):
+ checks.append({'name':name,'passed':bool(condition)})
+ if not condition:raise AssertionError(name)
+def capture(page,name):
+ # Software WebGL captures can exceed the interaction deadline on shared CI.
+ # Keep every screenshot mandatory, with a separate bounded capture deadline.
+ print('Capturing '+name,flush=True)
+ page.wait_for_function('!window.dollhouse?.visual?.().cameraMoving',timeout=60000)
+ page.mouse.move(8,8)
+ (OUT/f'{name}-capture.json').write_text(json.dumps({'viewport':page.viewport_size,'visual':page.evaluate('window.dollhouse?.visual?.() ?? null')},indent=2))
+ page.screenshot(path=str(OUT/f'{name}.png'),full_page=False,timeout=60000)
+def state(page):return page.evaluate('window.dollhouse.state()')
+def click(page,action):page.locator(f'[data-action="{action}"]:visible').click()
+def open_settings(page):click(page,'panel-settings')
+def reload_game(page):
+ # After a long software-WebGL session, teardown/re-init can exceed the 12s click deadline.
+ # The game ships only local runtime assets, so app readiness is the meaningful persistence gate.
+ page.reload(wait_until='domcontentloaded',timeout=60000)
+ page.wait_for_function('window.dollhouse?.state && !document.querySelector("#loading")',timeout=60000)
+try:
+ with sync_playwright() as p:
+  opts={'headless':True,'args':['--no-sandbox','--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']}
+  if os.environ.get('CHROMIUM_PATH'):opts['executable_path']=os.environ['CHROMIUM_PATH']
+  browser=p.chromium.launch(**opts)
+  ctx=browser.new_context(viewport={'width':1440,'height':1000},device_scale_factor=1)
+  page=ctx.new_page();page.set_default_timeout(12000)
+  page.on('pageerror',lambda e:errors.append(str(e)))
+  page.on('console',lambda m:errors.append(m.text) if m.type=='error' else None)
+  page.goto(BASE+'/?debug=1',wait_until='networkidle');page.wait_for_timeout(1500)
+  capture(page,'desktop-day')
+  check('3D house starts without fallback or JS error',not page.locator('.error-screen').count() and not errors)
+  check('no loading overlay remains',not page.locator('#loading').count())
+  stats=page.evaluate('window.dollhouse.stats()');(OUT/'render-stats.json').write_text(json.dumps(stats,indent=2))
+  check('real 3D geometry was rendered',stats['triangles']>10000)
+  check('first view keeps panels closed',not page.locator('dialog[open]').count())
+  check('detailed scene stays within the first-playable geometry budget',stats['triangles']<550000 and stats['calls']<650)
+  check('forty refinements retain fewer than 400k triangles and the preceding 388-call ceiling',stats['triangles']<400000 and stats['calls']<388)
+  page.locator('[data-room=studio]').click();page.wait_for_timeout(500);capture(page,'desktop-room-closeup')
+  check('room closeup targets the sewing room',page.evaluate('window.dollhouse.visual().focusedRoom')=='studio')
+  click(page,'camera');check('whole-house camera resets room focus',page.evaluate('window.dollhouse.visual().focusedRoom') is None)
+  point=page.evaluate('window.dollhouse.project("lina")');page.mouse.click(point['x'],point['y'])
+  check('3D doll picking survives the remodel',page.locator('dialog[open]').count()==1)
+  page.wait_for_function('document.querySelectorAll(".has-portrait img").length===4 && [...document.querySelectorAll(".has-portrait img")].every(i=>i.complete&&i.naturalWidth===192)',timeout=60000)
+  check('resident sheet uses three cached actual-model portraits',page.evaluate('window.dollhouse.visual().portraitCount===3'))
+  portrait_sources=page.locator('.resident-tabs img').evaluate_all('(images)=>images.map(i=>i.src)');click(page,'close');click(page,'panel-household')
+  check('reopening the household reuses portraits instead of generating new targets',page.locator('.resident-tabs img').evaluate_all('(images)=>images.map(i=>i.src)')==portrait_sources)
+  click(page,'focus-doll');capture(page,'desktop-doll-closeup')
+  check('look closer focuses the selected resident without opening another sheet',page.evaluate('window.dollhouse.visual().focusedDoll==="lina"') and not page.locator('dialog[open]').count())
+  click(page,'camera');check('whole house clears portrait focus and hidden-HUD state',page.evaluate('window.dollhouse.visual().focusedDoll===null && document.querySelector("#ui").dataset.focusDoll===""'))
+  page.locator('[data-room=kitchen]').click()
+  before=state(page);click(page,'objective');after=state(page)
+  check('first wish feeds Lina and awards only net 6 buttons',after['dolls'][0]['hunger']>before['dolls'][0]['hunger'] and after['buttons']==42 and after['wishes']==['lina'])
+  page.wait_for_timeout(200);capture(page,'tea-reaction');click(page,'camera')
+  click(page,'panel-household');page.locator('[data-action="select"][data-id="noor"]').click();capture(page,'doll-care')
+  page.locator('[data-action="care"][data-care="rest"]').click()
+  check('tucking Noor in improves energy and closes panel',state(page)['dolls'][1]['energy']>70 and not page.locator('dialog[open]').count())
+  page.locator('[data-room=bedroom]').click();page.wait_for_timeout(200);capture(page,'sleep-reaction');click(page,'camera')
+  click(page,'panel-household');page.locator('[data-action="select"][data-id="sami"]').click();page.locator('[data-action="care"][data-care="play"]').click()
+  check('all three residents have fulfilable wishes',len(state(page)['wishes'])==3)
+  money=state(page)['buttons'];click(page,'panel-decorate');capture(page,'catalogue');page.locator('[data-action="choose-item"][data-id="plant"]').click()
+  check('choosing a decoration does not spend money',state(page)['buttons']==money)
+  page.wait_for_function('window.dollhouse.visual().previewVisible');capture(page,'decoration-preview')
+  check('decoration preview is valid before purchase',page.evaluate('window.dollhouse.visual().previewValid'))
+  page.locator('#place-room').focus();page.keyboard.press('Escape');check('cancel removes the 3D preview',not page.evaluate('window.dollhouse.visual().previewVisible'));check('cancelling does not spend money',state(page)['buttons']==money and not state(page)['decor'])
+  click(page,'panel-decorate');page.locator('[data-action="choose-item"][data-id="plant"]').click();click(page,'place-confirm');after=state(page)
+  check('placing a decoration changes ownership and charges exact price',after['buttons']==money-8 and len(after['decor'])==1)
+  click(page,'panel-decorate');page.locator('[data-action="remove"]').click();check('packing away refunds the full price',state(page)['buttons']==money and not state(page)['decor']);click(page,'close')
+  click(page,'panel-decorate');page.locator('[data-action="choose-item"][data-id="musicbox"]').click();page.locator('#place-room').select_option('parlor');click(page,'place-confirm')
+  click(page,'light');page.wait_for_function('window.dollhouse.visual().nightMix>.99',timeout=60000);capture(page,'desktop-night')
+  check('night capture uses the settled lighting rather than a transition',page.evaluate('window.dollhouse.visual().nightMix')>.99)
+  check('nightfall changes the simulation and reveals a visitor',state(page)['clock']>=120 and page.locator('.visitor-hint').is_visible())
+  page.locator('.visitor-hint [data-action="discover"]').click();capture(page,'first-whisper');check('visitor grants an authored mystery',state(page)['journal']==['music-box'])
+  money=state(page)['buttons'];page.locator('#sheet [data-action="discover"]').click();check('same-night mystery cannot be farmed',state(page)['buttons']==money and len(state(page)['journal'])==1);click(page,'close')
+  page.locator('[data-room=parlor]').click();page.wait_for_timeout(400);capture(page,'parlor-night');click(page,'camera')
+  click(page,'pause');elapsed=state(page)['elapsed'];page.wait_for_timeout(700);check('pause freezes simulation',state(page)['elapsed']==elapsed);page.locator('.pause-overlay [data-action="pause"]').click()
+  saved=state(page);reload_game(page);page.wait_for_timeout(1000);after=state(page)
+  check('reload preserves ownership, money and journal',after['buttons']==saved['buttons'] and [(d['item'],d['room'],d['slot']) for d in after['decor']]==[(d['item'],d['room'],d['slot']) for d in saved['decor']] and after['journal']==saved['journal'])
+  open_settings(page);page.locator('[data-field="motion"]').check();page.locator('[data-field="locale"]').select_option('ar');capture(page,'arabic-settings');click(page,'close')
+  check('Arabic switches document direction and visible content',page.locator('html').get_attribute('dir')=='rtl' and 'أهل البيت' in page.locator('.dock').inner_text())
+  check('reduced motion is applied and saved',state(page)['settings']['reducedMotion'] and 'reduced-motion' in page.locator('body').get_attribute('class'))
+  page.set_viewport_size({'width':390,'height':844});page.wait_for_timeout(800);capture(page,'mobile-arabic-night')
+  check('mobile viewport has no horizontal overflow',page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
+  page.locator('[data-room=bedroom]').click();page.wait_for_timeout(300);capture(page,'mobile-room-closeup')
+  check('mobile room closeup uses the selected room and battery budget',page.evaluate('window.dollhouse.visual().focusedRoom==="bedroom" && window.dollhouse.visual().quality==="low"'))
+  click(page,'camera')
+  targets=page.locator('.dock button,.camera-tools button,.objective button,.time-tools button').evaluate_all('(els)=>els.map(e=>({name:e.dataset.action,w:e.getBoundingClientRect().width,h:e.getBoundingClientRect().height}))')
+  (OUT/'touch-targets.json').write_text(json.dumps(targets,indent=2))
+  check('all persistent mobile controls are at least 44 by 44 px',all(e['h']>=44 and e['w']>=44 for e in targets))
+  open_settings(page);page.locator('[data-field="locale"]').select_option('en');click(page,'close');click(page,'light');capture(page,'mobile-day')
+  click(page,'panel-household');capture(page,'mobile-care');page.keyboard.press('Escape');check('Escape dismisses the sheet',not page.locator('dialog[open]').count())
+  click(page,'panel-household');page.locator('[data-action="select"][data-id="noor"]').click();click(page,'focus-doll');capture(page,'mobile-doll-closeup')
+  check('phone portrait keeps the doll between its header and toolbar',page.evaluate('window.dollhouse.visual().focusedDoll==="noor" && window.dollhouse.project("noor",1.45).y>100 && window.dollhouse.project("noor",.03).y<innerHeight-120'))
+  page.set_viewport_size({'width':844,'height':390});page.wait_for_timeout(800)
+  check('portrait reframes after rotating the phone',page.evaluate('window.dollhouse.visual().focusedDoll==="noor" && window.dollhouse.project("noor",1.45).y>15 && window.dollhouse.project("noor",.03).y<innerHeight-65'))
+  click(page,'camera')
+  page.set_viewport_size({'width':844,'height':390});page.wait_for_timeout(800);capture(page,'mobile-landscape');check('landscape retains visible toolbar',page.locator('.dock').is_visible())
+  check('landscape phone does not accidentally enable desktop shadows',page.evaluate('window.dollhouse.visual().quality==="low"'))
+  page.locator('[data-room=studio]').click();open_settings(page);click(page,'reset-prompt');click(page,'reset-yes');page.wait_for_timeout(400)
+  check('new house resets camera focus and room button state',page.evaluate('window.dollhouse.visual().focusedRoom===null && document.querySelector("#ui").dataset.focusRoom==="" && document.querySelector("[data-room=studio]").getAttribute("aria-pressed")==="false"'))
+  check('new house also resets the doll portrait camera',page.evaluate('window.dollhouse.visual().focusedDoll===null && document.querySelector("#ui").dataset.focusDoll===""'))
+  check('complete play loop produces no browser errors',not errors)
+  print(json.dumps({'checks':checks,'errors':errors,'render':stats},indent=2))
+except Exception as exc:
+ errors.append(str(exc));traceback.print_exc()
+ try:capture(page,'failure-state')
+ except Exception:pass
+finally:
+ (OUT/'browser-results.json').write_text(json.dumps({'checks':checks,'errors':errors},indent=2))
+ if browser:
+  try:browser.close()
+  except Exception:pass
+ if server:server.terminate()
+if errors or any(not c['passed'] for c in checks):raise SystemExit(1)

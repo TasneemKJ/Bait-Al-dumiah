@@ -1,0 +1,11 @@
+import {cp,mkdir,rm,readFile,writeFile,stat} from 'node:fs/promises';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+await rm(path.join(root,'dist'),{recursive:true,force:true});await mkdir(path.join(root,'dist/vendor'),{recursive:true});
+for(const item of ['index.html','src'])await cp(path.join(root,item),path.join(root,'dist',item),{recursive:true});
+await cp(path.join(root,'public'),path.join(root,'dist'),{recursive:true});
+for(const file of ['three.module.min.js','three.core.min.js'])await cp(path.join(root,'node_modules/three/build',file),path.join(root,'dist/vendor',file));
+await cp(path.join(root,'node_modules/three/examples/jsm/controls/OrbitControls.js'),path.join(root,'dist/vendor/OrbitControls.js'));
+await cp(path.join(root,'node_modules/three/LICENSE'),path.join(root,'dist/vendor/THREE-LICENSE.txt'));
+console.log('Static 3D game built in dist/. All runtime dependencies are local.');

@@ -1,0 +1,57 @@
+/* Keepsake-paper UI: the scene stays primary, closeups are one tap away. */
+:root{--ink:#53404d;--muted:#7e6670;--paper:#fbf1e1;--line:#cfb89f;--rose-dark:#775166}
+.brand h1{text-shadow:0 1px 12px #fff8e066}.brand-mark{background:#f8eddd66;box-shadow:inset 0 0 0 3px #f7ead6}
+.objective{background:linear-gradient(110deg,#f5e6d4b8,transparent);padding:15px 12px;border-radius:0 0 14px 0}
+.objective-head{color:#735b66}.objective p{color:#543f4b}
+.house-status{background:#fff2ddbb;box-shadow:inset 0 0 0 3px #fff8e433}
+.dock{box-shadow:0 8px 28px #35233525,inset 0 0 0 3px #fff8e9a0;border-color:#c9aa87;background:#f9eddbf0}
+.room-views{position:absolute;left:50%;bottom:119px;transform:translateX(-50%);display:flex;gap:5px;padding:4px 8px;background:#f7eddfb8;border:1px solid #cdb39577;border-radius:18px;backdrop-filter:blur(6px);pointer-events:auto}
+.room-views button{border:0;background:none;min-width:85px;min-height:46px;padding:5px 10px;display:flex;flex-direction:column;gap:2px;font-size:9px;border-radius:12px;line-height:1.35}
+.room-views .icon{width:18px;height:18px;color:#906478}
+.room-views button[aria-pressed=true]{background:#a8758840;box-shadow:inset 0 0 0 1px #ab7b8e}
+.scene-caption{bottom:184px;opacity:.9}.scene-caption>span{font-size:9px}
+.night .brand h1{text-shadow:0 1px 12px #131b37}.night .brand-mark{background:#39364a77;box-shadow:inset 0 0 0 3px #e8ceb210}
+.night .objective{background:linear-gradient(110deg,#252537cc,transparent)}.night .objective p{color:#f2dfcb}.night .objective-head{color:#d5bfae}
+.night .room-views{background:#302b3cc9;border-color:#ccb59844;color:#e7d2bd}
+.night .room-views .icon{color:#ddbe9e}.night .room-views button:hover{background:#765568}.night .room-views button[aria-pressed=true]{background:#956c834d;box-shadow:inset 0 0 0 1px #c4a78d}
+.night .house-status{background:#292638b8}.night .dock{background:#f6e9d5f2}.night .camera-tools{background:#292637bf}
+#ui[data-focus-room]:not([data-focus-room=""]) .scene-caption{opacity:0}
+@media(max-width:680px){
+ .objective{inset-inline-start:15px;padding:10px 6px;width:194px}.objective p{font-size:14px}
+ .room-views{bottom:131px;padding:4px 6px;gap:2px;border-radius:17px}
+ .room-views button{min-width:70px;max-width:76px;padding:5px 7px;font-size:9px}
+ .scene-caption{bottom:194px;padding-inline:20px}
+ .camera-tools{bottom:199px;inset-inline-end:12px}
+ .brand h1{font-size:24px}.dock{bottom:max(24px,env(safe-area-inset-bottom))}
+}
+@media(max-height:560px) and (min-width:681px){
+ .room-views{left:auto;right:auto;inset-inline-start:18px;transform:none;bottom:16px;display:grid;grid-template-columns:44px 44px;gap:4px;padding:4px}
+ .room-views button{min-width:44px;min-height:44px;width:44px;height:44px;padding:4px}
+ .room-views button span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+ .scene-caption{display:none}
+ #ui .objective p{font-size:13px;line-height:1.5}
+}
+@media(max-height:360px) and (min-width:681px){
+ .objective{top:78px;padding:6px;width:173px}#ui .objective p{font-size:12px;line-height:1.3;margin:5px 0}.objective-head{font-size:8px}
+}
+
+/* Closeups can put architecture behind the time toggle; keep its text legible. */
+#ui[data-focus-room]:not([data-focus-room=""]) .time-tools{padding:3px 10px 7px;background:#f9ebdce8;border-radius:12px}
+.night #ui[data-focus-room]:not([data-focus-room=""]) .time-tools{background:#272238e8}
+
+.resident-name{position:absolute;transform:translateX(-50%);max-width:130px;padding:5px 12px;border:1px solid #bea18a;border-radius:18px;background:#493545ed;color:#fff0db;font-size:11px;line-height:1.4;text-align:center;white-space:nowrap;box-shadow:0 3px 10px #21182722;z-index:1;pointer-events:none}
+
+.room-views .room-short{display:none}
+@media(max-width:680px){
+ .room-views{max-width:calc(100vw - 24px);gap:2px;padding:4px}
+ .room-views button{min-width:66px;max-width:80px;flex:1;padding:5px 6px;font-size:10.5px;line-height:1.45}
+ .room-views .room-long{display:none}.room-views .room-short{display:inline}
+ [dir=rtl] .room-views button{font-size:11px}
+}
+
+/* The existing day/night icon carries the cycle, without a second time panel. */
+#light-button{position:relative;padding-inline-start:7px}
+#light-button:before{content:"";position:absolute;inset-inline-start:1px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;background:conic-gradient(#997853 var(--day-progress,0deg),#cdbba54d 0);mask:radial-gradient(circle,transparent 57%,#000 60%);pointer-events:none}
+#light-button>.icon{margin-inline-end:7px}
+.night #light-button:before{background:conic-gradient(#e6c28f var(--day-progress,0deg),#d5b69233 0)}
+@media(max-width:680px){#light-button:before{width:28px;height:28px}#light-button>.icon{margin-inline-end:6px}}

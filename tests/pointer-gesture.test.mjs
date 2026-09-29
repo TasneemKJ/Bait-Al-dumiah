@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+const module=await import('../src/pointer-gesture.js').catch(()=>({}));
+const event=(x=100,y=100,id=1,primary=true)=>({clientX:x,clientY:y,pointerId:id,isPrimary:primary});
+const guard=()=>{assert.equal(typeof module.createTapGesture,'function','gesture boundary must exist');return module.createTapGesture();};
+test('a stationary primary pointer selects exactly once',()=>{const g=guard();g.down(event());assert.equal(g.up(event()),true);assert.equal(g.up(event()),false)});
+test('small touch jitter remains a tap',()=>{const g=guard();g.down(event());g.move(event(103,103));assert.equal(g.up(event(103,103)),true)});
+test('a camera drag returning to its start is never a tap',()=>{const g=guard();g.down(event());g.move(event(180));g.move(event());assert.equal(g.up(event()),false)});
+test('an ordinary drag is never a tap',()=>{const g=guard();g.down(event());g.move(event(180));assert.equal(g.up(event(180)),false)});
+test('a second touch cancels the pending tap',()=>{const g=guard();g.down(event());g.down(event(120,120,2,false));assert.equal(g.up(event()),false)});
+test('pointer cancellation clears a pending tap',()=>{const g=guard();g.down(event());g.cancel();assert.equal(g.up(event()),false)});
+test('an unrelated pointer release cannot select',()=>{const g=guard();g.down(event());assert.equal(g.up(event(100,100,2)),false);assert.equal(g.up(event()),false)});
