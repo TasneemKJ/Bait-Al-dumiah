@@ -23,8 +23,15 @@ try:
   page.on('pageerror',lambda e:errors.append(str(e)))
   page.on('console',lambda m:errors.append(m.text) if m.type=='error' else None)
   page.goto(URL+'/?debug=1',wait_until='networkidle')
-  page.evaluate('''async()=>{const {createState}=await import('/src/simulation.js');const {SAVE_KEY}=await import('/src/content.js');const s=createState();s.elapsed=18;s.clock=145;s.settings.locale='ar';localStorage.setItem(SAVE_KEY,JSON.stringify(s));}''')
-  page.reload(wait_until='networkidle');page.wait_for_function('dollhouse.visual().nightMix>.99',timeout=60000)
+  fixture=page.evaluate('''async()=>{const {createState}=await import('/src/simulation.js');const {SAVE_KEY}=await import('/src/content.js');const s=createState();s.elapsed=18;s.clock=145;s.settings.locale='ar';return {key:SAVE_KEY,value:JSON.stringify(s)};}''')
+  # Seed the incoming document before main.js reads its save. Writing in the old
+  # document loses to the legitimate pagehide autosave during page.reload().
+  page.add_init_script('localStorage.setItem('+json.dumps(fixture['key'])+','+json.dumps(fixture['value'])+');')
+  page.reload(wait_until='networkidle')
+  initial=page.evaluate('({state:dollhouse.state(),visual:dollhouse.visual(),hidden:document.hidden})')
+  (OUT/'night-initial-state.json').write_text(json.dumps(initial,indent=2))
+  check('the night fixture survives pagehide autosave and loads before the app',initial['state']['clock']>=120 and initial['state']['settings']['locale']=='ar')
+  page.wait_for_function('dollhouse.visual().nightMix>.99',timeout=60000)
   check('Shami labels are rendered right-to-left in the shipped game',page.locator('html').get_attribute('dir')=='rtl' and 'أهل البيت' in page.locator('.dock').inner_text())
   check('night cue appears in the actual scene, not only in a construction fixture',page.evaluate('dollhouse.visual().courtyard.shadow>0 && dollhouse.visual().courtyard.shadow<=.24'))
   capture(page,'courtyard-shami-night')

@@ -30,3 +30,18 @@ Friendly dolls, embroidery, relocated courtyard fountain, Shami copy, simulation
 save format, economy, IDs, dependencies and existing performance gates are preserved.
 No schedule, force push, merge or production promotion. Waveform tests do not claim
 perceptual listening review, and Chromium does not certify physical phones or Safari.
+
+## Rendered fixture correction
+Run 36558925626 passed all 41 ordinary gameplay checks, 48 Node tests, 179 artwork
+checks and 12 UI checks. Its additional atmosphere check timed out waiting for
+nightMix: the fixture wrote a night save into the outgoing page, but main.js
+correctly autosaved its live daytime state again on pagehide. No game save code
+is changed. The fixture now seeds the incoming document with add_init_script
+before the app reads storage, and explicitly asserts that the seeded night and
+Arabic locale loaded. Initial state/visual diagnostics are retained.
+
+The atmosphere step now runs before the longer ordinary gameplay suite, with
+its own early screenshot artifact. All original assertions remain mandatory;
+this changes diagnostic ordering rather than reducing verification. Runtime
+files are unchanged from 3eaf895. The measured first-scene counters on that
+commit were 386 calls / 381,595 triangles, within the existing strict budgets.

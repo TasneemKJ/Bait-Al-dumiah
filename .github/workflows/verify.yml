@@ -52,10 +52,15 @@ jobs:
           name: doll-model-preview
           path: artifacts/dolls/
           retention-days: 7
-      - name: Play desktop and mobile game flows
-        run: npm run test:browser
       - name: Verify courtyard, Shami and audio
         run: python scripts/atmosphere_check.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: levantine-scene-preview
+          path: artifacts/levantine/
+          retention-days: 7
+      - name: Play desktop and mobile game flows
+        run: npm run test:browser
       - name: Record source identity
         if: always()
         run: |
