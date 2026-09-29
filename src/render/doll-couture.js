@@ -80,7 +80,7 @@ export function bodiceGeometry(){
 
 let sleeve=null;
 export function sleeveGeometry(){
- if(!sleeve)sleeve=closeSurfaceSeam(gridSurface(32,16,(u,v)=>{const a=u*Math.PI*2,r=.041+.017*Math.sin(v*Math.PI)-.021*Math.pow(v,6),fold=1+.024*Math.cos(a*12)*Math.sin(v*Math.PI);return [Math.cos(a)*r*fold,-.112+.124*v,Math.sin(a)*r*fold*.91]}),32,16);
+ if(!sleeve)sleeve=closeSurfaceSeam(gridSurface(32,16,(u,v)=>{const a=u*Math.PI*2,r=.0385+.013*Math.sin(v*Math.PI)-.0185*Math.pow(v,6),fold=1+.020*Math.cos(a*12)*Math.sin(v*Math.PI);return [Math.cos(a)*r*fold,-.112+.124*v,Math.sin(a)*r*fold*.91]}),32,16);
  return sleeve;
 }
 
