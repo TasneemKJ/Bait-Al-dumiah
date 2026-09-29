@@ -6,7 +6,7 @@ const caps=new Map();
 function capGeometry(id){
  if(caps.has(id))return caps.get(id);const vertices=[],uv=[],indices=[],w=40,h=20;
  for(let j=0;j<=h;j++)for(let i=0;i<=w;i++){const phi=i/w*Math.PI*2,front=Math.sin(phi),theta=j/h*(front>0?1.10+.60*(1-front):1.70-.56*front),groove=1+.009*Math.sin(phi*28+theta*3.2)*Math.sin(theta);
-  vertices.push(-Math.cos(phi)*Math.sin(theta)*.315*groove,Math.cos(theta)*.315+.017,Math.sin(phi)*Math.sin(theta)*.288*groove+.008);uv.push(i/w,1-j/h);
+  vertices.push(-Math.cos(phi)*Math.sin(theta)*.315*groove,Math.cos(theta)*.295+.010,Math.sin(phi)*Math.sin(theta)*.288*groove+.008);uv.push(i/w,1-j/h);
  }
  for(let j=0;j<h;j++)for(let i=0;i<w;i++){const a=j*(w+1)+i,b=a+w+1;indices.push(a,b,a+1,a+1,b,b+1)}
  const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(vertices,3));g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));g.setIndex(indices);g.computeVertexNormals();caps.set(id,g);return g;

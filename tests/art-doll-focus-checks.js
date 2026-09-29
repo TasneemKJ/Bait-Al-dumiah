@@ -9,36 +9,36 @@ const fixture=(id='lina')=>{const state=createState(),view=createDolls(new T.Gro
 const named=(root,name)=>{const a=[];root.traverse(o=>{if(o.name===name)a.push(o)});return a};
 export async function runArtChecks(){const results=[];for(const {name,run} of cases){try{await run();results.push({name,passed:true})}catch(e){results.push({name,passed:false,error:e.message})}}return results}
 
-test("D01: Cheek and jaw sculpt",()=>{
-const {doll}=fixture();const hull=doll.head.getObjectByName('porcelain-head');assert(hull,'head is still an anonymous ellipsoid');const p=hull.geometry.attributes.position;let cheek=0,jaw=0;for(let i=0;i<p.count;i++){const y=p.getY(i),x=Math.abs(p.getX(i));if(y>-.1&&y<.02)cheek=Math.max(cheek,x);if(y<-.19)jaw=Math.max(jaw,x)}assert(cheek>.27&&jaw<cheek*.73,'jaw does not taper beneath full cheeks');assert(p.count<1200,'portrait head exceeds its mesh budget');
+test("D01: Rounded cheek and jaw sculpt (revised after user feedback)",()=>{
+const {doll}=fixture();const hull=doll.head.getObjectByName('porcelain-head');assert(hull,'head is missing');const p=hull.geometry.attributes.position;let cheek=0,jaw=0;for(let i=0;i<p.count;i++){const y=p.getY(i),x=Math.abs(p.getX(i));cheek=Math.max(cheek,x);if(y<-.185&&y>-.213)jaw=Math.max(jaw,x)}assert(cheek>.29&&jaw>=cheek*.76,'lower cheeks narrow into the rejected triangular jaw');assert(p.count<1200,'portrait head exceeds its mesh budget');
 });
 
 test("D02: Painted porcelain complexion",()=>{
 const {doll}=fixture();const m=doll.faceHull.material;assert(m.map?.isCanvasTexture,'complexion has no painted layer');const c=m.map.image.getContext('2d'),sample=(x,y)=>Array.from(c.getImageData(x,y,1,1).data);const a=sample(72,284),b=sample(230,60);assert(a.slice(0,3).some((v,i)=>Math.abs(v-b[i])>8),'painted cheek has no soft color variation');assert(m.map.image.width<=512,'face texture exceeds its budget');
 });
 
-test("D03: Almond eye sockets",()=>{
-const {doll}=fixture();for(const eye of doll.eyes){const white=eye.getObjectByName('almond-white');assert(white,'eye still uses stacked spherical beads');white.geometry.computeBoundingBox();const size=white.geometry.boundingBox.getSize(new T.Vector3());assert(size.x>.10&&size.x<.14&&size.z<.015,'eye is not shallow and almond-shaped');assert(eye.userData.noBatch,'eye lost its independent blink transform')}
+test("D03: Small shallow painted eyes (replaces rejected white sockets)",()=>{
+const {doll}=fixture();for(const eye of doll.eyes){assert(!eye.getObjectByName('almond-white'),'rejected white socket remains');const painted=eye.iris;painted.geometry.computeBoundingBox();const size=painted.geometry.boundingBox.getSize(new T.Vector3());assert(size.x>.04&&size.x<.075&&size.z<.01,'eye is not a small painted mark');assert(eye.userData.noBatch,'eye lost its independent blink transform')}
 });
 
-test("D04: Individual glass irises",()=>{
-const view=createDolls(new T.Group());const maps=view.dolls.map(d=>d.eyes[0].iris.material.map);assert(maps.every(m=>m?.isCanvasTexture),'irises are flat black disks');assert(new Set(maps).size===3,'residents do not have individual eye colors');for(const m of maps){const c=m.image.getContext('2d'),p=c.getImageData(64,64,1,1).data,h=c.getImageData(45,38,1,1).data;assert(h[0]>p[0]+80,'eye has no hand-painted catchlight')}const repeat=createDolls(new T.Group());assert(repeat.dolls[0].eyes[0].iris.material.map===maps[0],'iris textures are rebuilt on every resident construction');
+test("D04: Individually tinted painted eyes",()=>{
+const view=createDolls(new T.Group());const maps=view.dolls.map(d=>d.eyes[0].iris.material.map);assert(maps.every(m=>m?.isCanvasTexture),'painted eye maps are missing');assert(new Set(maps).size===3,'residents do not have individual eye colors');for(const m of maps){const c=m.image.getContext('2d'),p=c.getImageData(64,64,1,1).data,h=c.getImageData(45,38,1,1).data;assert(h[0]>p[0]+80,'eye has no hand-painted catchlight')}const repeat=createDolls(new T.Group());assert(repeat.dolls[0].eyes[0].iris.material.map===maps[0],'iris textures are rebuilt on every resident construction');
 });
 
-test("D05: Lid rims and lashes",()=>{
-const {doll}=fixture();for(const e of doll.eyes){assert(rigParts(e,'upper-lash')[0]?.geometry.type==='TubeGeometry','eye has no curved upper lash line');assert(rigParts(e,'lower-waterline')[0],'eye has no delicate lower rim')}assert(doll.brows?.length===2&&doll.brows.every(b=>b.userData.noBatch),'eyebrows cannot express emotion independently');
+test("D05: Quiet eye marks and independent brows (replaces socket rims)",()=>{
+const {doll}=fixture();for(const e of doll.eyes){assert(e.aperture.children.length===1,'heavy eye framing returned');assert(e.closedLid.geometry.type==='TubeGeometry','closed eye is not a soft curved mark')}assert(doll.brows?.length===2&&doll.brows.every(b=>b.userData.noBatch),'eyebrows cannot express emotion independently');
 });
 
 test("D06: Actual closed eyelids",()=>{
 const {state,view,doll,resident}=fixture();resident.action='rest';state.settings.reducedMotion=true;view.update(state,.1,'lina');for(const eye of doll.eyes){assert(eye.closedLid?.visible&&!eye.aperture.visible,'sleep still shows squeezed eye whites');assert(eye.scale.y===1,'blink compresses the entire eye including its attachment')}resident.action='idle';view.update(state,.1,'lina');assert(doll.eyes.every(e=>!e.closedLid.visible&&e.aperture.visible),'waking leaves eyelid seams visible over open eyes');
 });
 
-test("D07: Sculpted lips",()=>{
-const {doll}=fixture();const lips=rigParts(doll.mouth,'sculpted-lip');assert(lips.length===2,'mouth is still a single torus');for(const lip of lips){assert(lip.geometry.type==='ShapeGeometry','lips are not shaped contours');lip.geometry.computeBoundingBox();assert(lip.geometry.boundingBox.getSize(new T.Vector3()).x<.08,'smile overwhelms the face')}assert(doll.mouth.userData.noBatch,'lip expression cannot move independently');
+test("D07: Simple painted smile (replaces realistic lips)",()=>{
+const {doll}=fixture();const smile=doll.mouth.getObjectByName('painted-smile');assert(smile?.geometry.type==='TubeGeometry','soft painted smile is missing');smile.geometry.computeBoundingBox();const size=smile.geometry.boundingBox.getSize(new T.Vector3());assert(size.x>.045&&size.x<.07&&size.z<.015,'smile is too large or protruding');assert(!rigParts(doll.mouth,'sculpted-lip').length,'rejected realistic lips returned');assert(doll.mouth.userData.noBatch,'smile expression cannot move independently');
 });
 
-test("D08: Soft nose bridge",()=>{
-const {doll}=fixture();assert(doll.nose?.geometry,'nose has no sculpted bridge');const p=doll.nose.geometry.attributes.position;let top=0,tip=0;for(let i=0;i<p.count;i++){if(p.getY(i)>.020)top=Math.max(top,Math.abs(p.getX(i)));if(p.getY(i)<0&&p.getY(i)>-.020)tip=Math.max(tip,Math.abs(p.getX(i)))}assert(top<tip*.7,'nose bridge is as broad as its tip');doll.nose.geometry.computeBoundingBox();assert(doll.nose.geometry.boundingBox.getSize(new T.Vector3()).z<.06,'nose projects too far out of the face');
+test("D08: Low-relief button nose (replaces elongated bridge)",()=>{
+const {doll}=fixture();doll.nose.geometry.computeBoundingBox();const size=doll.nose.geometry.boundingBox.getSize(new T.Vector3());assert(size.y<.034&&size.x>=size.y,'nose narrows into a pin');assert(size.z<.036,'nose projects too far from the face');
 });
 
 test("D09: Recessed ears",()=>{

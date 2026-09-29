@@ -45,7 +45,7 @@ function makeDoll(def){
  if(clothSkirt){garments.root.position.y=-.75;clothSkirt.add(garments.root)}
  // A scalloped collar and tiny seams make the residents feel sewn, not conical.
  createCollar(body);
- cylinder(body,0,.845,0,.057,.10,skin);createNeckJoint(body);
+ cylinder(body,0,.845,0,.066,.085,skin);createNeckJoint(body);
  const arms=[-1,1].map(sign=>createArm(body,sign,def,skin));
  const head=new T.Group();head.name='doll-head';head.position.set(0,1.095,.008);body.add(head);
  const hairStyle=createHair(head,def);
@@ -88,7 +88,7 @@ export function createDolls(parent){
    v.sparkles.rotation.y=motion?t*.7:0;
    v.body.position.y=motion?(d.action==='play'?Math.abs(Math.sin(t*4.6))*.065:0):0;
    v.body.rotation.z=motion&&d.action==='play'?Math.sin(t*3.6)*.05:0;
-   v.head.rotation.z=d.action==='rest'?.16:motion?Math.sin(t*.6+i)*.04:0;v.head.rotation.y=motion?T.MathUtils.damp(v.head.rotation.y,selected===d.id?T.MathUtils.clamp(Number.isFinite(viewerYaw)?viewerYaw:0,-.35,.35):Math.sin(t*.36+i)*.08,5,dt):0;v.head.rotation.x=d.action==='rest'?.23:0;
+   v.head.rotation.z=d.action==='rest'?.16:motion?Math.sin(t*.6+i)*.04:0;v.baseHeadYaw=motion?T.MathUtils.damp(v.baseHeadYaw||0,selected===d.id?T.MathUtils.clamp(Number.isFinite(viewerYaw)?viewerYaw:0,-.25,.25):Math.sin(t*.36+i)*.06,5,dt):0;v.head.rotation.y=v.baseHeadYaw;v.head.rotation.x=d.action==='rest'?.23:0;
    const openness=d.action==='rest'?.12:motion?blinkOpen(t,i):1;
    v.eyes.forEach(e=>closePortraitEye(e,openness));
    v.arms.forEach((a,j)=>{const sign=j===0?-1:1;a.rotation.y=0;a.rotation.z=sign*(d.action==='play'?.55+(motion?Math.sin(t*4)*.18:0):d.action==='soothe'?.50:d.action==='rest'?.46:.19);a.rotation.x=d.action==='tea'&&j===1?-1.2:d.action==='rest'?(j===0?-.88:-.68):0});

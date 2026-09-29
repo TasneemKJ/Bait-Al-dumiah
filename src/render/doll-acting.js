@@ -8,10 +8,10 @@ export function createArm(parent,sign,def,skin){
  ball(arm,0,-.052,0,.073,.095,.075,craftMaterial(def.color));
  const elbow=ball(arm,0,-.132,0,.044,.043,.044,skin);elbow.name='bisque-elbow';
  const forearm=new T.Group();forearm.name='articulated-forearm';forearm.userData.noBatch=true;forearm.position.set(0,-.132,0);arm.add(forearm);arm.forearm=forearm;
- ball(forearm,0,-.051,0,.038,.068,.038,skin);ring(forearm,0,-.096,0,.04,.005,0xe6d3bc,true);
+ ball(forearm,0,-.051,0,.047,.068,.043,skin);ring(forearm,0,-.096,0,.04,.005,0xe6d3bc,true);
  const hand=new T.Group();hand.name='articulated-hand';hand.userData.noBatch=true;hand.position.set(0,-.129,.01);forearm.add(hand);arm.hand=hand;
- const palm=ball(hand,0,.004,0,.034,.035,.021,skin);palm.name='porcelain-palm';
- for(let i=0;i<4;i++){const length=[.022,.029,.027,.018][i],finger=new T.Mesh(new T.CapsuleGeometry(.0075,length,3,8),skin);finger.name='porcelain-finger';finger.position.set(-.0225+i*.015,-.028-length/2,0);finger.castShadow=true;hand.add(finger)}
+ const palm=ball(hand,0,.004,0,.039,.037,.027,skin);palm.name='porcelain-palm';
+ for(let i=0;i<4;i++){const length=[.012,.016,.014,.010][i],finger=new T.Mesh(new T.CapsuleGeometry(.009,length,3,8),skin);finger.name='porcelain-finger';finger.position.set(-.0225+i*.015,-.028-length/2,0);finger.castShadow=true;hand.add(finger)}
  const thumb=ball(hand,-sign*.030,.008,.006,.015,.026,.013,skin);thumb.name='porcelain-thumb';thumb.rotation.z=-sign*.38;
  arm.rotation.z=sign*.19;return arm;
 }
@@ -32,15 +32,15 @@ export function balanceWalk(v,d,t,index,motion){
 }
 
 export function gaze(v,selected,yaw,motion,dt){
- const target=motion&&selected===v.id?T.MathUtils.clamp(Number.isFinite(yaw)?yaw:0,-.35,.35)*.032:0;
+ const target=motion&&selected===v.id?T.MathUtils.clamp(Number.isFinite(yaw)?yaw:0,-.35,.35)*.014:0;
  for(const eye of v.eyes)eye.iris.position.x=motion?T.MathUtils.damp(eye.iris.position.x,target,8,dt):0;
 }
 
 export function express(v,d,still,dt){
  const mood=d.action==='rest'?'sleepy':d.action==='play'?'delighted':d.action==='soothe'?'comforted':d.action==='tea'?'content':d.energy<32?'sleepy':Math.min(d.comfort,d.hunger)<25?'worried':'content';
  v.expression=mood;shapeMouth(v.mouth,mood,dt,still);
- const brow=mood==='worried'?.19:mood==='sleepy'?-.09:mood==='delighted'?-.13:0;
- v.brows.forEach((b,i)=>{const z=(i===0?-1:1)*brow;b.rotation.z=still?z:T.MathUtils.damp(b.rotation.z,z,8,dt);b.position.y=mood==='delighted'?.103:.091});
+ const brow=mood==='worried'?.10:mood==='sleepy'?-.09:mood==='delighted'?-.13:0;
+ v.brows.forEach((b,i)=>{const z=(i===0?-1:1)*brow;b.rotation.z=still?z:T.MathUtils.damp(b.rotation.z,z,8,dt);b.position.y=mood==='delighted'?.092:.082});
  const width=mood==='worried'?.79:mood==='delighted'?1.18:mood==='sleepy'?.90:1.03;
  v.mouth.scale.x=still?width:T.MathUtils.damp(v.mouth.scale.x,width,8,dt);
  v.mouth.scale.y=mood==='delighted'?1.12:mood==='sleepy'?.84:1;
