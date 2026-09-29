@@ -8,6 +8,8 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def sources():
     files = {f'project/{p.relative_to(ROOT).as_posix()}': p.read_text() for p in (ROOT/'src').rglob('*.js')}
+    for p in (ROOT/'src').glob('*.css'):
+        files[f'project/styles/{p.name}.js'] = 'export default '+json.dumps(p.read_text())
     for p in (ROOT/'tests').glob('art-*-checks.js'):
         files[f'project/tests/{p.name}'] = p.read_text()
     files['three/addons/controls/OrbitControls.js'] = (ROOT/'node_modules/three/examples/jsm/controls/OrbitControls.js').read_text()

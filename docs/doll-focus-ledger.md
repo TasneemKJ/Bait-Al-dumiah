@@ -1,8 +1,8 @@
-# Forty doll-focused passes
+# Doll-focused iteration ledger
 
-Base: `5b02f9a0b31b7aa1324d080fd29e4f240b1c03ac`. D01–D40 follow the previous forty refinements.
+Base: `5b02f9a0b31b7aa1324d080fd29e4f240b1c03ac`. D01–D40 fulfill the initial doll-focused request; D41 onward continue the user’s instruction to iterate until stopped.
 
-Each pass has a concrete regression, observed RED/GREEN results and its own local commit; the GitHub PR receives four grouped checkpoints. Rendered reviews occur at checkpoints, not as forty separate device tests.
+Each pass has a concrete regression, observed RED/GREEN results and its own local commit; the GitHub PR receives grouped checkpoints. Rendered reviews occur at checkpoints, not as separate device tests for every pass.
 
 | Pass | Refinement | Local commit | Cumulative art checks |
 |---|---|---|---|
@@ -47,5 +47,17 @@ Each pass has a concrete regression, observed RED/GREEN results and its own loca
 | D39 | Rigid detail batching | `e528752` | 69 |
 | D40 | Reusable portrait resources | `8b13420` | 83 |
 | D41 | Cup-to-hand attachment | `f4da361` | 84 |
+| D42 | Tea wrist alignment | `28bf17a` | 85 |
+| D43 | Grounded idle shoes | `c9cc5c1` | 86 |
+| D44 | Sculpted smile contours | `c2f4cd8` | 87 |
+| D45 | Fitted spectacles | `25943d8` | 88 |
+| D46 | Sculpted finger silhouettes | `f563812` | 89 |
+| D47 | Fine sculpted hair grain | `a2b5c5c` | 90 |
+| D48 | Lace skirt edging | `8deb8a6` | 91 |
+| D49 | Sewn Peter Pan collars | `9bc2aae` | 92 |
+| D50 | Care-first facial reactions | `89c79d0` | 93 |
+| D51 | Proportioned braid ties | `05408c0` | 94 |
+| D52 | Single-pass stitched collars | `1e71f94` | 95 |
+| D53 | Readable portrait controls | `57e8c34` | 96 |
 
 All rows have retained failing and passing assertion logs and a fresh unit/build log. The commit IDs identify the exportable local Git bundle; the remote PR receives grouped checkpoint commits. Final rendered results are recorded separately after executing CI.

@@ -1,4 +1,5 @@
 import * as T from 'three';
+import {shapeMouth} from './doll-expression.js';
 import {ball,ring} from './primitives.js';
 import {craftMaterial} from './textiles.js';
 const rotation=new T.Quaternion();
@@ -9,7 +10,8 @@ export function createArm(parent,sign,def,skin){
  const forearm=new T.Group();forearm.name='articulated-forearm';forearm.userData.noBatch=true;forearm.position.set(0,-.132,0);arm.add(forearm);arm.forearm=forearm;
  ball(forearm,0,-.051,0,.038,.068,.038,skin);ring(forearm,0,-.096,0,.04,.005,0xe6d3bc,true);
  const hand=new T.Group();hand.name='articulated-hand';hand.userData.noBatch=true;hand.position.set(0,-.129,.01);forearm.add(hand);arm.hand=hand;
- const palm=ball(hand,0,-.006,0,.039,.048,.021,skin);palm.name='porcelain-palm';
+ const palm=ball(hand,0,.004,0,.034,.035,.021,skin);palm.name='porcelain-palm';
+ for(let i=0;i<4;i++){const length=[.022,.029,.027,.018][i],finger=new T.Mesh(new T.CapsuleGeometry(.0075,length,3,8),skin);finger.name='porcelain-finger';finger.position.set(-.0225+i*.015,-.028-length/2,0);finger.castShadow=true;hand.add(finger)}
  const thumb=ball(hand,-sign*.030,.008,.006,.015,.026,.013,skin);thumb.name='porcelain-thumb';thumb.rotation.z=-sign*.38;
  arm.rotation.z=sign*.19;return arm;
 }
@@ -35,8 +37,8 @@ export function gaze(v,selected,yaw,motion,dt){
 }
 
 export function express(v,d,still,dt){
- const mood=d.action==='rest'||d.energy<32?'sleepy':d.action==='play'?'delighted':d.action==='soothe'?'comforted':Math.min(d.comfort,d.hunger)<25?'worried':'content';
- v.expression=mood;
+ const mood=d.action==='rest'?'sleepy':d.action==='play'?'delighted':d.action==='soothe'?'comforted':d.action==='tea'?'content':d.energy<32?'sleepy':Math.min(d.comfort,d.hunger)<25?'worried':'content';
+ v.expression=mood;shapeMouth(v.mouth,mood,dt,still);
  const brow=mood==='worried'?.19:mood==='sleepy'?-.09:mood==='delighted'?-.13:0;
  v.brows.forEach((b,i)=>{const z=(i===0?-1:1)*brow;b.rotation.z=still?z:T.MathUtils.damp(b.rotation.z,z,8,dt);b.position.y=mood==='delighted'?.103:.091});
  const width=mood==='worried'?.79:mood==='delighted'?1.18:mood==='sleepy'?.90:1.03;
@@ -70,7 +72,8 @@ export function carePose(v,d,t,still){
  if(d.action==='soothe'){aimArm(v.arms[0],[-.067,.724,.181]);aimArm(v.arms[1],[.067,.714,.189]);v.head.rotation.x=.09+(still?0:Math.sin(t*1.2)*.012)}
  if(d.action==='tea'){
   const age=Math.max(0,t-(Number.isFinite(d.lastCare)?d.lastCare:t)),lift=still?1:age<.85?smooth(age/.85):age<=2.55?1:1-smooth((age-2.55)/1.30);
-  v.teaPhase=lift;aimArm(v.arms[1],[.08,.811,.214],lift);aimArm(v.arms[0],[-.055,.790,.205],lift);v.head.rotation.x=.28*lift;
+  v.teaPhase=lift;aimArm(v.arms[1],[.08,.811,.214],lift);aimArm(v.arms[0],[-.030,.778,.185],lift);v.head.rotation.x=.28*lift;
+  v.arms.forEach((arm,i)=>{const parent=arm.quaternion.clone().multiply(arm.forearm.quaternion),palm=new T.Quaternion().setFromAxisAngle(new T.Vector3(1,0,0),i===0?-Math.PI/2:-.35);arm.hand.quaternion.slerp(parent.invert().multiply(palm),lift)});
  }
 }
 

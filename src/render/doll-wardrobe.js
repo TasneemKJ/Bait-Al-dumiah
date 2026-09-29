@@ -43,7 +43,7 @@ const shoeGeometry=new T.SphereGeometry(1,16,10);
 export function createFoot(parent,def,sign){
  const root=new T.Group();root.name={lina:'rose-mary-jane',noor:'soft-moon-slipper',sami:'laced-tinker-boot'}[def.id];root.userData.noBatch=true;root.position.set(0,-.323,.059);parent.add(root);
  const color={lina:0x9e5e72,noor:0xb1bfaa,sami:0x665065}[def.id],material=def.id==='noor'?craftMaterial(color):mat(color,{roughness:.58});
- const sole=new T.Mesh(shoeGeometry,mat(def.id==='noor'?0xb7a18e:0x513a46));sole.scale.set(.099,.015,.152);sole.position.y=-.043;root.add(sole);root.sole=sole;
+ const sole=new T.Mesh(shoeGeometry,mat(def.id==='noor'?0xb7a18e:0x513a46));sole.scale.set(.099,.015,.152);sole.position.y=-.062;root.add(sole);root.sole=sole;
  const upper=new T.Mesh(shoeGeometry,material);upper.scale.set(.093,def.id==='noor'?.055:.064,.147);upper.castShadow=true;root.add(upper);root.upper=upper;
  if(def.id==='lina'){const strap=new T.Mesh(new T.TorusGeometry(.086,.008,4,20,Math.PI),mat(0xebcbbd));strap.name='mary-jane-strap';strap.scale.y=.36;strap.position.set(0,.037,.025);root.add(strap);root.strap=strap;ball(root,sign*.082,.045,.03,.012,.012,.008,0xc59b60)}
  if(def.id==='sami'){cylinder(root,0,.059,-.043,.070,.075,material);root.laces=[];for(let i=0;i<3;i++){const lace=box(root,0,.075+i*.012,.017-i*.018,.095,.006,.011,0xd8c3aa,true);lace.rotation.z=(i%2?1:-1)*.14;root.laces.push(lace)}}

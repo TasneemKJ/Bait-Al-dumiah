@@ -1,4 +1,5 @@
 import * as T from 'three';
+import {scalpMaterial} from './doll-hair-grain.js';
 import {mat,ball,ring,batch} from './primitives.js';
 import {craftMaterial} from './textiles.js';
 const caps=new Map();
@@ -10,13 +11,13 @@ function capGeometry(id){
  for(let j=0;j<h;j++)for(let i=0;i<w;i++){const a=j*(w+1)+i,b=a+w+1;indices.push(a,b,a+1,a+1,b,b+1)}
  const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(vertices,3));g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));g.setIndex(indices);g.computeVertexNormals();caps.set(id,g);return g;
 }
-export function createHair(parent,def){const root=new T.Group();root.name='sculpted-hairstyle';parent.add(root);const material=mat(def.hair,{roughness:.66});const cap=new T.Mesh(capGeometry(def.id),material);cap.name='swept-hair-cap';cap.userData.noBatch=true;cap.castShadow=true;cap.receiveShadow=true;root.add(cap);const tails=def.id==='lina'?[-1,1].map(sign=>createPlait(root,sign,def)):[];const bun=def.id==='noor'?createBun(root,def):null,temples=def.id==='noor'?templeLocks(root,def):[];const fringe=def.id==='sami'?sidePart(root,def):[];const bows=tails.map((tail,i)=>fabricBow(tail,(i===0?-1:1)*.035,-.32,.043,def.color));if(bun)bows.push(fabricBow(root,-.21,.232,.164,0xd3ba8b));return {root,cap,tails,bun,temples,fringe,bows}}
+export function createHair(parent,def){const root=new T.Group();root.name='sculpted-hairstyle';parent.add(root);const material=scalpMaterial(def.hair);const cap=new T.Mesh(capGeometry(def.id),material);cap.name='swept-hair-cap';cap.userData.noBatch=true;cap.castShadow=true;cap.receiveShadow=true;root.add(cap);const tails=def.id==='lina'?[-1,1].map(sign=>createPlait(root,sign,def)):[];const bun=def.id==='noor'?createBun(root,def):null,temples=def.id==='noor'?templeLocks(root,def):[];const fringe=def.id==='sami'?sidePart(root,def):[];const bows=tails.map((tail,i)=>fabricBow(tail,(i===0?-1:1)*.035,-.32,.043,def.color));if(bun)bows.push(fabricBow(root,-.21,.232,.164,0xd3ba8b));return {root,cap,tails,bun,temples,fringe,bows}}
 
 function hairTube(parent,points,radius,color,name){const path=new T.CatmullRomCurve3(points.map(p=>new T.Vector3(...p)));const mesh=new T.Mesh(new T.TubeGeometry(path,32,radius,6,false),mat(color,{roughness:.66}));mesh.name=name;mesh.castShadow=true;parent.add(mesh);return mesh}
 function createPlait(parent,sign,def){
  const root=new T.Group();root.name='lina-plait';root.userData.noBatch=true;root.position.set(sign*.307,.085,-.022);parent.add(root);root.strands=[];
  for(let strand=0;strand<2;strand++){const points=[];for(let j=0;j<=30;j++){const t=j/30,a=t*Math.PI*5+strand*Math.PI;points.push([Math.sin(a)*.035+sign*t*.035,-t*.36,Math.cos(a)*.041])}root.strands.push(hairTube(root,points,.031,def.hair,'woven-hair-strand'))}
- const tie=ring(root,sign*.035,-.334,0,.048,.009,def.color,true);tie.scale.y=.75;return root;
+ const tie=ring(root,sign*.035,-.334,0,.048,.009,def.color,true);tie.scale.y*=.75;return root;
 }
 
 function createBun(parent,def){
