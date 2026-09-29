@@ -17,7 +17,7 @@ Facial attachment at three angles; hair/eye/glasses clearance; garment/hand cont
 For each checkbox: add a concrete geometry/material/behavior assertion to `tests/art-atelier-checks.js`, run `CHROMIUM_PATH=/usr/bin/chromium python scripts/art_check.py` and inspect the expected failure, implement only that refinement, rerun cumulative art + `npm run verify` + `scripts/ui_check.py`, then commit and ledger. All source paths below are under `src/render/`.
 
 - [x] 01–10 Face/body balance (`dolls.js`, `doll-face.js`): balanced head scale, cheek contour, surface attachment, eye shape, painted upper lid, expressive smile, integrated button nose, tucked ears, complexion, visible neck.
-- [ ] 11–20 Hair (`doll-hair.js`, `doll-hair-grain.js`, `doll-couture.js`): quiet scalp, flattened tapered locks, individual Lina/Noor/Sami fringes, tapered plaits, wrapped bun, side locks, smaller sewn bows, directional grain.
+- [x] 11–20 Hair (`doll-hair.js`, `doll-hair-grain.js`, `doll-couture.js`): quiet scalp, flattened tapered locks, individual Lina/Noor/Sami fringes, tapered plaits, wrapped bun, side locks, smaller sewn bows, directional grain.
 - [ ] 21–30 Clothing/form (`dolls.js`, `doll-wardrobe.js`, `doll-acting.js`, `doll-couture.js`, `doll-trimmings.js`): torso, sleeves, hands, trouser legs, dress drape, rounded apron, contrasting knit, shaped pockets, footwear, garment contact.
 - [ ] 31–40 Acting/presentation (`doll-acting.js`, `doll-expression.js`, `dolls.js`, existing portrait/camera adapters): grounded gait, weight transfer, tea, clapping, sleep, reassurance, bounded gaze/blink, expression caching, portrait clarity, mobile framing.
 

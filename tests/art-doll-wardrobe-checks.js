@@ -14,7 +14,7 @@ const {doll}=fixture();const cap=doll.hairStyle?.cap;assert(cap,'hair remains an
 });
 
 test("D12: Lina plaits",()=>{
-const {doll}=fixture();assert(doll.hairStyle.tails.length===2,'Lina has no paired plaits');for(const braid of doll.hairStyle.tails){assert(braid.strands?.length===2,'plait is not interwoven');const p=braid.strands[0].geometry.attributes.position;let low=Infinity,high=-Infinity;for(let i=0;i<p.count;i++){low=Math.min(low,p.getZ(i));high=Math.max(high,p.getZ(i))}assert(high-low>.07,'braid has no overlapping depth');assert(braid.userData.noBatch,'braid cannot follow the head independently')}
+const {doll}=fixture();assert(doll.hairStyle.tails.length===2,'Lina has no paired plaits');for(const braid of doll.hairStyle.tails){assert(braid.strands?.length===3,'plait is not interwoven');const p=braid.strands[0].geometry.attributes.position;let low=Infinity,high=-Infinity;for(let i=0;i<p.count;i++){low=Math.min(low,p.getZ(i));high=Math.max(high,p.getZ(i))}assert(high-low>.07,'braid has no overlapping depth');assert(braid.userData.noBatch,'braid cannot follow the head independently')}
 });
 
 test("D13: Noor braided bun",()=>{
@@ -22,7 +22,7 @@ const {doll}=fixture('noor');const bun=doll.hairStyle.bun;assert(bun?.strands.le
 });
 
 test("D14: Sami side part",()=>{
-const {doll}=fixture('sami');const locks=doll.hairStyle.fringe;assert(locks?.length===4,'Sami has no individual side-part fringe');assert(locks.every(o=>o.geometry.type==='BufferGeometry'),'fringe is not a lofted, tapered mass');let front=0;for(const lock of locks){lock.geometry.computeBoundingBox();front=Math.max(front,lock.geometry.boundingBox.max.z)}assert(front>.24,'side-swept locks are buried in the scalp');
+const {doll}=fixture('sami');const locks=doll.hairStyle.fringe;assert(locks?.length===6,'Sami has no individual side-part fringe');assert(locks.every(o=>o.geometry.type==='BufferGeometry'),'fringe is not a lofted, tapered mass');let front=0;for(const lock of locks){lock.geometry.computeBoundingBox();front=Math.max(front,lock.geometry.boundingBox.max.z)}assert(front>.24,'side-swept locks are buried in the scalp');
 });
 
 test("D15: Fabric ribbon folds",()=>{

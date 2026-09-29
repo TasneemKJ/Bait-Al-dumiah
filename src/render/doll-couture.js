@@ -41,8 +41,8 @@ export function sweptLock(points,width,depth) {
  const path=new T.CatmullRomCurve3(points.map(p=>new T.Vector3(...p))),center=new T.Vector3(),tangent=new T.Vector3(),side=new T.Vector3();
  return closeSurfaceSeam(gridSurface(12,24,(u,v)=>{
   path.getPoint(v,center);path.getTangent(v,tangent);side.set(-tangent.y,tangent.x,0).normalize();
-  const a=u*Math.PI*2,taper=.035+.965*Math.pow(Math.sin(Math.PI*v),.56),rib=1+.035*Math.cos(a*6);
-  return [center.x+side.x*Math.cos(a)*width*taper,center.y+side.y*Math.cos(a)*width*taper,center.z+Math.sin(a)*depth*taper*rib];
+  const a=u*Math.PI*2,taper=(.20+.80*Math.pow(Math.sin(Math.PI*v),.65))*(1-.72*v),rib=1+.018*Math.cos(a*6);
+  return [center.x+side.x*Math.cos(a)*width*taper,center.y+side.y*Math.cos(a)*width*taper,center.z+Math.sin(a)*depth*taper*rib*.62];
  },true),12,24);
 }
 
