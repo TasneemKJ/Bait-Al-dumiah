@@ -43,6 +43,8 @@ jobs:
       - name: Verify Three artwork construction
         run: python scripts/art_check.py
       - name: Capture actual doll models
+        env:
+          DOLL_BASELINE: b99bf28e8eba7dd525381ff8ec99d64bdf35a715
         run: python scripts/doll_capture.py
       - name: Retain model previews for early visual review
         uses: actions/upload-artifact@v4

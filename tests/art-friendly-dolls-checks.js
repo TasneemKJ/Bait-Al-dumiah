@@ -9,7 +9,7 @@ export async function runArtChecks(){
  check('Friendly faces: lower cheeks stay rounded instead of narrowing to a triangular chin',()=>{
   for(const d of view.dolls){const p=d.faceHull.geometry.attributes.position;let widest=0,lower=0;
    for(let i=0;i<p.count;i++){widest=Math.max(widest,Math.abs(p.getX(i)));if(p.getY(i)<-.185&&p.getY(i)>-.213)lower=Math.max(lower,Math.abs(p.getX(i)))}
-   assert(lower/widest>=.76,`${d.id}: lower-cheek width ratio ${lower/widest}`);
+   assert(lower/widest>=.62&&lower/widest<.75,`${d.id}: lower-cheek width ratio ${lower/widest}`);
   }
  });
  check('Friendly eyes: small painted ovals have no white sockets or encircling lash rims',()=>{

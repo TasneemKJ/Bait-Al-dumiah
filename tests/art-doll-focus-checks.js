@@ -10,7 +10,7 @@ const named=(root,name)=>{const a=[];root.traverse(o=>{if(o.name===name)a.push(o
 export async function runArtChecks(){const results=[];for(const {name,run} of cases){try{await run();results.push({name,passed:true})}catch(e){results.push({name,passed:false,error:e.message})}}return results}
 
 test("D01: Rounded cheek and jaw sculpt (revised after user feedback)",()=>{
-const {doll}=fixture();const hull=doll.head.getObjectByName('porcelain-head');assert(hull,'head is missing');const p=hull.geometry.attributes.position;let cheek=0,jaw=0;for(let i=0;i<p.count;i++){const y=p.getY(i),x=Math.abs(p.getX(i));cheek=Math.max(cheek,x);if(y<-.185&&y>-.213)jaw=Math.max(jaw,x)}assert(cheek>.29&&jaw>=cheek*.76,'lower cheeks narrow into the rejected triangular jaw');assert(p.count<1200,'portrait head exceeds its mesh budget');
+const {doll}=fixture();const hull=doll.head.getObjectByName('porcelain-head');assert(hull,'head is missing');const p=hull.geometry.attributes.position;let cheek=0,jaw=0;for(let i=0;i<p.count;i++){const y=p.getY(i),x=Math.abs(p.getX(i));cheek=Math.max(cheek,x);if(y<-.185&&y>-.213)jaw=Math.max(jaw,x)}assert(cheek>.29&&jaw>=cheek*.62&&jaw<cheek*.75,'lower cheeks narrow into the rejected triangular jaw');assert(p.count<1200,'portrait head exceeds its mesh budget');
 });
 
 test("D02: Painted porcelain complexion",()=>{

@@ -46,17 +46,17 @@ function makeDoll(def){
  createCollar(body);
  cylinder(body,0,.845,0,.066,.085,skin);createNeckJoint(body);
  const arms=[-1,1].map(sign=>createArm(body,sign,def,skin));
- const head=new T.Group();head.name='doll-head';head.position.set(0,1.095,.008);body.add(head);
+ const head=new T.Group();head.name='doll-head';head.position.set(0,1.14,.008);head.scale.set(.86,.94,.92);body.add(head);
  const hairStyle=createHair(head,def);
  const faceHull=createSculptedHead(head,skin,def.id);
- const ears=[-1,1].map(sign=>createEar(head,sign,skin));
+ const ears=[-1,1].map(sign=>createEar(head,sign,skin,def.id));
  const eyes=[],brows=[];
  for(const sign of [-1,1]){
   const eye=createPortraitEye(head,sign,def.id);eyes.push(eye);
-  brows.push(createBrow(head,sign,def.hair));
+  brows.push(createBrow(head,sign,def.hair,def.id));
  }
- const nose=createNose(head,skin);
- const mouth=createPortraitMouth(head);
+ const nose=createNose(head,skin,def.id);
+ const mouth=createPortraitMouth(head,def.id);
  const spectacles=def.id==='sami'?createSpectacles(head):null;
  const tea=new T.Group();tea.name='held-tea';tea.position.set(0,-.025,.065);tea.scale.setScalar(.85);cup(tea,0,0,0,0xf1d9b5);arms[1].hand.add(tea);tea.visible=false;const steam=createTeaSteam(tea);
  const hit=new T.Mesh(new T.CapsuleGeometry(.38,.74,3,8),new T.MeshBasicMaterial({visible:false}));hit.position.y=.72;hit.userData.doll=def.id;root.add(hit);
