@@ -1,4 +1,4 @@
-import {sweptLock} from './doll-couture.js';
+import {sweptLock,gridSurface} from './doll-couture.js';
 import * as T from 'three';
 import {scalpMaterial} from './doll-hair-grain.js';
 import {mat,ball,ring,batch} from './primitives.js';
@@ -51,6 +51,14 @@ function storybookFringe(parent,def){
 
  ];
  const widths={lina:[.046,.049,.037,.046,.047,.036],noor:[.046,.046,.041,.035,.037],sami:[.043,.045,.036,.037,.031,.033]}[def.id];
+ // Join the outer sweep to the core mass. A front-only view hid the daylight
+ // gap between these two locks; the inset bridge also closes oblique views.
+ if(def.id==='noor'){
+  const inner=new T.CatmullRomCurve3(starts[0].map(p=>new T.Vector3(...p))),outer=new T.CatmullRomCurve3(starts[4].map(p=>new T.Vector3(...p)));
+  const g=gridSurface(8,20,(u,v)=>{const t=.06+.93*v,a=inner.getPoint(t),b=outer.getPoint(t),p=a.lerp(b,u);return [p.x,p.y,p.z-.005*Math.sin(u*Math.PI)]});
+  const join=new T.Mesh(g,scalpMaterial(def.hair));join.name='joined-side-sweep';join.castShadow=join.receiveShadow=true;parent.add(join);
+ }
+
  return starts.map((points,i)=>{
   const mesh=new T.Mesh(sweptLock(points,widths[i],.020),scalpMaterial(def.hair));
   mesh.name='sculpted-fringe';mesh.castShadow=mesh.receiveShadow=true;parent.add(mesh);return mesh;

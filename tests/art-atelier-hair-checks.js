@@ -28,3 +28,10 @@ test("A18: Shape fine tapered temple locks on all three dolls without framing th
 test("A19: Scale hair ribbons to sewn ties instead of oversized bow ornaments", ()=>{for(const d of fixture().view.dolls)for(const b of d.hairStyle.bows){const s=new T.Box3().setFromObject(b).getSize(new T.Vector3());assert(s.x<.153&&s.y<.105,'bow overpowers the hair');assert(rigParts(b,'folded-bow-loop').length===2,'fabric folds were removed')}});
 
 test("A20: Paint directional hair tones with shared color maps rather than a single flat cap", ()=>{const a=fixture().view,b=fixture().view;for(let i=0;i<3;i++){const m=a.dolls[i].hairStyle.cap.material;assert(m.map?.isCanvasTexture,'hair has no directional painted tones');assert(m.map===b.dolls[i].hairStyle.cap.material.map,'hair color texture is recreated');const c=m.map.image.getContext('2d'),x=c.getImageData(25,15,1,1).data,y=c.getImageData(100,230,1,1).data;assert(x.some((v,k)=>k<3&&Math.abs(v-y[k])>3),'hair tone map is flat');assert(m.map.image.width<=256,'hair map exceeds budget')}});
+
+
+test("Review: Noor's upper sweep has no see-through gap at a three-quarter angle", ()=>{
+ const {view,state,doll}=fixture('noor');state.settings.reducedMotion=true;view.update(state,.1,'noor');doll.root.position.set(0,0,0);doll.root.rotation.y=.4;doll.root.updateMatrixWorld(true);
+ const camera=new T.OrthographicCamera(-.43,.43,.43,-.43,.1,50);camera.position.set(0,1.23,8);camera.lookAt(0,1.11,0);camera.updateMatrixWorld(true);
+ for(const [x,y] of [[680,240],[690,250],[686,246]]){const ray=new T.Raycaster();ray.setFromCamera(new T.Vector2(x/900*2-1,1-y/900*2),camera);const hits=ray.intersectObject(doll.hairStyle.root,true).filter(h=>h.object.material.visible);assert(hits.length>0,'background shows between the cap and the upper swept strand')}
+});
