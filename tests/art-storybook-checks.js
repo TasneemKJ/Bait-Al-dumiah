@@ -1,5 +1,7 @@
 import * as T from 'three';
 import {createDolls} from '../src/render/dolls.js';
+import {createHair} from '../src/render/doll-hair.js';
+import {DOLLS} from '../src/content.js';
 import {createState} from '../src/simulation.js';
 import {rigParts} from '../src/render/doll-rig-batch.js';
 const assert=(ok,text)=>{if(!ok)throw Error(text)};
@@ -25,6 +27,19 @@ export async function runArtChecks(){
  });
  check('Storybook: shoes have sculpted toe boxes instead of ellipsoid beads',()=>{
   for(const d of view.dolls)for(const leg of d.legs){assert(leg.foot.upper.geometry.type==='BufferGeometry','shoe upper is still a sphere');assert(leg.foot.upper.geometry.attributes.position.count<900,'shoe exceeds small-model budget')}
+ });
+ check('Storybook: Sami fringe leaves both spectacle rims intact in front and three-quarter views',()=>{
+  const root=new T.Group(),hair=createHair(root,DOLLS.find(d=>d.id==='sami')),meshes=[];
+  hair.root.traverse(o=>{if(o.isMesh)meshes.push(o)});
+  for(const yaw of [-.4,0,.4]){
+   root.rotation.y=yaw;root.updateMatrixWorld(true);
+   for(const sign of [-1,1])for(let i=0;i<=16;i++){
+    const a=i/16*Math.PI,point=root.localToWorld(new T.Vector3(sign*.105+Math.cos(a)*.071,.007+Math.sin(a)*.071,.304));
+    const ray=new T.Raycaster(point.clone().add(new T.Vector3(0,0,2)),new T.Vector3(0,0,-1));
+    const hit=ray.intersectObjects(meshes,false)[0];
+    assert(!hit||hit.distance>=1.998,`hair obscures rim at yaw ${yaw}, side ${sign}, angle ${i}`);
+   }
+  }
  });
  check('Storybook: named model surfaces remain finite through every care pose',()=>{
   const state=createState();for(const action of ['idle','tea','rest','soothe','play'])for(const still of [true,false]){state.settings.reducedMotion=still;state.elapsed=1.8;state.dolls.forEach(d=>{d.action=action;d.lastCare=0});view.update(state,.016,'lina',.2);view.dolls.forEach(d=>d.root.traverse(o=>assert([...o.position,...o.quaternion,...o.scale].every(Number.isFinite),'invalid joint')))}

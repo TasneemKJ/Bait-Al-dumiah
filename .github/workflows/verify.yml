@@ -44,6 +44,12 @@ jobs:
         run: python scripts/art_check.py
       - name: Capture actual doll models
         run: python scripts/doll_capture.py
+      - name: Retain model previews for early visual review
+        uses: actions/upload-artifact@v4
+        with:
+          name: doll-model-preview
+          path: artifacts/dolls/
+          retention-days: 7
       - name: Play desktop and mobile game flows
         run: npm run test:browser
       - name: Record source identity
