@@ -46,7 +46,7 @@ function makeDoll(def){
  createCollar(body);
  cylinder(body,0,.845,0,.066,.085,skin);createNeckJoint(body);
  const arms=[-1,1].map(sign=>createArm(body,sign,def,skin));
- const head=new T.Group();head.name='doll-head';head.position.set(0,1.14,.008);head.scale.set(.86,.94,.92);body.add(head);
+ const head=new T.Group();head.name='doll-head';head.position.set(0,1.12,.008);head.scale.set(.80,.88,.86);body.add(head);
  const hairStyle=createHair(head,def);
  const faceHull=createSculptedHead(head,skin,def.id);
  const ears=[-1,1].map(sign=>createEar(head,sign,skin,def.id));
