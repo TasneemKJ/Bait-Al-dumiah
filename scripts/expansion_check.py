@@ -47,6 +47,9 @@ try:
   check('completed ritual rewards earned mastery',state()['activities']['mastery']['tea']==1 and state()['buttons']==before+7)
   check('result is visible',page.locator('.ritual-result').is_visible())
   page.screenshot(path=str(OUT/'03-earned-reward.png'))
+  page.locator('[data-action="close"]').click()
+  page.wait_for_function('document.querySelector(".object-controls") && !document.querySelector(".object-controls").hidden')
+  check('ritual camera and accessible objects agree after completion',page.locator('[data-object="prop:tea-set"]').is_visible() and page.locator('[data-room="kitchen"]').get_attribute('aria-pressed')=='true')
   page.reload();page.wait_for_function('window.dollhouse && !document.querySelector("#loading")')
   check('mastery survives reload',state()['activities']['mastery']['tea']==1)
   # Seed an earned-state fixture to inspect restoration and all-tier rendering.

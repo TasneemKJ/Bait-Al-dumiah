@@ -50,7 +50,7 @@ async function dispatch(action,value){
   case 'activity-hint':if(sim.toggleActivityHint(state).ok)ui.setActivityResult(null);break;
   case 'begin-activity':{
    if(manualPause||fatal){say(ui.t('pausedActivity'));break}if(ui.panel)ui.close();
-   const result=sim.beginActivity(state,value);if(result.ok){ui.setActivityResult(null);ui.open('activities');world?.focusRoom(ACTIVITY_ROOM[value]);save()}else say(ui.t(result.reason));break;
+   const result=sim.beginActivity(state,value);if(result.ok){ui.setActivityResult(null);ui.open('activities');dispatch('focus-room',ACTIVITY_ROOM[value]);save()}else say(ui.t(result.reason));break;
   }
   case 'activity-input':{
    const result=sim.activityInput(state,value);if(result.ok){if(!result.mistake)audio.effect(result.complete?'place':'care');ui.setActivityResult(result);save();ui.tick()}else say(ui.t(result.reason));break;
