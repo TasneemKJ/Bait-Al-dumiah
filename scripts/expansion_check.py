@@ -154,7 +154,7 @@ try:
   check('music-box action records a current animation timestamp',state()['elapsed']-state()['decor'][2]['lastUse']<1)
   page.wait_for_function('Math.abs(window.dollhouse.visual().reactivePoses[3]?.turn??0) > .02')
   turn=page.evaluate('window.dollhouse.visual().reactivePoses[3].turn')
-  page.wait_for_function('turn=>Math.abs(window.dollhouse.visual().reactivePoses[3].turn-turn)>.25',turn)
+  page.wait_for_function('turn=>Math.abs(window.dollhouse.visual().reactivePoses[3].turn-turn)>.25',arg=turn)
   check('wound music box visibly turns in the rendered room',True)
   page.screenshot(path=str(OUT/'14-wound-music-box.png'))
   page.locator('[data-action="panel-settings"]').click();page.locator('[data-field="motion"]').check();page.locator('[data-action="close"]').click()
