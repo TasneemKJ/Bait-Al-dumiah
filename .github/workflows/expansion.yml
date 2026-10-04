@@ -6,7 +6,9 @@ permissions:
 jobs:
   expansion:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # This journey performs all three real rituals and the owned-keepsake tail.
+    # cf787a2 reached 43/48 checks at the former 20-minute cap, with no failures.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

@@ -41,9 +41,40 @@ def targets_fit(label):
   })};
  }''')
  check(label+' has five real 44px targets clear of the work strip and controls',result['count']==5 and set(result['keys'])=={0,1,2,3,'moon'} and result['valid'])
+def house_hud_fit(label):
+ result=page.evaluate(r'''()=>{
+  const rect=e=>{const r=e.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}};
+  const visible=e=>e.getClientRects().length&&getComputedStyle(e).visibility==='visible';
+  const inside=r=>r.width>0&&r.height>0&&r.left>=0&&r.top>=0&&r.right<=innerWidth&&r.bottom<=innerHeight;
+  const titleElement=document.querySelector('.brand h1'),clueElement=document.querySelector('.objective');
+  const title=rect(titleElement),clue=rect(clueElement);
+  const objectives=[...document.querySelectorAll('[data-action="objective"]')],objectiveRects=objectives.map(rect);
+  const normalize=text=>(text??'').replace(/\s+/g,' ').trim(),label=normalize(objectives[0]?.textContent);
+  const identity=e=>e?{tag:e.tagName,id:e.id,class:typeof e.className==='string'?e.className:'',action:e.dataset?.action??null}:null;
+  const labelCopies=label?[...document.querySelectorAll('#app *')].filter(e=>(e.matches('button,a,[role="button"]')||e.children.length===0)&&normalize(e.textContent)===label).slice(0,12).map(e=>{
+   const c=getComputedStyle(e);return {element:identity(e),rect:rect(e),style:{display:c.display,visibility:c.visibility,opacity:c.opacity,position:c.position,transform:c.transform}};
+  }):[];
+  const topEdge=[40,120,200].flatMap(x=>[2,12,22].map(y=>{
+   const px=Math.max(0,Math.min(innerWidth-1,x)),py=Math.max(0,Math.min(innerHeight-1,y)),hit=document.elementFromPoint(px,py);
+   return {x:px,y:py,hit:identity(hit),button:identity(hit?.closest('button,a,[role="button"]'))};
+  }));
+  const roomButtons=[...document.querySelectorAll('.room-views [data-room]')];
+  const dockButtons=[...document.querySelectorAll('.dock[data-expanded=false]>button')].filter(visible);
+  const controls=[...roomButtons,...dockButtons].map(e=>{
+   const r=rect(e),hit=document.elementFromPoint((r.left+r.right)/2,(r.top+r.bottom)/2);
+   return {key:e.dataset.room??e.dataset.action,rect:r,reachable:visible(e)&&inside(r)&&r.width>=44&&r.height>=44&&Boolean(hit&&e.contains(hit))};
+  });
+  return {viewport:{width:innerWidth,height:innerHeight},title,clue,objectiveRects,labelCopies,topEdge,singleObjective:objectives.length===1&&visible(objectives[0])&&inside(objectiveRects[0])&&objectiveRects[0].left>=clue.left&&objectiveRects[0].right<=clue.right&&objectiveRects[0].top>=clue.top&&objectiveRects[0].bottom<=clue.bottom,clearTitle:visible(titleElement)&&visible(clueElement)&&inside(title)&&inside(clue)&&!(title.left<clue.right&&title.right>clue.left&&title.top<clue.bottom&&title.bottom>clue.top),roomKeys:roomButtons.map(e=>e.dataset.room),controls};
+ }''')
+ print('SCENE_HUD_BOUNDS '+json.dumps({'label':label,**result}),flush=True)
+ check(label+' title and clue stay fully visible without overlap',result['clearTitle'])
+ check(label+' has one visible objective action inside its clue card',result['singleObjective'])
+ check(label+' room and dock controls remain real reachable 44px targets',set(result['roomKeys'])=={'kitchen','parlor','studio','bedroom'} and len(result['controls'])==7 and all(c['reachable'] for c in result['controls']))
+
 def start_from_scene():
  page.locator('[data-room=bedroom]').click()
  page.wait_for_function('!window.dollhouse.visual().cameraMoving',timeout=60000)
+ house_hud_fit('bedroom entry')
  capture('00-bedroom-mobile')
  for _ in range(2):
   p=page.evaluate('window.dollhouse.objects().find(p=>p.key==="prop:moon-mobile")')
@@ -147,6 +178,7 @@ try:
   page.wait_for_function('!window.dollhouse.visual().chimeActive',timeout=60000);settled()
   check('an unfinished replay restores canvas controls and keeps earned progress',status() is None and snapshot()['buttons']==stable and snapshot()['activities']['mastery']['lullaby']==1 and page.locator('.room-views').is_visible() and page.evaluate('document.activeElement.id==="world"&&document.querySelector("#world").getAttribute("role")!=="application"'))
   check('leaving retains an earned star in the bedroom',page.evaluate('window.dollhouse.visual().chimes.earnedStars===1'))
+  house_hud_fit('returned house')
   capture('05-earned-constellation')
   if SCENARIO=='desktop':
    page.reload(wait_until='domcontentloaded',timeout=60000);page.wait_for_function('window.dollhouse&&!document.querySelector("#loading")',timeout=90000)
