@@ -70,7 +70,7 @@ try:
   complete_tea(page)
   check('completed physical ritual rewards earned mastery',state()['activities']['mastery']['tea']==1 and state()['buttons']==before+7)
   check('served result remains visible on the actual table',tea_status(page)['phase']=='served' and page.locator('#tea-work-status').is_visible())
-  page.screenshot(path=str(OUT/'03-earned-reward.png'))
+  page.screenshot(path=str(OUT/'03-earned-reward.png'),timeout=60000)
   tap_tea(page,'tray');page.wait_for_function('window.dollhouse.tea()===null')
   expose_objects(page)
   check('ritual camera and accessible objects agree after completion',page.locator('[data-object="prop:tea-set"]').is_visible() and page.locator('[data-room="kitchen"]').get_attribute('aria-pressed')=='true')

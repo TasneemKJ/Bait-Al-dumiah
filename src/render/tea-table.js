@@ -44,7 +44,10 @@ export function createTeaTable(parent){
  const handle=torus(pot,.074,.010,brass,[-.17,.005,-.015]);handle.rotation.y=.55;
  const tipOffset=new T.Vector3(.22,.035,0),spoutCurve=new T.CatmullRomCurve3([new T.Vector3(.13,.02,0),new T.Vector3(.18,.025,0),tipOffset]);
  mesh(pot,new T.TubeGeometry(spoutCurve,6,.025,6,false),brass);
- const motif=mesh(pot,new T.CircleGeometry(.033,5),cream,[0,.015,.153]);motif.rotation.z=.18;
+ const leaf=new T.Shape();leaf.moveTo(0,.042);leaf.lineTo(.024,.016);leaf.lineTo(.016,-.022);leaf.lineTo(0,-.036);leaf.lineTo(-.018,.016);leaf.closePath();
+ // The enamel reaches z=.16 here. Put the entire five-point painted leaf
+ // outside that hull so its center and tips remain visible in the work view.
+ const motif=mesh(pot,new T.ShapeGeometry(leaf),cream,[0,.015,.168]);motif.rotation.z=-.35;
  batch(pot);
  const spout=new T.Object3D();spout.name='tea-spout-anchor';spout.position.copy(tipOffset);pot.add(spout);
  const stream=mesh(root,new T.CylinderGeometry(.007,.012,1,8),amber);stream.name='tea-pouring-stream';stream.visible=false;stream.receiveShadow=false;

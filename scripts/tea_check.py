@@ -278,6 +278,17 @@ def run():
         working_high_stats = page.evaluate('window.dollhouse.stats()')
         check('tea adds at most five thousand visible triangles and twenty-four draws', working_high_stats['triangles'] - outside_stats['triangles'] < 5000 and working_high_stats['calls'] - outside_stats['calls'] <= 24)
         capture('01-desktop-empty')
+        # Retain the high-detail opening and its unchanged geometry gate. The
+        # long continuous-input journey uses the actual player quality setting;
+        # shared software WebGL can otherwise advance very little simulation
+        # time while screenshots consume minutes of wall time.
+        exit_tea()
+        panel('settings')
+        page.locator('[data-field="quality"]').select_option('low')
+        page.locator('#sheet [data-action="close"]').click()
+        page.wait_for_function('window.dollhouse.visual().quality==="low"')
+        enter()
+        check('low-quality replay enters through real UI with fresh empty cups', tea_status(page)['phase'] == 'pour' and all(c['fill'] == 0 for c in tea_status(page)['cups']) and state()['activities']['mastery']['tea'] == 0)
         # A held pot starts with no flow; its spout misses both cups in the gap.
         drag = PotDrag(page).down()
         try:
@@ -307,7 +318,8 @@ def run():
             page.wait_for_function('window.dollhouse.tea().flow>0 && window.dollhouse.tea().cups[0].fill>.3')
             page.wait_for_function('window.dollhouse.visual().tea.stream.visible')
             capture('03-desktop-mid-pour', moving=True)
-            page.wait_for_function('window.dollhouse.tea().cups[0].overfilled && window.dollhouse.tea().cups[0].fill>=1.05')
+            drag.aim(tea_status(page)['cups'][0], tilt=.64)
+            page.wait_for_function('window.dollhouse.tea().cups[0].overfilled && window.dollhouse.tea().cups[0].fill>=1.05', timeout=60000)
         finally:
             drag.release()
         dirty = tea_status(page)
@@ -557,8 +569,11 @@ def run():
     except Exception:
         if page and not page.is_closed():
             try:
-                page.screenshot(path=str(out/'failure.png'), timeout=20000)
                 (out/'failure-state.json').write_text(json.dumps({'state': state(), 'tea': tea_status(page), 'visual': page.evaluate('window.dollhouse.visual()'), 'errors': errors}, indent=2))
+            except Exception:
+                pass
+            try:
+                page.screenshot(path=str(out/'failure.png'), timeout=20000)
             except Exception:
                 pass
         raise
