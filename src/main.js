@@ -38,9 +38,11 @@ function announce(event){
 function showError(kind){fatal=true;syncPause();save();document.querySelector('#loading')?.remove();if(ui?.panel)ui.close();const error=document.createElement('section');error.className='error-screen';error.setAttribute('role','alert');const h=document.createElement('h2'),p=document.createElement('p'),b=document.createElement('button');h.textContent=ui.t(kind==='context'?'contextTitle':'webglTitle');p.textContent=ui.t(kind==='context'?'contextHelp':'webglHelp');b.textContent=ui.t('reload');b.addEventListener('click',()=>location.reload());error.append(h,p,b);host.append(error)}
 async function dispatch(action,value){
  switch(action){
+  case 'tools-state':if(value){storyUI?.clear();world?.clearObjectSelection();objectControls?.collapse()}break;
   case 'panel-state':panelOpen=value||false;syncPause();storyUI?.clear();world?.setEnabled(!panelOpen&&!manualPause&&!carrying);world?.clearObjectSelection();if(!value)ui.clearObject();objectControls?.update();if(value==='household'&&world){try{ui.setPortraits(world.getPortraits())}catch(error){console.warn('Resident portrait unavailable:',error)}}break;
   case 'select-object':{
    const o=objectInfo(state,value);if(!o||fatal||manualPause||panelOpen||ui.placement)break;
+   ui.collapseTools();
    if(storyUI?.select(value)){world?.focusRoom(o.room,true);host.dataset.focusRoom=o.room;host.dataset.focusDoll='';world?.selectObject(value);roomViews.update();objectControls?.update()}break;
   }
   case 'activate-object':{

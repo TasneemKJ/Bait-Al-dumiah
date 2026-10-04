@@ -5,6 +5,7 @@
 .dock[data-expanded=false]>.tools-toggle{padding-inline:14px;font-size:11px;min-width:120px;display:flex;flex-direction:row}
 .dock[data-expanded=false]>.icon-button{min-width:44px;width:44px;flex:none}
 .dock>.tools-toggle[aria-expanded=true]{background:#dcc8b5}
+#ui:has(.dock[data-expanded=true]) .room-views,#ui:has(.dock[data-expanded=true]) .object-controls,#ui:has(.dock[data-expanded=true]) .camera-tools,#ui:has(.dock[data-expanded=true]) .story-playfield{visibility:hidden}
 .room-views{bottom:85px;background:#f6ead9b3;border-radius:24px;box-shadow:none}.room-views button{min-height:44px}
 .scene-caption,.saved-note{display:none}.brand{top:22px;inset-inline-start:24px}.brand h1{font-size:25px}.brand .tagline{display:none}.brand-mark{margin-top:4px}
 .house-status{top:22px;inset-inline-end:24px;padding:9px 15px;gap:16px}.time-tools{top:102px;inset-inline-end:24px}.camera-tools{inset-inline-end:18px;bottom:83px}

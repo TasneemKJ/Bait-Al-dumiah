@@ -132,9 +132,10 @@ export function createUI(host,getState,dispatch){
  }
  function toast(message){if(panel){let note=host.querySelector('.panel-notice');if(!note){note=document.createElement('p');note.className='panel-notice';note.setAttribute('role','status');host.querySelector('#sheet-content').prepend(note)}note.textContent=message}const el=host.querySelector('#toast');clearTimeout(toastTimer);el.textContent=message;el.classList.add('visible');toastTimer=setTimeout(()=>el.classList.remove('visible'),4500)}
  function refresh(){const wasPanel=panel;if(wasPanel){host.querySelector('#sheet')?.close()}build()}
+ function setTools(expanded){toolsExpanded=expanded;host.querySelector('.dock').dataset.expanded=String(expanded);host.querySelector('[data-action="toggle-tools"]').setAttribute('aria-expanded',String(expanded));dispatch('tools-state',expanded)}
  const click=event=>{
   const target=event.target.closest('[data-action]');if(!target||target.disabled)return;const action=target.dataset.action;
-  if(action==='toggle-tools'){toolsExpanded=!toolsExpanded;host.querySelector('.dock').dataset.expanded=String(toolsExpanded);target.setAttribute('aria-expanded',String(toolsExpanded));return}
+  if(action==='toggle-tools'){setTools(!toolsExpanded);return}
   if(action==='story-interact'){dispatch(action,target.dataset.object);return}
   if(action.startsWith('panel-'))return open(action.slice(6));
   if(action==='close')return close();
@@ -161,5 +162,5 @@ export function createUI(host,getState,dispatch){
   dispatch('setting',{key:el.dataset.field,value:el.type==='checkbox'?el.checked:el.value});
  };
  host.addEventListener('click',click);host.addEventListener('change',change);build();
- return {openObject(key){if(!objectInfo(getState(),key))return false;selectedObject=key;open('object');return true},clearObject(){selectedObject=null},beginMove,get moveId(){return moveId},open,close,refresh,tick,toast,objective:nextStep,clearPlacement,setActivityResult(result){activityResult=result;const choice=host.querySelector('#sheet [data-choice]:focus')?.dataset.choice;renderPanel();host.querySelector(result?.complete?'.ritual-result button':choice!==undefined?`#sheet [data-choice="${choice}"]`:'#sheet [data-action="recall-ready"], #sheet [data-choice], #sheet [data-action="begin-activity"]')?.focus()},setPortraits(values){portraits=values??{};if(panel==='household')renderPanel()},get selected(){return selected},get panel(){return panel},get placement(){return placement},get t(){return t},get n(){return n},dispose(){clearTimeout(toastTimer);host.removeEventListener('click',click);host.removeEventListener('change',change)}};
+ return {collapseTools(){if(toolsExpanded)setTools(false)},openObject(key){if(!objectInfo(getState(),key))return false;selectedObject=key;open('object');return true},clearObject(){selectedObject=null},beginMove,get moveId(){return moveId},open,close,refresh,tick,toast,objective:nextStep,clearPlacement,setActivityResult(result){activityResult=result;const choice=host.querySelector('#sheet [data-choice]:focus')?.dataset.choice;renderPanel();host.querySelector(result?.complete?'.ritual-result button':choice!==undefined?`#sheet [data-choice="${choice}"]`:'#sheet [data-action="recall-ready"], #sheet [data-choice], #sheet [data-action="begin-activity"]')?.focus()},setPortraits(values){portraits=values??{};if(panel==='household')renderPanel()},get selected(){return selected},get panel(){return panel},get placement(){return placement},get t(){return t},get n(){return n},dispose(){clearTimeout(toastTimer);host.removeEventListener('click',click);host.removeEventListener('change',change)}};
 }

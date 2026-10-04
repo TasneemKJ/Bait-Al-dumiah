@@ -62,6 +62,8 @@ PR #10 was squash-merged by the user at 16:27 UTC during this session. Main 8d38
 
 Iteration acceptance and the next feature pass wait for exact-commit CI and screenshot review. No measured gameplay/retention score is claimed; finite stories establish purposeful exploration, while repeatable physical activities remain the next priority.
 
+Verification checkpoint on draft PR #11: first run exposed an art-fixture import mismatch (new dynamic import not rewritten into blob module map) and a real narrow-phone tools/room-tabs overlap. Static test imports and exclusive expanded-tools presentation correct their respective causes. Failure screenshots now capture before browser teardown. The long story journey uses the game's low-quality setting through the actual UI, with full-quality opening/final captures; the separate full regression retains its high-quality rendering budget gate. Source/build remain 125/125 passing; exact-commit rendered rerun pending.
+
 ## Next iteration after story verification
 Begin with a fresh set of exactly twenty ideas after checking the feat/scene-first-play draft PR and the latest CI. Prioritize repeatable physical activities and resident responses that reuse the direct interaction vocabulary without creating reward farms.
 

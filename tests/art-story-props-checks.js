@@ -1,10 +1,11 @@
 import * as T from 'three';
+import * as api from '../src/render/story-props.js';
 import {createState} from '../src/simulation.js';
 import {lamp} from '../src/render/primitives.js';
 const cases=[];
 const test=(name,run)=>cases.push({name,run});
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
-async function view(){const module=await import('../src/render/story-props.js').catch(()=>({}));assert(typeof module.createStoryProps==='function','authored story prop renderer is missing');return module.createStoryProps(new T.Group())}
+async function view(){assert(typeof api.createStoryProps==='function','authored story prop renderer is missing');return api.createStoryProps(new T.Group())}
 export async function runArtChecks(){const results=[];for(const {name,run} of cases){try{await run();results.push({name,passed:true})}catch(error){results.push({name,passed:false,error:String(error.message)})}}return results}
 test('S1: authored story objects use actual pick-aligned room landmarks',async()=>{
  const v=await view();
