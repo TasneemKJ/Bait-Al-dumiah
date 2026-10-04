@@ -101,7 +101,19 @@ try:
   click(page,'panel-decorate');page.locator('[data-action="choose-item"][data-id="plant"]').click();click(page,'place-confirm');after=state(page)
   check('placing a decoration changes ownership and charges exact price',after['buttons']==money-8 and len(after['decor'])==1)
   click(page,'panel-decorate');page.locator('[data-action="remove"]').click();check('packing away refunds the full price',state(page)['buttons']==money and not state(page)['decor']);click(page,'close')
-  click(page,'panel-decorate');page.locator('[data-action="choose-item"][data-id="musicbox"]').click();page.locator('#place-room').select_option('parlor');click(page,'place-confirm')
+  click(page,'panel-decorate');page.locator('[data-action="choose-item"][data-id="musicbox"]').click();page.locator('#place-room').select_option('parlor')
+  # Plant confirmation above retains actual mouse-click coverage. Exercise the
+  # native keyboard route for this purchase without waiting for consecutive
+  # paint frames merely to establish a stationary button's mouse stability.
+  musicbox_before=state(page);confirm=page.locator('[data-action="place-confirm"]:visible')
+  check('musicbox placement exposes a visible enabled confirmation',confirm.is_visible() and confirm.is_enabled())
+  page.locator('#place-room').focus();page.keyboard.press('Tab')
+  check('placement keyboard navigation reaches the slot selector',page.evaluate('document.activeElement.id==="place-slot"'))
+  page.keyboard.press('Tab')
+  check('placement keyboard navigation reaches the confirmation button',page.evaluate('document.activeElement.dataset.action==="place-confirm"'))
+  page.keyboard.press('Enter');musicbox_after=state(page)
+  # The authored musicbox catalogue price in src/content.js is twenty buttons.
+  check('keyboard placement buys the parlor musicbox for its exact twenty-button price',musicbox_after['buttons']==musicbox_before['buttons']-20 and len(musicbox_after['decor'])==len(musicbox_before['decor'])+1 and any(d['item']=='musicbox' and d['room']=='parlor' and d['slot']==0 for d in musicbox_after['decor']))
   click(page,'light');page.wait_for_function('window.dollhouse.visual().nightMix>.99',timeout=60000);capture(page,'desktop-night')
   check('night capture uses the settled lighting rather than a transition',page.evaluate('window.dollhouse.visual().nightMix')>.99)
   check('nightfall changes the simulation and reveals a visitor',state(page)['clock']>=120 and page.locator('.visitor-hint').is_visible())
@@ -147,6 +159,20 @@ try:
   print(json.dumps({'checks':checks,'errors':errors,'render':stats},indent=2))
 except Exception as exc:
  errors.append(str(exc));traceback.print_exc()
+ # Retain state/actionability evidence even if the independent screenshot
+ # cannot finish on a saturated software renderer.
+ try:
+  diagnostics=page.evaluate('''()=>{
+   const button=document.querySelector('[data-action="place-confirm"]'),active=document.activeElement;
+   const rect=button?.getBoundingClientRect(),hit=rect?document.elementFromPoint(rect.left+rect.width/2,rect.top+rect.height/2):null;
+   const describe=e=>e?{tag:e.tagName,id:e.id,action:e.dataset.action}:null;
+   return {state:window.dollhouse?.state?.(),visual:window.dollhouse?.visual?.(),
+    viewport:{width:innerWidth,height:innerHeight},visibility:document.visibilityState,
+    activeElement:describe(active),confirmation:button?{text:button.textContent,disabled:button.disabled,
+     visible:button.getClientRects().length>0,rect:rect.toJSON(),hit:describe(hit),receivesInput:hit===button||button.contains(hit)}:null};
+  }''')
+  (OUT/'failure-diagnostics.json').write_text(json.dumps(diagnostics,indent=2))
+ except Exception:pass
  try:capture(page,'failure-state')
  except Exception:pass
 finally:

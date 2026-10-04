@@ -5,7 +5,7 @@ import {mat,glaze,palette as P,batch} from './primitives.js';
 import {softTexture} from './textiles.js';
 
 const amber=new T.MeshPhysicalMaterial({color:0x9f5424,roughness:.24,clearcoat:.28,metalness:0});
-const spillMaterial=new T.MeshBasicMaterial({map:softTexture(),color:0x7d3f22,transparent:true,opacity:.65,depthWrite:false});
+const spillMaterial=new T.MeshPhysicalMaterial({color:0xb5682e,roughness:.28,clearcoat:.35,metalness:0});
 const innerBottom=.024,liquidSpan=.19;
 const fillY=fill=>innerBottom+Math.max(0,Math.min(1,fill))*liquidSpan;
 function mesh(parent,geometry,material,position=[0,0,0]){const o=new T.Mesh(geometry,material);o.position.fromArray(position);o.castShadow=false;o.receiveShadow=true;parent.add(o);return o}
@@ -16,7 +16,9 @@ function group(parent,name){const o=new T.Group();o.name=name;o.userData.noBatch
 export function createTeaTable(parent){
  const root=new T.Group();root.name='physical-tea-table';root.visible=false;const room=ROOMS.find(r=>r.id===TEA_TABLE.room);root.position.set(room.x+TEA_TABLE.x,room.y+TEA_TABLE.y,TEA_TABLE.z);parent.add(root);
  const brass=mat(P.gold),cream=glaze(P.cream),mint=glaze(P.mint);
- const tray=group(root,'tea-serving-tray');
+ // One presentation root moves the complete served set and its real targets.
+ const presentation=group(root,'tea-presented-service');
+ const tray=group(presentation,'tea-serving-tray');
  const trayShape=new T.Shape();trayShape.absellipse(0,0,.525,.25,0,Math.PI*2,false,0);
  const plate=mesh(tray,new T.ExtrudeGeometry(trayShape,{depth:.012,bevelEnabled:false,curveSegments:20}),brass,[0,.014,.18]);plate.rotation.x=-Math.PI/2;
  const lip=torus(tray,.51,.009,brass,[0,.029,.18],true);lip.scale.y=.49;
@@ -26,7 +28,7 @@ export function createTeaTable(parent){
  batch(tray);
  const cupViews=[];
  for(let i=0;i<3;i++){
-  const cup=group(root,`tea-cup-${i}`);
+  const cup=group(presentation,`tea-cup-${i}`);
   const r=TEA_TABLE.cupOuterRadius,inner=TEA_TABLE.cupRadius,h=TEA_TABLE.cupHeight;
   const profile=[[.09,0],[.105,.015],[r,h-.02],[r,h],[inner,h],[inner-.008,.03],[.08,.018],[0,.018]].map(([x,y])=>new T.Vector2(x,y));
   const vessel=mesh(cup,new T.LatheGeometry(profile,20),cream);vessel.name='tea-open-cup';
@@ -51,24 +53,30 @@ export function createTeaTable(parent){
  batch(pot);
  const spout=new T.Object3D();spout.name='tea-spout-anchor';spout.position.copy(tipOffset);pot.add(spout);
  const stream=mesh(root,new T.CylinderGeometry(.007,.012,1,8),amber);stream.name='tea-pouring-stream';stream.visible=false;stream.receiveShadow=false;
- const spill=mesh(root,new T.PlaneGeometry(.54,.30),spillMaterial,[.10,.035,.23]);spill.rotation.x=-Math.PI/2;spill.name='tea-spill-patch';spill.receiveShadow=false;
- const servedGlow=mesh(root,new T.PlaneGeometry(1.04,.55),new T.MeshBasicMaterial({map:softTexture(),color:0xf7cd8c,transparent:true,opacity:.22,depthWrite:false,blending:T.AdditiveBlending}),[0,.006,.24]);servedGlow.rotation.x=-Math.PI/2;servedGlow.receiveShadow=false;
+ const puddle=new T.Shape();puddle.moveTo(-.22,-.035);puddle.bezierCurveTo(-.27,0,-.19,.08,-.13,.09);puddle.bezierCurveTo(-.08,.145,.005,.115,.03,.10);puddle.bezierCurveTo(.085,.135,.205,.11,.22,.05);puddle.bezierCurveTo(.255,-.015,.155,-.08,.09,-.095);puddle.bezierCurveTo(.015,-.145,-.115,-.08,-.14,-.095);puddle.bezierCurveTo(-.22,-.115,-.26,-.065,-.22,-.035);puddle.closePath();
+ const drop=new T.Shape();drop.absarc(.22,-.105,.024,0,Math.PI*2,false);
+ const spill=mesh(presentation,new T.ShapeGeometry([puddle,drop],8),spillMaterial,[.10,.035,.23]);spill.rotation.x=-Math.PI/2;spill.name='tea-spill-patch';spill.receiveShadow=false;
+ const glintShape=new T.Shape();glintShape.moveTo(-.17,.035);glintShape.quadraticCurveTo(-.15,.078,-.095,.081);glintShape.lineTo(-.097,.071);glintShape.quadraticCurveTo(-.15,.067,-.159,.030);glintShape.closePath();
+ const spillGlint=mesh(spill,new T.ShapeGeometry(glintShape,6),new T.MeshBasicMaterial({color:0xf4d5a0}),[0,0,.001]);spillGlint.name='tea-spill-highlight';spillGlint.receiveShadow=false;
+ const servedGlow=mesh(presentation,new T.PlaneGeometry(1.04,.55),new T.MeshBasicMaterial({map:softTexture(),color:0xf7cd8c,transparent:true,opacity:.22,depthWrite:false,blending:T.AdditiveBlending}),[0,.006,.24]);servedGlow.rotation.x=-Math.PI/2;servedGlow.receiveShadow=false;
  const hitMaterial=new T.MeshBasicMaterial({visible:false}),targets=[];
  function hit(parent,key,size,position){const target=mesh(parent,new T.BoxGeometry(...size),hitMaterial,position);target.name=`tea-hit-${key}`;target.userData.tea=key;targets.push(target);return target}
  const potHit=hit(pot,'pot',[.36,.39,.32],[0,.035,0]);
  const cupHits=cupViews.map((v,i)=>hit(v.root,`cup:${i}`,[.30,.29,.30],[0,.13,0]));
- const trayHit=hit(root,'tray',[.92,.14,.28],[0,.078,.42]);
+ // The elevated anchor stays on the visible brass in projection and retains
+ // a complete 44px patch even in the shortest landscape safe rectangle.
+ const trayHit=hit(presentation,'tray',[.92,.14,.28],[0,.108,.42]);
  let actual={active:false,served:false,pot:null,stream:{visible:false,start:[0,0,0],end:[0,0,0]},cups:[],spillVisible:false};
  function localPoint(o){root.updateWorldMatrix(true,true);return root.worldToLocal(o.getWorldPosition(new T.Vector3()))}
  return {root,targets,update(state){
   const tea=teaStatus(state);root.visible=Boolean(tea);if(!tea){stream.visible=false;actual={...actual,active:false,served:false,cups:[],spillVisible:false,stream:{...actual.stream,visible:false}};return}
-  const served=tea.phase==='served',tilt=served?0:tea.tilt*.75;pot.rotation.z=-tilt;
+  const served=tea.phase==='served',tilt=served?0:tea.tilt*.75;pot.rotation.z=-tilt;presentation.position.set(served?.12:0,served?.024:0,served?.05:0);
   const aimPoint=new T.Vector3(tea.aim*TEA_TABLE.aimSpan,.48,TEA_TABLE.cupZ),rotated=tipOffset.clone().applyQuaternion(pot.quaternion);pot.position.copy(aimPoint).sub(rotated);
   cupViews.forEach((v,i)=>{const c=tea.cups[i];v.root.visible=Boolean(c);cupHits[i].visible=Boolean(c);if(!c)return;v.root.position.set(c.x,0,TEA_TABLE.cupZ);v.band.position.y=fillY(c.target);v.liquid.position.y=fillY(c.fill)-.004;v.liquid.visible=c.fill>0;v.band.material.color.set(c.ready?0xc9b57a:P.gold)});
   const start=localPoint(spout),cup=tea.cups.find(c=>c.id===tea.aimedCup),surface=cup?fillY(cup.fill):.035,end=new T.Vector3(start.x,surface,start.z);
   stream.visible=!served&&tea.flow>0;const length=start.distanceTo(end);stream.position.copy(start).add(end).multiplyScalar(.5);stream.scale.y=length;
   spill.visible=tea.spills>0;spill.scale.setScalar(Math.min(1.2,.35+tea.spills*.7));servedGlow.visible=served;
   potHit.visible=true;trayHit.visible=true;
-  actual={active:true,served,pot:{position:pot.position.toArray(),rotation:pot.rotation.z,spout:start.toArray()},stream:{visible:stream.visible,start:start.toArray(),end:end.toArray()},cups:tea.cups.map((c,i)=>({id:c.id,x:cupViews[i].root.position.x,surfaceY:cupViews[i].liquid.position.y+.004,bandY:cupViews[i].band.position.y,visible:cupViews[i].root.visible})),spillVisible:spill.visible};
+  actual={active:true,served,presentation:{offset:presentation.position.toArray()},pot:{position:pot.position.toArray(),rotation:pot.rotation.z,spout:start.toArray()},stream:{visible:stream.visible,start:start.toArray(),end:end.toArray()},cups:tea.cups.map((c,i)=>({id:c.id,x:cupViews[i].root.position.x+presentation.position.x,z:cupViews[i].root.position.z+presentation.position.z,surfaceY:cupViews[i].liquid.position.y+.004,bandY:cupViews[i].band.position.y,visible:cupViews[i].root.visible})),spillVisible:spill.visible};
  },status(){return structuredClone(actual)},points(){if(!root.visible)return [];root.updateWorldMatrix(true,true);const result=targets.filter(t=>t.visible).map(t=>({key:t.userData.tea,local:localPoint(t).toArray(),world:t.getWorldPosition(new T.Vector3()).toArray()}));result.push({key:'spout',local:localPoint(spout).toArray(),world:spout.getWorldPosition(new T.Vector3()).toArray()});return result}};
 }

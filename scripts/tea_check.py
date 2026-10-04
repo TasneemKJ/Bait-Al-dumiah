@@ -21,7 +21,22 @@ def tea_status(page):
 
 
 def tea_ready(page):
-    page.wait_for_function('window.dollhouse?.tea?.() && window.dollhouse.visual().tea?.active && window.dollhouse.teaObjects().some(p=>p.key==="pot") && !window.dollhouse.visual().cameraMoving', timeout=60000)
+    # Replay creates a new simulation session before the next graphics frame.
+    # An already-active table and existing pot point can still be its old pose.
+    # Observe agreement with the actual current session before picking it.
+    page.wait_for_function('''()=>{
+        const game=window.dollhouse,s=game?.tea?.(),visual=game?.visual?.(),v=visual?.tea;
+        if(!s||!v?.active||visual.cameraMoving||!v.pot||v.served!==(s.phase==="served"))return false;
+        const close=(a,b)=>Number.isFinite(a)&&Math.abs(a-b)<1e-6;
+        if(!close(v.pot.spout[0],s.aim*.45)||!close(v.pot.rotation,s.phase==="served"?0:-s.tilt*.75))return false;
+        const offset=v.presentation?.offset;
+        if(!Array.isArray(offset)||offset.length!==3||!offset.every(Number.isFinite))return false;
+        if(v.cups.length!==s.cups.length||!s.cups.every(c=>{
+            const rendered=v.cups.find(p=>p.id===c.id);
+            return rendered?.visible&&close(rendered.x,c.x+offset[0])&&close(rendered.z,.14+offset[2])&&close(rendered.bandY,.024+Math.max(0,Math.min(1,c.target))*.19);
+        }))return false;
+        return game.teaObjects().some(p=>p.key==="pot");
+    }''', timeout=60000)
 
 
 def tea_point(page, key, reachable=True):
@@ -32,6 +47,7 @@ def tea_point(page, key, reachable=True):
 
 
 def tap_tea(page, key, touch=False):
+    tea_ready(page)
     point = tea_point(page, key)
     if touch:
         page.touchscreen.tap(point['x'], point['y'])
@@ -43,8 +59,17 @@ class PotDrag:
     """Grab the actual pot, then move its observed spout over an actual cup."""
     def __init__(self, page, touch=False):
         self.page, self.touch, self.session = page, touch, None
-        self.start = tea_point(page, 'pot')
-        self.spout = tea_point(page, 'spout', reachable=False)
+        tea_ready(page)
+        self.observation = page.evaluate('''()=>{
+            const targets=window.dollhouse.teaObjects();
+            return {pot:targets.find(p=>p.key==="pot"),spout:targets.find(p=>p.key==="spout"),
+                targets,tea:window.dollhouse.tea(),visual:window.dollhouse.visual().tea,
+                viewport:{width:innerWidth,height:innerHeight}};
+        }''')
+        self.start, self.spout = self.observation['pot'], self.observation['spout']
+        assert page.evaluate('p=>p.x>0&&p.x<innerWidth&&p.y>0&&p.y<innerHeight&&document.elementFromPoint(p.x,p.y)?.id==="world"', self.start), 'Tea pot grab is covered'
+        # Python-side evidence only; no property is written in the game page.
+        page._tea_grab_observation = self.observation
         self.x, self.y = self.start['x'], self.start['y']
         self.held = False
 
@@ -673,7 +698,7 @@ def run(scenario):
     except Exception:
         if page and not page.is_closed():
             try:
-                (out/'failure-state.json').write_text(json.dumps({'state': state(), 'tea': tea_status(page), 'visual': page.evaluate('window.dollhouse.visual()'), 'visibility': page.evaluate('({state:document.visibilityState,focus:document.hasFocus()})'), 'viewport': page.viewport_size, 'waits': waits, 'errors': errors}, indent=2))
+                (out/'failure-state.json').write_text(json.dumps({'state': state(), 'tea': tea_status(page), 'visual': page.evaluate('window.dollhouse.visual()'), 'targets': page.evaluate('window.dollhouse.teaObjects()'), 'lastGrab': getattr(page, '_tea_grab_observation', None), 'visibility': page.evaluate('({state:document.visibilityState,focus:document.hasFocus()})'), 'viewport': page.viewport_size, 'waits': waits, 'errors': errors}, indent=2))
             except Exception:
                 pass
             try:
