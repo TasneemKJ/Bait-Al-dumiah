@@ -110,7 +110,7 @@ export function place(s,item,room,slot){
  if(!entry||!has(ROOMS,room)||!Number.isInteger(slot)||slot<0||slot>=SLOTS.length)return fail('invalid');
  if(s.decor.some(d=>d.room===room&&d.slot===slot))return fail('occupied');
  if(s.buttons<entry.price)return fail('funds');
- s.buttons-=entry.price;s.decor.push({id:s.nextId++,item,room,slot,rotation:0,originRoom:room});
+ s.buttons-=entry.price;s.decor.push({id:s.nextId++,item,room,slot,rotation:0,originRoom:room,active:false,tendedDay:0,lastUse:-10});
  for(const d of s.dolls)if(d.room===room)d.comfort=clamp(d.comfort+entry.cozy);
  const loved=s.dolls.filter(d=>d.room===room&&DOLLS.find(x=>x.id===d.id).favItem===item).map(d=>d.id);
  checkMilestones(s);
@@ -125,6 +125,17 @@ export function moveDecor(s,id,room,slot){
  item.originRoom??=item.room;item.room=room;item.slot=slot;return {ok:true};
 }
 export function rotateDecor(s,id){const item=s.decor.find(d=>d.id===id);if(!item)return fail('invalid');item.rotation=((item.rotation??0)+1)%4;return {ok:true}}
+export function useDecor(s,id){
+ const item=s.decor.find(d=>d.id===id);if(!item)return fail('invalid');
+ if(!['plant','lamp','musicbox','mobile'].includes(item.item))return fail('notInteractive');
+ if(item.item==='plant'){
+  if(item.tendedDay===s.day)return fail('alreadyTended');
+  item.tendedDay=s.day;item.lastUse=s.elapsed;return {ok:true,id,effect:'water'};
+ }
+ item.tendedDay=s.day;item.lastUse=s.elapsed;
+ if(item.item==='lamp'){item.active=!item.active;return {ok:true,id,effect:item.active?'light':'dim',active:item.active}}
+ return {ok:true,id,effect:item.item==='musicbox'?'wind':'rock'};
+}
 export function moveDoll(s,id,room){const doll=s.dolls.find(d=>d.id===id);if(!doll||!has(ROOMS,room))return fail('invalid');doll.room=room;return {ok:true,favorite:inFavoriteRoom(doll)}}
 export function changeLight(s){if(isNight(s)){s.clock=0;newDay(s)}else{s.clock=120}return {ok:true}}
 export function discover(s){
@@ -210,7 +221,7 @@ export function restore(raw){
  s.elapsed=clamp(v.elapsed,0,1e9);s.clock=clamp(v.clock,0,239.999);s.day=integer(v.day,1,99999);s.buttons=integer(v.buttons,0,9999);s.unease=clamp(v.unease);s.cares=integer(v.cares,0,1e9);
  if(Array.isArray(v.dolls))for(const d of s.dolls){const a=v.dolls.find(x=>x&&x.id===d.id);if(!a)continue;for(const k of ['hunger','energy','comfort','bond'])if(Number.isFinite(a[k]))d[k]=clamp(a[k]);if(has(ROOMS,a.room))d.room=a.room;d.lastCare=-10;d.action='idle';d.actionUntil=0}
  const occupied=new Set();
- if(Array.isArray(v.decor))for(const d of v.decor.slice(0,100)){if(!d||!has(CATALOG,d.item)||!has(ROOMS,d.room)||!Number.isInteger(d.slot)||d.slot<0||d.slot>=SLOTS.length)continue;const key=`${d.room}:${d.slot}`;if(occupied.has(key))continue;occupied.add(key);s.decor.push({id:s.nextId++,item:d.item,room:d.room,slot:d.slot,rotation:Number.isInteger(d.rotation)&&d.rotation>=0&&d.rotation<4?d.rotation:0,originRoom:has(ROOMS,d.originRoom)?d.originRoom:d.room})}
+ if(Array.isArray(v.decor))for(const d of v.decor.slice(0,100)){if(!d||!has(CATALOG,d.item)||!has(ROOMS,d.room)||!Number.isInteger(d.slot)||d.slot<0||d.slot>=SLOTS.length)continue;const key=`${d.room}:${d.slot}`;if(occupied.has(key))continue;occupied.add(key);s.decor.push({id:s.nextId++,item:d.item,room:d.room,slot:d.slot,rotation:Number.isInteger(d.rotation)&&d.rotation>=0&&d.rotation<4?d.rotation:0,originRoom:has(ROOMS,d.originRoom)?d.originRoom:d.room,active:d.active===true,tendedDay:integer(d.tendedDay,0,s.day),lastUse:Number.isFinite(d.lastUse)?clamp(d.lastUse,-10,s.elapsed):-10})}
  s.wishes=Array.isArray(v.wishes)?DOLLS.filter(d=>v.wishes.includes(d.id)).map(d=>d.id):[];
  s.journal=Array.isArray(v.journal)?SECRETS.filter(id=>v.journal.includes(id)):[];
  s.lastSecretDay=integer(v.lastSecretDay,0,s.day);

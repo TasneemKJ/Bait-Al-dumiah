@@ -72,7 +72,7 @@ export class DollhouseAudio{
  }
  effect(kind){
   if(!this.enabled||!this.context||this.paused)return;
-  const t=this.context.currentTime,notes=kind==='secret'?[293.665,311.127,392]:kind==='place'?[392,493.883]:[440,523.251];
+  const t=this.context.currentTime,notes=kind==='secret'?[293.665,311.127,392]:kind==='place'?[392,493.883]:kind==='musicbox'?[523.251,659.255,783.991,659.255]:kind==='mobile'?[392,493.883,587.33]:[440,523.251];
   notes.forEach((f,i)=>this.tone(f,t+i*.16,1.2,.035));
  }
  dispose(){if(this.disposed)return;this.disposed=true;this.enableGeneration++;this.enabled=false;this.stopVoices();this.context?.close().catch(()=>{})}

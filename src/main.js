@@ -42,6 +42,10 @@ async function dispatch(action,value){
    const o=objectInfo(state,value);if(!o||fatal||manualPause)break;
    if(ui.openObject(value)){world?.focusRoom(o.room,true);host.dataset.focusRoom=o.room;host.dataset.focusDoll='';world?.selectObject(value);roomViews.update()}break;
   }
+  case 'use-object':{
+   const item=state.decor.find(d=>d.id===value),result=sim.useDecor(state,value);
+   if(result.ok){ui.close();dispatch('focus-room',item.room);audio.effect(item.item==='musicbox'?'musicbox':item.item==='mobile'?'mobile':'care');say(ui.t('keepsake-'+(result.effect==='water'?'watered':result.effect==='light'?'lit':result.effect==='dim'?'dimmed':result.effect==='wind'?'wound':'rocked')));save()}else say(ui.t(result.reason));break;
+  }
   case 'rotate-object':if(notify(sim.rotateDecor(state,value),'objectRotated'))ui.refresh();break;
   case 'move-object':ui.beginMove(value);break;
   case 'pack-object':if(notify(sim.remove(state,value),'packed')){ui.close();objectControls?.update()}break;

@@ -136,7 +136,7 @@ export function createUI(host,getState,dispatch){
   if(action==='focus-doll'){dispatch(action,target.dataset.id);return}
   if(action==='begin-activity'||action==='restore-room'){dispatch(action,target.dataset.id);return}
   if(action==='activity-input'){dispatch(action,Number(target.dataset.choice));return}
-  if(['rotate-object','move-object','pack-object'].includes(action)){dispatch(action,Number(target.dataset.id));return}
+  if(['use-object','rotate-object','move-object','pack-object'].includes(action)){dispatch(action,Number(target.dataset.id));return}
   if(['recall-ready','activity-hint'].includes(action)){dispatch(action);return}
   if(action==='end-activity'){dispatch(action);return}
   if(action==='care'){dispatch('care',{id:target.dataset.id,action:target.dataset.care});return}

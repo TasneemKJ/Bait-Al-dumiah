@@ -100,6 +100,12 @@ with sync_playwright() as p:
  results.append({'name':'selected prop offers localized activity and care actions','passed':page.locator('.object-detail [data-id="tea"]').count()==1 and page.locator('.object-detail [data-care="tea"]').count()==1 and 'الشاي' in page.locator('#sheet-title').inner_text()})
  page.locator('[data-action="close"]').click()
  results.append({'name':'closing object sheet restores originating keyboard control','passed':page.evaluate('document.activeElement.dataset.object==="prop:tea-set"')})
+ page.evaluate("fixtureState.decor=[{id:1,item:'plant',room:'kitchen',slot:0,rotation:0,originRoom:'kitchen',active:false,tendedDay:0,lastUse:-10}];fixtureUI.refresh();fixtureUI.openObject('decor:1')")
+ action=page.locator('.object-detail [data-action="use-object"]')
+ results.append({'name':'owned keepsake use is a bilingual mobile-safe primary action','passed':action.count()==1 and action.get_attribute('data-id')=='1' and action.evaluate('(e)=>{const b=e.getBoundingClientRect();return b.width>=44&&b.height>=44}')})
+ page.evaluate("fixtureState.settings.locale='en';fixtureState.decor[0].tendedDay=fixtureState.day;fixtureUI.refresh()")
+ results.append({'name':'tended status is textual and same-day watering is disabled','passed':action.is_disabled() and 'Watered today' in page.locator('.object-detail [role="status"]').inner_text()})
+ page.locator('[data-action="close"]').click()
  for locale in ['en','ar']:
   page.set_viewport_size({'width':320,'height':740})
   page.evaluate("locale=>{fixtureState.settings.locale=locale;fixtureUI.refresh();fixtureObjects.update()}",locale)
