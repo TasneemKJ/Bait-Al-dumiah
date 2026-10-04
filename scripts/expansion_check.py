@@ -25,6 +25,13 @@ try:
   page.goto(BASE+'/?debug=1');page.wait_for_function('window.dollhouse && !document.querySelector("#loading")')
   check('WebGL scene starts',page.locator('.error-screen').count()==0)
   state=lambda:page.evaluate('window.dollhouse.state()')
+  def ensure_night():
+   # Software WebGL can make this journey span enough simulation time to reach
+   # evening naturally. Only press the control while it still represents Evening.
+   for _ in range(2):
+    if state()['clock']>=120:return
+    page.locator('[data-action="light"]').click()
+   check('night entry is deterministic even across a natural clock transition',state()['clock']>=120)
   points=page.evaluate('window.dollhouse.objects()');point=next(o for o in points if o['key']=='prop:tea-set');other=next(o for o in points if o['key']=='prop:moon-bed');before_distance=((point['x']-other['x'])**2+(point['y']-other['y'])**2)**.5
   page.mouse.click(point['x'],point['y'])
   check('whole-house object pick focuses its room before the paused sheet',page.locator('.object-detail').count()==1 and page.evaluate('window.dollhouse.visual().focusedRoom==="kitchen" && !window.dollhouse.visual().cameraMoving'))
@@ -68,7 +75,7 @@ try:
   stats=page.evaluate('window.dollhouse.stats()')
   (OUT/'render-stats.json').write_text(json.dumps(stats,indent=2))
   check('restored house stays within 400k triangles',stats['triangles']<400000)
-  page.locator('[data-action="light"]').click();page.wait_for_function('window.dollhouse.visual().nightMix > .99')
+  ensure_night();page.wait_for_function('window.dollhouse.visual().nightMix > .99')
   check('all four earned lamps cast bounded practical light at settled night',page.evaluate('window.dollhouse.visual().restoredLights===4'))
   page.screenshot(path=str(OUT/'06-restored-night.png'))
   page.set_viewport_size({'width':390,'height':844})
@@ -138,7 +145,7 @@ try:
   page.locator('[data-room="parlor"]').click();page.wait_for_function('!window.dollhouse.visual().cameraMoving');page.locator('[data-object="decor:2"]').click();page.locator('[data-action="use-object"]').click()
   check('lamp action toggles persistent active state',state()['decor'][1]['active'])
   check('keepsake action restores its originating keyboard control',page.evaluate('document.activeElement?.dataset.object==="decor:2"'))
-  page.locator('[data-action="light"]').click();page.wait_for_function('window.dollhouse.visual().nightMix > .99 && window.dollhouse.visual().activeOwnedLights === 1')
+  ensure_night();page.wait_for_function('window.dollhouse.visual().nightMix > .99 && window.dollhouse.visual().activeOwnedLights === 1')
   page.screenshot(path=str(OUT/'13-active-lamp-night.png'))
   page.locator('[data-room="studio"]').click();page.wait_for_function('!window.dollhouse.visual().cameraMoving');page.locator('[data-object="decor:3"]').click();page.locator('[data-action="use-object"]').click()
   check('music-box action records a current animation timestamp',state()['elapsed']-state()['decor'][2]['lastUse']<1)
