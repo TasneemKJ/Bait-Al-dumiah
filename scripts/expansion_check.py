@@ -2,6 +2,7 @@
 import json, os, subprocess, time, urllib.request
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from chime_gestures import finish_chimes
 from tea_check import complete_tea, tea_ready, tea_status, tap_tea
 from stitch_gestures import NeedleDrag, finish_stitch, stitch_ready, stitch_status, tap_stitch, trace_stitch
 ROOT=Path(__file__).resolve().parents[1]
@@ -158,9 +159,8 @@ try:
   check('manipulated object survives reload',state()['decor'][-1]['room']=='studio' and state()['decor'][-1]['rotation']==1)
   page.locator('[data-room="bedroom"]').click();page.wait_for_function('!window.dollhouse.visual().cameraMoving')
   select_object(page,'prop:moon-bed',inspect=True);page.locator('[data-action="begin-activity"][data-id="lullaby"]').click()
-  pattern=state()['activities']['active']['pattern'];page.screenshot(path=str(OUT/'11-reverse-echo.png'))
-  for choice in reversed(pattern):page.locator(f'[data-choice="{choice}"]').click()
-  check('reverse echo completes through real object ritual',state()['activities']['mastery']['lullaby']==7)
+  finish_chimes(page)
+  check('physical moon echo completes through real object plucks',state()['activities']['mastery']['lullaby']==7)
   # Seed each usable keepsake and exercise the full object-sheet dispatch against the rendered game.
   page.evaluate('''() => {const s=window.dollhouse.state();s.settings.locale='en';s.settings.reducedMotion=false;s.clock=0;s.decor=[
    {id:1,item:'plant',room:'kitchen',slot:0,rotation:0,originRoom:'kitchen',active:false,tendedDay:0,lastUse:-10},

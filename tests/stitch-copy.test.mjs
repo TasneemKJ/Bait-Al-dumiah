@@ -70,7 +70,7 @@ test('standard finish displays the actual score and best; failures use translate
  }
 });
 
-test('physical sewing and tea never render an answer grid, while lullaby retains its playable sequence',()=>{
+test('all three physical rituals keep their controls out of the answer grid',()=>{
  const t=k=>translate('en',k),n=v=>number('en',v),button=(action,text)=>'<button data-action="'+action+'">'+text+'</button>';
  for(const id of ['stitch','tea']){
   const s=createState();beginActivity(s,id);
@@ -80,7 +80,7 @@ test('physical sewing and tea never render an answer grid, while lullaby retains
  }
  const s=createState();beginActivity(s,'lullaby');
  const markup=activityMarkup(s,t,n,button,null);
- assert.match(markup,/ritual-choices/);assert.match(markup,/data-action="activity-input"/);
+ assert.equal(markup,'');
  for(const locale of ['en','ar'])for(const key of ['activityRule-stitch','activity-stitchIntro','object-sewing-machineStory']){
   assert.doesNotMatch(translate(locale,key),/memory|Study|ذاكرة/);
  }

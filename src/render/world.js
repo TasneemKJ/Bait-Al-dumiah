@@ -19,6 +19,8 @@ import {createTeaTable} from './tea-table.js';
 import {teaFraming} from './tea-camera.js';
 import {createSewingPlay} from './sewing-play.js';
 import {stitchFraming} from './stitch-camera.js';
+import {createMoonChimes,CHIME_LAYOUT} from './moon-chimes.js';
+import {chimeFraming} from './chime-camera.js';
 import {createRestoration} from './restoration.js';
 import {createCameraMove} from './camera-motion.js';
 import {createAtmosphere} from './atmosphere.js';
@@ -32,8 +34,8 @@ export function createWorld(canvas,{onPick,onError}){
  const depthFog=new T.FogExp2(0xe7d8c8,.0012);scene.fog=depthFog;
  const controls=new OrbitControls(camera,canvas);controls.enablePan=false;controls.enableDamping=true;controls.dampingFactor=.10;controls.minAzimuthAngle=-.48;controls.maxAzimuthAngle=.48;controls.minPolarAngle=1.10;controls.maxPolarAngle=1.50;controls.minZoom=.8;controls.maxZoom=3.5;
  controls.touches.ONE=T.TOUCH.ROTATE;controls.touches.TWO=T.TOUCH.DOLLY_ROTATE;
- let focusedRoom=null,focusedDoll=null,reducedMotion=false,teaActive=false,stitchActive=false,requestedEnabled=true;const working=()=>teaActive||stitchActive;const cameraMove=createCameraMove(camera,controls);const cancelCameraMove=()=>cameraMove.cancel();controls.addEventListener('start',cancelCameraMove);
- function focusPose(){if(teaActive)return teaFraming(canvas.clientWidth,canvas.clientHeight);if(stitchActive)return stitchFraming(canvas.clientWidth,canvas.clientHeight);const p=focusedDoll?residents.position(focusedDoll):null;if(p){p.add(house.root.position);return portraitFraming(canvas.clientWidth,canvas.clientHeight,p.toArray())}return framing(canvas.clientWidth,canvas.clientHeight,focusedRoom)}
+ let focusedRoom=null,focusedDoll=null,reducedMotion=false,teaActive=false,stitchActive=false,chimeActive=false,chimeSelection=-1,requestedEnabled=true;const working=()=>teaActive||stitchActive||chimeActive;const cameraMove=createCameraMove(camera,controls);const cancelCameraMove=()=>cameraMove.cancel();controls.addEventListener('start',cancelCameraMove);
+ function focusPose(){if(chimeActive)return chimeFraming(canvas.clientWidth,canvas.clientHeight);if(teaActive)return teaFraming(canvas.clientWidth,canvas.clientHeight);if(stitchActive)return stitchFraming(canvas.clientWidth,canvas.clientHeight);const p=focusedDoll?residents.position(focusedDoll):null;if(p){p.add(house.root.position);return portraitFraming(canvas.clientWidth,canvas.clientHeight,p.toArray())}return framing(canvas.clientWidth,canvas.clientHeight,focusedRoom)}
  function applyFraming(){cameraMove.moveTo(focusPose(),true)}
  function home(){if(working())return;focusedRoom=null;focusedDoll=null;applyFraming()}
  home();
@@ -45,7 +47,7 @@ export function createWorld(canvas,{onPick,onError}){
  const courtyard=createLevantineSetting(house.root);
  const portraitCache=createPortraitCache(residents,doll=>renderPortrait(renderer,doll));
  createKeepsakeDetails(house.root);const details=createCraftDetails(house.root);createGarden(house.root);const atmosphere=createAtmosphere(scene),roomEffects=createRoomEffects(house.root),roomFrame=createRoomFrame(house.root),preview=createPlacementPreview(house.root);let previewPose=null;
- const restoration=createRestoration(house.root),objects=createObjectInteractions(house.root),storyProps=createStoryProps(house.root),teaTable=createTeaTable(house.root),sewingPlay=createSewingPlay(house.root);let stitchSections=[];
+ const restoration=createRestoration(house.root),objects=createObjectInteractions(house.root),storyProps=createStoryProps(house.root),teaTable=createTeaTable(house.root),sewingPlay=createSewingPlay(house.root),moonChimes=createMoonChimes(house.root);let stitchSections=[];
  const decor=new Map(),slotTargets=[];
  const slotGroup=new T.Group();house.root.add(slotGroup);
  for(const room of ROOMS)for(let i=0;i<SLOTS.length;i++){
@@ -62,9 +64,11 @@ export function createWorld(canvas,{onPick,onError}){
  }
  const tapGesture=createTapGesture();
  function setWorkActivity(id){
-  const nextTea=id==='tea',nextStitch=id==='stitch';if(nextTea===teaActive&&nextStitch===stitchActive)return;
-  const room=nextStitch||(!nextTea&&stitchActive)?'studio':'kitchen';
-  teaActive=nextTea;stitchActive=nextStitch;tapGesture.cancel();cameraMove.cancel();objects.clear();focusedRoom=room;focusedDoll=null;
+  const current=teaActive?'tea':stitchActive?'stitch':chimeActive?'lullaby':null;
+  const next=['tea','stitch','lullaby'].includes(id)?id:null;if(next===current)return;
+  const room={tea:'kitchen',stitch:'studio',lullaby:'bedroom'}[next??current]??'bedroom';
+  teaActive=next==='tea';stitchActive=next==='stitch';chimeActive=next==='lullaby';chimeSelection=-1;
+  tapGesture.cancel();cameraMove.cancel();objects.clear();focusedRoom=room;focusedDoll=null;
   controls.enabled=requestedEnabled&&!working();controls.enableDamping=false;controls.minPolarAngle=working()?.8:1.10;controls.maxPolarAngle=1.50;
   if(house.originalTeaSet)house.originalTeaSet.visible=!teaActive;
   if(house.studioChair)house.studioChair.visible=!stitchActive;
@@ -72,8 +76,9 @@ export function createWorld(canvas,{onPick,onError}){
  }
  function setTeaActive(active){if(active)setWorkActivity('tea');else if(teaActive)setWorkActivity(null)}
  function setStitchActive(active){if(active)setWorkActivity('stitch');else if(stitchActive)setWorkActivity(null)}
+ function setChimeActive(active){if(active)setWorkActivity('lullaby');else if(chimeActive)setWorkActivity(null)}
  function workRay(x,y,id){
-  const active=id==='tea'?teaActive:id==='stitch'?stitchActive:false,rect=canvas.getBoundingClientRect();
+  const active=id==='tea'?teaActive:id==='stitch'?stitchActive:id==='lullaby'?chimeActive:false,rect=canvas.getBoundingClientRect();
   if(!active||lost||!Number.isFinite(x)||!Number.isFinite(y)||x<rect.left||x>rect.right||y<rect.top||y>rect.bottom)return false;
   mouse.set((x-rect.left)/rect.width*2-1,-(y-rect.top)/rect.height*2+1);camera.updateMatrixWorld();ray.setFromCamera(mouse,camera);return true;
  }
@@ -121,6 +126,20 @@ export function createWorld(canvas,{onPick,onError}){
   if(!stitchActive||lost)return [];
   return stitchSections.map(section=>section.map(([x,y])=>projectStitch(x,y)));
  }
+ function chimeAt(x,y){
+  if(!workRay(x,y,'lullaby')||!moonChimes.root.visible)return null;
+  moonChimes.root.updateWorldMatrix(true,true);
+  return ray.intersectObjects(moonChimes.targets,false)[0]?.object.userData.chime??null;
+ }
+ function chimePositions(){
+  if(!chimeActive)return [];camera.updateMatrixWorld();
+  return moonChimes.points().map(p=>({key:p.key,...projectWorkPoint(p.world)}));
+ }
+ function chimePullSpan(){
+  if(!chimeActive)return 0;moonChimes.root.updateWorldMatrix(true,true);camera.updateMatrixWorld();
+  const p=moonChimes.root.localToWorld(new T.Vector3(0,1.16,0)),q=p.clone();q.y-=CHIME_LAYOUT.pull;
+  return Math.abs(projectWorkPoint(p.toArray()).y-projectWorkPoint(q.toArray()).y);
+ }
  const pointerdown=e=>tapGesture.down(e);
  const pointermove=e=>tapGesture.move(e);
  const pointerup=e=>{
@@ -134,12 +153,12 @@ export function createWorld(canvas,{onPick,onError}){
  function resize(){const w=canvas.clientWidth,h=canvas.clientHeight;const aspect=w/Math.max(1,h),height=focusPose().height;camera.left=-height*aspect/2;camera.right=height*aspect/2;camera.top=height/2;camera.bottom=-height/2;camera.updateProjectionMatrix();renderer.setSize(w,h,false)}
  const observer=new ResizeObserver(()=>{resize();if(focusedRoom||focusedDoll)applyFraming()});observer.observe(canvas);resize();
  return {
-  renderer,camera,scene,home,setTeaActive,teaAt,teaAimAt,teaPositions,setStitchActive,stitchAt,stitchPointAt,stitchPositions,projectStitch,
+  renderer,camera,scene,home,setChimeActive,chimeAt,chimePositions,chimePullSpan,setChimeSelection(index){chimeSelection=Number.isInteger(index)&&index>=0&&index<4?index:-1},setTeaActive,teaAt,teaAimAt,teaPositions,setStitchActive,stitchAt,stitchPointAt,stitchPositions,projectStitch,
   selectObject(key){return objects.select(key)},clearObjectSelection(){objects.clear()},objectAt,objectPositions(){return objects.project(camera,canvas.clientWidth,canvas.clientHeight)},
   getPortraits(){return portraitCache.getAll()},
   focusRoom(id,immediate=false){if(working()||!ROOMS.some(r=>r.id===id))return false;focusedRoom=id;focusedDoll=null;cameraMove.moveTo(framing(canvas.clientWidth,canvas.clientHeight,id),reducedMotion||immediate);return true},
   focusDoll(id){const p=residents.position(id);if(working()||!p)return false;focusedDoll=id;focusedRoom=null;cameraMove.moveTo(focusPose(),reducedMotion);return true},
-  visualStatus(){return {portraitCount:portraitCache.size,quality,focusedRoom,focusedDoll,nightMix,cameraMoving:cameraMove.active,previewVisible:preview.root.visible,previewValid:preview.root.userData.valid??false,windowMaterials:house.windows.size,activeOwnedLights:[...decor.values()].filter(o=>o.userData.ownedLight?.intensity>0).length,restoredLights:restoration.lights.filter(l=>l.intensity>0).length,reactivePoses:Object.fromEntries([...decor].map(([id,o])=>[id,{turn:o.rotation.y,rock:o.rotation.z,scale:o.scale.x}])),courtyard:house.root.getObjectByName('levantine-courtyard')?.userData.nightCue,selectedObject:objects.selected,story:storyProps.status(),teaActive,tea:teaTable.status(),stitchActive,stitch:sewingPlay.status(),stitchGuides:stitchGuidePositions()}},
+  visualStatus(){return {portraitCount:portraitCache.size,quality,focusedRoom,focusedDoll,nightMix,cameraMoving:cameraMove.active,previewVisible:preview.root.visible,previewValid:preview.root.userData.valid??false,windowMaterials:house.windows.size,activeOwnedLights:[...decor.values()].filter(o=>o.userData.ownedLight?.intensity>0).length,restoredLights:restoration.lights.filter(l=>l.intensity>0).length,reactivePoses:Object.fromEntries([...decor].map(([id,o])=>[id,{turn:o.rotation.y,rock:o.rotation.z,scale:o.scale.x}])),courtyard:house.root.getObjectByName('levantine-courtyard')?.userData.nightCue,selectedObject:objects.selected,story:storyProps.status(),teaActive,tea:teaTable.status(),stitchActive,stitch:sewingPlay.status(),stitchGuides:stitchGuidePositions(),chimeActive,chimes:moonChimes.status()}},
   zoom(amount){if(working())return;cameraMove.cancel();camera.zoom=T.MathUtils.clamp(camera.zoom*amount,.8,3.5);camera.updateProjectionMatrix()},
   orbit(amount){if(working())return;cameraMove.cancel();const offset=camera.position.clone().sub(controls.target);offset.applyAxisAngle(new T.Vector3(0,1,0),amount);camera.position.copy(controls.target).add(offset);controls.update()},
   setEnabled(enabled){requestedEnabled=Boolean(enabled);controls.enabled=requestedEnabled&&!working();if(!enabled)cameraMove.cancel()},
@@ -161,9 +180,9 @@ export function createWorld(canvas,{onPick,onError}){
    const cue=courtyard.update(state,nightMix),look=lighting(nightMix),haze=fogPolicy(nightMix);hemi.intensity=look.ambient;key.intensity=look.key;fill.intensity=look.rim;renderer.toneMappingExposure=look.exposure;depthFog.density=haze.density;depthFog.color.setHex(haze.color);
    hemi.color.set(0xe9e0d5).lerp(new T.Color(0x849bc9),nightMix);key.color.set(0xffe5c2).lerp(new T.Color(0xb8caff),nightMix);fill.color.set(0xb8cbd5).lerp(new T.Color(0x829bdb),nightMix);
    house.lights.forEach(l=>{if(l.isLight){l.intensity=look.lamps*cue.lamp;l.color.set(0xffca8e)}});
-   house.windows.forEach(m=>{m.emissive.set(0x8baaca);m.emissiveIntensity=.14+nightMix*.44});details.update(nightMix);atmosphere.update(state,nightMix,quality);roomEffects.update(state,nightMix);restoration.update(state,nightMix);storyProps.update(state,nightMix);teaTable.update(state);sewingPlay.update(state);roomFrame.show(working()?null:focusedRoom);preview.update(previewPose,state);
+   house.windows.forEach(m=>{m.emissive.set(0x8baaca);m.emissiveIntensity=.14+nightMix*.44});details.update(nightMix);atmosphere.update(state,nightMix,quality);roomEffects.update(state,nightMix);restoration.update(state,nightMix);storyProps.update(state,nightMix);teaTable.update(state);sewingPlay.update(state);moonChimes.update(state,chimeSelection);roomFrame.show(working()?null:focusedRoom);preview.update(previewPose,state);
    residents.update(state,dt,selected,Math.atan2(camera.position.x-controls.target.x,camera.position.z-controls.target.z));
-   for(const doll of residents.dolls){const room=state.dolls.find(d=>d.id===doll.id)?.room;doll.root.visible=!(teaActive&&room==='kitchen'||stitchActive&&room==='studio')}
+   for(const doll of residents.dolls){const room=state.dolls.find(d=>d.id===doll.id)?.room;doll.root.visible=!(teaActive&&room==='kitchen'||stitchActive&&room==='studio'||chimeActive&&room==='bedroom')}
    if(focusedDoll){const room=state.dolls.find(d=>d.id===focusedDoll)?.room;if(room!==scene.userData.portraitRoom){scene.userData.portraitRoom=room;cameraMove.moveTo(focusPose(),reducedMotion)}}else scene.userData.portraitRoom=null;ghost.update(state.elapsed,night,state.settings.reducedMotion||state.paused,state.journal.length);
    if(working())ghost.root.visible=false;
    controls.enableDamping=!working()&&!state.settings.reducedMotion;controls.update();renderer.render(scene,camera);

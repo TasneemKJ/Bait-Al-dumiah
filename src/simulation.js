@@ -94,9 +94,9 @@ function newDay(s){
  emit(s,{type:'dawn',day:s.day,wishes,fresh,earned:s.earnedToday,streak:currentStreak(s)});s.earnedToday=0;
 }
 export function step(s,dt){
- if(s.paused){if(s.activities.active?.id==='stitch')releaseStitch(s);return}if(!Number.isFinite(dt)||dt<=0)return;
+ if(s.paused){if(s.activities.active?.id==='stitch')releaseStitch(s);cancelChime(s);return}if(!Number.isFinite(dt)||dt<=0)return;
  dt=Math.min(dt,1);s.elapsed+=dt;s.clock+=dt;s.dayTime=Math.min(1e6,s.dayTime+dt);
- stepTea(s,dt);const stitching=stitchActive(s);if(stitching)moveStitch(stitching,stitchSections(stitching),dt);
+ stepTea(s,dt);stepChimes(s,dt);const stitching=stitchActive(s);if(stitching)moveStitch(stitching,stitchSections(stitching),dt);
  if(s.clock>=240){s.clock-=240;newDay(s)}
  const comfortProtection=Math.min(.65,s.decor.length*.035);
  for(const d of s.dolls){
@@ -186,9 +186,10 @@ export function beginActivity(s,id){
  if(s.activities.active)return fail('activityBusy');
  if(id==='tea'){s.activities.active=createTea(s,'ritual');return {ok:true}}
  if(id==='stitch'){s.activities.active=createStitch(s,'ritual');return {ok:true}}
+ if(id==='lullaby'){s.activities.active={id,phase:'listen',pattern:activityPattern(s,id),cursor:0,listenTime:0,round:0,held:null,pull:0,mistakes:0,lastTone:null,lastPluck:-10,toneSerial:0,result:null};return {ok:true}}
  s.activities.active={id,cursor:0,pattern:activityPattern(s,id),phase:id==='stitch'?'study':'play',hint:false};return {ok:true};
 }
-export function endActivity(s){releaseTea(s);releaseStitch(s);s.activities.active=null;return {ok:true}}
+export function endActivity(s){releaseTea(s);releaseStitch(s);cancelChime(s);s.activities.active=null;return {ok:true}}
 export function startRecall(s){const a=s.activities.active;if(s.paused)return fail('pausedActivity');if(a?.id!=='stitch'||a.phase!=='study')return fail('invalid');a.phase='recall';return {ok:true}}
 export function toggleActivityHint(s){const a=s.activities.active;if(s.paused)return fail('pausedActivity');if(a?.id!=='stitch'||a.phase!=='recall')return fail('invalid');a.hint=!a.hint;return {ok:true}}
 export function activityAnswer(s){const a=s.activities.active;return a&&a.id!=='tea'&&a.id!=='stitch'? a.id==='lullaby'?[...a.pattern].reverse():[...a.pattern]:[]}
@@ -196,6 +197,7 @@ export function activityInput(s,choice){
  const active=s.activities.active;if(s.paused)return fail('pausedActivity');
  if(active?.id==='tea')return fail('teaPhysical');
  if(active?.id==='stitch')return fail('stitchPhysical');
+ if(active?.id==='lullaby')return fail('chimePhysical');
  if(!active||!Number.isInteger(choice)||choice<0||choice>3)return fail('invalid');
  if(active.phase==='study')return fail('studyFirst');
  if(activityAnswer(s)[active.cursor]!==choice){active.cursor=0;return {ok:true,mistake:true,complete:false}}
@@ -377,4 +379,65 @@ export function restore(raw){
  s.milestones=ids(v.milestones);s.achieved=ids([...ids(v.achieved),...s.milestones]);
  if(v.settings&&typeof v.settings==='object'){s.settings.locale=v.settings.locale==='ar'?'ar':'en';s.settings.muted=v.settings.muted!==false;s.settings.reducedMotion=v.settings.reducedMotion===true;s.settings.quality=['auto','low','high'].includes(v.settings.quality)?v.settings.quality:'auto'}
  return s;
+}
+
+// Moon chimes: the same validated pull/release commands serve pointer and keys.
+// Listening, cancellation and weak taps never enter the economic boundary.
+const chimeActive=s=>s.activities.active?.id==='lullaby'?s.activities.active:null;
+const CHIME_LEAD=.35,CHIME_BEAT=.8,CHIME_RING=.52,CHIME_MIN_PULL=.22;
+function stepChimes(s,dt){
+ const a=chimeActive(s);if(!a||a.phase!=='listen')return;
+ a.listenTime+=dt;
+ if(a.listenTime>=CHIME_LEAD+a.pattern.length*CHIME_BEAT){a.phase='echo';a.cursor=0}
+}
+export function chimeStatus(s){
+ const a=chimeActive(s);if(!a)return null;
+ const index=Math.floor((a.listenTime-CHIME_LEAD)/CHIME_BEAT);
+ const demo=a.phase==='listen'&&index>=0&&index<a.pattern.length&&(a.listenTime-CHIME_LEAD)%CHIME_BEAT<CHIME_RING;
+ const recent=a.lastTone!==null&&s.elapsed-a.lastPluck<CHIME_RING;
+ const sounding=demo?a.pattern[index]:recent?a.lastTone:null;
+ return {...a,pattern:[...a.pattern],result:a.result?structuredClone(a.result):null,
+  sounding,tone:demo?`${a.round}:demo:${index}`:recent?`pluck:${a.toneSerial}`:null,
+  demoIndex:demo?index:null,minPull:CHIME_MIN_PULL};
+}
+function chimeBlocked(s,phase='echo'){
+ if(s.paused)return fail('pausedActivity');const a=chimeActive(s);
+ if(!a)return fail('chimeNotActive');if(a.phase!==phase)return fail(a.phase==='finished'?'chimeFinished':'chimeListening');return null;
+}
+export function grabChime(s,id){
+ const blocked=chimeBlocked(s);if(blocked)return blocked;
+ if(!Number.isInteger(id)||id<0||id>3)return fail('invalid');
+ const a=chimeActive(s);if(a.held!==null)return fail('chimeHeld');
+ a.held=id;a.pull=0;return {ok:true};
+}
+export function pullChime(s,pull){
+ const blocked=chimeBlocked(s);if(blocked)return blocked;
+ if(!Number.isFinite(pull)||pull<0||pull>1)return fail('invalid');
+ const a=chimeActive(s);if(a.held===null)return fail('chimeNotHeld');
+ a.pull=pull;return {ok:true};
+}
+export function cancelChime(s){
+ const a=chimeActive(s);if(!a)return fail('chimeNotActive');a.held=null;a.pull=0;return {ok:true};
+}
+export function releaseChime(s){
+ if(s.paused){cancelChime(s);return fail('pausedActivity')}
+ const blocked=chimeBlocked(s);if(blocked)return blocked;
+ const a=chimeActive(s);if(a.held===null)return fail('chimeNotHeld');
+ const id=a.held,pull=a.pull;cancelChime(s);
+ if(pull<CHIME_MIN_PULL)return {ok:true,silent:true};
+ a.lastTone=id;a.lastPluck=s.elapsed;a.toneSerial++;
+ if(id!==a.pattern[a.pattern.length-1-a.cursor]){
+  a.cursor=0;a.mistakes++;a.phase='listen';a.listenTime=-.55;a.round++;
+  return {ok:true,mistake:true,complete:false};
+ }
+ a.cursor++;
+ if(a.cursor<a.pattern.length)return {ok:true,complete:false};
+ a.phase='finished';a.result={...completeActivity(s,'lullaby'),mistakes:a.mistakes};
+ return {...a.result};
+}
+export function replayChimes(s){
+ if(s.paused)return fail('pausedActivity');const a=chimeActive(s);
+ if(!a)return fail('chimeNotActive');if(a.phase==='finished')return fail('chimeFinished');
+ cancelChime(s);a.phase='listen';a.listenTime=0;a.cursor=0;a.round++;a.lastTone=null;
+ return {ok:true};
 }

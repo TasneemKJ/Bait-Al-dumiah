@@ -1,0 +1,42 @@
+name: Verify physical moon chimes
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  chimes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: [desktop, phone]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run verify
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements.txt
+      - run: python -m playwright install --with-deps chromium
+      - run: python scripts/chime_dom_check.py
+      - run: python scripts/art_check.py
+      - name: Play the actual hanging instrument
+        run: python scripts/chime_check.py
+        env:
+          CHIME_SCENARIO: ${{ matrix.scenario }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: moon-chimes-${{ matrix.scenario }}
+          path: |
+            artifacts/chimes/
+            artifacts/chime-dom-checks.json
+            artifacts/art-checks.json
+          retention-days: 14

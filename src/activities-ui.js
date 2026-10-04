@@ -15,19 +15,8 @@ export function updateActivityStatus(host,s,t,n){
 
 export function activityMarkup(s,t,n,button,result){
  const active=s.activities.active;
- // Physical tea and sewing own their actual work surfaces. Neither opens a
- // sequence grid or a result sheet, even when started from this catalog.
- if(active?.id==='tea'||active?.id==='stitch')return '';
- if(active){
-  const a=ACTIVITIES.find(a=>a.id===active.id),study=active.phase==='study',concealed=a.id==='stitch'&&!study&&!active.hint,reverse=a.id==='lullaby';
-  return `<section class="ritual-play"><p class="eyebrow">${t(a.resident)} · ${t(a.room)}</p><h2 id="sheet-title">${t('activity-'+a.id)}</h2><p class="sheet-intro">${t('activity-'+a.id+'Intro')}</p>
-   <div class="ritual-pattern" role="group" aria-label="${t('patternLabel')}">${active.pattern.map((choice,i)=>`<div class="pattern-step ${(!reverse?i<active.cursor:i>=active.pattern.length-active.cursor)?'done':(!reverse?i===active.cursor:i===active.pattern.length-1-active.cursor)?'current':''}" ${(!reverse?i===active.cursor:i===active.pattern.length-1-active.cursor)?'aria-current="step"':''}><small>${n(reverse?active.pattern.length-i:i+1)}</small>${icon(concealed?'moon':a.choices[choice])}<span>${concealed?t('hiddenThread'):t('choice-'+a.id+'-'+choice)}</span></div>`).join('')}</div>
-   <p class="ritual-instructions">${t('activityRule-'+a.id)}</p><p class="ritual-feedback" role="status">${result?.mistake?t('activityMistake'):t('activityNext')+' '+n(active.cursor+1)+' / '+n(active.pattern.length)}</p>
-   ${study?button('recall-ready',t('recallReady'),'play','class="primary wide"'):a.id==='stitch'?button('activity-hint',t(active.hint?'hideHint':'showHint'),'spark','class="wide"'):''}
-   <div class="ritual-choices" role="group" aria-label="${t('choicesLabel')}">${a.choices.map((ico,i)=>button('activity-input',t('choice-'+a.id+'-'+i),ico,`data-choice="${i}" class="ritual-choice" ${study?'disabled':''}`)).join('')}</div>
-   <p class="ritual-earning">${activityRewardReady(s,a.id)?icon('button')+' +'+n(7+activityLevel(s,a.id)*2)+' '+t('buttons'):t('practiceLabel')}</p>
-   ${button('end-activity',t('activityExit'),'arrow','class="text-button"')}</section>`;
- }
+ // All three rituals own real scene surfaces, including from this catalog.
+ if(['tea','stitch','lullaby'].includes(active?.id))return '';
  const outcome=result?.complete?`<div class="ritual-result" role="status">${icon('check')}<h3>${t('activityFinished')}</h3><p>${result.practice?t('activityPractice'):t('activityReward')+' +'+n(result.reward+result.bonus)+' '+t('buttons')}</p>${button('begin-activity',t('activityAgain'),'play',`data-id="${result.id}" class="primary"`)}</div>`:'';
  return `<h2 id="sheet-title">${t('activities')}</h2><p class="sheet-intro">${t('activitiesIntro')}</p>${outcome}
   <div class="ritual-catalog">${ACTIVITIES.map(a=>{

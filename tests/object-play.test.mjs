@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as sim from '../src/simulation.js';
+import {listenChimes,pluckChime} from './chime-test-helpers.mjs';
 import {finishStitch} from './tea-test-helpers.mjs';
 test('move is atomic, preserves ownership, costs nothing and cannot farm rewards',()=>{
  const s=sim.createState();sim.place(s,'plant','kitchen',0);sim.place(s,'lamp','parlor',1);const id=s.decor[0].id,before=structuredClone(s);
@@ -27,7 +28,7 @@ test('physical activity conflicts preserve both current work and economy until e
  assert.equal(sim.interactStory(s,'prop:mint-tin').reason,'activityBusy');assert.deepEqual(s,before);sim.endActivity(s);assert.equal(s.activities.active,null);assert.equal(s.activities.mastery.stitch,0);assert.equal(sim.beginActivity(s,'tea').ok,true);
 });
 test('moon song echoes the shown sequence in reverse without rewarding wrong input',()=>{
- const s=sim.createState();sim.beginActivity(s,'lullaby');const p=sim.activityPattern(s,'lullaby');assert.equal(sim.activityInput(s,(p.at(-1)+1)%4).mistake,true);assert.equal(s.activities.mastery.lullaby,0);let result;for(const c of [...p].reverse())result=sim.activityInput(s,c);assert.equal(result.complete,true);assert.equal(s.activities.mastery.lullaby,1);
+ const s=sim.createState();sim.beginActivity(s,'lullaby');listenChimes(s);const p=sim.activityPattern(s,'lullaby');assert.equal(pluckChime(s,(p.at(-1)+1)%4).mistake,true);assert.equal(s.activities.mastery.lullaby,0);listenChimes(s);let result;for(const c of [...p].reverse())result=pluckChime(s,c);assert.equal(result.complete,true);assert.equal(s.activities.mastery.lullaby,1);
 });
 test('moving then refunding cannot leave the original placement comfort as a farmable bonus',()=>{
  const s=sim.createState(),before=structuredClone(s);sim.place(s,'plant','kitchen',0);const id=s.decor[0].id;

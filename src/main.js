@@ -2,6 +2,7 @@ import {objectInfo,sceneObjectAction} from './object-ui.js';
 import {createStoryUI} from './story-ui.js';
 import {createTeaUI} from './tea-ui.js';
 import {createStitchUI} from './stitch-ui.js';
+import {createChimeUI} from './chime-ui.js';
 import {createObjectControls} from './render/object-controls.js';
 import {bindPlacementEscape} from './placement-keys.js';
 import {DOLLS,SAVE_KEY,ACTIVITIES} from './content.js';
@@ -17,31 +18,36 @@ let state=stored?sim.restore(stored):sim.createState();
 if(!stored)state.settings.reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 // A saved unmute preference never overrides a fresh page's audio gesture boundary.
 state.settings.muted=true;
-let world=null,ui=null,manualPause=false,panelOpen=false,fatal=false,saveWarning=false,objectControls=null,storyUI=null,teaUI=null,stitchUI=null,carrying=false;
+let world=null,ui=null,manualPause=false,panelOpen=false,fatal=false,saveWarning=false,objectControls=null,storyUI=null,teaUI=null,stitchUI=null,chimeUI=null,lastChimeTone=null,carrying=false;
 const audio=new DollhouseAudio(),canvas=document.querySelector('#world'),host=document.querySelector('#ui');
 const ACTIVITY_ROOM=Object.fromEntries(ACTIVITIES.map(a=>[a.id,a.room]));
-const physicalActivity=()=>['tea','stitch'].includes(state.activities.active?.id)?state.activities.active.id:null;
-function cancelWorkInput(){teaUI?.cancel();stitchUI?.cancel()}
+const physicalActivity=()=>['tea','stitch','lullaby'].includes(state.activities.active?.id)?state.activities.active.id:null;
+function cancelWorkInput(){teaUI?.cancel();stitchUI?.cancel();chimeUI?.cancel()}
 // Inactive adapters restore their canvas attributes before the active owner
 // updates them. A rapid tea/sewing transition must keep the correct shortcuts.
 function updateWorkUI(dt=0){
- if(physicalActivity()==='tea'){stitchUI?.update(0);teaUI?.update(dt)}
- else{teaUI?.update(0);stitchUI?.update(dt)}
+ const active=physicalActivity(),adapters={tea:teaUI,stitch:stitchUI,lullaby:chimeUI};
+ for(const [id,adapter] of Object.entries(adapters))if(id!==active)adapter?.update(0);
+ if(active)adapters[active]?.update(dt);
+ const chime=sim.chimeStatus(state);
+ if(chime?.tone&&chime.tone!==lastChimeTone)audio.chime(chime.sounding);
+ lastChimeTone=chime?.tone??null;
 }
 // Reattach scene controls synchronously; a slow graphics frame must not hide the UI.
 function refreshUI(){ui.refresh();roomViews.update();objectControls?.update();storyUI?.update();updateWorkUI()}
 function syncPause(){state.paused=manualPause||Boolean(panelOpen&&panelOpen!=='activities')||document.hidden||fatal;if(state.paused)cancelWorkInput();audio.setPaused(state.paused)}
 function enterWork(id){
- if(!['tea','stitch'].includes(id))return;
+ if(!['tea','stitch','lullaby'].includes(id))return;
+ if(id==='lullaby')audio.stopVoices();
  if(ui.panel)ui.close();ui.collapseTools();storyUI?.clear();objectControls?.collapse();world?.clearObjectSelection();
  host.dataset.focusRoom=ACTIVITY_ROOM[id];host.dataset.focusDoll='';
- world?.setTeaActive(id==='tea');world?.setStitchActive(id==='stitch');world?.setEnabled(!state.paused);
+ world?.setTeaActive(id==='tea');world?.setStitchActive(id==='stitch');world?.setChimeActive(id==='lullaby');world?.setEnabled(!state.paused);
  updateWorkUI();roomViews.update();objectControls?.update();canvas.focus({preventScroll:true});save();
 }
 function leaveWork(){
  const id=physicalActivity();if(!id)return;
  const storyResult=state.activities.active?.result?.storyResult;
- cancelWorkInput();sim.endActivity(state);world?.setTeaActive(false);world?.setStitchActive(false);
+ cancelWorkInput();sim.endActivity(state);world?.setTeaActive(false);world?.setStitchActive(false);world?.setChimeActive(false);
  world?.setEnabled(!panelOpen&&!manualPause&&!fatal);updateWorkUI();
  host.dataset.focusRoom=ACTIVITY_ROOM[id];host.dataset.focusDoll='';storyUI?.clear();if(storyResult)storyUI?.respond(storyResult.message);
  roomViews.update();objectControls?.update();ui.tick();canvas.focus({preventScroll:true});save();
@@ -93,7 +99,7 @@ async function dispatch(action,value){
    if(ui.panel)ui.close();
    const result=sim.interactStory(state,value);
    if(result.ok){
-    if(['tea','stitch'].includes(result.startedActivity)){enterWork(result.startedActivity);break}
+    if(['tea','stitch','lullaby'].includes(result.startedActivity)){enterWork(result.startedActivity);break}
     const o=objectInfo(state,value);if(o){world?.focusRoom(o.room,true);host.dataset.focusRoom=o.room;host.dataset.focusDoll=''}
     // A successful handoff changes the destination. Reveal its clue instead of
     // leaving a now-invalid source action as the largest control on a phone.
@@ -154,6 +160,21 @@ async function dispatch(action,value){
    cancelWorkInput();sim.endActivity(state);updateWorkUI();if(sim.beginActivity(state,'stitch').ok)enterWork('stitch');break;
   }
   case 'stitch-exit':if(state.activities.active?.id==='stitch')leaveWork();break;
+  case 'chime-grab':if(!fatal&&!panelOpen)sim.grabChime(state,value);break;
+  case 'chime-pull':if(!fatal&&!panelOpen)sim.pullChime(state,value);break;
+  case 'chime-cancel':sim.cancelChime(state);break;
+  case 'chime-focus':world?.setChimeSelection(value);break;
+  case 'chime-release':{
+   const result=sim.releaseChime(state);if(result.complete){save();ui.tick()}updateWorkUI();break;
+  }
+  case 'chime-replay':{
+   if(state.paused||fatal||state.activities.active?.id!=='lullaby')break;
+   cancelWorkInput();
+   if(state.activities.active.phase==='finished'){sim.endActivity(state);updateWorkUI();if(sim.beginActivity(state,'lullaby').ok)enterWork('lullaby')}
+   else{sim.replayChimes(state);updateWorkUI()}
+   break;
+  }
+  case 'chime-exit':if(state.activities.active?.id==='lullaby')leaveWork();break;
   case 'activity-input':{
    const result=sim.activityInput(state,value);if(result.ok){if(!result.mistake)audio.effect(result.complete?'place':'care');ui.setActivityResult(result);save();ui.tick()}else say(ui.t(result.reason));break;
   }
@@ -218,7 +239,7 @@ async function dispatch(action,value){
    save();refreshUI();break;
   }
   case 'reset-yes':{
-   cancelWorkInput();world?.setTeaActive(false);world?.setStitchActive(false);notices.length=0;const settings={...state.settings};ui.close();ui.clearPlacement();ui.setActivityResult(null);state=sim.createState();state.settings=settings;manualPause=false;syncPause();dispatch('camera');world?.setPlacement(null);save();refreshUI();break;
+   cancelWorkInput();world?.setTeaActive(false);world?.setStitchActive(false);world?.setChimeActive(false);notices.length=0;const settings={...state.settings};ui.close();ui.clearPlacement();ui.setActivityResult(null);state=sim.createState();state.settings=settings;manualPause=false;syncPause();dispatch('camera');world?.setPlacement(null);save();refreshUI();break;
   }
  }
 }
@@ -235,9 +256,10 @@ objectControls=createObjectControls(host,()=>state,key=>dispatch('select-object'
 storyUI=createStoryUI(host,()=>state,dispatch);
 teaUI=createTeaUI(host,canvas,()=>state,dispatch,{pick:(x,y)=>world?.teaAt(x,y),aimAt:(x,y)=>world?.teaAimAt(x,y)});
 stitchUI=createStitchUI(host,canvas,()=>state,dispatch,{pick:(x,y)=>world?.stitchAt(x,y),pointAt:(x,y)=>world?.stitchPointAt(x,y)});
+chimeUI=createChimeUI(host,canvas,()=>state,dispatch,{pick:(x,y)=>world?.chimeAt(x,y),pullSpan:()=>world?.chimePullSpan()??0});
 let last=performance.now(),lastUI=0,lastSave=0,stopped=false;
 function frame(now){if(stopped)return;const dt=Math.min(.1,Math.max(0,(now-last)/1000));last=now;
- if(!document.hidden&&!fatal){updateWorkUI(dt);sim.step(state,dt);if(state.events.length)for(const event of state.events.splice(0))announce(event);if(notices.length&&now>=noticeAt&&!physicalActivity())showNotice(now);world?.render(state,dt,ui.selected);residentLabel.update(state,ui.selected,host.dataset.focusRoom||(host.dataset.focusDoll?state.dolls.find(d=>d.id===host.dataset.focusDoll)?.room:''),world?.project(ui.selected,.05),Boolean(ui.panel||ui.placement||state.paused||storyUI?.selected||physicalActivity()));audio.tick(sim.isNight(state));if(now-lastUI>250){ui.tick();roomViews.update();objectControls.update();storyUI.update();lastUI=now}if(now-lastSave>8000){save();lastSave=now}}
+ if(!document.hidden&&!fatal){updateWorkUI(dt);sim.step(state,dt);if(state.events.length)for(const event of state.events.splice(0))announce(event);if(notices.length&&now>=noticeAt&&!physicalActivity())showNotice(now);world?.render(state,dt,ui.selected);residentLabel.update(state,ui.selected,host.dataset.focusRoom||(host.dataset.focusDoll?state.dolls.find(d=>d.id===host.dataset.focusDoll)?.room:''),world?.project(ui.selected,.05),Boolean(ui.panel||ui.placement||state.paused||storyUI?.selected||physicalActivity()));if(physicalActivity()!=='lullaby')audio.tick(sim.isNight(state));if(now-lastUI>250){ui.tick();roomViews.update();objectControls.update();storyUI.update();lastUI=now}if(now-lastSave>8000){save();lastSave=now}}
  requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
@@ -260,5 +282,5 @@ window.addEventListener('keydown',event=>{
 });
 // Explicit opt-in diagnostics for reproducible browser verification, never enabled by default.
 if(new URLSearchParams(location.search).get('debug')==='1'){
- window.dollhouse={state:()=>structuredClone(state),stats:()=>({calls:world?.renderer.info.render.calls,triangles:world?.renderer.info.render.triangles,geometries:world?.renderer.info.memory.geometries,textures:world?.renderer.info.memory.textures}),project:(id,height)=>world?.project(id,height),visual:()=>world?.visualStatus(),objects:()=>world?.objectPositions(),tea:()=>sim.teaStatus(state),teaObjects:()=>world?.teaPositions(),stitch:()=>sim.stitchStatus(state),stitchObjects:()=>world?.stitchPositions(),projectStitch:(x,y,height)=>world?.projectStitch(x,y,height)};
+ window.dollhouse={state:()=>structuredClone(state),stats:()=>({calls:world?.renderer.info.render.calls,triangles:world?.renderer.info.render.triangles,geometries:world?.renderer.info.memory.geometries,textures:world?.renderer.info.memory.textures}),project:(id,height)=>world?.project(id,height),visual:()=>world?.visualStatus(),objects:()=>world?.objectPositions(),tea:()=>sim.teaStatus(state),teaObjects:()=>world?.teaPositions(),stitch:()=>sim.stitchStatus(state),stitchObjects:()=>world?.stitchPositions(),projectStitch:(x,y,height)=>world?.projectStitch(x,y,height),chimes:()=>sim.chimeStatus(state),chimeObjects:()=>world?.chimePositions(),chimePullSpan:()=>world?.chimePullSpan()};
 }
