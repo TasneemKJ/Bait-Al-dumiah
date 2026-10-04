@@ -221,9 +221,10 @@ try:
     page.set_viewport_size({'width': 390, 'height': 844})
     room('kitchen')
     select('prop:wash-basin', touch=True)
+    check('phone selection explains the second touch', page.locator('.ribbon-copy p').is_visible())
     tap_object('prop:wash-basin', touch=True)
     check('phone touch fills an ewer in Arabic', progress() == 8 and page.locator('html').get_attribute('dir') == 'rtl')
-    check('phone shows how to drag and touch the object again', page.locator('.held-item em').is_visible() and page.locator('.ribbon-copy p').is_visible())
+    check('successful phone handoff reveals the next clue and drag instruction', page.locator('.held-item em').is_visible() and page.locator('.objective').is_visible() and not page.locator('.object-ribbon').count())
     capture('06-arabic-water-in-hand')
     room('parlor')
     drag_to('prop:jasmine-window', touch=True)
@@ -241,6 +242,11 @@ try:
     check('landscape phone reaches the doorstep and finishes the stories', progress() == 11 and state()['buttons'] == initial['buttons'] + 48)
     check('landscape completion leaves the next objective visible', page.locator('.objective').is_visible())
     page.wait_for_function('window.dollhouse.visual().story.guestVisible')
+    check('landscape reward remains visible outside its completion message', page.evaluate('''()=>{
+        const p=window.dollhouse.objects().find(o=>o.key==='prop:doorstep'),e=document.querySelector('.scene-response');
+        if(!e)return true;const b=e.getBoundingClientRect();
+        return !(p.x>=b.left&&p.x<=b.right&&p.y>=b.top&&p.y<=b.bottom);
+    }'''))
     capture('09-landscape-welcome')
     stamp = state()['story']['lastActionAt']
     page.wait_for_function('t=>window.dollhouse.state().elapsed>t+.1', arg=stamp)
@@ -268,6 +274,7 @@ try:
         room('parlor')
         check(f'{width}×{height} controls fit without horizontal overflow', page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
         check(f'{width}×{height} visible play controls meet 44px targets', page.locator('.dock button:visible,.room-views button:visible,[data-object-toggle]:visible,.camera-tools button:visible').evaluate_all('(els)=>els.every(e=>{const b=e.getBoundingClientRect();return b.width>=44&&b.height>=44&&b.left>=0&&b.right<=innerWidth&&b.top>=0&&b.bottom<=innerHeight})'))
+        check(f'{width}×{height} controls can actually receive a touch', page.locator('.dock button:visible,.room-views button:visible,[data-object-toggle]:visible,.camera-tools button:visible').evaluate_all('(els)=>els.every(e=>{const b=e.getBoundingClientRect(),hit=document.elementFromPoint(b.left+b.width/2,b.top+b.height/2);return hit===e||e.contains(hit)})'))
     page.set_viewport_size({'width': 1280, 'height': 900})
     panel('settings')
     page.locator('[data-field="quality"]').select_option('high')

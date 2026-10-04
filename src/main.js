@@ -64,8 +64,10 @@ async function dispatch(action,value){
    if(ui.panel)ui.close();
    const result=sim.interactStory(state,value);
    if(result.ok){
-    const o=objectInfo(state,value);if(o){world?.focusRoom(o.room,true);host.dataset.focusRoom=o.room;host.dataset.focusDoll='';storyUI?.select(value);world?.selectObject(value)}
-    if(result.chapterComplete){storyUI?.clear();world?.clearObjectSelection()}
+    const o=objectInfo(state,value);if(o){world?.focusRoom(o.room,true);host.dataset.focusRoom=o.room;host.dataset.focusDoll=''}
+    // A successful handoff changes the destination. Reveal its clue instead of
+    // leaving a now-invalid source action as the largest control on a phone.
+    storyUI?.clear();world?.clearObjectSelection();
     storyUI?.respond(result.message,result.chapterComplete,result.reward);audio.effect(result.chapterComplete?'secret':result.effect==='music-cabinet'?'musicbox':'care');save();ui.tick();roomViews.update();objectControls?.update();
    }else storyUI?.respond(result.reason);break;
   }

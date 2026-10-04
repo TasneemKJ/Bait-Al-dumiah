@@ -97,6 +97,11 @@ with sync_playwright() as p:
    valid=page.locator('.dock button:visible').evaluate_all('(els)=>els.length>0&&els.every(e=>{const b=e.getBoundingClientRect();return b.width>=44&&b.height>=44&&b.left>=0&&b.right<=innerWidth})')
    results.append({'name':f'320px {locale} {"expanded" if expanded else "collapsed"} dock stays in bounds with 44px targets','passed':valid and page.locator('.dock [data-action^="panel-"]:visible').count()==(5 if expanded else 0)})
   page.locator('[data-action="toggle-tools"]').click()
+ for locale in ['en','ar']:
+  page.set_viewport_size({'width':667,'height':375})
+  page.evaluate("locale=>{fixtureState.settings.locale=locale;fixtureUI.refresh();fixtureViews.update()}",locale)
+  reachable=page.locator('.dock button:visible,.room-views button:visible').evaluate_all('(els)=>els.every(e=>{const b=e.getBoundingClientRect(),hit=document.elementFromPoint(b.left+b.width/2,b.top+b.height/2);return hit===e||e.contains(hit)})')
+  results.append({'name':f'{locale} 667px landscape room and dock controls receive actual pointer input','passed':reachable})
  page.set_viewport_size({'width':390,'height':844})
  page.evaluate("fixtureState.settings.locale='ar';fixtureUI.refresh();document.querySelector('#ui').dataset.focusRoom='kitchen';fixtureObjects.update()")
  page.locator('[data-object-toggle]').click()
