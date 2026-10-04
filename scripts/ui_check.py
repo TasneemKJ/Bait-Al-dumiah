@@ -17,7 +17,7 @@ with sync_playwright() as p:
  if os.environ.get('CHROMIUM_PATH'):options['executable_path']=os.environ['CHROMIUM_PATH']
  browser=p.chromium.launch(**options)
  page=browser.new_page(viewport={'width':1440,'height':1000})
- css='\n'.join(((ROOT/'src'/name).read_text() if (ROOT/'src'/name).exists() else '') for name in ['styles.css','accessibility.css','visual-upgrade.css','doll-portraits.css','gameplay.css','activities.css','story.css'])
+ css='\n'.join(((ROOT/'src'/name).read_text() if (ROOT/'src'/name).exists() else '') for name in ['styles.css','accessibility.css','visual-upgrade.css','doll-portraits.css','gameplay.css','activities.css','story.css','tea.css'])
  page.set_content('<html><head><meta name="theme-color" content="#fff"><style>'+css+'</style></head><body><div id="app"><canvas id="world"></canvas><div id="ui"></div></div></body></html>')
  modules={}
  for name in ['content','simulation','i18n','icons','resident-portraits','activities-ui','object-ui','story-ui','carry-gesture','ui','render/room-views','render/object-controls']:
@@ -80,10 +80,10 @@ with sync_playwright() as p:
  page.evaluate("fixtureUI.close();fixtureState.wishes=['lina','noor','sami'];fixtureState.decor=[{id:1,item:'plant',room:'kitchen',slot:0}];fixtureState.achieved=[];fixtureState.clock=130;fixtureState.lastSecretDay=fixtureState.day;fixtureState.activities.mastery.tea=1;fixtureState.story.chapter=3;fixtureUI.tick()")
  results.append({'name':'after tonight\'s whisper the objective points to morning, not a dead end','passed':page.evaluate('fixtureUI.objective().action==="light"')})
  page.evaluate("fixtureUI.close();fixtureState.story.chapter=0;fixtureState.story.step=0;fixtureState.settings.locale='en';fixtureUI.refresh()")
- page.evaluate('''async()=>{const sim=await import('fixture/simulation.js');fixtureState.paused=false;sim.beginActivity(fixtureState,'tea');for(const c of fixtureState.activities.active.pattern)sim.activityInput(fixtureState,c);fixtureUI.open('activities');}''')
+ page.evaluate('''async()=>{const sim=await import('fixture/simulation.js');fixtureState.paused=false;sim.beginActivity(fixtureState,'tea');for(const cup of sim.teaStatus(fixtureState).cups){sim.controlTea(fixtureState,{aim:cup.x/.45,tilt:.64,pressed:true});while(sim.teaStatus(fixtureState).cups.find(c=>c.id===cup.id).fill<cup.target-.025)sim.step(fixtureState,.05);sim.releaseTea(fixtureState)}sim.serveTea(fixtureState);sim.endActivity(fixtureState);fixtureUI.open('activities');}''')
  page.evaluate('''async()=>{const sim=await import('fixture/simulation.js');for(let i=0;i<21;i++)sim.step(fixtureState,1);fixtureUI.tick()}''')
  results.append({'name':'ritual reward button updates after cooldown while sheet stays open','passed':'Play' in page.locator('.ritual-card [data-id="tea"]').inner_text()})
- page.evaluate('''async()=>{const sim=await import('fixture/simulation.js');sim.beginActivity(fixtureState,'tea');fixtureUI.setActivityResult(null);document.querySelector('[data-choice]').focus();let result;for(const c of fixtureState.activities.active.pattern)result=sim.activityInput(fixtureState,c);fixtureUI.setActivityResult(result);}''')
+ page.evaluate('''async()=>{const sim=await import('fixture/simulation.js');sim.beginActivity(fixtureState,'stitch');sim.startRecall(fixtureState);fixtureUI.setActivityResult(null);document.querySelector('[data-choice]').focus();let result;for(const c of fixtureState.activities.active.pattern)result=sim.activityInput(fixtureState,c);fixtureUI.setActivityResult(result);}''')
  results.append({'name':'ritual completion retains meaningful keyboard focus in its result','passed':page.evaluate('document.activeElement.matches(".ritual-result button")')})
  page.evaluate('''async()=>{const sim=await import('fixture/simulation.js');fixtureState.activities.completed.tea=2;fixtureState.dayTime=61;fixtureState.clock=239;sim.step(fixtureState,1);fixtureUI.tick()}''')
  results.append({'name':'fresh dawn updates activity cap without reopening the sheet','passed':'Both rewards' not in page.locator('.ritual-card').first.inner_text()})

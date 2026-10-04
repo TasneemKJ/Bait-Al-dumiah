@@ -31,7 +31,7 @@ export function createStoryUI(host,getState,dispatch){
  }
  function update(){
   if(!root.isConnected)host.append(root);if(!ghost.isConnected)host.append(ghost);
-  const s=getState(),status=storyStatus(s),hidden=Boolean(host.querySelector('dialog[open],.error-screen'))||s.paused||host.querySelector('.placement')?.hidden===false;
+  const s=getState(),status=storyStatus(s),hidden=Boolean(host.querySelector('dialog[open],.error-screen'))||s.paused||s.activities.active?.id==='tea'||host.querySelector('.placement')?.hidden===false;
   root.hidden=hidden;if(hidden)cancelDrag();
   if(selected&&!current())selected=null;
   host.dataset.objectSelected=selected??'';

@@ -50,6 +50,8 @@ export const ACTIVITIES=[
  {id:'lullaby',resident:'noor',room:'bedroom',icon:'music',choices:['moon','music','spark','heart'],seed:3},
 ];
 export const ACTIVITY_THRESHOLDS=[0,2,5,9],ACTIVITY_DAILY_CAP=2,ACTIVITY_COOLDOWN=20;
+// Shared table geometry; simulation alone judges stream landing and fill targets.
+export const TEA_TABLE={room:'kitchen',x:-.53,y:.779,z:.10,aimSpan:.45,cupZ:.14,cupRadius:.112,cupOuterRadius:.14,cupHeight:.24};
 export const RESTORATION_COSTS=[45,85,140],RESTORATION_MASTERY=[1,3,6];
 export const INTERACTIVE_PROPS=[
  {id:'tea-set',room:'kitchen',position:[-.53,.92,.1],size:[1.1,.55,.75],icon:'tea',activity:'tea',resident:'lina',care:'tea'},

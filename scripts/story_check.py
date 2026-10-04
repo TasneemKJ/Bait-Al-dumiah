@@ -6,6 +6,7 @@ submits synthetic rewards, calls simulation functions or bypasses hit testing.
 import json, os, subprocess, time, urllib.request
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from tea_check import complete_tea, tea_ready, tea_status, tap_tea
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'artifacts' / 'stories'
@@ -234,7 +235,15 @@ try:
     page.set_viewport_size({'width': 320, 'height': 740})
     room('kitchen')
     drag_to('prop:tea-set', touch=True)
-    check('320px phone can carry the sprig into the tea set', progress() == 10)
+    tea_ready(page)
+    ritual_before = state()['activities'].copy()
+    check('320px phone starts a one-cup tea while keeping the sprig', progress() == 9 and tea_status(page)['mode'] == 'guest' and len(tea_status(page)['cups']) == 1)
+    complete_tea(page, touch=True)
+    ritual_after = state()['activities']
+    check('physical guest service produces the carried cup without ritual progress', progress() == 10 and all(ritual_after[key] == ritual_before[key] for key in ['mastery','completed','lastReward','teaRecords']))
+    tap_tea(page,'tray',touch=True);page.wait_for_function('window.dollhouse.tea()===null')
+    ready()
+    check('served guest cup returns to the real carried-item route', page.locator('[data-held-item="guest-cup"]').is_visible())
     capture('08-small-phone-tea')
     page.set_viewport_size({'width': 667, 'height': 375})
     room('parlor')

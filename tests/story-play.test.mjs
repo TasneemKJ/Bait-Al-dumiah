@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as sim from '../src/simulation.js';
 import * as content from '../src/content.js';
+import {storyAction} from './tea-test-helpers.mjs';
 
 const route=[
  ['mint-tin','red-thread',0,'mended-friend'],
@@ -16,7 +17,7 @@ const route=[
  ['tea-set','guest-cup',0,'guest-tea'],
  ['doorstep',null,20,'guest-tea'],
 ];
-const use=(s,id)=>sim.interactStory(s,'prop:'+id);
+const use=storyAction;
 const saved=s=>JSON.stringify(s);
 
 test('fresh house offers an empty-handed first discovery without prerequisites',()=>{
@@ -38,7 +39,7 @@ test('eleven deliberate object actions carry one item and pay exactly 48 once-on
   const result=use(s,id);earned+=reward;
   assert.deepEqual(result,{ok:true,chapterComplete:reward>0,reward,chapterId,step,message:`story-${chapterId}-${step}-done`,effect:id,held});
   assert.equal(s.buttons,earned);assert.equal(s.earnedToday,earned);
-  assert.equal(s.story.lastAction,'prop:'+id);assert.equal(s.story.lastActionAt,i+1);
+  assert.equal(s.story.lastAction,'prop:'+id);assert.equal(s.story.lastActionAt,s.elapsed);
   const status=sim.storyStatus(s);assert.equal(status.held,held);assert.equal(status.progress,i+1);
   assert.deepEqual(status.completed,i<2?[]:i<6?['mended-friend']:i<10?['mended-friend','lost-song']:['mended-friend','lost-song','guest-tea']);
  }
@@ -73,6 +74,10 @@ test('stories do not mutate care, bond, mastery, needs, wishes or owned decorati
  const s=sim.createState();sim.place(s,'lamp','parlor',0);sim.care(s,'lina','tea');
  const before=structuredClone(s);
  for(const [id] of route)assert.equal(use(s,id).ok,true);
+ // Pouring passes real simulation time; compare unrelated fields against the same
+ // elapsed house time, so natural need decay cannot masquerade as a story reward.
+ let remaining=s.elapsed-before.elapsed;
+ while(remaining>1e-9){const dt=Math.min(1,remaining);sim.step(before,dt);remaining-=dt}
  for(const key of Object.keys(before))if(!['story','buttons','earnedToday'].includes(key))assert.deepEqual(s[key],before[key],key);
  assert.equal(s.buttons,before.buttons+48);assert.equal(s.earnedToday,before.earnedToday+48);
 });
@@ -116,7 +121,7 @@ test('dawn, optional rituals and keepsake reuse cannot reset chapters or repeat 
  const story=structuredClone(s.story),buttons=s.buttons;
  sim.changeLight(s);sim.changeLight(s);assert.deepEqual(s.story,story);
  assert.equal(use(s,'doorstep').reason,'storyFinished');assert.equal(s.buttons,buttons);
- sim.beginActivity(s,'tea');sim.activityInput(s,(s.activities.active.pattern[0]+1)%4);
+ sim.beginActivity(s,'tea');assert.equal(sim.activityInput(s,0).reason,'teaPhysical');sim.endActivity(s);
  assert.deepEqual(s.story,story);assert.equal(use(s,'mint-tin').reason,'storyFinished');
 });
 

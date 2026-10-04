@@ -1,4 +1,4 @@
-import {DOLLS,ROOMS,CATALOG,SLOTS,SECRETS,ACTIONS,BOND_LEVELS,SECRET_COZY,MILESTONES,SEW_SECONDS,SEW_DAILY,BASKET_MAX,DOOR_STEPS,GIFT_COST,VISITOR_GIFTS,WISH_REFRESH_SECONDS,ACTIVITIES,ACTIVITY_THRESHOLDS,ACTIVITY_DAILY_CAP,ACTIVITY_COOLDOWN,RESTORATION_COSTS,RESTORATION_MASTERY,INTERACTIVE_PROPS,STORY_CHAPTERS} from './content.js';
+import {DOLLS,ROOMS,CATALOG,SLOTS,SECRETS,ACTIONS,BOND_LEVELS,SECRET_COZY,MILESTONES,SEW_SECONDS,SEW_DAILY,BASKET_MAX,DOOR_STEPS,GIFT_COST,VISITOR_GIFTS,WISH_REFRESH_SECONDS,ACTIVITIES,ACTIVITY_THRESHOLDS,ACTIVITY_DAILY_CAP,ACTIVITY_COOLDOWN,RESTORATION_COSTS,RESTORATION_MASTERY,INTERACTIVE_PROPS,STORY_CHAPTERS,TEA_TABLE} from './content.js';
 const clamp=(v,min=0,max=100)=>Math.max(min,Math.min(max,Number.isFinite(v)?v:min));
 const integer=(v,min,max)=>Math.floor(clamp(v,min,max));
 const has=(items,id)=>items.some(x=>x.id===id);
@@ -11,7 +11,7 @@ export function createState(){
   dolls:DOLLS.map(d=>({id:d.id,room:d.room,hunger:d.hunger,energy:d.energy,comfort:d.comfort,lastCare:-10,action:'idle',actionUntil:0,bond:0,sew:0})),
   decor:[],nextId:1,wishes:[],journal:[],lastSecretDay:0,paused:false,
   streak:0,lastFullDay:0,sewnToday:0,basket:0,earnedToday:0,achieved:[],milestones:[],events:[],door:0,gifts:[],lastGiftDay:0,dayTime:0,
-  activities:{mastery:Object.fromEntries(ACTIVITIES.map(a=>[a.id,0])),completed:Object.fromEntries(ACTIVITIES.map(a=>[a.id,0])),lastReward:Object.fromEntries(ACTIVITIES.map(a=>[a.id,-ACTIVITY_COOLDOWN])),active:null},
+  activities:{mastery:Object.fromEntries(ACTIVITIES.map(a=>[a.id,0])),completed:Object.fromEntries(ACTIVITIES.map(a=>[a.id,0])),lastReward:Object.fromEntries(ACTIVITIES.map(a=>[a.id,-ACTIVITY_COOLDOWN])),teaRecords:[null,null,null,null],active:null},
   restoration:Object.fromEntries(ROOMS.map(r=>[r.id,0])),
   story:{chapter:0,step:0,lastAction:null,lastActionAt:-10},
   settings:{locale:'en',muted:true,reducedMotion:false,quality:'auto'}};
@@ -95,6 +95,7 @@ function newDay(s){
 export function step(s,dt){
  if(s.paused||!Number.isFinite(dt)||dt<=0)return;
  dt=Math.min(dt,1);s.elapsed+=dt;s.clock+=dt;s.dayTime=Math.min(1e6,s.dayTime+dt);
+ stepTea(s,dt);
  if(s.clock>=240){s.clock-=240;newDay(s)}
  const comfortProtection=Math.min(.65,s.decor.length*.035);
  for(const d of s.dolls){
@@ -181,27 +182,82 @@ export function activityPattern(s,id){
 export function activityRewardReady(s,id){return Boolean(activityDef(id))&&s.activities.completed[id]<ACTIVITY_DAILY_CAP&&s.elapsed-s.activities.lastReward[id]>=ACTIVITY_COOLDOWN}
 export function beginActivity(s,id){
  if(s.paused)return fail('pausedActivity');if(!activityDef(id))return fail('invalid');
+ if(s.activities.active)return fail('activityBusy');
+ if(id==='tea'){s.activities.active=createTea(s,'ritual');return {ok:true}}
  s.activities.active={id,cursor:0,pattern:activityPattern(s,id),phase:id==='stitch'?'study':'play',hint:false};return {ok:true};
 }
+export function endActivity(s){releaseTea(s);s.activities.active=null;return {ok:true}}
 export function startRecall(s){const a=s.activities.active;if(s.paused)return fail('pausedActivity');if(a?.id!=='stitch'||a.phase!=='study')return fail('invalid');a.phase='recall';return {ok:true}}
 export function toggleActivityHint(s){const a=s.activities.active;if(s.paused)return fail('pausedActivity');if(a?.id!=='stitch'||a.phase!=='recall')return fail('invalid');a.hint=!a.hint;return {ok:true}}
-export function activityAnswer(s){const a=s.activities.active;return a? a.id==='lullaby'?[...a.pattern].reverse():[...a.pattern]:[]}
+export function activityAnswer(s){const a=s.activities.active;return a&&a.id!=='tea'? a.id==='lullaby'?[...a.pattern].reverse():[...a.pattern]:[]}
 export function activityInput(s,choice){
  const active=s.activities.active;if(s.paused)return fail('pausedActivity');
+ if(active?.id==='tea')return fail('teaPhysical');
  if(!active||!Number.isInteger(choice)||choice<0||choice>3)return fail('invalid');
  if(active.phase==='study')return fail('studyFirst');
  if(activityAnswer(s)[active.cursor]!==choice){active.cursor=0;return {ok:true,mistake:true,complete:false}}
  active.cursor++;
  if(active.cursor<active.pattern.length)return {ok:true,complete:false};
- const id=active.id,a=activityDef(id),before=activityLevel(s,id),rewarded=activityRewardReady(s,id);
+ const id=active.id;s.activities.active=null;return completeActivity(s,id);
+}
+// Sequence and physical rituals share one economic boundary.
+function completeActivity(s,id){
+ const a=activityDef(id),before=activityLevel(s,id),rewarded=activityRewardReady(s,id);
  let reward=0,bonus=0;
  if(rewarded){
   s.activities.completed[id]++;s.activities.lastReward[id]=s.elapsed;s.activities.mastery[id]=Math.min(999,s.activities.mastery[id]+1);
   reward=7+before*2;bonus=activityLevel(s,id)>before?10*(before+1):0;earn(s,reward+bonus);
   const d=s.dolls.find(d=>d.id===a.resident);growBond(s,d,3);d.comfort=clamp(d.comfort+8);s.unease=clamp(s.unease-3);
  }
- s.activities.active=null;checkMilestones(s);
+ checkMilestones(s);
  return {ok:true,complete:true,id,reward,bonus,level:activityLevel(s,id),practice:!rewarded};
+}
+const TEA_TOLERANCE=.07;
+const teaActive=s=>s.activities.active?.id==='tea'?s.activities.active:null;
+const cupReady=c=>Math.abs(c.fill-c.target)<=TEA_TOLERANCE+1e-9;
+const teaHit=a=>a.cups.find(c=>Math.abs(c.x-a.aim*TEA_TABLE.aimSpan)<=TEA_TABLE.cupRadius)??null;
+const teaFlow=(s,a)=>a.phase==='pour'&&!s.paused&&a.pressed?Math.max(0,(a.tilt-.15)/.85)*.55:0;
+function createTea(s,mode){
+ const level=mode==='guest'?0:activityLevel(s,'tea'),xs=mode==='guest'?[0]:level<2?[-.23,.23]:[-.33,0,.33];
+ return {id:'tea',phase:'pour',mode,level,cups:xs.map((x,id)=>({id,x,target:mode==='guest'?.70:.60+((level*3+s.day+s.activities.mastery.tea+id*4)%5)*.05,fill:0})),aim:0,tilt:0,pressed:false,spills:0,poured:0,result:null};
+}
+function stepTea(s,dt){
+ const a=teaActive(s);if(!a)return;const volume=teaFlow(s,a)*dt;if(volume<=0)return;
+ a.poured+=volume;const cup=teaHit(a);
+ if(!cup){a.spills+=volume;return}
+ const added=Math.min(volume,Math.max(0,1.2-cup.fill));cup.fill+=added;a.spills+=volume-added;
+}
+export function teaStatus(s){
+ const a=teaActive(s);if(!a)return null;
+ return {...a,result:a.result?structuredClone(a.result):null,flow:teaFlow(s,a),aimedCup:teaHit(a)?.id??null,best:a.mode==='ritual'?s.activities.teaRecords[a.level]:null,cups:a.cups.map(c=>({...c,ready:cupReady(c),overfilled:c.fill>c.target+TEA_TOLERANCE+1e-9})),ready:a.phase==='pour'&&!a.pressed&&a.cups.every(cupReady)};
+}
+function teaCommand(s){
+ if(s.paused)return fail('pausedActivity');const a=teaActive(s);
+ if(!a)return fail('teaNotActive');if(a.phase==='served')return fail('teaServed');return null;
+}
+export function controlTea(s,input){
+ const blocked=teaCommand(s);if(blocked)return blocked;
+ if(!input||typeof input!=='object'||Array.isArray(input)||Object.keys(input).some(k=>!['aim','tilt','pressed'].includes(k))||!Number.isFinite(input.aim)||input.aim< -1||input.aim>1||!Number.isFinite(input.tilt)||input.tilt<0||input.tilt>1||typeof input.pressed!=='boolean')return fail('invalid');
+ const a=teaActive(s);a.aim=input.aim;a.tilt=input.tilt;a.pressed=input.pressed;return {ok:true};
+}
+export function releaseTea(s){
+ const a=teaActive(s);if(!a)return fail('teaNotActive');a.pressed=false;a.tilt=0;return {ok:true};
+}
+export function emptyTeaCup(s,id){
+ const blocked=teaCommand(s);if(blocked)return blocked;const a=teaActive(s),cup=Number.isInteger(id)?a.cups.find(c=>c.id===id):null;
+ if(!cup)return fail('invalid');if(a.pressed)return fail('teaHeld');if(cup.fill<=cup.target+TEA_TOLERANCE+1e-9)return fail('teaNotOverfilled');
+ a.spills+=cup.fill;cup.fill=0;return {ok:true};
+}
+export function serveTea(s){
+ const blocked=teaCommand(s);if(blocked)return blocked;const a=teaActive(s);
+ if(a.pressed)return fail('teaHeld');if(!a.cups.every(cupReady))return fail('teaNotReady');
+ if(a.mode==='guest'){const story=storyStatus(s);if(story.chapter?.id!=='guest-tea'||story.step!==2)return fail('storyNotHere')}
+ const accuracy=a.cups.reduce((sum,c)=>sum+Math.max(0,1-Math.abs(c.fill-c.target)/TEA_TOLERANCE),0)/a.cups.length;
+ const useful=a.cups.reduce((sum,c)=>sum+Math.min(c.fill,c.target),0),score=integer(Math.round(100*accuracy*Math.min(1,useful/a.poured)),0,100);
+ let result;
+ if(a.mode==='guest')result={ok:true,complete:true,id:'tea',mode:'guest',reward:0,bonus:0,level:a.level,practice:true,score,storyResult:advanceStory(s,storyStatus(s))};
+ else{result={...completeActivity(s,'tea'),mode:'ritual',score};s.activities.teaRecords[a.level]=Math.max(s.activities.teaRecords[a.level]??0,score)}
+ a.pressed=false;a.tilt=0;a.phase='served';a.result=result;return structuredClone(result);
 }
 export function restorationReady(s,room){
  const r=ROOMS.find(r=>r.id===room);if(!r)return null;const tier=s.restoration[room];
@@ -224,10 +280,15 @@ export function storyStatus(s){
 export function interactStory(s,key){
  if(s.paused)return fail('pausedActivity');
  if(typeof key!=='string'||!INTERACTIVE_PROPS.some(p=>'prop:'+p.id===key))return fail('invalid');
+ if(s.activities.active)return fail('activityBusy');
  const status=storyStatus(s);if(status.finished)return fail('storyFinished');
  if(key!=='prop:'+status.next.object)return fail('storyNotHere');
+ if(status.chapter.id==='guest-tea'&&status.step===2){s.activities.active=createTea(s,'guest');return {ok:true,startedActivity:'tea',mode:'guest',held:status.held}}
+ return advanceStory(s,status);
+}
+function advanceStory(s,status){
  const {chapter,step,next}=status,chapterComplete=step===chapter.steps.length-1,reward=chapterComplete?chapter.reward:0;
- s.story.lastAction=key;s.story.lastActionAt=s.elapsed;
+ s.story.lastAction='prop:'+next.object;s.story.lastActionAt=s.elapsed;
  if(chapterComplete){s.story.chapter++;s.story.step=0;earn(s,reward)}else s.story.step++;
  return {ok:true,chapterComplete,reward,chapterId:chapter.id,step,message:`story-${chapter.id}-${step}-done`,effect:next.object,held:storyStatus(s).held};
 }
@@ -258,6 +319,7 @@ export function restore(raw){
  s.basket=integer(v.basket,0,BASKET_MAX);
  s.dayTime=clamp(v.dayTime,0,1e6);s.door=integer(v.door,0,DOOR_STEPS.length);s.gifts=Array.isArray(v.gifts)?VISITOR_GIFTS.filter(g=>v.gifts.includes(g)):[];s.lastGiftDay=integer(v.lastGiftDay,0,s.day);
  for(const a of ACTIVITIES){s.activities.mastery[a.id]=integer(v.activities?.mastery?.[a.id],0,999);s.activities.completed[a.id]=integer(v.activities?.completed?.[a.id],0,ACTIVITY_DAILY_CAP);s.activities.lastReward[a.id]=Number.isFinite(v.activities?.lastReward?.[a.id])?clamp(v.activities.lastReward[a.id],-ACTIVITY_COOLDOWN,s.elapsed):-ACTIVITY_COOLDOWN}
+ if(Array.isArray(v.activities?.teaRecords))s.activities.teaRecords=s.activities.teaRecords.map((_,i)=>Number.isFinite(v.activities.teaRecords[i])?integer(v.activities.teaRecords[i],0,100):null);
  for(const r of ROOMS)s.restoration[r.id]=integer(v.restoration?.[r.id],0,3);
  if(v.story&&typeof v.story==='object'&&!Array.isArray(v.story)){
   s.story.chapter=integer(v.story.chapter,0,STORY_CHAPTERS.length);

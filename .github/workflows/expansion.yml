@@ -52,3 +52,27 @@ jobs:
           name: hidden-house-stories
           path: artifacts/stories/
           retention-days: 14
+  tea:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements.txt
+      - run: python -m playwright install --with-deps chromium
+      - name: Pour and serve tea through mouse, touch and keyboard
+        run: python scripts/tea_check.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: physical-tea-service
+          path: artifacts/tea/
+          retention-days: 14

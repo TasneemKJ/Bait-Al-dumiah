@@ -2,6 +2,7 @@
 import json, os, subprocess, time, urllib.request
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from tea_check import complete_tea, tea_ready, tea_status, tap_tea
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'artifacts'/'expansion'; OUT.mkdir(parents=True,exist_ok=True)
 BASE=os.environ.get('PLAY_URL','http://127.0.0.1:4188')
@@ -63,15 +64,14 @@ try:
   check('activity selection has three rituals',page.locator('.ritual-card').count()==3)
   page.screenshot(path=str(OUT/'01-rituals.png'))
   page.locator('[data-action="begin-activity"][data-id="tea"]').click()
-  pattern=state()['activities']['active']['pattern'];before=state()['buttons']
-  page.locator(f'[data-choice="{(pattern[0]+1)%4}"]').click()
-  check('mistake keeps cursor and buttons safe',state()['activities']['active']['cursor']==0 and state()['buttons']==before)
+  tea_ready(page);before=state()['buttons']
+  check('tea enters the actual table without sequence choices or a modal',tea_status(page)['phase']=='pour' and not page.locator('.ritual-choice:visible,dialog[open]').count())
   page.screenshot(path=str(OUT/'02-tea-play.png'))
-  for choice in pattern:page.locator(f'[data-choice="{choice}"]').click()
-  check('completed ritual rewards earned mastery',state()['activities']['mastery']['tea']==1 and state()['buttons']==before+7)
-  check('result is visible',page.locator('.ritual-result').is_visible())
+  complete_tea(page)
+  check('completed physical ritual rewards earned mastery',state()['activities']['mastery']['tea']==1 and state()['buttons']==before+7)
+  check('served result remains visible on the actual table',tea_status(page)['phase']=='served' and page.locator('#tea-work-status').is_visible())
   page.screenshot(path=str(OUT/'03-earned-reward.png'))
-  page.locator('[data-action="close"]').click()
+  tap_tea(page,'tray');page.wait_for_function('window.dollhouse.tea()===null')
   expose_objects(page)
   check('ritual camera and accessible objects agree after completion',page.locator('[data-object="prop:tea-set"]').is_visible() and page.locator('[data-room="kitchen"]').get_attribute('aria-pressed')=='true')
   page.reload();page.wait_for_function('window.dollhouse && !document.querySelector("#loading")')
@@ -103,6 +103,8 @@ try:
   pattern=state()['activities']['active']['pattern']
   check('mobile choices all have 44px targets',page.locator('.ritual-choice').count()==4 and page.locator('.ritual-choice').evaluate_all('(els)=>els.every(e=>{const r=e.getBoundingClientRect();return r.width>=44 && r.height>=44})'))
   page.locator('[data-action="recall-ready"]').click()
+  before=state()['buttons'];page.locator(f'[data-choice="{(pattern[0]+1)%4}"]').click()
+  check('embroidery mistake keeps cursor and buttons safe',state()['activities']['active']['cursor']==0 and state()['buttons']==before)
   check('recall hides thread choices until a free hint',page.locator('.pattern-step').first.locator('span').inner_text()=='تذكّر')
   page.locator('[data-action="activity-hint"]').click()
   check('hint reveals the pattern without spending buttons',state()['activities']['active']['hint'])
