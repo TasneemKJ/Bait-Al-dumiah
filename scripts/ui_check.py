@@ -31,7 +31,7 @@ with sync_playwright() as p:
   const imports={};for(const [id,source] of Object.entries(modules))imports[id]=URL.createObjectURL(new Blob([source],{type:'text/javascript'}));
   const map=document.createElement('script');map.type='importmap';map.textContent=JSON.stringify({imports});document.head.append(map);
   const {createState}=await import('fixture/simulation.js');const {createUI}=await import('fixture/ui.js');
-  window.fixtureState=createState();window.fixtureUI=createUI(document.querySelector('#ui'),()=>fixtureState,(action,value)=>{window.lastAction={action,value};if(action==='panel-state')fixtureState.paused=Boolean(value)});
+  window.fixtureState=createState();window.fixtureUI=createUI(document.querySelector('#ui'),()=>fixtureState,(action,value)=>{window.lastAction={action,value};if(action==='panel-state')fixtureState.paused=Boolean(value&&value!=='activities')});
   try {const {createRoomViews}=await import('fixture/render/room-views.js');window.fixtureViews=createRoomViews(document.querySelector('#ui'),()=>fixtureState,id=>{window.lastAction={action:'focus-room',value:id}})} catch {}
  }''',modules)
  page.evaluate("fixtureUI.open('settings');fixtureUI.refresh();fixtureUI.close();fixtureUI.tick()")
@@ -77,5 +77,19 @@ with sync_playwright() as p:
  results.append({'name':'reopening a sheet does not repeat a stale notice','passed':page.locator('#sheet .panel-notice').count()==0})
  page.evaluate("fixtureUI.close();fixtureState.wishes=['lina','noor','sami'];fixtureState.decor=[{id:1,item:'plant',room:'kitchen',slot:0}];fixtureState.achieved=[];fixtureState.clock=130;fixtureState.lastSecretDay=fixtureState.day;fixtureState.activities.mastery.tea=1;fixtureUI.tick()")
  results.append({'name':'after tonight\'s whisper the objective points to morning, not a dead end','passed':page.evaluate('fixtureUI.objective().action==="light"')})
+ page.evaluate("fixtureUI.close();fixtureState.settings.locale='en';fixtureUI.refresh()")
+ page.evaluate('''async()=>{const sim=await import('fixture/simulation.js');fixtureState.paused=false;sim.beginActivity(fixtureState,'tea');for(const c of fixtureState.activities.active.pattern)sim.activityInput(fixtureState,c);fixtureUI.open('activities');}''')
+ page.evaluate('''async()=>{const sim=await import('fixture/simulation.js');for(let i=0;i<21;i++)sim.step(fixtureState,1);fixtureUI.tick()}''')
+ results.append({'name':'ritual reward button updates after cooldown while sheet stays open','passed':'Play' in page.locator('.ritual-card [data-id="tea"]').inner_text()})
+ page.evaluate('''async()=>{const sim=await import('fixture/simulation.js');sim.beginActivity(fixtureState,'tea');fixtureUI.setActivityResult(null);document.querySelector('[data-choice]').focus();let result;for(const c of fixtureState.activities.active.pattern)result=sim.activityInput(fixtureState,c);fixtureUI.setActivityResult(result);}''')
+ results.append({'name':'ritual completion retains meaningful keyboard focus in its result','passed':page.evaluate('document.activeElement.matches(".ritual-result button")')})
+ page.evaluate('''async()=>{const sim=await import('fixture/simulation.js');fixtureState.activities.completed.tea=2;fixtureState.dayTime=61;fixtureState.clock=239;sim.step(fixtureState,1);fixtureUI.tick()}''')
+ results.append({'name':'fresh dawn updates activity cap without reopening the sheet','passed':'Both rewards' not in page.locator('.ritual-card').first.inner_text()})
+ page.evaluate('fixtureUI.close()')
+ for locale in ['en','ar']:
+  page.set_viewport_size({'width':320,'height':740})
+  page.evaluate("locale=>{fixtureState.settings.locale=locale;fixtureUI.refresh();fixtureViews.update()}",locale)
+  valid=page.locator('.dock button').evaluate_all('(els)=>els.every(e=>{const b=e.getBoundingClientRect();return b.width>=44&&b.height>=44&&b.left>=0&&b.right<=innerWidth})')
+  results.append({'name':f'320px {locale} dock stays in bounds with 44px targets','passed':valid})
  print(json.dumps(results,indent=2));browser.close()
  if any(not r['passed'] for r in results):raise SystemExit(1)
