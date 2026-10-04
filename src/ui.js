@@ -1,5 +1,5 @@
 import {portraitMarkup} from './resident-portraits.js';
-import {activityMarkup} from './activities-ui.js';
+import {activityMarkup,updateActivityStatus} from './activities-ui.js';
 import {DOLLS,ROOMS,CATALOG,SECRETS,ACTIONS,MILESTONES,SEW_DAILY,BASKET_MAX,DOOR_STEPS,GIFT_COST,VISITOR_GIFTS} from './content.js';
 import {translate,number} from './i18n.js';
 import {isNight,coziness,wishFor,wishReward,bondLevel,nextBond,isContent,contentThreshold,delighted,inFavoriteRoom,currentStreak,unclaimed,secretCozyNeeded,doorOpen,nextDoorStep,doorReady,restorationReady} from './simulation.js';
@@ -101,6 +101,7 @@ export function createUI(host,getState,dispatch){
  }
  function tick(){
   const s=getState();document.body.classList.toggle('night',isNight(s));
+  if(panel==='activities')updateActivityStatus(host,s,t,n);
   host.style.setProperty('--day-progress',(Number.isFinite(s.clock)?Math.max(0,Math.min(240,s.clock))*1.5:0)+'deg');
   const values={buttons:n(s.buttons),cozy:n(coziness(s))+'%',wishes:`${n(s.wishes.length)} / ${n(3)}`,day:t('day')+' '+n(s.day),time:t(isNight(s)?'evening':'morning')};
   for(const [key,value] of Object.entries(values)){const el=host.querySelector(`[data-value="${key}"]`);if(el&&el.textContent!==value)el.textContent=value}
@@ -146,5 +147,5 @@ export function createUI(host,getState,dispatch){
   dispatch('setting',{key:el.dataset.field,value:el.type==='checkbox'?el.checked:el.value});
  };
  host.addEventListener('click',click);host.addEventListener('change',change);build();
- return {open,close,refresh,tick,toast,objective:nextStep,clearPlacement,setActivityResult(result){activityResult=result;const choice=host.querySelector('#sheet [data-choice]:focus')?.dataset.choice;renderPanel();host.querySelector(choice?`#sheet [data-choice="${choice}"]`:'#sheet [data-action="begin-activity"]')?.focus()},setPortraits(values){portraits=values??{};if(panel==='household')renderPanel()},get selected(){return selected},get panel(){return panel},get placement(){return placement},get t(){return t},get n(){return n},dispose(){clearTimeout(toastTimer);host.removeEventListener('click',click);host.removeEventListener('change',change)}};
+ return {open,close,refresh,tick,toast,objective:nextStep,clearPlacement,setActivityResult(result){activityResult=result;const choice=host.querySelector('#sheet [data-choice]:focus')?.dataset.choice;renderPanel();host.querySelector(result?.complete?'.ritual-result button':choice!==undefined?`#sheet [data-choice="${choice}"]`:'#sheet [data-choice], #sheet [data-action="begin-activity"]')?.focus()},setPortraits(values){portraits=values??{};if(panel==='household')renderPanel()},get selected(){return selected},get panel(){return panel},get placement(){return placement},get t(){return t},get n(){return n},dispose(){clearTimeout(toastTimer);host.removeEventListener('click',click);host.removeEventListener('change',change)}};
 }

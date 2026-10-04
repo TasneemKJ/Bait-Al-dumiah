@@ -24,3 +24,5 @@
 [dir=rtl] .ritual-title h3,[dir=rtl] .ritual-result h3{font-family:Tahoma,Arial,sans-serif}
 @media(max-width:680px){.dock{width:calc(100% - 24px);max-width:390px;padding-inline:6px;gap:0}.dock>button,.dock>.icon-button{min-width:44px;padding-inline:4px;flex:1;font-size:8px}.dock>button[data-action="panel-settings"]>span{display:none}.dock-divider{display:none}.ritual-card,.restoration-card{padding:16px}.ritual-title h3{font-size:19px}.ritual-choices{gap:6px}.ritual-choice{min-height:84px}.pattern-step span{font-size:9px}.ritual-pattern{gap:5px}}
 @media(max-width:350px){.ritual-pattern{gap:3px}.ritual-choices{grid-template-columns:repeat(2,minmax(0,1fr))}.ritual-choice{min-height:64px}.ritual-choice>.icon{width:22px;height:22px}}
+@media(max-width:360px){.dock{width:calc(100% - 4px);padding-inline:2px}.dock>button>span{max-width:100%;overflow-wrap:anywhere}}
+@media(max-height:560px) and (min-width:681px){.dock{max-width:calc(100% - 264px);padding-inline:4px;gap:0}.dock>button{padding-inline:8px}.dock>button[data-action="panel-settings"]>span{display:none}}
