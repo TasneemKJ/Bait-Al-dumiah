@@ -329,14 +329,21 @@ def run(scenario):
                 page.locator('[data-stitch-action="exit"]').click()
             page.wait_for_function('window.dollhouse.state().activities.active===null', polling=100)
             check(('Escape' if escape else 'Exit') + ' fully ends physical sewing without rewards', state()['activities']['active'] is None and economy() == before_exit and not page.evaluate('window.dollhouse.visual().stitchActive'))
-        else:
-            check(activity + ' starts through its visible optional catalog', page.locator('dialog[open] .ritual-play').is_visible())
+        elif activity == 'lullaby':
+            # The catalog hands off to a physical instrument, not an answer
+            # dialog. Wait for the rendered owner, then verify cancellation
+            # before continuing the same phone journey into carried stories.
+            page.wait_for_function('window.dollhouse.visual().chimes?.active && !window.dollhouse.visual().cameraMoving', timeout=60000)
+            check(activity + ' starts through its visible optional catalog', page.evaluate('window.dollhouse.chimes().phase!=="finished"') and page.locator('.chime-playfield').is_visible() and not page.locator('dialog[open],[data-choice]').count())
+            before_exit = economy()
             if escape:
                 page.keyboard.press('Escape')
             else:
-                page.locator('#sheet [data-action="close"]').click()
-            page.wait_for_function('window.dollhouse.state().activities.active===null')
-            check(('Escape' if escape else 'Close') + ' fully ends the sequence session', not page.locator('dialog[open]').count() and state()['activities']['active'] is None)
+                page.locator('.chime-exit').click()
+            page.wait_for_function('window.dollhouse.state().activities.active===null', polling=100)
+            check(('Escape' if escape else 'Exit') + ' fully ends physical moon play without rewards', economy() == before_exit and not page.locator('.chime-playfield').is_visible() and not page.evaluate('window.dollhouse.visual().chimeActive'))
+        else:
+            raise AssertionError('Unsupported physical ritual: ' + activity)
         ready()
 
     def enter():

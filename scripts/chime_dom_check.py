@@ -63,6 +63,15 @@ with sync_playwright() as p:
    check(f'{locale} work strip and exit fit {width}x{height} with 44px target',value)
  page.locator('.chime-exit').click();page.wait_for_function('s.activities.active===null')
  check('leaving restores canvas focus and its non-application role',page.evaluate('document.activeElement.id==="world"&&!document.querySelector("#world").hasAttribute("role")'))
+ # Repeat with an unfinished held phrase. Escape must cancel ownership rather
+ # than pluck, pay, or leave a stale adapter blocking the next story gesture.
+ page.set_viewport_size({'width':1280,'height':900})
+ page.evaluate("sim.beginActivity(s,'lullaby');controller.update();document.querySelector('#world').focus()")
+ page.wait_for_function("s.activities.active.phase==='echo'")
+ page.keyboard.down('Space');page.wait_for_function('s.activities.active.pull>=.3')
+ page.keyboard.press('Escape');page.keyboard.up('Space')
+ page.wait_for_function('s.activities.active===null')
+ check('Escape cancels unfinished held moon work without a reward or stale input owner',page.evaluate('s.buttons===43&&s.activities.mastery.lullaby===1&&document.activeElement.id==="world"&&!document.querySelector("#world").hasAttribute("role")&&document.querySelector(".chime-playfield").hidden'))
  check('controller journey has zero JavaScript errors',not errors)
  browser.close()
 out=ROOT/'artifacts/chime-dom-checks.json';out.parent.mkdir(exist_ok=True);out.write_text(json.dumps(checks,indent=2));print(json.dumps({'passed':len(checks),'total':len(checks)},indent=2))

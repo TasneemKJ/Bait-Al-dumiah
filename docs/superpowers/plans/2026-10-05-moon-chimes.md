@@ -20,13 +20,19 @@ unmute boundaries and viewport changes while holding.
 - [x] Add pointer/keyboard controller, localized work strip and audio cues.
 - [x] Integrate work ownership, object entry, active/exit paths and read-only diagnostics.
 - [x] Replace obsolete grid assertions with physical-input coverage.
-- [ ] Run Node, DOM, constructed-art and real-browser journeys; inspect evidence.
-- [ ] Commit iteration and update existing PR without production deployment.
+- [x] Run Node, DOM, constructed-art and dedicated real-browser chime journeys; inspect evidence.
+- [ ] Complete corrected cross-ritual and whole-branch regression acceptance.
+- [x] Commit iteration and update existing PR without production deployment.
 
 Locale data is extracted verbatim to locale-data.js; i18n.js remains the public
 entry point and the home of all new copy. This preserves existing exports and
 fallbacks without duplicating the old catalog.
 
-Source, DOM and artwork-construction checks pass locally. HTTP/WebGL journeys and
-original screenshot review remain pending on the published candidate; they are
-not represented as completed by the checked implementation tasks.
+Feature e5160c8 passed both real HTTP/WebGL chime jobs in workflow 37239781505.
+Original desktop/phone opening, held, completed and returned-bedroom screenshots
+were inspected, including Arabic small/landscape views. A wider phone journey
+still expected the removed lullaby dialog; the follow-up corrects that test and
+adds an unfinished-Escape regression. Corrected local checks pass 233 source
+tests/build, 37 global DOM, 17 controller DOM and 308 constructed-art checks.
+Exact-head cross-ritual results and the separate sewing correction remain open;
+see docs/reviews/2026-10-05-moon-chimes-checkpoint.md.
