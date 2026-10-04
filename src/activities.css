@@ -34,3 +34,8 @@
 .night .object-controls{background:#32283eec;border-color:#9e7e8f;color:#f3e4d0}.night .object-controls>p{color:#d3b8c5}.night .object-controls button{background:#4c394e;color:#f3dfc8;border-color:#99798a}.night .object-controls .icon{color:#dfbe98}
 @media(max-width:680px){.object-controls{top:245px;inset-inline-start:16px;width:170px;padding:8px}.object-controls button{font-size:10px}.object-controls>p{font-size:9px}}
 @media(max-height:560px) and (min-width:681px){.object-controls{top:80px;inset-inline-start:auto;inset-inline-end:180px;width:180px;padding:6px;max-height:calc(100svh - 180px);overflow:auto}.object-controls>p{font-size:9px;margin-bottom:3px}.object-controls button{font-size:10px;margin-top:2px}}
+@media(max-height:560px) and (max-width:680px){
+ #ui[data-focus-room]:not([data-focus-room=""]) .objective{visibility:hidden}
+ .object-controls{top:104px;inset-inline-start:16px;width:150px;max-height:calc(100svh - 220px);overflow:auto;padding:6px}
+ .object-controls>p{font-size:9px;margin-bottom:3px}.object-controls button{font-size:10px;margin-top:2px}
+}

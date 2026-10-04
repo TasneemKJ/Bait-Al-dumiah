@@ -33,7 +33,7 @@ export function createUI(host,getState,dispatch){
   const sheet=host.querySelector('#sheet');sheet.addEventListener('cancel',event=>{event.preventDefault();close()});sheet.addEventListener('click',event=>{if(event.target===sheet){const r=sheet.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)close()}});
   if(panel){renderPanel();sheet.showModal()}renderPlacement();tick();
  }
- function open(name,id){if(placement){placement=null;dispatch('placement-cancel')}panel=name;resetConfirm=false;if(id)selected=id;previousFocus=document.activeElement;renderPanel();host.querySelector('#sheet').showModal();dispatch('panel-state',name);host.querySelector('#sheet [data-action="close"]').focus()}
+ function open(name,id){if(placement){placement=null;moveId=null;renderPlacement();dispatch('placement-cancel')}panel=name;resetConfirm=false;if(id)selected=id;previousFocus=document.activeElement;renderPanel();host.querySelector('#sheet').showModal();dispatch('panel-state',name);host.querySelector('#sheet [data-action="close"]').focus()}
  function close(){const sheet=host.querySelector('#sheet');sheet?.close();panel=null;renderedPanel=null;resetConfirm=false;dispatch('panel-state',null);if(previousFocus?.isConnected)previousFocus.focus();else host.querySelector('[data-action="panel-household"]')?.focus()}
  let renderedPanel=null;
  function doorMarkup(s){

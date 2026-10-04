@@ -39,7 +39,8 @@ async function dispatch(action,value){
  switch(action){
   case 'panel-state':panelOpen=value||false;syncPause();world?.setEnabled(!panelOpen);if(!value){world?.clearObjectSelection();ui.clearObject()}objectControls?.update();if(value==='household'&&world){try{ui.setPortraits(world.getPortraits())}catch(error){console.warn('Resident portrait unavailable:',error)}}break;
   case 'select-object':{
-   const o=objectInfo(state,value);if(!o||fatal||manualPause)break;dispatch('focus-room',o.room);if(ui.openObject(value))world?.selectObject(value);break;
+   const o=objectInfo(state,value);if(!o||fatal||manualPause)break;
+   if(ui.openObject(value)){world?.focusRoom(o.room,true);host.dataset.focusRoom=o.room;host.dataset.focusDoll='';world?.selectObject(value);roomViews.update()}break;
   }
   case 'rotate-object':if(notify(sim.rotateDecor(state,value),'objectRotated'))ui.refresh();break;
   case 'move-object':ui.beginMove(value);break;

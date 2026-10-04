@@ -67,7 +67,7 @@ export function createWorld(canvas,{onPick,onError}){
   renderer,camera,scene,home,
   selectObject(key){return objects.select(key)},clearObjectSelection(){objects.clear()},objectPositions(){return objects.project(camera,canvas.clientWidth,canvas.clientHeight)},
   getPortraits(){return portraitCache.getAll()},
-  focusRoom(id){if(!ROOMS.some(r=>r.id===id))return false;focusedRoom=id;focusedDoll=null;cameraMove.moveTo(framing(canvas.clientWidth,canvas.clientHeight,id),reducedMotion);return true},
+  focusRoom(id,immediate=false){if(!ROOMS.some(r=>r.id===id))return false;focusedRoom=id;focusedDoll=null;cameraMove.moveTo(framing(canvas.clientWidth,canvas.clientHeight,id),reducedMotion||immediate);return true},
   focusDoll(id){const p=residents.position(id);if(!p)return false;focusedDoll=id;focusedRoom=null;cameraMove.moveTo(focusPose(),reducedMotion);return true},
   visualStatus(){return {portraitCount:portraitCache.size,quality,focusedRoom,focusedDoll,nightMix,cameraMoving:cameraMove.active,previewVisible:preview.root.visible,previewValid:preview.root.userData.valid??false,windowMaterials:house.windows.size,courtyard:house.root.getObjectByName('levantine-courtyard')?.userData.nightCue}},
   zoom(amount){cameraMove.cancel();camera.zoom=T.MathUtils.clamp(camera.zoom*amount,.8,3.5);camera.updateProjectionMatrix()},
