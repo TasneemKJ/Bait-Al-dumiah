@@ -1,9 +1,10 @@
 import {objectMarkup,objectInfo} from './object-ui.js';
+import {storyObjective,storyMemoriesMarkup} from './story-ui.js';
 import {portraitMarkup} from './resident-portraits.js';
 import {activityMarkup,updateActivityStatus} from './activities-ui.js';
 import {DOLLS,ROOMS,CATALOG,SECRETS,ACTIONS,MILESTONES,SEW_DAILY,BASKET_MAX,DOOR_STEPS,GIFT_COST,VISITOR_GIFTS} from './content.js';
 import {translate,number} from './i18n.js';
-import {isNight,coziness,wishFor,wishReward,bondLevel,nextBond,isContent,contentThreshold,delighted,inFavoriteRoom,currentStreak,unclaimed,secretCozyNeeded,doorOpen,nextDoorStep,doorReady,restorationReady} from './simulation.js';
+import {isNight,coziness,wishFor,wishReward,bondLevel,nextBond,isContent,contentThreshold,delighted,inFavoriteRoom,currentStreak,unclaimed,secretCozyNeeded,doorOpen,nextDoorStep,doorReady,restorationReady,storyStatus} from './simulation.js';
 import {icon} from './icons.js';
 const actionIcon={tea:'tea',play:'play',rest:'rest',soothe:'heart'};
 const wishKey=(id,action)=>DOLLS.find(d=>d.id===id).wish===action?id+'Wish':id+'Wish_'+action;
@@ -11,7 +12,7 @@ const dockIcons={household:'souls',activities:'play',decorate:'leaf',journal:'bo
 export function createUI(host,getState,dispatch){
  let panel=null,selected='lina',placement=null,placementRoom='kitchen',placementSlot=0,previousFocus=null,toastTimer,resetConfirm=false;
  let portraits={};
- let activityResult=null,selectedObject=null,moveId=null;
+ let activityResult=null,selectedObject=null,moveId=null,toolsExpanded=false;
  const t=key=>translate(getState().settings.locale,key),n=value=>number(getState().settings.locale,value);
  const button=(action,label,ico,extra='')=>`<button type="button" data-action="${action}" ${extra}>${ico?icon(ico):''}<span>${label}</span></button>`;
  function avatar(id){const portrait=portraitMarkup(id,portraits[id]);if(portrait)return portrait;return `<span class="avatar ${id}" aria-hidden="true"><span class="hair"></span><span class="face"><i></i><i></i></span><span class="dress"></span></span>`}
@@ -20,12 +21,12 @@ export function createUI(host,getState,dispatch){
   document.body.classList.toggle('reduced-motion',s.settings.reducedMotion);document.querySelector('#world').setAttribute('aria-label',t('canvasLabel'));
   host.innerHTML=`<header class="brand"><span class="brand-mark">${icon('home')}</span><div><p class="eyebrow">${t('brandArabic')}</p><h1>${t('title')}</h1><p class="tagline">${t('subtitle')}</p></div></header>
    <section class="house-status" aria-label="${t('allWishes')}"><div class="currency" title="${t('buttons')}">${icon('button')}<strong data-value="buttons"></strong><span>${t('buttons')}</span></div><div class="cozy">${icon('heart')}<strong data-value="cozy"></strong><span>${t('cozy')}</span></div></section>
-   <aside class="objective"><div class="objective-head"><span class="tiny-star">✦</span><span>${t('objectiveLabel')}</span><span class="wish-count" data-value="wishes"></span></div><p id="objective-copy"></p><button id="objective-action" type="button" data-action="objective"></button></aside>
+   <aside class="objective"><div class="objective-head"><span class="tiny-star">✦</span><span data-story-heading>${t('storyTitle')}</span><span class="wish-count" data-value="wishes"></span></div><p id="objective-copy"></p><button id="objective-action" type="button" data-action="objective"></button></aside>
    <div class="time-tools"><button type="button" data-action="light" id="light-button"></button><div class="clock"><span data-value="day"></span><span class="clock-dot">·</span><span data-value="time"></span></div></div>
    <div class="camera-tools" aria-label="${t('resetCamera')}">${button('zoom-in',t('zoomIn'),'plus',`class="icon-button" title="${t('zoomIn')}"`)}${button('zoom-out',t('zoomOut'),'minus',`class="icon-button" title="${t('zoomOut')}"`)}${button('camera',t('resetCamera'),'home',`class="icon-button" title="${t('resetCamera')}"`)}</div>
    <div class="visitor-hint" hidden><button type="button" data-action="discover">${icon('ghost')}<span>${t('investigate')}</span><span class="notification-dot"></span></button></div>
    <div class="scene-caption"><span class="desktop-hint">${t('hint')}</span><span class="mobile-hint">${t('mobileHint')}</span></div>
-   <nav class="dock" aria-label="${t('title')}">${Object.entries(dockIcons).map(([key,ico])=>button('panel-'+key,t(key),ico,`aria-haspopup="dialog"`)).join('')}<span class="dock-divider"></span>${button('sound',t(s.settings.muted?'soundOff':'soundOn'),s.settings.muted?'muted':'volume',`class="icon-button" title="${t('sound')}" aria-pressed="${!s.settings.muted}"`)}${button('pause',t(s.paused?'resume':'pause'),s.paused?'resume':'pause',`class="icon-button" title="${t('pause')}" aria-pressed="${s.paused}"`)}</nav>
+   <nav class="dock" data-expanded="${toolsExpanded}" aria-label="${t('title')}">${button('toggle-tools',t('houseTools'),'home',`class="tools-toggle" aria-expanded="${toolsExpanded}"`)}${Object.entries(dockIcons).map(([key,ico])=>button('panel-'+key,t(key),ico,`aria-haspopup="dialog"`)).join('')}<span class="dock-divider"></span>${button('sound',t(s.settings.muted?'soundOff':'soundOn'),s.settings.muted?'muted':'volume',`class="icon-button" title="${t('sound')}" aria-pressed="${!s.settings.muted}"`)}${button('pause',t(s.paused?'resume':'pause'),s.paused?'resume':'pause',`class="icon-button" title="${t('pause')}" aria-pressed="${s.paused}"`)}</nav>
    <div class="saved-note">${icon('check')}<span>${t('saved')}</span></div>
    <div class="placement" hidden></div><div id="toast" role="status" aria-live="polite"></div>
    <div class="pause-overlay" hidden><div>${icon('moon')}<h2>${t('paused')}</h2><p>${t('pausedHelp')}</p>${button('pause',t('resume'),'resume','class="primary"')}</div></div>
@@ -33,8 +34,12 @@ export function createUI(host,getState,dispatch){
   const sheet=host.querySelector('#sheet');sheet.addEventListener('cancel',event=>{event.preventDefault();close()});sheet.addEventListener('click',event=>{if(event.target===sheet){const r=sheet.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)close()}});
   if(panel){renderPanel();sheet.showModal()}renderPlacement();tick();
  }
- function open(name,id){if(placement){placement=null;moveId=null;renderPlacement();dispatch('placement-cancel')}panel=name;resetConfirm=false;if(id)selected=id;previousFocus=document.activeElement;renderPanel();host.querySelector('#sheet').showModal();dispatch('panel-state',name);host.querySelector('#sheet [data-action="close"]').focus()}
- function close(){const sheet=host.querySelector('#sheet');sheet?.close();panel=null;renderedPanel=null;resetConfirm=false;dispatch('panel-state',null);if(previousFocus?.isConnected)previousFocus.focus();else host.querySelector('[data-action="panel-household"]')?.focus()}
+ function open(name,id){if(placement){placement=null;moveId=null;renderPlacement();dispatch('placement-cancel')}panel=name;resetConfirm=false;if(id)selected=id;previousFocus=document.activeElement;
+  if(previousFocus?.matches('[data-action^="panel-"]'))previousFocus=host.querySelector('[data-action="toggle-tools"]');
+  if(previousFocus?.closest('.object-ribbon'))previousFocus=host.querySelector('[data-object-toggle]');
+  toolsExpanded=false;host.querySelector('.dock').dataset.expanded='false';host.querySelector('[data-action="toggle-tools"]').setAttribute('aria-expanded','false');
+  renderPanel();host.querySelector('#sheet').showModal();dispatch('panel-state',name);host.querySelector('#sheet [data-action="close"]').focus()}
+ function close(){const sheet=host.querySelector('#sheet');sheet?.close();panel=null;renderedPanel=null;resetConfirm=false;dispatch('panel-state',null);const origin=previousFocus?.isConnected&&previousFocus.getClientRects().length?previousFocus:host.querySelector('[data-action="toggle-tools"]');origin?.focus({preventScroll:true})}
  let renderedPanel=null;
  function doorMarkup(s){
   const step=nextDoorStep(s),ready=step&&doorReady(s,step);
@@ -69,7 +74,7 @@ export function createUI(host,getState,dispatch){
   }
   if(panel==='journal'){
    root.innerHTML=`<h2 id="sheet-title">${t('journal')} <small>${n(s.journal.length)}/${n(SECRETS.length)}</small></h2><p class="sheet-intro">${t('whispersIntro')}</p><div class="journal-illustration">${icon('ghost')}<span>✦</span>${icon('moon')}</div>${!s.journal.length?`<p class="empty-note">${t('noSecrets')}</p>`:''}<div class="journal-entries">${s.journal.map((id,i)=>`<article><span class="entry-number">${n(i+1).padStart(2,'0')}</span><div><h3>${t(id+'Title')}</h3><p>${t(id+'Text')}</p></div></article>`).join('')}</div>${s.journal.length<SECRETS.length?button(isNight(s)?'discover':'light',t(isNight(s)?'investigate':'night'),isNight(s)?'ghost':'moon','class="primary wide"'):`<p class="ending-note">${t('complete')}</p>`}${isNight(s)&&s.journal.length<SECRETS.length&&coziness(s)<secretCozyNeeded(s)?`<p class="shy-note">${t('shyNeed')} ${n(secretCozyNeeded(s))}% · ${t('cozy')} ${n(coziness(s))}%</p>`:''}
-    ${doorMarkup(s)}
+    ${storyMemoriesMarkup(s,t)}${doorMarkup(s)}
     <h3 class="section-heading">${t('milestones')} <small>${n(s.milestones.length)}/${n(MILESTONES.length)}</small></h3><p class="sheet-intro">${t('milestonesIntro')} ${t('streakLabel')}: <strong>${n(currentStreak(s))}</strong></p><div class="milestones">${MILESTONES.map(m=>{const got=s.milestones.includes(m.id),ready=s.achieved.includes(m.id)&&!got;return `<div class="milestone ${got?'claimed':ready?'ready':''}">${icon(got?'check':ready?'spark':'button')}<div><strong>${t('ms-'+m.id+'Title')}</strong><small>${t('ms-'+m.id+'Text')}</small></div>${ready?button('claim',t('collect')+' +'+n(m.reward),null,`data-id="${m.id}" class="primary"`):`<em>${got?t('collected'):'+'+n(m.reward)}</em>`}</div>`}).join('')}</div>`;
   }
   if(panel==='settings'){
@@ -85,6 +90,7 @@ export function createUI(host,getState,dispatch){
  // One suggested next step: wishes, first keepsake, rewards to collect, then the night's whisper.
  function nextStep(){
   const s=getState(),wish=DOLLS.find(d=>!s.wishes.includes(d.id));
+  const story=storyObjective(s,t);if(story)return story;
   if(wish){const action=wishFor(s,wish.id);return {copy:t(wishKey(wish.id,action)),label:t(action),ico:actionIcon[action],action:'care',value:{id:wish.id,action}}}
   if(!s.decor.length)return {copy:t('objectiveDecorate'),label:t('decorate'),ico:'leaf',action:'panel',value:'decorate'};
   const readyRoom=ROOMS.find(r=>{const next=restorationReady(s,r.id);return next.ready&&s.buttons>=next.cost});
@@ -106,7 +112,8 @@ export function createUI(host,getState,dispatch){
   const s=getState();document.body.classList.toggle('night',isNight(s));
   if(panel==='activities')updateActivityStatus(host,s,t,n);
   host.style.setProperty('--day-progress',(Number.isFinite(s.clock)?Math.max(0,Math.min(240,s.clock))*1.5:0)+'deg');
-  const values={buttons:n(s.buttons),cozy:n(coziness(s))+'%',wishes:`${n(s.wishes.length)} / ${n(3)}`,day:t('day')+' '+n(s.day),time:t(isNight(s)?'evening':'morning')};
+  const story=storyStatus(s),values={buttons:n(s.buttons),cozy:n(coziness(s))+'%',wishes:story.finished?`${n(s.wishes.length)} / ${n(3)}`:`${n(story.index+1)} / ${n(3)}`,day:t('day')+' '+n(s.day),time:t(isNight(s)?'evening':'morning')};
+  const heading=host.querySelector('[data-story-heading]');if(heading)heading.textContent=t(story.finished?'objectiveLabel':'story-'+story.chapter.id+'-title');
   for(const [key,value] of Object.entries(values)){const el=host.querySelector(`[data-value="${key}"]`);if(el&&el.textContent!==value)el.textContent=value}
   const {copy,label,ico}=nextStep();
   const objective=host.querySelector('#objective-copy');if(objective.textContent!==copy)objective.textContent=copy;
@@ -127,6 +134,8 @@ export function createUI(host,getState,dispatch){
  function refresh(){const wasPanel=panel;if(wasPanel){host.querySelector('#sheet')?.close()}build()}
  const click=event=>{
   const target=event.target.closest('[data-action]');if(!target||target.disabled)return;const action=target.dataset.action;
+  if(action==='toggle-tools'){toolsExpanded=!toolsExpanded;host.querySelector('.dock').dataset.expanded=String(toolsExpanded);target.setAttribute('aria-expanded',String(toolsExpanded));return}
+  if(action==='story-interact'){dispatch(action,target.dataset.object);return}
   if(action.startsWith('panel-'))return open(action.slice(6));
   if(action==='close')return close();
   if(action==='select'){selected=target.dataset.id;dispatch('select',selected);renderPanel();host.querySelector(`[data-action="select"][data-id="${selected}"]`)?.focus();return}
