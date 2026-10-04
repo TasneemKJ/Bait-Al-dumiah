@@ -55,6 +55,13 @@ jobs:
   tea:
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: [desktop, phone, progression]
+    env:
+      TEA_SCENARIO: ${{ matrix.scenario }}
+      TEA_HEADED: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -69,10 +76,10 @@ jobs:
       - run: python -m pip install -r requirements.txt
       - run: python -m playwright install --with-deps chromium
       - name: Pour and serve tea through mouse, touch and keyboard
-        run: python scripts/tea_check.py
+        run: xvfb-run -a python scripts/tea_check.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: physical-tea-service
-          path: artifacts/tea/
+          name: physical-tea-service-${{ matrix.scenario }}
+          path: artifacts/tea/${{ matrix.scenario }}/
           retention-days: 14

@@ -63,7 +63,7 @@ python scripts/ui_check.py
 python scripts/art_check.py
 python scripts/expansion_check.py
 python scripts/story_check.py
-python scripts/tea_check.py
+TEA_HEADED=1 xvfb-run -a python scripts/tea_check.py
 ```
 
 The browser check exercises the built HTTP application, care/rewards, placement/cancellation/refunds, night/mystery progression, pause, saving/reloading, Arabic, mobile portrait/landscape and reduced motion. It records screenshots and JSON results under `artifacts/`. CI retains evidence, including on failure. The expansion check additionally uses actual object ray picks, relocation/rotation/reload, recall/hints, reverse echo, restoration budgets and Arabic touch controls. A preview being available is not proof the browser checks passed.
@@ -72,7 +72,9 @@ The browser check exercises the built HTTP application, care/rewards, placement/
 
 The story check completes all eleven actions through actual scene touches and pointer drops, including wrong destinations, mid-carry reload, Escape, pause, optional keyboard inspection, replay without duplicate rewards, Arabic phone play at 320/390px, and 667px landscape completion. It observes read-only diagnostics and never writes progress or submits synthetic scores.
 
-The tea check uses real mouse drags, touch gestures and keyboard input to exercise misses, partial pours, local overfill repair, serving, free practice, personal-best reloads, input cancellation and the guest's cup. Empty, pouring, spilled, ready and served states are captured in `artifacts/tea/`. The CI job retains exact-commit evidence; a successful source build alone does not certify the rendered activity.
+The tea checks use real mouse drags, touch gestures and keyboard input to exercise misses, partial pours, local overfill repair, serving, free practice, personal-best reloads, input cancellation and the guest's cup. Three independent journeys start from fresh saves: `TEA_SCENARIO=desktop`, `phone` or `progression`; the default runs all three. Progression earns the three-cup table through actual service, cooldowns and house days. Empty, pouring, spilled, ready and served states are captured under `artifacts/tea/<scenario>/`, alongside observed wall/game time for long waits. CI runs the journeys separately and retains evidence for each.
+
+The phone journey checks actual tab visibility, so it needs a headed browser. On Linux, the command above follows [Playwright's Xvfb setup](https://playwright.dev/python/docs/ci#running-headed). On a desktop with a display, use `TEA_HEADED=1 python scripts/tea_check.py`. A successful source build alone does not certify the rendered activity.
 
 ## Boundaries
 
