@@ -34,6 +34,6 @@ Files: `src/object-ui.js`, `src/main.js`, `src/i18n.js`, `src/audio.js`, `src/re
 
 ### Task 3: Real browser evidence and checkpoint
 Files: `scripts/expansion_check.py`, `docs/superpowers/iteration-ledger.md`, PR body.
-- [ ] Exercise real scene selections, actions, night light, reduced motion and reload; capture screenshots.
-- [ ] Run dedicated and full CI; inspect images and metrics.
-- [ ] Independently review, correct Important findings, commit and publish iteration checkpoint.
+- [x] Exercise real scene selections, actions, night light, reduced motion and reload; capture screenshots.
+- [x] Run dedicated and full CI; inspect images and metrics.
+- [x] Independently review, correct Important findings, commit and publish iteration checkpoint.

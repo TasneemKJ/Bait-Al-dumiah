@@ -30,8 +30,24 @@ Evidence so far:
 - Browser regressions exercise whole-house ray pick, selected-object action sheet, recall/hint/reverse answers, camera drag rejection, actual decoration pick, quarter-turn, free move, reload persistence, Arabic 320px targets and 667px populated-room reachability.
 - Remote feature commit a866655 followed by review fixes; verification head e62751d. Dedicated software-WebGL run 37207066426 passed 26/26 browser checks and 265/265 artwork checks; actual selection, rotated/moved keepsake, Arabic phone study and reverse-echo screenshots inspected. Full regression run 37207066484 also passed UI regression, artwork, doll/craft captures, courtyard/Shami/audio and the complete desktop/mobile play loop (48/48 play checks, 28/28 DOM checks), with zero errors or failed checks. Landscape screenshot also inspected. Re-review confirms all four Important fixes; two minor test-strength gaps are strengthened in the queued checkpoint with actual projected zoom and post-stitch room assertions. Runtime is unchanged by that test/documentation checkpoint. The checkpoint adds one locally passing origin-refund test plus two stronger browser assertions; runtime source is identical to the verified e62751d build. Its CI rerun is pending after publication.
 
-## Next brainstorm
-Twenty ideas for reactive keepsakes are recorded in specs/2026-10-04-reactive-keepsakes.md. This is queued design work, not implemented features.
+## 2026-10-04 / Iteration 3 — Reactive keepsakes
+Twenty ideas, alternatives and selected contract: specs/2026-10-04-reactive-keepsakes.md.
+Plan: plans/2026-10-04-reactive-keepsakes.md.
+
+Implemented persistent actions for four owned keepsakes: water jasmine once per house day, switch lamps on/off, wind music boxes and rock moon mobiles. Actions are selected from the actual room or the keyboard/touch object list, close the sheet to reveal their response, preserve focus, save safely and grant no currency, care, mastery or bond. Watered plants visibly perk up; lamps add bounded shadowless room light; music boxes turn; moon mobiles use a still response pose under reduced motion. Earned tier-two lamps now cast practical light, and kitchen tier three renders the promised fourth cup. English/Shami Arabic status and feedback accompany every action.
+
+Evidence:
+- Reactive simulation and bilingual copy tests were observed RED before implementation, then GREEN. `npm run verify` passes 107/107 tests and builds the static app; version-one interaction fields are whitelisted and clamped.
+- Independent review found a stale browser label and an Important keyboard-focus regression. Both were corrected. Re-review found no remaining Critical or Important issue; all three minor contract/evidence gaps were also resolved.
+- Dedicated software-WebGL run 37212546019 passed 268/268 art checks and 41/41 browser checks. It covers actual plant ray selection, all four actions, settled restored/owned lights, plant scale, music-box motion, reduced-motion stillness, keyboard focus, no reward mutation, reload persistence and zero JavaScript errors.
+- Full regression run 37212545967 passed source/build, UI regression, art construction, doll/craft captures, courtyard/Shami/audio checks and the full desktop/mobile game flow on the same head.
+- Inspected restored-night, watered-jasmine, active-lamp, moving-music-box and reduced-motion moon-mobile captures. The practical lights read clearly without flattening the existing cute-creepy night palette; focused rooms keep the selected object large and discoverable.
+- Published implementation head 32c01df followed by test-harness corrections; verified feature head a8f34ff on draft PR #10. CI failures were isolated to slow-render timing and a Playwright keyword-only call, then corrected without weakening gameplay assertions.
+
+No measured gameplay or retention score claimed. No merge or production deploy.
+
+## Next iteration
+Begin with a fresh set of exactly twenty ideas after checking PR #10 and the latest CI. Prioritize resident responses, object combinations and choice-driven house consequences that reuse the direct interaction vocabulary without creating reward farms.
 
 ## Continuation
 Hourly autonomous continuation is scheduled until the user asks to stop. Avoid overlapping active work. Always read PR #10/head/CI and this ledger first; finish failed verification before new features. Generate exactly twenty distinct ideas before each iteration, select a coherent playable improvement, test, independently review major changes, inspect rendered evidence, commit and publish its checkpoint. Preserve local identity, bilingual accessibility, local assets, save compatibility and no production merge/deploy.
