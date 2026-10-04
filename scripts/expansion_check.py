@@ -51,6 +51,7 @@ try:
   page.reload();page.wait_for_function('window.dollhouse && !document.querySelector("#loading")')
   page.screenshot(path=str(OUT/'05-restored-house.png'))
   stats=page.evaluate('window.dollhouse.stats()')
+  (OUT/'render-stats.json').write_text(json.dumps(stats,indent=2))
   check('restored house stays within 400k triangles',stats['triangles']<400000)
   page.locator('[data-action="light"]').click();page.wait_for_timeout(900)
   page.screenshot(path=str(OUT/'06-restored-night.png'))
