@@ -17,10 +17,10 @@ with sync_playwright() as p:
  if os.environ.get('CHROMIUM_PATH'):options['executable_path']=os.environ['CHROMIUM_PATH']
  browser=p.chromium.launch(**options)
  page=browser.new_page(viewport={'width':1440,'height':1000})
- css='\n'.join(((ROOT/'src'/name).read_text() if (ROOT/'src'/name).exists() else '') for name in ['styles.css','accessibility.css','visual-upgrade.css','doll-portraits.css','gameplay.css'])
+ css='\n'.join(((ROOT/'src'/name).read_text() if (ROOT/'src'/name).exists() else '') for name in ['styles.css','accessibility.css','visual-upgrade.css','doll-portraits.css','gameplay.css','activities.css'])
  page.set_content('<html><head><meta name="theme-color" content="#fff"><style>'+css+'</style></head><body><div id="app"><canvas id="world"></canvas><div id="ui"></div></div></body></html>')
  modules={}
- for name in ['content','simulation','i18n','icons','resident-portraits','ui','render/room-views']:
+ for name in ['content','simulation','i18n','icons','resident-portraits','activities-ui','ui','render/room-views']:
   file=ROOT/'src'/f'{name}.js'
   if not file.exists():continue
   source=file.read_text()
@@ -75,7 +75,7 @@ with sync_playwright() as p:
  results.append({'name':'collecting in an open sheet keeps its notice visible after re-render','passed':page.locator('#sheet .panel-notice').inner_text()=='Milestone reward collected' and page.evaluate('lastAction.action==="claim" && lastAction.value==="first-care"')})
  page.evaluate("fixtureUI.close();fixtureUI.open('journal')")
  results.append({'name':'reopening a sheet does not repeat a stale notice','passed':page.locator('#sheet .panel-notice').count()==0})
- page.evaluate("fixtureUI.close();fixtureState.wishes=['lina','noor','sami'];fixtureState.decor=[{id:1,item:'plant',room:'kitchen',slot:0}];fixtureState.achieved=[];fixtureState.clock=130;fixtureState.lastSecretDay=fixtureState.day;fixtureUI.tick()")
+ page.evaluate("fixtureUI.close();fixtureState.wishes=['lina','noor','sami'];fixtureState.decor=[{id:1,item:'plant',room:'kitchen',slot:0}];fixtureState.achieved=[];fixtureState.clock=130;fixtureState.lastSecretDay=fixtureState.day;fixtureState.activities.mastery.tea=1;fixtureUI.tick()")
  results.append({'name':'after tonight\'s whisper the objective points to morning, not a dead end','passed':page.evaluate('fixtureUI.objective().action==="light"')})
  print(json.dumps(results,indent=2));browser.close()
  if any(not r['passed'] for r in results):raise SystemExit(1)
