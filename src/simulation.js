@@ -1,4 +1,4 @@
-import {DOLLS,ROOMS,CATALOG,SLOTS,SECRETS,ACTIONS,BOND_LEVELS,SECRET_COZY,MILESTONES,SEW_SECONDS,SEW_DAILY,BASKET_MAX,DOOR_STEPS,GIFT_COST,VISITOR_GIFTS,WISH_REFRESH_SECONDS,ACTIVITIES,ACTIVITY_THRESHOLDS,ACTIVITY_DAILY_CAP,ACTIVITY_COOLDOWN,RESTORATION_COSTS,RESTORATION_MASTERY} from './content.js';
+import {DOLLS,ROOMS,CATALOG,SLOTS,SECRETS,ACTIONS,BOND_LEVELS,SECRET_COZY,MILESTONES,SEW_SECONDS,SEW_DAILY,BASKET_MAX,DOOR_STEPS,GIFT_COST,VISITOR_GIFTS,WISH_REFRESH_SECONDS,ACTIVITIES,ACTIVITY_THRESHOLDS,ACTIVITY_DAILY_CAP,ACTIVITY_COOLDOWN,RESTORATION_COSTS,RESTORATION_MASTERY,INTERACTIVE_PROPS,STORY_CHAPTERS} from './content.js';
 const clamp=(v,min=0,max=100)=>Math.max(min,Math.min(max,Number.isFinite(v)?v:min));
 const integer=(v,min,max)=>Math.floor(clamp(v,min,max));
 const has=(items,id)=>items.some(x=>x.id===id);
@@ -13,6 +13,7 @@ export function createState(){
   streak:0,lastFullDay:0,sewnToday:0,basket:0,earnedToday:0,achieved:[],milestones:[],events:[],door:0,gifts:[],lastGiftDay:0,dayTime:0,
   activities:{mastery:Object.fromEntries(ACTIVITIES.map(a=>[a.id,0])),completed:Object.fromEntries(ACTIVITIES.map(a=>[a.id,0])),lastReward:Object.fromEntries(ACTIVITIES.map(a=>[a.id,-ACTIVITY_COOLDOWN])),active:null},
   restoration:Object.fromEntries(ROOMS.map(r=>[r.id,0])),
+  story:{chapter:0,step:0,lastAction:null,lastActionAt:-10},
   settings:{locale:'en',muted:true,reducedMotion:false,quality:'auto'}};
 }
 export const isNight=s=>s.clock>=120;
@@ -212,6 +213,33 @@ export function restoreRoom(s,room){
  if(!next.ready)return fail('restorationLocked');if(s.buttons<next.cost)return fail('funds');
  s.buttons-=next.cost;s.restoration[room]++;return {ok:true,room,tier:s.restoration[room],cost:next.cost};
 }
+// A single ordered progress record owns inventory, completed memories and rewards.
+// No separate held/claimed flags can disagree after an interrupted mobile session.
+export function storyStatus(s){
+ const index=s.story.chapter,chapter=STORY_CHAPTERS[index]??null,step=chapter?s.story.step:0;
+ const completed=STORY_CHAPTERS.slice(0,index).map(c=>c.id);
+ const progress=STORY_CHAPTERS.slice(0,index).reduce((sum,c)=>sum+c.steps.length,0)+step;
+ return {chapter,index,step,next:chapter?.steps[step]??null,held:chapter&&step>0?chapter.steps[step-1].gives:null,completed,finished:chapter===null,progress,totalSteps:STORY_CHAPTERS.reduce((sum,c)=>sum+c.steps.length,0)};
+}
+export function interactStory(s,key){
+ if(s.paused)return fail('pausedActivity');
+ if(typeof key!=='string'||!INTERACTIVE_PROPS.some(p=>'prop:'+p.id===key))return fail('invalid');
+ const status=storyStatus(s);if(status.finished)return fail('storyFinished');
+ if(key!=='prop:'+status.next.object)return fail('storyNotHere');
+ const {chapter,step,next}=status,chapterComplete=step===chapter.steps.length-1,reward=chapterComplete?chapter.reward:0;
+ s.story.lastAction=key;s.story.lastActionAt=s.elapsed;
+ if(chapterComplete){s.story.chapter++;s.story.step=0;earn(s,reward)}else s.story.step++;
+ return {ok:true,chapterComplete,reward,chapterId:chapter.id,step,message:`story-${chapter.id}-${step}-done`,effect:next.object,held:storyStatus(s).held};
+}
+// Earned tableaux remain toys; replay records a visual cue, never progression.
+export function playStoryKeepsake(s,key){
+ if(s.paused)return fail('pausedActivity');
+ const chapters={'prop:moon-bed':'mended-friend','prop:music-cabinet':'lost-song','prop:doorstep':'guest-tea'};
+ if(typeof key!=='string'||!Object.hasOwn(chapters,key))return fail('invalid');
+ if(!storyStatus(s).completed.includes(chapters[key]))return fail('storyNotReady');
+ s.story.lastAction=key;s.story.lastActionAt=s.elapsed;
+ const effect=key.slice(5);return {ok:true,effect,message:'story-replay-'+effect};
+}
 // Whitelist all persisted fields: no saved HTML/prose, renderer objects, or wall-clock catch-up.
 // Fields added after the first release default safely, so earlier version-1 saves keep loading.
 export function restore(raw){
@@ -231,6 +259,12 @@ export function restore(raw){
  s.dayTime=clamp(v.dayTime,0,1e6);s.door=integer(v.door,0,DOOR_STEPS.length);s.gifts=Array.isArray(v.gifts)?VISITOR_GIFTS.filter(g=>v.gifts.includes(g)):[];s.lastGiftDay=integer(v.lastGiftDay,0,s.day);
  for(const a of ACTIVITIES){s.activities.mastery[a.id]=integer(v.activities?.mastery?.[a.id],0,999);s.activities.completed[a.id]=integer(v.activities?.completed?.[a.id],0,ACTIVITY_DAILY_CAP);s.activities.lastReward[a.id]=Number.isFinite(v.activities?.lastReward?.[a.id])?clamp(v.activities.lastReward[a.id],-ACTIVITY_COOLDOWN,s.elapsed):-ACTIVITY_COOLDOWN}
  for(const r of ROOMS)s.restoration[r.id]=integer(v.restoration?.[r.id],0,3);
+ if(v.story&&typeof v.story==='object'&&!Array.isArray(v.story)){
+  s.story.chapter=integer(v.story.chapter,0,STORY_CHAPTERS.length);
+  const chapter=STORY_CHAPTERS[s.story.chapter];s.story.step=chapter?integer(v.story.step,0,chapter.steps.length-1):0;
+  s.story.lastAction=INTERACTIVE_PROPS.some(p=>'prop:'+p.id===v.story.lastAction)?v.story.lastAction:null;
+  s.story.lastActionAt=Number.isFinite(v.story.lastActionAt)?clamp(v.story.lastActionAt,-10,s.elapsed):-10;
+ }
  const ids=list=>Array.isArray(list)?MILESTONES.filter(m=>list.includes(m.id)).map(m=>m.id):[];
  s.milestones=ids(v.milestones);s.achieved=ids([...ids(v.achieved),...s.milestones]);
  if(v.settings&&typeof v.settings==='object'){s.settings.locale=v.settings.locale==='ar'?'ar':'en';s.settings.muted=v.settings.muted!==false;s.settings.reducedMotion=v.settings.reducedMotion===true;s.settings.quality=['auto','low','high'].includes(v.settings.quality)?v.settings.quality:'auto'}

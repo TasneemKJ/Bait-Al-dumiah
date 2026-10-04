@@ -29,7 +29,9 @@ Deploy `dist/` to any static web host. Runtime assets and Three.js are local; th
 - A full house (all three wishes in one day) pays a bonus that grows with a day-in-a-row streak.
 - Thirteen milestones in the journal. Each one's reward is paid only when you collect it.
 - The closed door: a five-step project in the journal that costs 430 buttons in all. The key step needs you to be dear to Sami, and opening the door needs all six whispers. Once the fifth room is open, you can leave the visitor one small gift a night (12 buttons) and collect the eight things they leave in return.
-- Direct object play: select the tea set, sewing machine, moon bed or jasmine sofa for contextual care and activities. Focus a room to find keyboard/touch object controls.
+- Three connected object stories: find a red thread and mend Noor's bear; retrieve a hidden key and repair the music cabinet; carry water, jasmine and tea to welcome a small guest. Eleven actions, eight carried items, three lasting scenes and three journal memories. Chapter rewards pay once; no purchase, waiting or mastery blocks the stories.
+- Direct object play: touch an object to select it, touch it again to act, or drag the item in your hand onto another object. Selection uses a small nonmodal ribbon; the house keeps running. Optional details and keyboard discovery remain available. Room views fit edge objects between the phone controls.
+- Earned story toys remain playable: wind the cabinet's little dancer, rock the mended bear and greet the guest. These interactions are free and never repeat chapter rewards.
 - Three distinct rituals: guided mint tea, embroidery study/recall with free hints, and a reversed moon-song echo. Mastery rewards the first two completions per activity per earned day; practice is always free and mistakes cost nothing. Rewards wait for 20 seconds of unpaused play between completions.
 - Twelve earned room-restoration stages unlocked through mastery and buttons, with visible arrangements that persist across reloads.
 - Six keepsakes, three placement slots per room, clear prices, cancellation without charge and full refunds on packing away. Select an owned keepsake in the scene to turn it or move it without buying again.
@@ -41,9 +43,11 @@ This is a first playable, not a claim of production certification. Assets are or
 
 ## Controls
 
-Tap a doll or open **Little souls**. Tap a usable object in the house, or focus a room and use **Things to touch**, to select it and see its actions. Open **Little rituals** to practice, earn mastery, and restore rooms. Fulfil the highlighted wish to earn buttons. Open **Decorate**, choose a keepsake, then tap a glowing spot or choose a room and spot using the controls. After dark, greet the visitor to hear a whisper.
+Follow the clue into a room. **Touch an object once to select it, then touch the same object again to act.** When something is in your hand, drag it onto an object in the room; a wrong destination leaves it safely in your hand. Tap the held item to find the next room. Story progress and carried items survive reloads.
 
-Drag to turn; pinch/scroll to zoom. Arrow keys turn, `+`/`-` zoom, `H` resets the camera, `Space` pauses, `Escape` closes a sheet. DOM controls provide keyboard alternatives to 3D picking.
+For keyboard play, choose a room, open **Things to touch**, select an object and activate its scene action. **Look closer** opens optional details. **House tools** opens the household, ritual, decoration, journal and settings controls. Tap a doll to check its care and wishes. Practice rituals for mastery and earn room restorations; choose and place keepsakes through Decorate. After dark, greet the visitor to hear a whisper.
+
+Drag the room to turn; pinch/scroll to zoom. Arrow keys turn, `+`/`-` zoom, `H` resets the camera, `Space` pauses, and `Escape` cancels a carry, dismisses selection or closes a sheet. DOM controls provide keyboard alternatives to 3D picking.
 
 ## Verification
 
@@ -55,11 +59,14 @@ npm run test:browser
 python scripts/ui_check.py
 python scripts/art_check.py
 python scripts/expansion_check.py
+python scripts/story_check.py
 ```
 
 The browser check exercises the built HTTP application, care/rewards, placement/cancellation/refunds, night/mystery progression, pause, saving/reloading, Arabic, mobile portrait/landscape and reduced motion. It records screenshots and JSON results under `artifacts/`. CI retains evidence, including on failure. The expansion check additionally uses actual object ray picks, relocation/rotation/reload, recall/hints, reverse echo, restoration budgets and Arabic touch controls. A preview being available is not proof the browser checks passed.
 
 `?debug=1` explicitly enables read-only diagnostics for tests. Normal play does not expose simulation state globally.
+
+The story check completes all eleven actions through actual scene touches and pointer drops, including wrong destinations, mid-carry reload, Escape, pause, optional keyboard inspection, replay without duplicate rewards, Arabic phone play at 320/390px, and 667px landscape completion. It observes read-only diagnostics and never writes progress or submits synthetic scores.
 
 ## Boundaries
 

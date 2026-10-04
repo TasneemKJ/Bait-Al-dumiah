@@ -17,10 +17,10 @@ with sync_playwright() as p:
  if os.environ.get('CHROMIUM_PATH'):options['executable_path']=os.environ['CHROMIUM_PATH']
  browser=p.chromium.launch(**options)
  page=browser.new_page(viewport={'width':1440,'height':1000})
- css='\n'.join(((ROOT/'src'/name).read_text() if (ROOT/'src'/name).exists() else '') for name in ['styles.css','accessibility.css','visual-upgrade.css','doll-portraits.css','gameplay.css','activities.css'])
+ css='\n'.join(((ROOT/'src'/name).read_text() if (ROOT/'src'/name).exists() else '') for name in ['styles.css','accessibility.css','visual-upgrade.css','doll-portraits.css','gameplay.css','activities.css','story.css'])
  page.set_content('<html><head><meta name="theme-color" content="#fff"><style>'+css+'</style></head><body><div id="app"><canvas id="world"></canvas><div id="ui"></div></div></body></html>')
  modules={}
- for name in ['content','simulation','i18n','icons','resident-portraits','activities-ui','object-ui','ui','render/room-views','render/object-controls']:
+ for name in ['content','simulation','i18n','icons','resident-portraits','activities-ui','object-ui','story-ui','carry-gesture','ui','render/room-views','render/object-controls']:
   file=ROOT/'src'/f'{name}.js'
   if not file.exists():continue
   source=file.read_text()
@@ -31,9 +31,10 @@ with sync_playwright() as p:
   const imports={};for(const [id,source] of Object.entries(modules))imports[id]=URL.createObjectURL(new Blob([source],{type:'text/javascript'}));
   const map=document.createElement('script');map.type='importmap';map.textContent=JSON.stringify({imports});document.head.append(map);
   const {createState}=await import('fixture/simulation.js');const {createUI}=await import('fixture/ui.js');
-  window.fixtureState=createState();window.fixtureUI=createUI(document.querySelector('#ui'),()=>fixtureState,(action,value)=>{window.lastAction={action,value};if(action==='panel-state'){fixtureState.paused=Boolean(value&&value!=='activities');window.fixtureObjects?.update()}});
+  window.fixtureState=createState();window.fixtureUI=createUI(document.querySelector('#ui'),()=>fixtureState,(action,value)=>{window.lastAction={action,value};if(action==='panel-state'){fixtureState.paused=Boolean(value&&value!=='activities');window.fixtureStory?.clear();window.fixtureObjects?.update()}if(action==='inspect-object')fixtureUI.openObject(value)});
   try {const {createRoomViews}=await import('fixture/render/room-views.js');window.fixtureViews=createRoomViews(document.querySelector('#ui'),()=>fixtureState,id=>{window.lastAction={action:'focus-room',value:id}})} catch {}
-  const {createObjectControls}=await import('fixture/render/object-controls.js');window.fixtureObjects=createObjectControls(document.querySelector('#ui'),()=>fixtureState,key=>{window.lastAction={action:'select-object',value:key}});
+  const {createStoryUI}=await import('fixture/story-ui.js');window.fixtureStory=createStoryUI(document.querySelector('#ui'),()=>fixtureState,(action,value)=>{window.lastAction={action,value};if(action==='inspect-object')fixtureUI.openObject(value)});
+  const {createObjectControls}=await import('fixture/render/object-controls.js');window.fixtureObjects=createObjectControls(document.querySelector('#ui'),()=>fixtureState,key=>{window.lastAction={action:'select-object',value:key};fixtureStory.select(key);fixtureObjects.collapse?.()});
  }''',modules)
  page.evaluate("fixtureUI.open('settings');fixtureUI.refresh();fixtureUI.close();fixtureUI.tick()")
  actual=page.locator('.dock [data-action="pause"]').get_attribute('aria-pressed')
@@ -76,9 +77,9 @@ with sync_playwright() as p:
  results.append({'name':'collecting in an open sheet keeps its notice visible after re-render','passed':page.locator('#sheet .panel-notice').inner_text()=='Milestone reward collected' and page.evaluate('lastAction.action==="claim" && lastAction.value==="first-care"')})
  page.evaluate("fixtureUI.close();fixtureUI.open('journal')")
  results.append({'name':'reopening a sheet does not repeat a stale notice','passed':page.locator('#sheet .panel-notice').count()==0})
- page.evaluate("fixtureUI.close();fixtureState.wishes=['lina','noor','sami'];fixtureState.decor=[{id:1,item:'plant',room:'kitchen',slot:0}];fixtureState.achieved=[];fixtureState.clock=130;fixtureState.lastSecretDay=fixtureState.day;fixtureState.activities.mastery.tea=1;fixtureUI.tick()")
+ page.evaluate("fixtureUI.close();fixtureState.wishes=['lina','noor','sami'];fixtureState.decor=[{id:1,item:'plant',room:'kitchen',slot:0}];fixtureState.achieved=[];fixtureState.clock=130;fixtureState.lastSecretDay=fixtureState.day;fixtureState.activities.mastery.tea=1;fixtureState.story.chapter=3;fixtureUI.tick()")
  results.append({'name':'after tonight\'s whisper the objective points to morning, not a dead end','passed':page.evaluate('fixtureUI.objective().action==="light"')})
- page.evaluate("fixtureUI.close();fixtureState.settings.locale='en';fixtureUI.refresh()")
+ page.evaluate("fixtureUI.close();fixtureState.story.chapter=0;fixtureState.story.step=0;fixtureState.settings.locale='en';fixtureUI.refresh()")
  page.evaluate('''async()=>{const sim=await import('fixture/simulation.js');fixtureState.paused=false;sim.beginActivity(fixtureState,'tea');for(const c of fixtureState.activities.active.pattern)sim.activityInput(fixtureState,c);fixtureUI.open('activities');}''')
  page.evaluate('''async()=>{const sim=await import('fixture/simulation.js');for(let i=0;i<21;i++)sim.step(fixtureState,1);fixtureUI.tick()}''')
  results.append({'name':'ritual reward button updates after cooldown while sheet stays open','passed':'Play' in page.locator('.ritual-card [data-id="tea"]').inner_text()})
@@ -90,16 +91,22 @@ with sync_playwright() as p:
  for locale in ['en','ar']:
   page.set_viewport_size({'width':320,'height':740})
   page.evaluate("locale=>{fixtureState.settings.locale=locale;fixtureUI.refresh();fixtureViews.update()}",locale)
-  valid=page.locator('.dock button').evaluate_all('(els)=>els.every(e=>{const b=e.getBoundingClientRect();return b.width>=44&&b.height>=44&&b.left>=0&&b.right<=innerWidth})')
-  results.append({'name':f'320px {locale} dock stays in bounds with 44px targets','passed':valid})
+  for expanded in [False,True]:
+   toggle=page.locator('[data-action="toggle-tools"]')
+   if (toggle.get_attribute('aria-expanded')=='true')!=expanded:toggle.click()
+   valid=page.locator('.dock button:visible').evaluate_all('(els)=>els.length>0&&els.every(e=>{const b=e.getBoundingClientRect();return b.width>=44&&b.height>=44&&b.left>=0&&b.right<=innerWidth})')
+   results.append({'name':f'320px {locale} {"expanded" if expanded else "collapsed"} dock stays in bounds with 44px targets','passed':valid and page.locator('.dock [data-action^="panel-"]:visible').count()==(5 if expanded else 0)})
+  page.locator('[data-action="toggle-tools"]').click()
  page.set_viewport_size({'width':390,'height':844})
  page.evaluate("fixtureState.settings.locale='ar';fixtureUI.refresh();document.querySelector('#ui').dataset.focusRoom='kitchen';fixtureObjects.update()")
+ page.locator('[data-object-toggle]').click()
  page.locator('[data-object="prop:tea-set"]').click()
  results.append({'name':'accessible object control dispatches stable selection key','passed':page.evaluate('lastAction.action==="select-object" && lastAction.value==="prop:tea-set"')})
- page.evaluate("fixtureUI.openObject('prop:tea-set')")
+ results.append({'name':'accessible selection shows nonmodal localized object ribbon','passed':page.locator('.object-ribbon').is_visible() and not page.locator('dialog[open]').count() and not page.evaluate('fixtureState.paused') and 'الشاي' in page.locator('.object-ribbon').inner_text()})
+ page.locator('[data-scene-action="inspect"]').click()
  results.append({'name':'selected prop offers localized activity and care actions','passed':page.locator('.object-detail [data-id="tea"]').count()==1 and page.locator('.object-detail [data-care="tea"]').count()==1 and 'الشاي' in page.locator('#sheet-title').inner_text()})
  page.locator('[data-action="close"]').click()
- results.append({'name':'closing object sheet restores originating keyboard control','passed':page.evaluate('document.activeElement.dataset.object==="prop:tea-set"')})
+ results.append({'name':'closing optional object inspection restores meaningful visible scene focus','passed':page.evaluate('document.activeElement.matches("[data-scene-action],[data-object-toggle]") && document.activeElement.getBoundingClientRect().width>=44')})
  page.evaluate("fixtureState.decor=[{id:1,item:'plant',room:'kitchen',slot:0,rotation:0,originRoom:'kitchen',active:false,tendedDay:0,lastUse:-10}];fixtureUI.refresh();fixtureUI.openObject('decor:1')")
  action=page.locator('.object-detail [data-action="use-object"]')
  results.append({'name':'owned keepsake use is a bilingual mobile-safe primary action','passed':action.count()==1 and action.get_attribute('data-id')=='1' and action.evaluate('(e)=>{const b=e.getBoundingClientRect();return b.width>=44&&b.height>=44}')})
@@ -109,13 +116,18 @@ with sync_playwright() as p:
  for locale in ['en','ar']:
   page.set_viewport_size({'width':320,'height':740})
   page.evaluate("locale=>{fixtureState.settings.locale=locale;fixtureUI.refresh();fixtureObjects.update()}",locale)
-  valid=page.locator('.object-controls button').evaluate_all('(els)=>els.every(e=>{const b=e.getBoundingClientRect();return b.width>=44&&b.height>=44&&b.left>=0&&b.right<=innerWidth})')
-  results.append({'name':f'{locale} direct-object controls fit 320px phones with 44px targets','passed':valid})
+  for expanded in [False,True]:
+   toggle=page.locator('[data-object-toggle]')
+   if (toggle.get_attribute('aria-expanded')=='true')!=expanded:toggle.click()
+   valid=page.locator('.object-controls button:visible').evaluate_all('(els)=>els.length>0&&els.every(e=>{const b=e.getBoundingClientRect();return b.width>=44&&b.height>=44&&b.left>=0&&b.right<=innerWidth})')
+   results.append({'name':f'{locale} {"expanded" if expanded else "collapsed"} object controls fit 320px phones with 44px targets','passed':valid and (page.locator('[data-object]:visible').count()>0 if expanded else page.locator('[data-object]:visible').count()==0)})
+  page.locator('[data-object-toggle]').click()
  for locale in ['en','ar']:
   page.set_viewport_size({'width':667,'height':375})
   page.evaluate("locale=>{fixtureState.settings.locale=locale;fixtureState.decor=[{id:1,item:'plant',room:'kitchen',slot:0},{id:2,item:'bear',room:'kitchen',slot:1},{id:3,item:'lamp',room:'kitchen',slot:2}];fixtureUI.refresh();fixtureObjects.update()}",locale)
-  page.locator('.object-controls button').last.scroll_into_view_if_needed()
-  visible=page.locator('.object-controls button').last.evaluate('(e)=>{const b=e.getBoundingClientRect(),n=e.parentElement.getBoundingClientRect(),d=document.querySelector(".dock").getBoundingClientRect();return b.top>=n.top&&b.bottom<=n.bottom&&b.bottom<d.top&&b.left>=0&&b.right<=innerWidth}')
+  if page.locator('[data-object-toggle]').get_attribute('aria-expanded')!='true':page.locator('[data-object-toggle]').click()
+  page.locator('.object-list button').last.scroll_into_view_if_needed()
+  visible=page.locator('.object-list button').last.evaluate('(e)=>{const b=e.getBoundingClientRect(),n=e.parentElement.getBoundingClientRect(),d=document.querySelector(".dock").getBoundingClientRect();return b.top>=n.top&&b.bottom<=n.bottom&&b.bottom<d.top&&b.left>=0&&b.right<=innerWidth}')
   results.append({'name':f'{locale} populated room object list remains reachable on 667px landscape phone','passed':visible})
  page.evaluate("fixtureUI.beginMove(1);fixtureUI.open('settings')")
  results.append({'name':'opening a menu cancels relocation UI and stale move identity','passed':page.evaluate('fixtureUI.moveId===null') and not page.locator('.placement').is_visible()})

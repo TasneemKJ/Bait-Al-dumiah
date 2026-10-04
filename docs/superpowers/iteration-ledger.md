@@ -46,8 +46,24 @@ Evidence:
 
 No measured gameplay or retention score claimed. No merge or production deploy.
 
-## Next iteration
-Begin with a fresh set of exactly twenty ideas after checking PR #10 and the latest CI. Prioritize resident responses, object combinations and choice-driven house consequences that reuse the direct interaction vocabulary without creating reward farms.
+## 2026-10-04 / Iteration 4 — Hidden house stories
+
+Twenty ideas and selected design: specs/2026-10-04-hidden-house-stories.md. Plan: plans/2026-10-04-hidden-house-stories.md. User explicitly rejects a game that depends on menus, buttons and toasts, so primary interaction now uses actual scene objects, a second touch and carried-item drops. Optional detail sheets and keyboard controls remain available.
+
+Implemented three connected stories, eleven deliberate actions, eight carried items, five new physical prop targets, three permanent earned scenes, three reward-free replayable toys and journal memories. Story rewards total 48 once-only buttons. Wrong drops, cancellation and pause preserve inventory; version-one saves preserve all intermediate steps. Tools and the object list collapse during play. Selection uses a small nonmodal ribbon, visible phone instructions, inline responses and a warm floor marker. Phone rooms fit the full projected room between controls.
+
+Evidence at implementation checkpoint:
+- Source rules, gesture and framing tests observed RED before implementation, then GREEN. `npm run verify`: 125 passing tests and static build. All affected Python browser scripts compile.
+- Eight constructed-art checks pass, including exact cabinet door clearance, jasmine/lamp separation, earned states, pause/reduced-motion/replay behavior and expired ripple handling. Story artwork adds 7,230 triangles/19 mesh draws with no lights or shadow maps.
+- Independent review found five material usability gaps: short landscape layout/clues, hidden focus restoration, missing phone input cues, pressed-token centering, and passive earned cabinet. Corrections are included with replay rules and browser assertions.
+- Native Chromium exits before navigation in the execution environment. Previous baseline software-WebGL evidence has identical runtime to the starting head c4d14e0. New complete story and legacy browser runs are required on this implementation commit in GitHub Actions; current rendered behavior is not yet certified.
+
+PR #10 was squash-merged by the user at 16:27 UTC during this session. Main 8d383238 has exactly the same tree as the starting c4d14e0 baseline. The iteration is rebased onto that main commit on the new feat/scene-first-play branch, with a fresh draft PR for subsequent verification and iterations. The earlier implementation checkpoint b53ad4c remains on the old branch; the new branch has the identical implementation with updated documentation and a clean main parent.
+
+Iteration acceptance and the next feature pass wait for exact-commit CI and screenshot review. No measured gameplay/retention score is claimed; finite stories establish purposeful exploration, while repeatable physical activities remain the next priority.
+
+## Next iteration after story verification
+Begin with a fresh set of exactly twenty ideas after checking the feat/scene-first-play draft PR and the latest CI. Prioritize repeatable physical activities and resident responses that reuse the direct interaction vocabulary without creating reward farms.
 
 ## Continuation
-Hourly autonomous continuation is scheduled until the user asks to stop. Avoid overlapping active work. Always read PR #10/head/CI and this ledger first; finish failed verification before new features. Generate exactly twenty distinct ideas before each iteration, select a coherent playable improvement, test, independently review major changes, inspect rendered evidence, commit and publish its checkpoint. Preserve local identity, bilingual accessibility, local assets, save compatibility and no production merge/deploy.
+Continue until the user asks to stop. The existing continuation task was disabled when this session began; this session is actively implementing the latest request. Avoid overlapping active work. Always read the active feat/scene-first-play draft PR/head/CI and this ledger first; finish failed verification before new features. Generate exactly twenty distinct ideas before each iteration, select a coherent playable improvement, test, independently review major changes, inspect rendered evidence, commit and publish its checkpoint. Preserve local identity, bilingual accessibility, local assets, save compatibility and no production merge/deploy.
