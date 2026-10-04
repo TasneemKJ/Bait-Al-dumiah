@@ -1,3 +1,5 @@
+import {objectInfo} from './object-ui.js';
+import {createObjectControls} from './render/object-controls.js';
 import {bindPlacementEscape} from './placement-keys.js';
 import {DOLLS,SAVE_KEY,ACTIVITIES} from './content.js';
 import * as sim from './simulation.js';
@@ -12,11 +14,11 @@ let state=stored?sim.restore(stored):sim.createState();
 if(!stored)state.settings.reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 // A saved unmute preference never overrides a fresh page's audio gesture boundary.
 state.settings.muted=true;
-let world=null,ui=null,manualPause=false,panelOpen=false,fatal=false,saveWarning=false;
+let world=null,ui=null,manualPause=false,panelOpen=false,fatal=false,saveWarning=false,objectControls=null;
 const audio=new DollhouseAudio(),canvas=document.querySelector('#world'),host=document.querySelector('#ui');
 const ACTIVITY_ROOM=Object.fromEntries(ACTIVITIES.map(a=>[a.id,a.room]));
 // Reattach scene controls synchronously; a slow graphics frame must not hide the UI.
-function refreshUI(){ui.refresh();roomViews.update()}
+function refreshUI(){ui.refresh();roomViews.update();objectControls?.update()}
 function syncPause(){state.paused=manualPause||Boolean(panelOpen&&panelOpen!=='activities')||document.hidden||fatal;audio.setPaused(state.paused)}
 function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));return true}catch{if(!saveWarning&&ui){ui.toast(ui.t('savingFailed'));saveWarning=true;const note=host.querySelector('.saved-note span');if(note)note.textContent=ui.t('savingFailed')}return false}}
 function notify(result,success){if(!result.ok){say(ui.t(result.reason));return false}if(success)say(ui.t(success));save();ui.tick();return true}
@@ -35,7 +37,16 @@ function announce(event){
 function showError(kind){fatal=true;syncPause();save();document.querySelector('#loading')?.remove();if(ui?.panel)ui.close();const error=document.createElement('section');error.className='error-screen';error.setAttribute('role','alert');const h=document.createElement('h2'),p=document.createElement('p'),b=document.createElement('button');h.textContent=ui.t(kind==='context'?'contextTitle':'webglTitle');p.textContent=ui.t(kind==='context'?'contextHelp':'webglHelp');b.textContent=ui.t('reload');b.addEventListener('click',()=>location.reload());error.append(h,p,b);host.append(error)}
 async function dispatch(action,value){
  switch(action){
-  case 'panel-state':panelOpen=value||false;syncPause();world?.setEnabled(!panelOpen);if(value==='household'&&world){try{ui.setPortraits(world.getPortraits())}catch(error){console.warn('Resident portrait unavailable:',error)}}break;
+  case 'panel-state':panelOpen=value||false;syncPause();world?.setEnabled(!panelOpen);if(!value){world?.clearObjectSelection();ui.clearObject()}objectControls?.update();if(value==='household'&&world){try{ui.setPortraits(world.getPortraits())}catch(error){console.warn('Resident portrait unavailable:',error)}}break;
+  case 'select-object':{
+   const o=objectInfo(state,value);if(!o||fatal||manualPause)break;dispatch('focus-room',o.room);if(ui.openObject(value))world?.selectObject(value);break;
+  }
+  case 'rotate-object':if(notify(sim.rotateDecor(state,value),'objectRotated'))ui.refresh();break;
+  case 'move-object':ui.beginMove(value);break;
+  case 'pack-object':if(notify(sim.remove(state,value),'packed')){ui.close();objectControls?.update()}break;
+  case 'relocate-object':{if(notify(sim.moveDecor(state,value.id,value.room,value.slot),'objectMoved')){ui.clearPlacement();world?.setPlacement(null);dispatch('focus-room',value.room);save()}break}
+  case 'recall-ready':if(sim.startRecall(state).ok)ui.setActivityResult(null);break;
+  case 'activity-hint':if(sim.toggleActivityHint(state).ok)ui.setActivityResult(null);break;
   case 'begin-activity':{
    if(manualPause||fatal){say(ui.t('pausedActivity'));break}if(ui.panel)ui.close();
    const result=sim.beginActivity(state,value);if(result.ok){ui.setActivityResult(null);ui.open('activities');world?.focusRoom(ACTIVITY_ROOM[value]);save()}else say(ui.t(result.reason));break;
@@ -104,7 +115,7 @@ async function dispatch(action,value){
    save();refreshUI();break;
   }
   case 'reset-yes':{
-   notices.length=0;const settings={...state.settings};ui.close();state=sim.createState();state.settings=settings;manualPause=false;syncPause();dispatch('camera');world?.setPlacement(null);save();refreshUI();break;
+   notices.length=0;const settings={...state.settings};ui.close();ui.clearPlacement();ui.setActivityResult(null);state=sim.createState();state.settings=settings;manualPause=false;syncPause();dispatch('camera');world?.setPlacement(null);save();refreshUI();break;
   }
  }
 }
@@ -112,13 +123,15 @@ ui=createUI(host,()=>state,dispatch);
 const residentLabel=createResidentLabel(host);
 const roomViews=createRoomViews(host,()=>state,id=>dispatch('focus-room',id));
 try{world=createWorld(canvas,{onPick:data=>{
+ if(data.object)dispatch('select-object',data.object);
  if(data.doll)ui.open('household',data.doll);
  if(data.ghost)dispatch('discover');
- if(data.slot&&ui.placement)dispatch('place',{item:ui.placement,...data.slot});
+ if(data.slot&&ui.placement)dispatch(ui.moveId!==null?'relocate-object':'place',{id:ui.moveId,item:ui.placement,...data.slot});
 },onError:showError});document.querySelector('#loading')?.remove();}catch(error){console.error('Dollhouse renderer could not start:',error);showError('webgl')}
+objectControls=createObjectControls(host,()=>state,key=>dispatch('select-object',key));
 let last=performance.now(),lastUI=0,lastSave=0,stopped=false;
 function frame(now){if(stopped)return;const dt=Math.min(.1,Math.max(0,(now-last)/1000));last=now;
- if(!document.hidden&&!fatal){sim.step(state,dt);if(state.events.length)for(const event of state.events.splice(0))announce(event);if(notices.length&&now>=noticeAt)showNotice(now);world?.render(state,dt,ui.selected);residentLabel.update(state,ui.selected,host.dataset.focusRoom||(host.dataset.focusDoll?state.dolls.find(d=>d.id===host.dataset.focusDoll)?.room:''),world?.project(ui.selected,.05),Boolean(ui.panel||ui.placement||state.paused));audio.tick(sim.isNight(state));if(now-lastUI>250){ui.tick();roomViews.update();lastUI=now}if(now-lastSave>8000){save();lastSave=now}}
+ if(!document.hidden&&!fatal){sim.step(state,dt);if(state.events.length)for(const event of state.events.splice(0))announce(event);if(notices.length&&now>=noticeAt)showNotice(now);world?.render(state,dt,ui.selected);residentLabel.update(state,ui.selected,host.dataset.focusRoom||(host.dataset.focusDoll?state.dolls.find(d=>d.id===host.dataset.focusDoll)?.room:''),world?.project(ui.selected,.05),Boolean(ui.panel||ui.placement||state.paused));audio.tick(sim.isNight(state));if(now-lastUI>250){ui.tick();roomViews.update();objectControls.update();lastUI=now}if(now-lastSave>8000){save();lastSave=now}}
  requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
@@ -139,5 +152,5 @@ window.addEventListener('keydown',event=>{
 });
 // Explicit opt-in diagnostics for reproducible browser verification, never enabled by default.
 if(new URLSearchParams(location.search).get('debug')==='1'){
- window.dollhouse={state:()=>structuredClone(state),stats:()=>({calls:world?.renderer.info.render.calls,triangles:world?.renderer.info.render.triangles,geometries:world?.renderer.info.memory.geometries,textures:world?.renderer.info.memory.textures}),project:(id,height)=>world?.project(id,height),visual:()=>world?.visualStatus()};
+ window.dollhouse={state:()=>structuredClone(state),stats:()=>({calls:world?.renderer.info.render.calls,triangles:world?.renderer.info.render.triangles,geometries:world?.renderer.info.memory.geometries,textures:world?.renderer.info.memory.textures}),project:(id,height)=>world?.project(id,height),visual:()=>world?.visualStatus(),objects:()=>world?.objectPositions()};
 }

@@ -1,3 +1,4 @@
+import {objectMarkup,objectInfo} from './object-ui.js';
 import {portraitMarkup} from './resident-portraits.js';
 import {activityMarkup,updateActivityStatus} from './activities-ui.js';
 import {DOLLS,ROOMS,CATALOG,SECRETS,ACTIONS,MILESTONES,SEW_DAILY,BASKET_MAX,DOOR_STEPS,GIFT_COST,VISITOR_GIFTS} from './content.js';
@@ -10,7 +11,7 @@ const dockIcons={household:'souls',activities:'play',decorate:'leaf',journal:'bo
 export function createUI(host,getState,dispatch){
  let panel=null,selected='lina',placement=null,placementRoom='kitchen',placementSlot=0,previousFocus=null,toastTimer,resetConfirm=false;
  let portraits={};
- let activityResult=null;
+ let activityResult=null,selectedObject=null,moveId=null;
  const t=key=>translate(getState().settings.locale,key),n=value=>number(getState().settings.locale,value);
  const button=(action,label,ico,extra='')=>`<button type="button" data-action="${action}" ${extra}>${ico?icon(ico):''}<span>${label}</span></button>`;
  function avatar(id){const portrait=portraitMarkup(id,portraits[id]);if(portrait)return portrait;return `<span class="avatar ${id}" aria-hidden="true"><span class="hair"></span><span class="face"><i></i><i></i></span><span class="dress"></span></span>`}
@@ -46,6 +47,7 @@ export function createUI(host,getState,dispatch){
   const s=getState(),root=host.querySelector('#sheet-content');if(!panel)return;
   // Re-rendering the same sheet keeps its latest notice, so a collected reward stays visible.
   const notice=renderedPanel===panel?root.querySelector('.panel-notice')?.textContent:null;renderedPanel=panel;
+  if(panel==='object')root.innerHTML=objectMarkup(s,selectedObject,t,n,button);
   if(panel==='activities')root.innerHTML=activityMarkup(s,t,n,button,activityResult);
   if(panel==='household'){
    const d=s.dolls.find(x=>x.id===selected),def=DOLLS.find(x=>x.id===selected);
@@ -75,10 +77,11 @@ export function createUI(host,getState,dispatch){
   }
   if(notice){const note=document.createElement('p');note.className='panel-notice';note.setAttribute('role','status');note.textContent=notice;root.prepend(note)}
  }
- function renderPlacement(){const root=host.querySelector('.placement');if(!root)return;root.hidden=!placement;if(!placement)return;const entry=CATALOG.find(c=>c.id===placement);root.innerHTML=`<div class="placement-head">${icon(entry.icon)}<div><strong>${t(placement)} · ${n(entry.price)} ${t('buttons')}</strong><p>${t('placeHint')}</p></div>${button('placement-cancel',t('cancel'),'close','class="icon-button"')}</div><div class="placement-fields"><label class="sr-only" for="place-room">${t('room')}</label><select id="place-room" data-field="place-room">${ROOMS.map(r=>`<option value="${r.id}" ${r.id===placementRoom?'selected':''}>${t(r.id)}</option>`).join('')}</select><label class="sr-only" for="place-slot">${t('placeTitle')}</label><select id="place-slot" data-field="place-slot">${['leftSpot','middleSpot','rightSpot'].map((v,i)=>`<option value="${i}" ${placementSlot===i?'selected':''} ${getState().decor.some(d=>d.room===placementRoom&&d.slot===i)?'disabled':''}>${t(v)}</option>`).join('')}</select>${button('place-confirm',t('placeConfirm'),'plus','class="primary"')}</div>`}
- function previewPlacement(){dispatch('placement-preview',{item:placement,room:placementRoom,slot:placementSlot})}
- function chooseItem(id){close();placement=id;placementRoom='kitchen';placementSlot=0;dispatch('placement',id);previewPlacement();renderPlacement();host.querySelector('#place-room').focus()}
- function clearPlacement(){placement=null;renderPlacement()}
+ function renderPlacement(){const root=host.querySelector('.placement');if(!root)return;root.hidden=!placement;if(!placement)return;const entry=CATALOG.find(c=>c.id===placement);root.innerHTML=`<div class="placement-head">${icon(entry.icon)}<div><strong>${t(placement)} · ${moveId!==null?t('moveObject'):n(entry.price)+' '+t('buttons')}</strong><p>${t('placeHint')}</p></div>${button('placement-cancel',t('cancel'),'close','class="icon-button"')}</div><div class="placement-fields"><label class="sr-only" for="place-room">${t('room')}</label><select id="place-room" data-field="place-room">${ROOMS.map(r=>`<option value="${r.id}" ${r.id===placementRoom?'selected':''}>${t(r.id)}</option>`).join('')}</select><label class="sr-only" for="place-slot">${t('placeTitle')}</label><select id="place-slot" data-field="place-slot">${['leftSpot','middleSpot','rightSpot'].map((v,i)=>`<option value="${i}" ${placementSlot===i?'selected':''} ${getState().decor.some(d=>d.id!==moveId&&d.room===placementRoom&&d.slot===i)?'disabled':''}>${t(v)}</option>`).join('')}</select>${button('place-confirm',t('placeConfirm'),'plus','class="primary"')}</div>`}
+ function previewPlacement(){dispatch('placement-preview',{item:placement,room:placementRoom,slot:placementSlot,moveId})}
+ function chooseItem(id){close();moveId=null;placement=id;placementRoom='kitchen';placementSlot=0;dispatch('placement',id);previewPlacement();renderPlacement();host.querySelector('#place-room').focus()}
+ function clearPlacement(){placement=null;moveId=null;renderPlacement()}
+ function beginMove(id){const d=getState().decor.find(d=>d.id===id);if(!d)return false;close();placement=d.item;moveId=id;placementRoom=d.room;placementSlot=d.slot;dispatch('placement',d.item);previewPlacement();renderPlacement();host.querySelector('#place-room').focus();return true}
  // One suggested next step: wishes, first keepsake, rewards to collect, then the night's whisper.
  function nextStep(){
   const s=getState(),wish=DOLLS.find(d=>!s.wishes.includes(d.id));
@@ -129,10 +132,12 @@ export function createUI(host,getState,dispatch){
   if(action==='select'){selected=target.dataset.id;dispatch('select',selected);renderPanel();host.querySelector(`[data-action="select"][data-id="${selected}"]`)?.focus();return}
   if(action==='choose-item')return chooseItem(target.dataset.id);
   if(action==='placement-cancel'){clearPlacement();dispatch(action);return}
-  if(action==='place-confirm'){dispatch('place',{item:placement,room:placementRoom,slot:placementSlot});return}
+  if(action==='place-confirm'){dispatch(moveId!==null?'relocate-object':'place',{id:moveId,item:placement,room:placementRoom,slot:placementSlot});return}
   if(action==='focus-doll'){dispatch(action,target.dataset.id);return}
   if(action==='begin-activity'||action==='restore-room'){dispatch(action,target.dataset.id);return}
   if(action==='activity-input'){dispatch(action,Number(target.dataset.choice));return}
+  if(['rotate-object','move-object','pack-object'].includes(action)){dispatch(action,Number(target.dataset.id));return}
+  if(['recall-ready','activity-hint'].includes(action)){dispatch(action);return}
   if(action==='end-activity'){dispatch(action);return}
   if(action==='care'){dispatch('care',{id:target.dataset.id,action:target.dataset.care});return}
   if(action==='remove'){dispatch('remove',Number(target.dataset.id));renderPanel();return}
@@ -141,11 +146,11 @@ export function createUI(host,getState,dispatch){
   dispatch(action);
  };
  const change=event=>{const el=event.target;if(!el.dataset.field)return;
-  if(el.dataset.field==='place-room'){placementRoom=el.value;placementSlot=[0,1,2].find(i=>!getState().decor.some(d=>d.room===placementRoom&&d.slot===i))??0;previewPlacement();renderPlacement();host.querySelector('#place-room').focus();return}
+  if(el.dataset.field==='place-room'){placementRoom=el.value;placementSlot=[0,1,2].find(i=>!getState().decor.some(d=>d.id!==moveId&&d.room===placementRoom&&d.slot===i))??0;previewPlacement();renderPlacement();host.querySelector('#place-room').focus();return}
   if(el.dataset.field==='place-slot'){placementSlot=Number(el.value);previewPlacement();return}
   if(el.dataset.field==='doll-room'){dispatch('move',{id:el.dataset.id,room:el.value});return}
   dispatch('setting',{key:el.dataset.field,value:el.type==='checkbox'?el.checked:el.value});
  };
  host.addEventListener('click',click);host.addEventListener('change',change);build();
- return {open,close,refresh,tick,toast,objective:nextStep,clearPlacement,setActivityResult(result){activityResult=result;const choice=host.querySelector('#sheet [data-choice]:focus')?.dataset.choice;renderPanel();host.querySelector(result?.complete?'.ritual-result button':choice!==undefined?`#sheet [data-choice="${choice}"]`:'#sheet [data-choice], #sheet [data-action="begin-activity"]')?.focus()},setPortraits(values){portraits=values??{};if(panel==='household')renderPanel()},get selected(){return selected},get panel(){return panel},get placement(){return placement},get t(){return t},get n(){return n},dispose(){clearTimeout(toastTimer);host.removeEventListener('click',click);host.removeEventListener('change',change)}};
+ return {openObject(key){if(!objectInfo(getState(),key))return false;selectedObject=key;open('object');return true},clearObject(){selectedObject=null},beginMove,get moveId(){return moveId},open,close,refresh,tick,toast,objective:nextStep,clearPlacement,setActivityResult(result){activityResult=result;const choice=host.querySelector('#sheet [data-choice]:focus')?.dataset.choice;renderPanel();host.querySelector(result?.complete?'.ritual-result button':choice!==undefined?`#sheet [data-choice="${choice}"]`:'#sheet [data-action="recall-ready"], #sheet [data-choice], #sheet [data-action="begin-activity"]')?.focus()},setPortraits(values){portraits=values??{};if(panel==='household')renderPanel()},get selected(){return selected},get panel(){return panel},get placement(){return placement},get t(){return t},get n(){return n},dispose(){clearTimeout(toastTimer);host.removeEventListener('click',click);host.removeEventListener('change',change)}};
 }

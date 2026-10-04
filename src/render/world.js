@@ -13,6 +13,7 @@ import {createKeepsakeDetails} from './keepsake-details.js';
 import {createPlacementPreview} from './placement-preview.js';
 import {createRoomFrame} from './room-frame.js';
 import {createRoomEffects} from './room-effects.js';
+import {createObjectInteractions} from './object-interactions.js';
 import {createRestoration} from './restoration.js';
 import {createCameraMove} from './camera-motion.js';
 import {createAtmosphere} from './atmosphere.js';
@@ -39,7 +40,7 @@ export function createWorld(canvas,{onPick,onError}){
  const courtyard=createLevantineSetting(house.root);
  const portraitCache=createPortraitCache(residents,doll=>renderPortrait(renderer,doll));
  createKeepsakeDetails(house.root);const details=createCraftDetails(house.root);createGarden(house.root);const atmosphere=createAtmosphere(scene),roomEffects=createRoomEffects(house.root),roomFrame=createRoomFrame(house.root),preview=createPlacementPreview(house.root);let previewPose=null;
- const restoration=createRestoration(house.root);
+ const restoration=createRestoration(house.root),objects=createObjectInteractions(house.root);
  const decor=new Map(),slotTargets=[];
  const slotGroup=new T.Group();house.root.add(slotGroup);
  for(const room of ROOMS)for(let i=0;i<SLOTS.length;i++){
@@ -55,7 +56,7 @@ export function createWorld(canvas,{onPick,onError}){
  const pointerup=e=>{
   if(!tapGesture.up(e)||!controls.enabled||lost)return;
   const rect=canvas.getBoundingClientRect();mouse.set((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1);ray.setFromCamera(mouse,camera);
-  const targets=placement?slotTargets:[...residents.targets,...(ghost.root.visible?[ghost.hit]:[])];
+  const targets=placement?slotTargets:[...residents.targets,...objects.targets,...(ghost.root.visible?[ghost.hit]:[])];
   const hit=ray.intersectObjects(targets,false)[0];if(hit)onPick(hit.object.userData);
  };
  const cancel=()=>tapGesture.cancel();canvas.addEventListener('pointerdown',pointerdown);canvas.addEventListener('pointermove',pointermove);canvas.addEventListener('pointerup',pointerup);canvas.addEventListener('pointercancel',cancel);
@@ -64,6 +65,7 @@ export function createWorld(canvas,{onPick,onError}){
  const observer=new ResizeObserver(()=>{resize();if(focusedRoom||focusedDoll)applyFraming()});observer.observe(canvas);resize();
  return {
   renderer,camera,scene,home,
+  selectObject(key){return objects.select(key)},clearObjectSelection(){objects.clear()},objectPositions(){return objects.project(camera,canvas.clientWidth,canvas.clientHeight)},
   getPortraits(){return portraitCache.getAll()},
   focusRoom(id){if(!ROOMS.some(r=>r.id===id))return false;focusedRoom=id;focusedDoll=null;cameraMove.moveTo(framing(canvas.clientWidth,canvas.clientHeight,id),reducedMotion);return true},
   focusDoll(id){const p=residents.position(id);if(!p)return false;focusedDoll=id;focusedRoom=null;cameraMove.moveTo(focusPose(),reducedMotion);return true},
@@ -79,9 +81,11 @@ export function createWorld(canvas,{onPick,onError}){
    const budget=detail(canvas.clientWidth,canvas.clientHeight,state.settings.quality,window.devicePixelRatio||1);
    if(quality!==budget.level){quality=budget.level;renderer.setPixelRatio(budget.pixelRatio);renderer.shadowMap.enabled=budget.shadows;resize()}
    for(const d of state.decor)if(!decor.has(d.id)){const obj=makeFurniture(d.item),room=ROOMS.find(r=>r.id===d.room),slot=SLOTS[d.slot];obj.position.set(room.x+slot.x,room.y+.13,slot.z);house.root.add(obj);decor.set(d.id,obj)}
+   for(const d of state.decor){const obj=decor.get(d.id),room=ROOMS.find(r=>r.id===d.room),slot=SLOTS[d.slot];obj.position.set(room.x+slot.x,room.y+.13,slot.z);obj.rotation.y=(d.rotation??0)*Math.PI/2;obj.visible=d.id!==previewPose?.moveId}
+   objects.update(state);
    for(const [id,obj] of decor)if(!state.decor.some(d=>d.id===id)){obj.removeFromParent();obj.traverse(o=>{if(o.material?.map&&!o.material.userData.shared){o.material.map.dispose();o.material.dispose();o.geometry?.dispose()}});decor.delete(id)}
-   slotTargets.forEach(o=>{o.visible=!state.decor.some(d=>d.room===o.userData.slot.room&&d.slot===o.userData.slot.slot)});
-   slotGroup.children.forEach(o=>{o.visible=!state.decor.some(d=>d.room===o.userData.slot.room&&d.slot===o.userData.slot.slot)});
+   slotTargets.forEach(o=>{o.visible=!state.decor.some(d=>d.id!==previewPose?.moveId&&d.room===o.userData.slot.room&&d.slot===o.userData.slot.slot)});
+   slotGroup.children.forEach(o=>{o.visible=!state.decor.some(d=>d.id!==previewPose?.moveId&&d.room===o.userData.slot.room&&d.slot===o.userData.slot.slot)});
    // Exponential interpolation is frame-rate independent; reduced motion switches instantly.
    const night=isNight(state);nightMix=state.settings.reducedMotion?Number(night):T.MathUtils.damp(nightMix,Number(night),2.2,dt);
    const cue=courtyard.update(state,nightMix),look=lighting(nightMix),haze=fogPolicy(nightMix);hemi.intensity=look.ambient;key.intensity=look.key;fill.intensity=look.rim;renderer.toneMappingExposure=look.exposure;depthFog.density=haze.density;depthFog.color.setHex(haze.color);

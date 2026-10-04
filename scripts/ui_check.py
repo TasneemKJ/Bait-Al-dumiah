@@ -20,7 +20,7 @@ with sync_playwright() as p:
  css='\n'.join(((ROOT/'src'/name).read_text() if (ROOT/'src'/name).exists() else '') for name in ['styles.css','accessibility.css','visual-upgrade.css','doll-portraits.css','gameplay.css','activities.css'])
  page.set_content('<html><head><meta name="theme-color" content="#fff"><style>'+css+'</style></head><body><div id="app"><canvas id="world"></canvas><div id="ui"></div></div></body></html>')
  modules={}
- for name in ['content','simulation','i18n','icons','resident-portraits','activities-ui','ui','render/room-views']:
+ for name in ['content','simulation','i18n','icons','resident-portraits','activities-ui','object-ui','ui','render/room-views']:
   file=ROOT/'src'/f'{name}.js'
   if not file.exists():continue
   source=file.read_text()

@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as sim from '../src/simulation.js';
-const finish=(s,id)=>{assert.equal(sim.beginActivity(s,id).ok,true);let result;for(const choice of sim.activityPattern(s,id))result=sim.activityInput(s,choice);return result};
+const finish=(s,id)=>{assert.equal(sim.beginActivity(s,id).ok,true);if(id==='stitch')sim.startRecall(s);let result;for(const choice of sim.activityAnswer(s))result=sim.activityInput(s,choice);return result};
 const wait=(s,seconds=21)=>{for(let i=0;i<seconds;i++)sim.step(s,1)};
 
 test('three activities reward real sequence completion, not starting or submitted scores',()=>{
- for(const id of ['tea','stitch','lullaby']){const s=sim.createState(),before=s.buttons;assert.equal(sim.beginActivity(s,id).ok,true);assert.equal(s.buttons,before);const pattern=sim.activityPattern(s,id);assert.equal(pattern.length,3);for(const x of pattern.slice(0,-1)){assert.equal(sim.activityInput(s,x).complete,false);assert.equal(s.buttons,before)}const result=sim.activityInput(s,pattern.at(-1));assert.equal(result.complete,true);assert.equal(result.reward,7);assert.equal(s.buttons,before+7);assert.equal(s.activities.mastery[id],1);assert.equal(s.activities.active,null);assert.equal(sim.activityInput(s,0).ok,false)}
+ for(const id of ['tea','stitch','lullaby']){const s=sim.createState(),before=s.buttons;assert.equal(sim.beginActivity(s,id).ok,true);assert.equal(s.buttons,before);if(id==='stitch')sim.startRecall(s);const pattern=sim.activityAnswer(s);assert.equal(pattern.length,3);for(const x of pattern.slice(0,-1)){assert.equal(sim.activityInput(s,x).complete,false);assert.equal(s.buttons,before)}const result=sim.activityInput(s,pattern.at(-1));assert.equal(result.complete,true);assert.equal(result.reward,7);assert.equal(s.buttons,before+7);assert.equal(s.activities.mastery[id],1);assert.equal(s.activities.active,null);assert.equal(sim.activityInput(s,0).ok,false)}
 });
 test('wrong input gently restarts and invalid input cannot corrupt progress',()=>{
  const s=sim.createState();sim.beginActivity(s,'tea');const p=sim.activityPattern(s,'tea');sim.activityInput(s,p[0]);assert.equal(sim.activityInput(s,(p[1]+1)%4).mistake,true);assert.equal(s.activities.active.cursor,0);const before=JSON.stringify(s);assert.equal(sim.activityInput(s,99).ok,false);assert.equal(JSON.stringify(s),before);assert.equal(sim.beginActivity(s,'unknown').ok,false);

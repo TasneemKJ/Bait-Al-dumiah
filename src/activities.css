@@ -26,3 +26,11 @@
 @media(max-width:350px){.ritual-pattern{gap:3px}.ritual-choices{grid-template-columns:repeat(2,minmax(0,1fr))}.ritual-choice{min-height:64px}.ritual-choice>.icon{width:22px;height:22px}}
 @media(max-width:360px){.dock{width:calc(100% - 4px);padding-inline:2px}.dock>button>span{max-width:100%;overflow-wrap:anywhere}}
 @media(max-height:560px) and (min-width:681px){.dock{max-width:calc(100% - 264px);padding-inline:4px;gap:0}.dock>button{padding-inline:8px}.dock>button[data-action="panel-settings"]>span{display:none}}
+/* Direct object play keeps one contextual surface in the focused room. */
+.object-controls{position:absolute;inset-inline-start:35px;top:350px;width:210px;padding:12px;border:1px solid #cdb49c;border-radius:16px;background:#fff6e9e8;backdrop-filter:blur(8px);pointer-events:auto}
+.object-controls>p{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#745d66;margin:0 4px 8px}
+.object-controls button{display:flex;justify-content:flex-start;width:100%;min-height:44px;margin-top:4px;padding:8px;font-size:11px;text-align:start;background:#fff9ee;border-color:#d4bda9}.object-controls .icon{width:20px;height:20px;color:#906478}
+.object-detail{text-align:start}.object-emblem{display:grid;place-items:center;width:78px;height:78px;margin:8px 0 22px;border-radius:26px;background:#ead9c6;border:1px solid #c6a581}.object-emblem .icon{width:38px;height:38px;color:#8b6175}.object-detail .eyebrow{margin-bottom:10px}.object-actions{display:grid;gap:10px;margin:24px 0}.object-actions button{width:100%;min-height:48px}.object-orientation{font-size:12px;color:var(--muted);margin-top:18px}
+.night .object-controls{background:#32283eec;border-color:#9e7e8f;color:#f3e4d0}.night .object-controls>p{color:#d3b8c5}.night .object-controls button{background:#4c394e;color:#f3dfc8;border-color:#99798a}.night .object-controls .icon{color:#dfbe98}
+@media(max-width:680px){.object-controls{top:245px;inset-inline-start:16px;width:170px;padding:8px}.object-controls button{font-size:10px}.object-controls>p{font-size:9px}}
+@media(max-height:560px) and (min-width:681px){.object-controls{top:80px;inset-inline-start:auto;inset-inline-end:180px;width:180px;padding:6px;max-height:calc(100svh - 180px);overflow:auto}.object-controls>p{font-size:9px;margin-bottom:3px}.object-controls button{font-size:10px;margin-top:2px}}
