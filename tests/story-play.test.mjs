@@ -73,11 +73,8 @@ test('paused object interaction cannot progress the story or consume a carried i
 test('stories do not mutate care, bond, mastery, needs, wishes or owned decorations',()=>{
  const s=sim.createState();sim.place(s,'lamp','parlor',0);sim.care(s,'lina','tea');
  const before=structuredClone(s);
- for(const [id] of route)assert.equal(use(s,id).ok,true);
- // Pouring passes real simulation time; compare unrelated fields against the same
- // elapsed house time, so natural need decay cannot masquerade as a story reward.
- let remaining=s.elapsed-before.elapsed;
- while(remaining>1e-9){const dt=Math.min(1,remaining);sim.step(before,dt);remaining-=dt}
+ // Compare the same dt cadence: house unease easing is intentionally unchanged.
+ for(const [id] of route)assert.equal(storyAction(s,id,dt=>sim.step(before,dt)).ok,true);
  for(const key of Object.keys(before))if(!['story','buttons','earnedToday'].includes(key))assert.deepEqual(s[key],before[key],key);
  assert.equal(s.buttons,before.buttons+48);assert.equal(s.earnedToday,before.earnedToday+48);
 });
@@ -182,4 +179,9 @@ test('paused and invalid story replay are rejected without any mutation',()=>{
  }
  s.paused=true;const before=saved(s);
  assert.equal(sim.playStoryKeepsake(s,'prop:music-cabinet').reason,'pausedActivity');assert.equal(saved(s),before);
+});
+
+test('bear mending starts physical scene work before it can return the carried bear',()=>{
+ const s=sim.createState();sim.interactStory(s,'prop:mint-tin');const before=structuredClone(s.story);
+ const result=sim.interactStory(s,'prop:sewing-machine');assert.equal(result.startedActivity,'stitch');assert.equal(result.mode,'mend');assert.deepEqual(s.story,before);assert.equal(sim.storyStatus(s).held,'red-thread');assert.equal(sim.stitchStatus(s).sections.length,2);assert.equal(sim.finishStitch(s).reason,'stitchNotReady');sim.endActivity(s);assert.equal(sim.storyStatus(s).held,'red-thread');
 });

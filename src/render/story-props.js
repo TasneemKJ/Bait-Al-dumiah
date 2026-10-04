@@ -72,8 +72,10 @@ export function createStoryProps(parent){
  ball(bear,0,.31,.085,.062,.041,.025,P.cream);
  for(const x of [-.043,.043])ball(bear,x,.37,.088,.011,.013,.009,P.ink);
  ball(bear,0,.324,.109,.015,.011,.008,P.ink);
- box(bear,.038,.17,.086,.080,.085,.012,P.rose);for(let i=0;i<3;i++)box(bear,.011+i*.027,.208,.096,.009,.022,.006,P.cream);
- box(bear,0,.257,.086,.16,.032,.015,P.rose);finish(bear);
+ const earnedPatch=box(bear,.038,.17,.086,.080,.085,.012,P.cream);earnedPatch.name='story-earned-bear-patch';
+ // Completed mending leaves actual red thread on the saved household bear.
+ for(let i=0;i<3;i++){const stitch=box(bear,.011+i*.027,.208,.096,.009,.022,.006,0xb44946);stitch.name='story-earned-red-stitch-'+i;stitch.rotation.z=i%2?.45:-.45}
+ for(let i=0;i<4;i++){const stitch=box(bear,-.068+i*.044,.257,.096,.009,.027,.006,0xb44946);stitch.name='story-earned-red-seam-'+i;stitch.rotation.z=i%2?.45:-.45}finish(bear);
 
  const doorstep=anchor(root,'story-doorstep','parlor',[.2,.13,1.95]);
  // Thin threshold; the original placement slots remain available.

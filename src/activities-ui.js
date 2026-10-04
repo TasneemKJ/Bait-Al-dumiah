@@ -15,9 +15,9 @@ export function updateActivityStatus(host,s,t,n){
 
 export function activityMarkup(s,t,n,button,result){
  const active=s.activities.active;
- // Tea owns the actual kitchen table. It never has a sequence grid or a
- // result sheet, including when the optional rituals catalog was its entry.
- if(active?.id==='tea')return '';
+ // Physical tea and sewing own their actual work surfaces. Neither opens a
+ // sequence grid or a result sheet, even when started from this catalog.
+ if(active?.id==='tea'||active?.id==='stitch')return '';
  if(active){
   const a=ACTIVITIES.find(a=>a.id===active.id),study=active.phase==='study',concealed=a.id==='stitch'&&!study&&!active.hint,reverse=a.id==='lullaby';
   return `<section class="ritual-play"><p class="eyebrow">${t(a.resident)} · ${t(a.room)}</p><h2 id="sheet-title">${t('activity-'+a.id)}</h2><p class="sheet-intro">${t('activity-'+a.id+'Intro')}</p>

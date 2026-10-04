@@ -13,6 +13,7 @@ import time
 import urllib.request
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from stitch_gestures import finish_stitch, stitch_ready, stitch_status
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -318,13 +319,24 @@ def run(scenario):
         panel('activities')
         page.locator(f'[data-action="begin-activity"][data-id="{activity}"]').click()
         page.wait_for_function('id=>window.dollhouse.state().activities.active?.id===id', arg=activity)
-        check(activity + ' starts through its visible optional catalog', page.locator('dialog[open] .ritual-play').is_visible())
-        if escape:
-            page.keyboard.press('Escape')
+        if activity == 'stitch':
+            stitch_ready(page)
+            check(activity + ' starts through its visible optional catalog', stitch_status(page)['phase'] == 'sew' and not page.locator('dialog[open]').count())
+            before_exit = economy()
+            if escape:
+                page.keyboard.press('Escape')
+            else:
+                page.locator('[data-stitch-action="exit"]').click()
+            page.wait_for_function('window.dollhouse.state().activities.active===null', polling=100)
+            check(('Escape' if escape else 'Exit') + ' fully ends physical sewing without rewards', state()['activities']['active'] is None and economy() == before_exit and not page.evaluate('window.dollhouse.visual().stitchActive'))
         else:
-            page.locator('#sheet [data-action="close"]').click()
-        page.wait_for_function('window.dollhouse.state().activities.active===null')
-        check(('Escape' if escape else 'Close') + ' fully ends the sequence session', not page.locator('dialog[open]').count() and state()['activities']['active'] is None)
+            check(activity + ' starts through its visible optional catalog', page.locator('dialog[open] .ritual-play').is_visible())
+            if escape:
+                page.keyboard.press('Escape')
+            else:
+                page.locator('#sheet [data-action="close"]').click()
+            page.wait_for_function('window.dollhouse.state().activities.active===null')
+            check(('Escape' if escape else 'Close') + ' fully ends the sequence session', not page.locator('dialog[open]').count() and state()['activities']['active'] is None)
         ready()
 
     def enter():
@@ -545,7 +557,14 @@ def run(scenario):
             room('kitchen')
             touch_object('prop:mint-tin', twice=True)
             check('current story prop progresses after dismissing an unfinished lullaby', progress() == 1 and page.locator('[data-held-item="red-thread"]').is_visible())
-            room('studio'); carry_to('prop:sewing-machine')
+            room('studio')
+            mend_before = economy()
+            mend_activities = state()['activities']
+            carry_to('prop:sewing-machine', touch=True)
+            stitch_ready(page)
+            check('phone red-thread drop opens physical mending without advancing early', progress() == 1 and stitch_status(page)['mode'] == 'mend')
+            finish_stitch(page, touch=True)
+            check('touch sewing returns the repaired bear without ritual rewards or records', progress() == 2 and page.locator('[data-held-item="mended-bear"]').is_visible() and economy() == mend_before and state()['activities'] == mend_activities)
             room('bedroom'); carry_to('prop:moon-bed')
             room('parlor'); touch_object('prop:parlor-sofa', twice=True)
             carry_to('prop:music-cabinet')

@@ -7,6 +7,7 @@ import json, os, subprocess, time, urllib.request
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 from tea_check import complete_tea, tea_ready, tea_status, tap_tea
+from stitch_gestures import finish_stitch, stitch_ready, stitch_status
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'artifacts' / 'stories'
@@ -169,8 +170,14 @@ try:
     check('pause freezes story time', state()['elapsed'] == frozen and progress() == 1)
     page.locator('.pause-overlay [data-action="pause"]').click()
     room('studio')
+    mend_before = state()
     drag_to('prop:sewing-machine')
-    check('thread becomes a mended bear through a real drop', progress() == 2 and page.locator('[data-held-item="mended-bear"]').is_visible())
+    stitch_ready(page)
+    check('red-thread drop opens the actual bear seam before advancing', progress() == 1 and stitch_status(page)['mode'] == 'mend' and not page.locator('dialog[open]').count())
+    finish_stitch(page)
+    mend_after = state()
+    check('physical bear sewing grants no ritual currency, care, mastery, bond or records', mend_after['activities'] == mend_before['activities'] and all(mend_after[key] == mend_before[key] for key in ['buttons', 'cares', 'earnedToday']) and [d['bond'] for d in mend_after['dolls']] == [d['bond'] for d in mend_before['dolls']])
+    check('thread becomes a mended bear through real sewing and finish', progress() == 2 and page.locator('[data-held-item="mended-bear"]').is_visible())
     capture('03-mended-bear-in-hand')
     room('bedroom')
     drag_to('prop:moon-bed')

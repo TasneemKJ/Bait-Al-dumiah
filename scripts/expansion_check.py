@@ -3,6 +3,7 @@ import json, os, subprocess, time, urllib.request
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 from tea_check import complete_tea, tea_ready, tea_status, tap_tea
+from stitch_gestures import NeedleDrag, finish_stitch, stitch_ready, stitch_status, tap_stitch, trace_stitch
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'artifacts'/'expansion'; OUT.mkdir(parents=True,exist_ok=True)
 BASE=os.environ.get('PLAY_URL','http://127.0.0.1:4188')
@@ -98,20 +99,38 @@ try:
   page.locator('[data-action="close"]').click();open_panel(page,'activities')
   check('Arabic direction and ritual titles',page.locator('html').get_attribute('dir')=='rtl' and 'شاي' in page.locator('.ritual-catalog').inner_text())
   page.locator('[data-action="begin-activity"][data-id="stitch"]').click()
+  stitch_ready(page)
   page.screenshot(path=str(OUT/'07-mobile-arabic.png'))
-  check('embroidery starts in explicit study mode',state()['activities']['active']['phase']=='study' and page.locator('.ritual-choice:disabled').count()==4)
-  pattern=state()['activities']['active']['pattern']
-  check('mobile choices all have 44px targets',page.locator('.ritual-choice').count()==4 and page.locator('.ritual-choice').evaluate_all('(els)=>els.every(e=>{const r=e.getBoundingClientRect();return r.width>=44 && r.height>=44})'))
-  page.locator('[data-action="recall-ready"]').click()
-  before=state()['buttons'];page.locator(f'[data-choice="{(pattern[0]+1)%4}"]').click()
-  check('embroidery mistake keeps cursor and buttons safe',state()['activities']['active']['cursor']==0 and state()['buttons']==before)
-  check('recall hides thread choices until a free hint',page.locator('.pattern-step').first.locator('span').inner_text()=='تذكّر')
-  page.locator('[data-action="activity-hint"]').click()
-  check('hint reveals the pattern without spending buttons',state()['activities']['active']['hint'])
-  for choice in pattern:page.locator(f'[data-choice="{choice}"]').click()
-  check('recall completes through real choice buttons',state()['activities']['mastery']['stitch']==7)
+  check('embroidery opens physical sewing with no answer grid or modal',stitch_status(page)['phase']=='sew' and stitch_status(page)['mode']=='ritual' and not page.locator('.ritual-choice:visible,dialog[open]').count())
+  check('mobile sewing controls all have reachable 44px targets',page.locator('[data-stitch-action]:visible,.dock button:visible').evaluate_all('els=>els.length>0&&els.every(e=>{const r=e.getBoundingClientRect(),hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return r.width>=44&&r.height>=44&&r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight&&(hit===e||e.contains(hit))})'))
+  check('empty sewing exposes only the actual reachable needle and spool',page.evaluate('()=>{const points=window.dollhouse.stitchObjects(),targets=points.filter(p=>["needle","spool"].includes(p.key));return targets.length===2&&!points.some(p=>p.key==="cloth")&&targets.every(p=>p.x>0&&p.x<innerWidth&&p.y>0&&p.y<innerHeight&&document.elementFromPoint(p.x,p.y)?.id==="world")}'))
+  before=state()['buttons']
+  stitched=trace_stitch(page,until_section=1)
+  check('real needle motion completes the first contour section',stitched['section']==1 and stitched['travel']>0 and not stitched['pressed'])
+  current=stitched['sections'][stitched['section']];start,next_point=current[0],current[1]
+  dx,dy=next_point[0]-start[0],next_point[1]-start[1];edge_length=(dx*dx+dy*dy)**.5
+  wrong_x=max(-.9,min(.9,start[0]-dy/edge_length*.5));wrong_y=max(-.9,min(.9,start[1]+dx/edge_length*.5))
+  needle=NeedleDrag(page).down()
+  try:
+   needle.move_to(wrong_x,wrong_y)
+   page.wait_for_function('window.dollhouse.stitch()?.loose===true',timeout=60000,polling=100)
+  finally:needle.release()
+  dirty=stitch_status(page)
+  check('embroidery mistake retains completed sections and buttons',dirty['loose'] and dirty['section']==stitched['section'] and dirty['travel']>stitched['travel'] and state()['buttons']==before)
+  guides=page.evaluate('window.dollhouse.visual().stitchGuides')
+  check('the sewing contour stays projected without paid hints',len(guides)==len(dirty['sections']) and all(len(projected)==len(authored) for projected,authored in zip(guides,dirty['sections'])) and all(p and 0<p['x']<390 and 0<p['y']<844 for section in guides for p in section) and state()['buttons']==before)
+  tap_stitch(page,'spool')
+  repaired=stitch_status(page)
+  check('free spool repair preserves finished sections and cumulative wrong travel',not repaired['loose'] and repaired['section']==dirty['section'] and repaired['distance']==0 and repaired['travel']==dirty['travel'] and repaired['alignmentTravel']==dirty['alignmentTravel'] and repaired['repairs']==dirty['repairs']+1 and state()['buttons']==before)
+  stitch_before=state()
+  finished=finish_stitch(page,leave=False)
+  stitch_ready(page)
+  check('finished cloth is an actual reachable scene target',page.evaluate('()=>{const targets=window.dollhouse.stitchObjects().filter(p=>p.key==="cloth");return targets.length===1&&targets.every(p=>p.x>0&&p.x<innerWidth&&p.y>0&&p.y<innerHeight&&document.elementFromPoint(p.x,p.y)?.id==="world")}'))
+  check('physical sewing finish earns unchanged mastery and eleven-button reward',state()['activities']['mastery']['stitch']==7 and state()['activities']['completed']['stitch']==stitch_before['activities']['completed']['stitch']+1 and state()['buttons']==before+11 and finished['result']['reward']==11 and finished['result']['bonus']==0)
+  check('finished sewing remains on its actual cloth with a saved played-level best',finished['phase']=='finished' and state()['activities']['stitchRecords'][finished['level']]==finished['best'] and not page.locator('dialog[open]').count())
   check('no horizontal page overflow',page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
-  page.locator('[data-action="close"]').click()
+  tap_stitch(page,'cloth');page.wait_for_function('window.dollhouse.stitch()===null',polling=100)
+  page.wait_for_function('!window.dollhouse.visual().cameraMoving',timeout=60000,polling=100)
   expose_objects(page)
   check('stitch launched from another view exposes studio objects after exit',page.locator('[data-object="prop:sewing-machine"]').is_visible() and page.locator('[data-room="studio"]').get_attribute('aria-pressed')=='true' and page.evaluate('window.dollhouse.visual().focusedRoom==="studio"'))
   open_panel(page,'settings');page.locator('[data-field="motion"]').check()

@@ -1,9 +1,9 @@
-"""Genuine background-tab acceptance for a held physical tea pot.
+"""Genuine background-tab acceptance for a held physical tea pot and sewing needle.
 
 Run with requirements-visibility.txt in a headed display (Xvfb on Linux).
 Playwright 1.60's no_defaults option leaves real focus/visibility intact only in
 the existing default context. The ordinary tea journeys keep Playwright 1.55.
-The game is driven through its UI and the shared real-mouse PotDrag helper;
+The game is driven through its UI and the shared real-mouse PotDrag and NeedleDrag helpers;
 diagnostics only observe state. No visibility events or game time are fabricated.
 
 Official fixture pattern:
@@ -19,6 +19,7 @@ from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 from tea_check import PotDrag, tea_ready, tea_status
+from stitch_gestures import NeedleDrag, stitch_ready, stitch_status
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -33,7 +34,7 @@ def run():
                     'noDefaults': True, 'context': 'existing default'}
     started = time.monotonic()
     failure = None
-    server = server_log = runtime = owner = browser = page = other_tab = drag = None
+    server = server_log = runtime = owner = browser = page = other_tab = drag = needle_drag = None
 
     def check(name, condition):
         checks.append({'name': name, 'passed': bool(condition)})
@@ -54,7 +55,8 @@ def run():
             return {
                 visibility:{hidden:document.hidden,state:document.visibilityState,focus:document.hasFocus()},
                 viewport:{width:innerWidth,height:innerHeight},
-                state:game?.state?.()??null,tea:game?.tea?.()??null,
+                state:game?.state?.()??null,tea:game?.tea?.()??null,stitch:game?.stitch?.()??null,
+                stitchTargets:game?.stitchObjects?.()??[],
                 visual:game?.visual?.()??null,targets:game?.teaObjects?.()??[]
             };
         }''')
@@ -174,6 +176,82 @@ def run():
         page.wait_for_function('window.dollhouse.tea()===null')
         ready()
         check('genuine tab visibility journey has no JavaScript or console errors', not errors)
+
+        # The original six tea checks above stay intact. A fresh story has no
+        # carried thread, so this double scene tap opens standard physical sewing.
+        page.locator('[data-room="studio"]').click()
+        ready()
+        for _ in range(2):
+            point = next(p for p in page.evaluate('window.dollhouse.objects()') if p['key'] == 'prop:sewing-machine')
+            assert page.evaluate('p=>document.elementFromPoint(p.x,p.y)?.id==="world"', point), 'Scene sewing machine is covered'
+            page.mouse.click(point['x'], point['y'])
+            ready()
+        stitch_ready(page)
+        assert stitch_status(page)['mode'] == 'ritual', 'Fresh empty-handed machine opens the standard sewing ritual'
+
+        other_tab = context.new_page()
+        other_tab.goto('about:blank')
+        foreground()
+        ready()
+        stitch_ready(page)
+        capture('03-foreground-cloth')
+        needle_drag = NeedleDrag(page).down()
+        first_vertex = stitch_status(page)['sections'][0][1]
+        needle_drag.move_to(first_vertex[0], first_vertex[1])
+        page.wait_for_function('''()=>{
+            const s=window.dollhouse.stitch();
+            return s?.pressed&&s.section===0&&s.distance>.03&&!s.loose&&s.travel>0
+                &&Math.hypot(s.target.x-s.needle.x,s.target.y-s.needle.y)>.02;
+        }''', timeout=60000, polling=100)
+        stitch_before = observe('stitch-before-hidden')
+        check('the foreground game sews actual partial coverage with a real held needle before tab loss',
+              not stitch_before['visibility']['hidden'] and stitch_before['visibility']['focus']
+              and not stitch_before['state']['paused'] and stitch_before['stitch']['pressed']
+              and stitch_before['stitch']['section'] == 0 and stitch_before['stitch']['distance'] > .03
+              and stitch_before['stitch']['travel'] > 0 and not stitch_before['stitch']['loose'])
+
+        other_tab.bring_to_front()
+        page.wait_for_function('document.hidden', timeout=20000, polling=100)
+        page.wait_for_function('''()=>{
+            const g=window.dollhouse,s=g.stitch();
+            return g.state().paused&&!s.pressed&&s.capture===null
+                &&Math.hypot(s.target.x-s.needle.x,s.target.y-s.needle.y)<1e-9;
+        }''', timeout=20000, polling=100)
+        stitch_hidden = observe('stitch-hidden')
+        check('switching to another real tab hides and pauses the held sewing page',
+              stitch_hidden['visibility']['hidden'] and stitch_hidden['visibility']['state'] == 'hidden'
+              and stitch_hidden['state']['paused'])
+        check('genuine sewing tab loss releases the needle and clears its capture and residual pursuit',
+              not stitch_hidden['stitch']['pressed'] and stitch_hidden['stitch']['capture'] is None
+              and stitch_hidden['stitch']['target'] == stitch_hidden['stitch']['needle'])
+        # Only read-only diagnostics during genuine hidden time; no screenshots,
+        # visibility events, fake clocks, input release or game-state writes.
+        page.wait_for_timeout(350)
+        stitch_hidden_still = observe('stitch-hidden-still')
+        frozen_keys = ('needle', 'target', 'section', 'distance', 'travel', 'alignmentTravel', 'repairs', 'loose')
+        check('the genuinely hidden needle stays fixed without adding coverage or stitch waste',
+              stitch_hidden_still['visibility']['hidden'] and stitch_hidden_still['state']['paused']
+              and all(stitch_hidden_still['stitch'][key] == stitch_hidden['stitch'][key] for key in frozen_keys))
+
+        other_tab.close()
+        other_tab = None
+        foreground()
+        stitch_ready(page)
+        page.wait_for_timeout(350)
+        stitch_restored = observe('stitch-restored')
+        check('returning never resumes held sewing or target pursuit before manual mouse release',
+              not stitch_restored['visibility']['hidden'] and stitch_restored['visibility']['focus']
+              and not stitch_restored['state']['paused'] and not stitch_restored['stitch']['pressed']
+              and stitch_restored['stitch']['capture'] is None
+              and all(stitch_restored['stitch'][key] == stitch_hidden['stitch'][key] for key in frozen_keys))
+        # Release the still-owned OS mouse only after the independent return check.
+        needle_drag.release()
+        capture('04-restored-cloth')
+        page.locator('[data-stitch-action="exit"]').click()
+        page.wait_for_function('window.dollhouse.stitch()===null')
+        ready()
+        check('genuine held-needle visibility journey has no JavaScript or console errors', not errors)
+
     except Exception as error:
         failure = str(error)
         if page and not page.is_closed():
@@ -197,6 +275,11 @@ def run():
         if drag:
             try:
                 drag.release()
+            except Exception:
+                pass
+        if needle_drag:
+            try:
+                needle_drag.release()
             except Exception:
                 pass
         if browser:

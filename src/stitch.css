@@ -1,0 +1,84 @@
+/* The cloth is the playfield. Needle, repair spool and finish cloth stay in
+   the scene; only a compact reading strip, Exit, sound and pause sit above it. */
+#ui[data-stitch-active=true] .brand,
+#ui[data-stitch-active=true] .house-status,
+#ui[data-stitch-active=true] .objective,
+#ui[data-stitch-active=true] .time-tools,
+#ui[data-stitch-active=true] .room-views,
+#ui[data-stitch-active=true] .object-controls,
+#ui[data-stitch-active=true] .camera-tools,
+#ui[data-stitch-active=true] .story-playfield,
+#ui[data-stitch-active=true] .carry-ghost,
+#ui[data-stitch-active=true] .resident-name,
+#ui[data-stitch-active=true] .visitor-hint,
+#ui[data-stitch-active=true] .scene-caption,
+#ui[data-stitch-active=true] .saved-note,
+#ui[data-stitch-active=true] #toast{display:none!important}
+#ui[data-stitch-active=true] .dock{
+ top:max(14px,env(safe-area-inset-top));bottom:auto;left:auto;right:auto;inset-inline-end:16px;
+ transform:none;display:flex;gap:0;width:96px;max-width:none;padding:4px;border-radius:28px;z-index:4;
+}
+#ui[data-stitch-active=true] .dock>button,
+#ui[data-stitch-active=true] .dock>.dock-divider{display:none!important}
+#ui[data-stitch-active=true] .dock>button[data-action=sound],
+#ui[data-stitch-active=true] .dock>button[data-action=pause]{
+ display:inline-flex!important;flex:none;width:44px;min-width:44px;height:44px;min-height:44px;padding:10px;border-radius:50%;
+}
+#ui[data-stitch-active=true] .pause-overlay{z-index:3}
+.stitch-playfield{position:absolute;inset:0;z-index:3;pointer-events:none;color:#503846;--stitch-paper:#fff1e4f5;--stitch-line:#bb9998;--stitch-muted:#765962}
+.stitch-heading{position:absolute;top:max(14px,env(safe-area-inset-top));inset-inline-start:22px;width:max-content;max-width:min(440px,calc(100% - 150px));padding:2px 7px;border-radius:8px;background:var(--stitch-paper)}
+.stitch-heading h2{font-size:22px;line-height:1.2;letter-spacing:-.35px;text-wrap:balance}
+.stitch-progress{font-size:11px;line-height:1.35;color:var(--stitch-muted);margin-top:3px;font-variant-numeric:tabular-nums;max-width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere}
+.stitch-work-strip{position:absolute;bottom:max(16px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:grid;grid-template-columns:minmax(0,1fr) 60px;align-items:center;gap:14px;width:min(710px,calc(100% - 36px));padding:11px 15px;background:var(--stitch-paper);border:1px solid var(--stitch-line);border-radius:17px;box-shadow:0 10px 34px #2d21141c;text-align:start}
+.stitch-work-copy{min-width:0}
+#stitch-work-instructions{font-size:14px;line-height:1.45;max-width:590px}
+#stitch-work-status{font-size:12px;line-height:1.5;color:var(--stitch-muted);margin-top:5px;font-variant-numeric:tabular-nums}
+.stitch-work-detail{font-size:11px;line-height:1.5;color:var(--stitch-muted);margin-top:5px}
+.stitch-cue-short{display:none}
+.stitch-exit{pointer-events:auto;display:flex;flex-direction:column;gap:3px;min-width:52px;min-height:56px;width:60px;padding:6px 4px;border-radius:12px;background:transparent;border-color:var(--stitch-line);color:inherit;font-size:10px;line-height:1.25;white-space:normal}
+.stitch-exit .icon{width:18px;height:18px;transform:rotate(180deg)}
+.stitch-exit:hover:not(:disabled){background:#dbc69c44}
+.stitch-playfield[data-ready=true] .stitch-work-strip{border-color:#a37178;box-shadow:0 0 0 1px #b1788928,0 10px 34px #2d21141c}
+.stitch-playfield[data-phase=finished] .stitch-work-strip{background:#fff0e4f7;border-color:#ac7c85}
+.night .stitch-playfield{color:#ffedd1;--stitch-paper:#292536f5;--stitch-line:#ab916b;--stitch-muted:#d9c09b}
+.night .stitch-playfield[data-phase=finished] .stitch-work-strip{background:#342b36f7}
+[dir=rtl] .stitch-heading h2{font-family:Tahoma,sans-serif;font-size:20px;letter-spacing:0;line-height:1.35}
+[dir=rtl] #stitch-work-instructions{font-size:14px;line-height:1.6}
+[dir=rtl] .stitch-exit .icon{transform:none}
+@media(max-width:680px){
+ #ui[data-stitch-active=true] .dock{top:max(12px,env(safe-area-inset-top));inset-inline-end:12px}
+ .stitch-heading{top:max(13px,env(safe-area-inset-top));inset-inline-start:12px;max-width:calc(100% - 132px);padding:2px 4px}
+ .stitch-heading h2{font-size:20px;line-height:1.25}
+ .stitch-progress{font-size:10.5px;line-height:1.4;margin-top:4px}
+ .stitch-work-strip{bottom:max(12px,env(safe-area-inset-bottom));width:calc(100% - 24px);grid-template-columns:minmax(0,1fr) 52px;padding:11px;gap:10px;border-radius:14px}
+ #stitch-work-instructions{font-size:12.5px;line-height:1.5}
+ #stitch-work-status{font-size:11px;line-height:1.5;margin-top:5px}
+ .stitch-work-detail{font-size:10px;line-height:1.45;margin-top:4px}
+ .stitch-exit{width:52px;min-height:56px;font-size:9.5px}
+ [dir=rtl] .stitch-heading h2{font-size:18px;line-height:1.45}
+ [dir=rtl] #stitch-work-instructions{font-size:13px;line-height:1.6}
+ [dir=rtl] #stitch-work-status{font-size:11.5px;line-height:1.6}
+}
+@media(max-height:560px) and (orientation:landscape){
+ .stitch-heading{top:10px;inset-inline-start:14px;padding:2px 5px}
+ .stitch-heading h2,[dir=rtl] .stitch-heading h2{font-size:19px;line-height:1.25}
+ .stitch-progress{font-size:10.5px;line-height:1.35;margin-top:3px}
+ .stitch-work-strip{bottom:max(10px,env(safe-area-inset-bottom));width:min(710px,calc(100% - 28px));padding:9px 12px;gap:12px;grid-template-columns:minmax(0,1fr) 52px}
+ #stitch-work-instructions,[dir=rtl] #stitch-work-instructions{font-size:12px;line-height:1.4}
+ #stitch-work-status,[dir=rtl] #stitch-work-status{font-size:11px;line-height:1.4;margin-top:4px}
+ .stitch-work-detail{font-size:10px;line-height:1.35;margin-top:3px}
+ .stitch-exit{min-height:48px}
+}
+@media(max-height:340px) and (orientation:landscape){
+ #ui[data-stitch-active=true] .dock{top:7px;inset-inline-end:12px}
+ .stitch-heading{top:7px}
+ .stitch-heading h2,[dir=rtl] .stitch-heading h2{font-size:17px;line-height:1.2}
+ .stitch-progress{font-size:10px;line-height:1.3;margin-top:2px}
+ .stitch-work-strip{bottom:max(8px,env(safe-area-inset-bottom));padding:8px 10px}
+ .stitch-cue-full{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+ .stitch-cue-short{display:inline}
+ .stitch-work-detail{display:none}
+ .stitch-exit{min-height:44px}
+}
+
+.stitch-playfield[data-loose=true] .stitch-work-strip{border-color:#b27479}

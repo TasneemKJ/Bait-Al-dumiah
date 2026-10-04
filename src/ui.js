@@ -39,7 +39,7 @@ export function createUI(host,getState,dispatch){
   if(previousFocus?.closest('.object-ribbon'))previousFocus=host.querySelector('[data-object-toggle]');
   toolsExpanded=false;host.querySelector('.dock').dataset.expanded='false';host.querySelector('[data-action="toggle-tools"]').setAttribute('aria-expanded','false');
   renderPanel();host.querySelector('#sheet').showModal();dispatch('panel-state',name);host.querySelector('#sheet [data-action="close"]').focus()}
- function close(){const sheet=host.querySelector('#sheet');sheet?.close();panel=null;renderedPanel=null;resetConfirm=false;dispatch('panel-state',null);const origin=previousFocus?.isConnected&&previousFocus.getClientRects().length?previousFocus:host.querySelector('[data-action="toggle-tools"]');origin?.focus({preventScroll:true})}
+ function close(){const sheet=host.querySelector('#sheet');sheet?.close();panel=null;renderedPanel=null;resetConfirm=false;dispatch('panel-state',null);const fallback=['tea','stitch'].includes(getState().activities.active?.id)?document.querySelector('#world'):host.querySelector('[data-action="toggle-tools"]');const origin=previousFocus?.isConnected&&previousFocus.getClientRects().length?previousFocus:fallback;origin?.focus({preventScroll:true})}
  let renderedPanel=null;
  function doorMarkup(s){
   const step=nextDoorStep(s),ready=step&&doorReady(s,step);

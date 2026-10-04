@@ -52,6 +52,16 @@ export const ACTIVITIES=[
 export const ACTIVITY_THRESHOLDS=[0,2,5,9],ACTIVITY_DAILY_CAP=2,ACTIVITY_COOLDOWN=20;
 // Shared table geometry; simulation alone judges stream landing and fill targets.
 export const TEA_TABLE={room:'kitchen',x:-.53,y:.779,z:.10,aimSpan:.45,cupZ:.14,cupRadius:.112,cupOuterRadius:.14,cupHeight:.24};
+// Physical sewing coordinates are normalized cloth x/z; rules own all acceptance.
+export const STITCH_TABLE={room:'studio',x:-.35,y:.891,z:.05,clothScale:.46,hoopRadius:.46,gripHeight:.38,boardSize:[1.68,.06,1.15],boardEdgePadding:.015,spoolOffset:[.65,0,.03],finishOffset:[-.65,0,.15],gripDiameter:.35,spoolDiameter:.35,finishSize:[.35,.54]};
+const stitchSections=(anchors,bend)=>anchors.slice(0,-1).map((p,i)=>[p,[(p[0]+anchors[i+1][0])/2*bend,(p[1]+anchors[i+1][1])/2*bend],anchors[i+1]]);
+export const STITCH_PATTERNS=[
+ {id:'bear-seam',sections:[[[-.58,-.05],[-.30,-.20],[0,-.05]],[[0,-.05],[.30,.15],[.58,-.05]]]},
+ {id:'leaf',sections:[[[-.60,0],[-.30,-.40],[0,-.60]],[[0,-.60],[.30,-.30],[.60,0]],[[.60,0],[.20,.35],[-.60,0]]]},
+ {id:'diamond',sections:stitchSections([[-.60,0],[0,-.60],[.60,0],[0,.60],[-.60,0]],1.20)},
+ {id:'jasmine',sections:stitchSections([[0,-.68],[.65,-.21],[.40,.55],[-.40,.55],[-.65,-.21],[0,-.68]],.45)},
+ {id:'heart',sections:stitchSections([[0,-.15],[.35,-.45],[.65,-.15],[.40,.35],[0,.65],[-.40,.35],[-.65,-.15],[-.35,-.45],[0,-.15]],1)},
+];
 export const RESTORATION_COSTS=[45,85,140],RESTORATION_MASTERY=[1,3,6];
 export const INTERACTIVE_PROPS=[
  {id:'tea-set',room:'kitchen',position:[-.53,.92,.1],size:[1.1,.55,.75],icon:'tea',activity:'tea',resident:'lina',care:'tea'},
