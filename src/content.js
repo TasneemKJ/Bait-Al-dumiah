@@ -44,3 +44,10 @@ export const DOOR_STEPS=[
 export const GIFT_COST=12;
 export const VISITOR_GIFTS=['pressed-jasmine','brass-thimble','paper-boat','sugar-cube','blue-bead','tiny-key','folded-letter','fifth-cup'];
 export const SAVE_KEY='bait-al-dumiah.v1';
+export const ACTIVITIES=[
+ {id:'tea',resident:'lina',room:'kitchen',icon:'tea',choices:['leaf','tea','heart','spark'],seed:1},
+ {id:'stitch',resident:'sami',room:'studio',icon:'button',choices:['button','leaf','moon','heart'],seed:2},
+ {id:'lullaby',resident:'noor',room:'bedroom',icon:'music',choices:['moon','music','spark','heart'],seed:3},
+];
+export const ACTIVITY_THRESHOLDS=[0,2,5,9],ACTIVITY_DAILY_CAP=2,ACTIVITY_COOLDOWN=20;
+export const RESTORATION_COSTS=[45,85,140],RESTORATION_MASTERY=[1,3,6];

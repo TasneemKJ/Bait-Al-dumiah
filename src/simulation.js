@@ -1,4 +1,4 @@
-import {DOLLS,ROOMS,CATALOG,SLOTS,SECRETS,ACTIONS,BOND_LEVELS,SECRET_COZY,MILESTONES,SEW_SECONDS,SEW_DAILY,BASKET_MAX,DOOR_STEPS,GIFT_COST,VISITOR_GIFTS,WISH_REFRESH_SECONDS} from './content.js';
+import {DOLLS,ROOMS,CATALOG,SLOTS,SECRETS,ACTIONS,BOND_LEVELS,SECRET_COZY,MILESTONES,SEW_SECONDS,SEW_DAILY,BASKET_MAX,DOOR_STEPS,GIFT_COST,VISITOR_GIFTS,WISH_REFRESH_SECONDS,ACTIVITIES,ACTIVITY_THRESHOLDS,ACTIVITY_DAILY_CAP,ACTIVITY_COOLDOWN,RESTORATION_COSTS,RESTORATION_MASTERY} from './content.js';
 const clamp=(v,min=0,max=100)=>Math.max(min,Math.min(max,Number.isFinite(v)?v:min));
 const integer=(v,min,max)=>Math.floor(clamp(v,min,max));
 const has=(items,id)=>items.some(x=>x.id===id);
@@ -11,6 +11,8 @@ export function createState(){
   dolls:DOLLS.map(d=>({id:d.id,room:d.room,hunger:d.hunger,energy:d.energy,comfort:d.comfort,lastCare:-10,action:'idle',actionUntil:0,bond:0,sew:0})),
   decor:[],nextId:1,wishes:[],journal:[],lastSecretDay:0,paused:false,
   streak:0,lastFullDay:0,sewnToday:0,basket:0,earnedToday:0,achieved:[],milestones:[],events:[],door:0,gifts:[],lastGiftDay:0,dayTime:0,
+  activities:{mastery:Object.fromEntries(ACTIVITIES.map(a=>[a.id,0])),completed:Object.fromEntries(ACTIVITIES.map(a=>[a.id,0])),lastReward:Object.fromEntries(ACTIVITIES.map(a=>[a.id,-ACTIVITY_COOLDOWN])),active:null},
+  restoration:Object.fromEntries(ROOMS.map(r=>[r.id,0])),
   settings:{locale:'en',muted:true,reducedMotion:false,quality:'auto'}};
 }
 export const isNight=s=>s.clock>=120;
@@ -86,7 +88,7 @@ export function care(s,id,action){
 // dawn with the light control never farms rewards. Nothing is lost by hurrying either.
 function newDay(s){
  const wishes=s.wishes.length,fresh=s.dayTime>=WISH_REFRESH_SECONDS;s.day=Math.min(99999,s.day+1);s.dayTime=0;
- if(fresh){s.wishes=[];s.sewnToday=0}
+ if(fresh){s.wishes=[];s.sewnToday=0;for(const a of ACTIVITIES)s.activities.completed[a.id]=0}
  emit(s,{type:'dawn',day:s.day,wishes,fresh,earned:s.earnedToday,streak:currentStreak(s)});s.earnedToday=0;
 }
 export function step(s,dt){
@@ -150,6 +152,44 @@ export function leaveGift(s){
  checkMilestones(s);
  return {ok:true,gift,cost:GIFT_COST};
 }
+const activityDef=id=>ACTIVITIES.find(a=>a.id===id);
+export const activityLevel=(s,id)=>activityDef(id)?ACTIVITY_THRESHOLDS.reduce((level,min,i)=>s.activities.mastery[id]>=min?i:level,0):0;
+export function activityPattern(s,id){
+ const a=activityDef(id);if(!a)return [];
+ const level=activityLevel(s,id),seed=a.seed+s.activities.mastery[id]*3;
+ return Array.from({length:Math.min(5,3+level)},(_,i)=>(seed+i*(a.seed+1)+Math.floor(i/2))%4);
+}
+export function activityRewardReady(s,id){return Boolean(activityDef(id))&&s.activities.completed[id]<ACTIVITY_DAILY_CAP&&s.elapsed-s.activities.lastReward[id]>=ACTIVITY_COOLDOWN}
+export function beginActivity(s,id){
+ if(s.paused)return fail('pausedActivity');if(!activityDef(id))return fail('invalid');
+ s.activities.active={id,cursor:0,pattern:activityPattern(s,id)};return {ok:true};
+}
+export function activityInput(s,choice){
+ const active=s.activities.active;if(s.paused)return fail('pausedActivity');
+ if(!active||!Number.isInteger(choice)||choice<0||choice>3)return fail('invalid');
+ if(active.pattern[active.cursor]!==choice){active.cursor=0;return {ok:true,mistake:true,complete:false}}
+ active.cursor++;
+ if(active.cursor<active.pattern.length)return {ok:true,complete:false};
+ const id=active.id,a=activityDef(id),before=activityLevel(s,id),rewarded=activityRewardReady(s,id);
+ let reward=0,bonus=0;
+ if(rewarded){
+  s.activities.completed[id]++;s.activities.lastReward[id]=s.elapsed;s.activities.mastery[id]=Math.min(999,s.activities.mastery[id]+1);
+  reward=7+before*2;bonus=activityLevel(s,id)>before?10*(before+1):0;earn(s,reward+bonus);
+  const d=s.dolls.find(d=>d.id===a.resident);growBond(s,d,3);d.comfort=clamp(d.comfort+8);s.unease=clamp(s.unease-3);
+ }
+ s.activities.active=null;checkMilestones(s);
+ return {ok:true,complete:true,id,reward,bonus,level:activityLevel(s,id),practice:!rewarded};
+}
+export function restorationReady(s,room){
+ const r=ROOMS.find(r=>r.id===room);if(!r)return null;const tier=s.restoration[room];
+ const id=room==='parlor'?'tea':ACTIVITIES.find(a=>a.room===room)?.id;
+ return {tier,activity:id,required:RESTORATION_MASTERY[tier]??0,cost:RESTORATION_COSTS[tier]??0,complete:tier>=3,ready:tier<3&&s.activities.mastery[id]>=RESTORATION_MASTERY[tier]};
+}
+export function restoreRoom(s,room){
+ const next=restorationReady(s,room);if(!next)return fail('invalid');if(next.complete)return fail('restorationDone');
+ if(!next.ready)return fail('restorationLocked');if(s.buttons<next.cost)return fail('funds');
+ s.buttons-=next.cost;s.restoration[room]++;return {ok:true,room,tier:s.restoration[room],cost:next.cost};
+}
 // Whitelist all persisted fields: no saved HTML/prose, renderer objects, or wall-clock catch-up.
 // Fields added after the first release default safely, so earlier version-1 saves keep loading.
 export function restore(raw){
@@ -167,6 +207,8 @@ export function restore(raw){
  s.sewnToday=integer(v.sewnToday,0,SEW_DAILY);s.earnedToday=integer(v.earnedToday,0,99999);
  s.basket=integer(v.basket,0,BASKET_MAX);
  s.dayTime=clamp(v.dayTime,0,1e6);s.door=integer(v.door,0,DOOR_STEPS.length);s.gifts=Array.isArray(v.gifts)?VISITOR_GIFTS.filter(g=>v.gifts.includes(g)):[];s.lastGiftDay=integer(v.lastGiftDay,0,s.day);
+ for(const a of ACTIVITIES){s.activities.mastery[a.id]=integer(v.activities?.mastery?.[a.id],0,999);s.activities.completed[a.id]=integer(v.activities?.completed?.[a.id],0,ACTIVITY_DAILY_CAP);s.activities.lastReward[a.id]=Number.isFinite(v.activities?.lastReward?.[a.id])?clamp(v.activities.lastReward[a.id],-ACTIVITY_COOLDOWN,s.elapsed):-ACTIVITY_COOLDOWN}
+ for(const r of ROOMS)s.restoration[r.id]=integer(v.restoration?.[r.id],0,3);
  const ids=list=>Array.isArray(list)?MILESTONES.filter(m=>list.includes(m.id)).map(m=>m.id):[];
  s.milestones=ids(v.milestones);s.achieved=ids([...ids(v.achieved),...s.milestones]);
  if(v.settings&&typeof v.settings==='object'){s.settings.locale=v.settings.locale==='ar'?'ar':'en';s.settings.muted=v.settings.muted!==false;s.settings.reducedMotion=v.settings.reducedMotion===true;s.settings.quality=['auto','low','high'].includes(v.settings.quality)?v.settings.quality:'auto'}

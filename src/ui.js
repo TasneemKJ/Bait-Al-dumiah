@@ -1,14 +1,16 @@
 import {portraitMarkup} from './resident-portraits.js';
+import {activityMarkup} from './activities-ui.js';
 import {DOLLS,ROOMS,CATALOG,SECRETS,ACTIONS,MILESTONES,SEW_DAILY,BASKET_MAX,DOOR_STEPS,GIFT_COST,VISITOR_GIFTS} from './content.js';
 import {translate,number} from './i18n.js';
-import {isNight,coziness,wishFor,wishReward,bondLevel,nextBond,isContent,contentThreshold,delighted,inFavoriteRoom,currentStreak,unclaimed,secretCozyNeeded,doorOpen,nextDoorStep,doorReady} from './simulation.js';
+import {isNight,coziness,wishFor,wishReward,bondLevel,nextBond,isContent,contentThreshold,delighted,inFavoriteRoom,currentStreak,unclaimed,secretCozyNeeded,doorOpen,nextDoorStep,doorReady,restorationReady} from './simulation.js';
 import {icon} from './icons.js';
 const actionIcon={tea:'tea',play:'play',rest:'rest',soothe:'heart'};
 const wishKey=(id,action)=>DOLLS.find(d=>d.id===id).wish===action?id+'Wish':id+'Wish_'+action;
-const dockIcons={household:'souls',decorate:'leaf',journal:'book',settings:'settings'};
+const dockIcons={household:'souls',activities:'play',decorate:'leaf',journal:'book',settings:'settings'};
 export function createUI(host,getState,dispatch){
  let panel=null,selected='lina',placement=null,placementRoom='kitchen',placementSlot=0,previousFocus=null,toastTimer,resetConfirm=false;
  let portraits={};
+ let activityResult=null;
  const t=key=>translate(getState().settings.locale,key),n=value=>number(getState().settings.locale,value);
  const button=(action,label,ico,extra='')=>`<button type="button" data-action="${action}" ${extra}>${ico?icon(ico):''}<span>${label}</span></button>`;
  function avatar(id){const portrait=portraitMarkup(id,portraits[id]);if(portrait)return portrait;return `<span class="avatar ${id}" aria-hidden="true"><span class="hair"></span><span class="face"><i></i><i></i></span><span class="dress"></span></span>`}
@@ -44,6 +46,7 @@ export function createUI(host,getState,dispatch){
   const s=getState(),root=host.querySelector('#sheet-content');if(!panel)return;
   // Re-rendering the same sheet keeps its latest notice, so a collected reward stays visible.
   const notice=renderedPanel===panel?root.querySelector('.panel-notice')?.textContent:null;renderedPanel=panel;
+  if(panel==='activities')root.innerHTML=activityMarkup(s,t,n,button,activityResult);
   if(panel==='household'){
    const d=s.dolls.find(x=>x.id===selected),def=DOLLS.find(x=>x.id===selected);
    const level=bondLevel(d.bond),next=nextBond(d.bond),wished=wishFor(s,d.id),threshold=contentThreshold(s,d),fav=CATALOG.find(c=>c.id===def.favItem);
@@ -81,6 +84,9 @@ export function createUI(host,getState,dispatch){
   const s=getState(),wish=DOLLS.find(d=>!s.wishes.includes(d.id));
   if(wish){const action=wishFor(s,wish.id);return {copy:t(wishKey(wish.id,action)),label:t(action),ico:actionIcon[action],action:'care',value:{id:wish.id,action}}}
   if(!s.decor.length)return {copy:t('objectiveDecorate'),label:t('decorate'),ico:'leaf',action:'panel',value:'decorate'};
+  const readyRoom=ROOMS.find(r=>{const next=restorationReady(s,r.id);return next.ready&&s.buttons>=next.cost});
+  if(readyRoom)return {copy:t('restorationObjective'),label:t('restoreAction'),ico:'home',action:'panel',value:'activities',focus:'#restoration-title'};
+  if(Object.values(s.activities.mastery).every(v=>v===0))return {copy:t('activityObjective'),label:t('activities'),ico:'play',action:'panel',value:'activities'};
   if(unclaimed(s).length)return {copy:t('objectiveMilestone'),label:t('collect'),ico:'book',action:'panel',value:'journal',focus:'.milestone.ready'};
   if(s.basket>0)return {copy:t('objectiveBasket'),label:t('collect')+' +'+n(s.basket),ico:'button',action:'collect-basket'};
   const step=nextDoorStep(s);
@@ -124,6 +130,9 @@ export function createUI(host,getState,dispatch){
   if(action==='placement-cancel'){clearPlacement();dispatch(action);return}
   if(action==='place-confirm'){dispatch('place',{item:placement,room:placementRoom,slot:placementSlot});return}
   if(action==='focus-doll'){dispatch(action,target.dataset.id);return}
+  if(action==='begin-activity'||action==='restore-room'){dispatch(action,target.dataset.id);return}
+  if(action==='activity-input'){dispatch(action,Number(target.dataset.choice));return}
+  if(action==='end-activity'){dispatch(action);return}
   if(action==='care'){dispatch('care',{id:target.dataset.id,action:target.dataset.care});return}
   if(action==='remove'){dispatch('remove',Number(target.dataset.id));renderPanel();return}
   if(action==='claim'||action==='collect-basket'||action==='mend-door'||action==='gift'){dispatch(action,target.dataset.id);if(panel)renderPanel();return}
@@ -137,5 +146,5 @@ export function createUI(host,getState,dispatch){
   dispatch('setting',{key:el.dataset.field,value:el.type==='checkbox'?el.checked:el.value});
  };
  host.addEventListener('click',click);host.addEventListener('change',change);build();
- return {open,close,refresh,tick,toast,objective:nextStep,clearPlacement,setPortraits(values){portraits=values??{};if(panel==='household')renderPanel()},get selected(){return selected},get panel(){return panel},get placement(){return placement},get t(){return t},get n(){return n},dispose(){clearTimeout(toastTimer);host.removeEventListener('click',click);host.removeEventListener('change',change)}};
+ return {open,close,refresh,tick,toast,objective:nextStep,clearPlacement,setActivityResult(result){activityResult=result;const choice=host.querySelector('#sheet [data-choice]:focus')?.dataset.choice;renderPanel();host.querySelector(choice?`#sheet [data-choice="${choice}"]`:'#sheet [data-action="begin-activity"]')?.focus()},setPortraits(values){portraits=values??{};if(panel==='household')renderPanel()},get selected(){return selected},get panel(){return panel},get placement(){return placement},get t(){return t},get n(){return n},dispose(){clearTimeout(toastTimer);host.removeEventListener('click',click);host.removeEventListener('change',change)}};
 }

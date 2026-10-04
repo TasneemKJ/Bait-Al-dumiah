@@ -1,5 +1,5 @@
 import {bindPlacementEscape} from './placement-keys.js';
-import {DOLLS,SAVE_KEY} from './content.js';
+import {DOLLS,SAVE_KEY,ACTIVITIES} from './content.js';
 import * as sim from './simulation.js';
 import {createWorld} from './render/world.js';
 import {createUI} from './ui.js';
@@ -14,9 +14,10 @@ if(!stored)state.settings.reducedMotion=matchMedia('(prefers-reduced-motion: red
 state.settings.muted=true;
 let world=null,ui=null,manualPause=false,panelOpen=false,fatal=false,saveWarning=false;
 const audio=new DollhouseAudio(),canvas=document.querySelector('#world'),host=document.querySelector('#ui');
+const ACTIVITY_ROOM=Object.fromEntries(ACTIVITIES.map(a=>[a.id,a.room]));
 // Reattach scene controls synchronously; a slow graphics frame must not hide the UI.
 function refreshUI(){ui.refresh();roomViews.update()}
-function syncPause(){state.paused=manualPause||panelOpen||document.hidden||fatal;audio.setPaused(state.paused)}
+function syncPause(){state.paused=manualPause||Boolean(panelOpen&&panelOpen!=='activities')||document.hidden||fatal;audio.setPaused(state.paused)}
 function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));return true}catch{if(!saveWarning&&ui){ui.toast(ui.t('savingFailed'));saveWarning=true;const note=host.querySelector('.saved-note span');if(note)note.textContent=ui.t('savingFailed')}return false}}
 function notify(result,success){if(!result.ok){say(ui.t(result.reason));return false}if(success)say(ui.t(success));save();ui.tick();return true}
 // Notices queue so a reward, a level-up and a milestone never overwrite one another.
@@ -34,7 +35,18 @@ function announce(event){
 function showError(kind){fatal=true;syncPause();save();document.querySelector('#loading')?.remove();if(ui?.panel)ui.close();const error=document.createElement('section');error.className='error-screen';error.setAttribute('role','alert');const h=document.createElement('h2'),p=document.createElement('p'),b=document.createElement('button');h.textContent=ui.t(kind==='context'?'contextTitle':'webglTitle');p.textContent=ui.t(kind==='context'?'contextHelp':'webglHelp');b.textContent=ui.t('reload');b.addEventListener('click',()=>location.reload());error.append(h,p,b);host.append(error)}
 async function dispatch(action,value){
  switch(action){
-  case 'panel-state':panelOpen=Boolean(value);syncPause();world?.setEnabled(!panelOpen);if(value==='household'&&world){try{ui.setPortraits(world.getPortraits())}catch(error){console.warn('Resident portrait unavailable:',error)}}break;
+  case 'panel-state':panelOpen=value||false;syncPause();world?.setEnabled(!panelOpen);if(value==='household'&&world){try{ui.setPortraits(world.getPortraits())}catch(error){console.warn('Resident portrait unavailable:',error)}}break;
+  case 'begin-activity':{
+   if(manualPause||fatal){say(ui.t('pausedActivity'));break}if(ui.panel)ui.close();
+   const result=sim.beginActivity(state,value);if(result.ok){ui.setActivityResult(null);ui.open('activities');world?.focusRoom(ACTIVITY_ROOM[value]);save()}else say(ui.t(result.reason));break;
+  }
+  case 'activity-input':{
+   const result=sim.activityInput(state,value);if(result.ok){if(!result.mistake)audio.effect(result.complete?'place':'care');ui.setActivityResult(result);save();ui.tick()}else say(ui.t(result.reason));break;
+  }
+  case 'end-activity':state.activities.active=null;ui.setActivityResult(null);ui.close();save();break;
+  case 'restore-room':{
+   const result=sim.restoreRoom(state,value);if(result.ok){ui.close();world?.focusRoom(value);host.dataset.focusRoom=value;host.dataset.focusDoll='';audio.effect('secret');say(ui.t('restoreSuccess'));save();refreshUI()}else say(ui.t(result.reason));break;
+  }
   case 'select':break;
   case 'care':{
    const result=sim.care(state,value.id,value.action);

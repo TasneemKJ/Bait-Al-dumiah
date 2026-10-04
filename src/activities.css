@@ -1,0 +1,26 @@
+/* Rituals live in one deliberate sheet; the miniature house remains the playfield. */
+.ritual-catalog,.restoration-catalog{display:grid;gap:14px;margin-top:20px}
+.ritual-card,.restoration-card{padding:20px;border:1px solid var(--line);border-radius:16px;background:#f6eddf}
+.ritual-title{display:flex;align-items:center;gap:12px}.ritual-title>.icon{width:28px;height:28px;color:var(--rose-dark)}
+.ritual-title>div{flex:1}.ritual-title h3{font-family:Georgia,serif;font-weight:normal;font-size:20px;margin:0}.ritual-title small{font-size:11px;color:var(--muted)}
+.ritual-level{display:grid;place-items:center;width:32px;height:32px;border:1px solid #bb9981;border-radius:50%;font-family:Georgia,serif;color:#886448}
+.ritual-card>p,.restoration-card>p{font-size:12px;line-height:1.8;color:var(--muted);margin:12px 0}
+.ritual-card>button,.restoration-card>button{width:100%;min-height:46px}
+.ritual-mastery{display:grid;gap:6px;margin:15px 0}.ritual-mastery label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.ritual-pattern{display:flex;gap:7px;margin:28px 0 20px;direction:ltr}
+.pattern-step{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px 3px;border:1px solid #ccb9a5;border-radius:12px;background:#eee1cd;color:#6f6058}
+.pattern-step small{font-size:10px}.pattern-step>.icon{width:24px;height:24px}.pattern-step span{font-size:10px;text-align:center;overflow-wrap:anywhere}
+.pattern-step.current{border:2px solid #996480;background:#f7dfe7;color:#714456}.pattern-step.done{background:#e1e9dc;border-color:#9ba990;color:#426445}
+.ritual-instructions{font-size:12px;line-height:1.8;color:var(--muted)}
+.ritual-feedback{font-size:12px;line-height:1.7;margin:16px 0;min-height:22px;color:var(--rose-dark)}
+.ritual-choices{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.ritual-choice{display:flex;flex-direction:column;justify-content:center;gap:10px;min-height:90px;padding:12px 4px;background:#fffaef;border:1px solid #bba58f;border-radius:14px;font-size:11px}
+.ritual-choice>.icon{width:27px;height:27px;color:#8f6378}.ritual-choice:active{background:#efdadf}
+.ritual-earning{display:flex;align-items:center;justify-content:center;gap:8px;font-size:12px;color:#687954;margin:22px 0}.ritual-earning>.icon{width:18px}
+.ritual-play>.text-button{width:100%;min-height:44px}
+.ritual-result{background:#e4ecdf;border:1px solid #a6b79c;border-radius:18px;text-align:center;padding:22px;margin:20px 0}.ritual-result>.icon{color:#5a7754;width:32px;height:32px}.ritual-result h3{font-family:Georgia,serif;font-size:24px;font-weight:normal;margin:10px 0}.ritual-result p{font-size:12px;line-height:1.8;margin:12px 0}.ritual-result button{min-height:44px}
+.restoration-card .ritual-title h3{flex:1;font-size:18px}.restoration-stages{list-style:none;padding:0;margin:16px 0;display:grid;gap:10px}.restoration-stages li{display:flex;align-items:center;gap:8px;font-size:12px;line-height:1.6;color:var(--muted)}.restoration-stages .icon{width:16px;flex-shrink:0}.restoration-stages .done{color:#57704d}
+.restoration-complete{color:#57704d!important}.restoration-card button:disabled{opacity:.6}
+[dir=rtl] .ritual-title h3,[dir=rtl] .ritual-result h3{font-family:Tahoma,Arial,sans-serif}
+@media(max-width:680px){.dock{width:calc(100% - 24px);max-width:390px;padding-inline:6px;gap:0}.dock>button,.dock>.icon-button{min-width:44px;padding-inline:4px;flex:1;font-size:8px}.dock>button[data-action="panel-settings"]>span{display:none}.dock-divider{display:none}.ritual-card,.restoration-card{padding:16px}.ritual-title h3{font-size:19px}.ritual-choices{gap:6px}.ritual-choice{min-height:84px}.pattern-step span{font-size:9px}.ritual-pattern{gap:5px}}
+@media(max-width:350px){.ritual-pattern{gap:3px}.ritual-choices{grid-template-columns:repeat(2,minmax(0,1fr))}.ritual-choice{min-height:64px}.ritual-choice>.icon{width:22px;height:22px}}
