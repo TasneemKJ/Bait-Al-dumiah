@@ -98,3 +98,30 @@ test('W10: completed story derives a permanent cream patch and red seam after re
   authoredBounds(bear,'story-earned-bear-patch');let count=0;bear.traverse(o=>{const c=o.geometry?.attributes.color;if(!c)return;for(let i=0;i<c.count;i++)if(Math.abs(c.getX(i)-red.r)<1e-6&&Math.abs(c.getY(i)-red.g)<1e-6&&Math.abs(c.getZ(i)-red.b)<1e-6)count++});assert(count>=100,'mended bear has no actual red stitch geometry')}
  const state=createState(),v=createStoryProps(new T.Group());v.update(state,0);assert(!v.root.getObjectByName('story-mended-bear').visible,'unearned patched bear appears');
 });
+
+test('W11: repair reel has closed cream flanges, inset red thread and no coincident faces',()=>{
+ const {state}=fixture(),v=view();v.update(state);v.root.updateWorldMatrix(true,true);
+ const spool=v.root.getObjectByName('stitch-repair-spool'),target=v.targets.find(o=>o.userData.stitch==='spool'),inverse=spool.matrixWorld.clone().invert(),faces=new Set(),cream=new T.Color(0xeedac1),red=new T.Color(0xa74345);
+ let duplicates=0,topCreamArea=0,bottomCreamArea=0,barrelFaces=0,maxRadius=0,minY=Infinity,maxY=-Infinity;
+ spool.traverse(o=>{
+  if(!o.isMesh)return;
+  const p=o.geometry.attributes.position,c=o.geometry.attributes.color,index=o.geometry.index,matrix=inverse.clone().multiply(o.matrixWorld),count=index?.count??p.count;
+  assert(!Array.isArray(o.material)&&o.material.opacity===1&&!o.material.transparent,'repair reel introduces transparent overlapping finishes');
+  for(let i=0;i<count;i+=3){
+   const ids=[0,1,2].map(j=>index?index.getX(i+j):i+j),vertices=ids.map(j=>new T.Vector3().fromBufferAttribute(p,j).applyMatrix4(matrix));
+   for(const a of vertices){minY=Math.min(minY,a.y);maxY=Math.max(maxY,a.y);maxRadius=Math.max(maxRadius,Math.hypot(a.x,a.z))}
+   const normal=new T.Vector3().subVectors(vertices[1],vertices[0]).cross(new T.Vector3().subVectors(vertices[2],vertices[0])),area=normal.length()/2;if(area<1e-10)continue;
+   const key=vertices.map(a=>a.toArray().map(n=>Math.round(n*1e6)).join(',')).sort().join('|');if(faces.has(key))duplicates++;faces.add(key);
+   const isColor=color=>c&&ids.every(j=>Math.abs(c.getX(j)-color.r)<1e-6&&Math.abs(c.getY(j)-color.g)<1e-6&&Math.abs(c.getZ(j)-color.b)<1e-6);
+   if(vertices.every(a=>Math.abs(a.y-.26)<1e-6)&&isColor(cream))topCreamArea+=area;
+   if(vertices.every(a=>Math.abs(a.y)<1e-6)&&isColor(cream))bottomCreamArea+=area;
+   if(vertices.every(a=>a.y>=.031&&a.y<=.229)&&isColor(red)){barrelFaces++;assert(vertices.every(a=>Math.hypot(a.x,a.z)<=.143),'red thread is not inset from the flanges')}
+  }
+ });
+ assert(duplicates===0,'repair reel has '+duplicates+' duplicate nondegenerate coincident triangles');
+ assert(topCreamArea>.085&&bottomCreamArea>.085&&barrelFaces>=40,'real opaque cream caps or red barrel were lost');
+ assert(Math.abs(minY)<1e-6&&Math.abs(maxY-.26)<1e-6&&Math.abs(maxRadius-.175)<1e-6,'reel changes its approved height or diameter');
+ assert(v.status().spool.center.every((n,i)=>Math.abs(n-[.65,.13,.03][i])<1e-6),'repair anchor moved');
+ const ray=new T.Raycaster(spool.localToWorld(new T.Vector3(.10,.50,0)),new T.Vector3(0,-1,0)),hit=ray.intersectObjects(v.targets,false)[0];
+ assert(hit?.object===target&&Math.abs(spool.worldToLocal(hit.point.clone()).y-.26)<1e-6,'closed visible cream cap does not own the actual spool pick');
+});

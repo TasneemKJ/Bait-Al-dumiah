@@ -13,6 +13,7 @@ server=None if os.environ.get('PLAY_URL') else subprocess.Popen(['node','scripts
 checks=[]
 def check(name,ok):
  checks.append({'name':name,'passed':bool(ok)})
+ print(('PASS ' if ok else 'FAIL ')+name,flush=True)
  assert ok,name
 def open_panel(page,name):
  target=page.locator(f'[data-action="panel-{name}"]')

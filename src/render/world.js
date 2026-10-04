@@ -72,6 +72,7 @@ export function createWorld(canvas,{onPick,onError}){
   controls.enabled=requestedEnabled&&!working();controls.enableDamping=false;controls.minPolarAngle=working()?.8:1.10;controls.maxPolarAngle=1.50;
   if(house.originalTeaSet)house.originalTeaSet.visible=!teaActive;
   if(house.studioChair)house.studioChair.visible=!stitchActive;
+  if(house.workCeiling)house.workCeiling.visible=!stitchActive;
   applyFraming();
  }
  function setTeaActive(active){if(active)setWorkActivity('tea');else if(teaActive)setWorkActivity(null)}
@@ -131,9 +132,20 @@ export function createWorld(canvas,{onPick,onError}){
   moonChimes.root.updateWorldMatrix(true,true);
   return ray.intersectObjects(moonChimes.targets,false)[0]?.object.userData.chime??null;
  }
+ function chimeTargetBounds(target){
+  target.updateWorldMatrix(true,false);
+  const positions=target.geometry.attributes.position,point=new T.Vector3();
+  let left=Infinity,right=-Infinity,top=Infinity,bottom=-Infinity;
+  for(let i=0;i<positions.count;i++){
+   point.fromBufferAttribute(positions,i).applyMatrix4(target.matrixWorld).project(camera);
+   const x=(point.x+1)*canvas.clientWidth/2,y=(1-point.y)*canvas.clientHeight/2;
+   left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);
+  }
+  return {left,right,top,bottom,width:right-left,height:bottom-top};
+ }
  function chimePositions(){
   if(!chimeActive)return [];camera.updateMatrixWorld();
-  return moonChimes.points().map(p=>({key:p.key,...projectWorkPoint(p.world)}));
+  return moonChimes.points().map(p=>({key:p.key,...projectWorkPoint(p.world),bounds:chimeTargetBounds(moonChimes.targets.find(target=>target.userData.chime===p.key))}));
  }
  function chimePullSpan(){
   if(!chimeActive)return 0;moonChimes.root.updateWorldMatrix(true,true);camera.updateMatrixWorld();
@@ -158,7 +170,7 @@ export function createWorld(canvas,{onPick,onError}){
   getPortraits(){return portraitCache.getAll()},
   focusRoom(id,immediate=false){if(working()||!ROOMS.some(r=>r.id===id))return false;focusedRoom=id;focusedDoll=null;cameraMove.moveTo(framing(canvas.clientWidth,canvas.clientHeight,id),reducedMotion||immediate);return true},
   focusDoll(id){const p=residents.position(id);if(working()||!p)return false;focusedDoll=id;focusedRoom=null;cameraMove.moveTo(focusPose(),reducedMotion);return true},
-  visualStatus(){return {portraitCount:portraitCache.size,quality,focusedRoom,focusedDoll,nightMix,cameraMoving:cameraMove.active,previewVisible:preview.root.visible,previewValid:preview.root.userData.valid??false,windowMaterials:house.windows.size,activeOwnedLights:[...decor.values()].filter(o=>o.userData.ownedLight?.intensity>0).length,restoredLights:restoration.lights.filter(l=>l.intensity>0).length,reactivePoses:Object.fromEntries([...decor].map(([id,o])=>[id,{turn:o.rotation.y,rock:o.rotation.z,scale:o.scale.x}])),courtyard:house.root.getObjectByName('levantine-courtyard')?.userData.nightCue,selectedObject:objects.selected,story:storyProps.status(),teaActive,tea:teaTable.status(),stitchActive,stitch:sewingPlay.status(),stitchGuides:stitchGuidePositions(),chimeActive,chimes:moonChimes.status()}},
+  visualStatus(){return {portraitCount:portraitCache.size,quality,focusedRoom,focusedDoll,nightMix,cameraMoving:cameraMove.active,previewVisible:preview.root.visible,previewValid:preview.root.userData.valid??false,windowMaterials:house.windows.size,activeOwnedLights:[...decor.values()].filter(o=>o.userData.ownedLight?.intensity>0).length,restoredLights:restoration.lights.filter(l=>l.intensity>0).length,reactivePoses:Object.fromEntries([...decor].map(([id,o])=>[id,{turn:o.rotation.y,rock:o.rotation.z,scale:o.scale.x}])),courtyard:house.root.getObjectByName('levantine-courtyard')?.userData.nightCue,selectedObject:objects.selected,story:storyProps.status(),teaActive,tea:teaTable.status(),stitchActive,workCeilingVisible:house.workCeiling.visible,stitch:sewingPlay.status(),stitchGuides:stitchGuidePositions(),chimeActive,chimes:moonChimes.status()}},
   zoom(amount){if(working())return;cameraMove.cancel();camera.zoom=T.MathUtils.clamp(camera.zoom*amount,.8,3.5);camera.updateProjectionMatrix()},
   orbit(amount){if(working())return;cameraMove.cancel();const offset=camera.position.clone().sub(controls.target);offset.applyAxisAngle(new T.Vector3(0,1,0),amount);camera.position.copy(controls.target).add(offset);controls.update()},
   setEnabled(enabled){requestedEnabled=Boolean(enabled);controls.enabled=requestedEnabled&&!working();if(!enabled)cameraMove.cancel()},

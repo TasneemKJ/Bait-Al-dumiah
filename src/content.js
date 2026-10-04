@@ -66,6 +66,7 @@ export const RESTORATION_COSTS=[45,85,140],RESTORATION_MASTERY=[1,3,6];
 export const INTERACTIVE_PROPS=[
  {id:'tea-set',room:'kitchen',position:[-.53,.92,.1],size:[1.1,.55,.75],icon:'tea',activity:'tea',resident:'lina',care:'tea'},
  {id:'sewing-machine',room:'studio',position:[-.35,1.08,-.78],size:[.9,.60,.55],icon:'button',activity:'stitch',resident:'sami',care:'play'},
+ {id:'moon-mobile',room:'bedroom',position:[-1.70,2.36,-.60],size:[.90,1.00,.30],icon:'music',activity:'lullaby'},
  {id:'moon-bed',room:'bedroom',position:[-.48,.75,-.42],size:[1.8,1.1,2.1],icon:'rest',activity:'lullaby',resident:'noor',care:'rest'},
  {id:'parlor-sofa',room:'parlor',position:[.42,.74,-.63],size:[2.5,1.1,1.0],icon:'heart',resident:'lina',care:'play'},
  {id:'mint-tin',room:'kitchen',position:[-.30,1.20,-1.04],size:[.36,.26,.30],icon:'leaf',story:true},

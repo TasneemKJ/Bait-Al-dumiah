@@ -192,15 +192,17 @@ def run(scenario):
         room('studio')
         touch_object('prop:sewing-machine', twice=True, touch=touch)
         stitch_ready(page)
-        check('machine entry is a physical ritual with canvas focus',
+        check('machine entry focuses the canvas and opens the physical sewing cutaway',
               stitch_status(page)['mode'] == 'ritual' and
-              page.evaluate('document.activeElement.id==="world"'))
+              page.evaluate('document.activeElement.id==="world" && window.dollhouse.visual().workCeilingVisible===false'))
 
     def exit_stitch():
         page.locator('[data-stitch-action="exit"]').click()
         page.wait_for_function('window.dollhouse.stitch()===null',
                                timeout=20000, polling=100)
         ready()
+        check('leaving the needle restores the actual studio ceiling',
+              page.evaluate('window.dollhouse.visual().workCeilingVisible===true'))
 
     def wait_simulation(label, predicate, arg=None, timeout=180000):
         # Read-only wall/simulation evidence. The production clock and its frame
@@ -582,7 +584,7 @@ def run(scenario):
             ready()
             check('the finished cloth returns to an interactive studio',
                   not page.locator('.stitch-playfield').is_visible() and
-                  page.evaluate('!window.dollhouse.visual().stitchActive && window.dollhouse.visual().focusedRoom==="studio"'))
+                  page.evaluate('!window.dollhouse.visual().stitchActive && window.dollhouse.visual().focusedRoom==="studio" && window.dollhouse.visual().workCeilingVisible===true'))
             page.reload(wait_until='domcontentloaded')
             ready()
             check('earned mastery and improved bests survive reload without an active needle',
@@ -736,6 +738,31 @@ def run(scenario):
                   progress() == 3 and not page.locator('.held-item').count() and
                   page.evaluate('window.dollhouse.visual().story.bearVisible'))
             capture('11-bear-patch')
+
+            # Earning the bear keeps its bed replay and the separate physical
+            # mobile available. No chapter/mastery is seeded for this entry.
+            before_mobile = economy()
+            touch_object('prop:moon-mobile', twice=True, touch=True)
+            page.wait_for_function('''()=>{
+                const g=window.dollhouse,s=g.chimes(),v=g.visual();
+                return s&&v.chimeActive&&v.chimes.active&&v.chimes.phase===s.phase&&!v.cameraMoving&&g.chimeObjects().length===5;
+            }''', timeout=60000, polling=100)
+            check('the earned bear does not block direct mobile entry on an Arabic phone',
+                  progress() == 3 and state()['activities']['active']['id'] == 'lullaby' and
+                  not page.locator('dialog[open],[data-choice]').count())
+            capture('11b-earned-moon-instrument')
+            page.locator('.chime-exit').click()
+            page.wait_for_function('window.dollhouse.chimes()===null', timeout=20000, polling=100)
+            ready()
+            check('leaving the post-bear instrument preserves all earned progress',
+                  economy() == before_mobile and progress() == 3)
+            last_bear_play = state()['story']['lastActionAt']
+            touch_object('prop:moon-bed', twice=True, touch=True)
+            check('the separate bed still replays its earned bear without opening a ritual',
+                  state()['activities']['active'] is None and economy() == before_mobile and
+                  state()['story']['lastAction'] == 'prop:moon-bed' and
+                  state()['story']['lastActionAt'] > last_bear_play and
+                  page.evaluate('window.dollhouse.visual().story.bearVisible'))
 
             if state()['clock'] < 120:
                 page.locator('[data-action="light"]').click()

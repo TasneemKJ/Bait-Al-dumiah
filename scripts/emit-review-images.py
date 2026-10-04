@@ -25,6 +25,13 @@ SELECTED = {
             '17-arabic-three-cup-ready', '18-arabic-three-cup-served',
         ],
     },
+    'chimes': {
+        'desktop': ['00-bedroom-mobile', '01-instrument', '02-held-charm', '03-finished-mobile', '05-earned-constellation'],
+        'phone': [
+            '00-bedroom-mobile', '01-instrument', '02-touch-held', '03-finished-mobile',
+            '04-arabic-320x568', '04-arabic-667x320', '05-earned-constellation',
+        ],
+    },
     'stitch': {
         'desktop': [
             '01-desktop-empty', '02-desktop-mid-stitch',
@@ -32,7 +39,7 @@ SELECTED = {
         ],
         'phone': [
             '09-small-phone-bear-seam', '10-small-phone-bear-finished',
-            '11-bear-patch', '12-arabic-landscape-night',
+            '11-bear-patch', '11b-earned-moon-instrument', '12-arabic-landscape-night',
             '13-phone-night-finished',
         ],
         'progression': [
@@ -44,7 +51,7 @@ SELECTED = {
 
 def main():
     if len(sys.argv) != 2:
-        raise SystemExit('Usage: python scripts/emit-review-images.py artifacts/tea-or-stitch/SCENARIO')
+        raise SystemExit('Usage: python scripts/emit-review-images.py artifacts/FAMILY/SCENARIO')
     directory = Path(sys.argv[1]).resolve()
     artifacts = (Path(__file__).resolve().parents[1] / 'artifacts').resolve()
     family, scenario = directory.parent.name, directory.name

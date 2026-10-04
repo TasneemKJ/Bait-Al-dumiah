@@ -41,7 +41,7 @@ export function createMoonChimes(parent){
   charms.push({charm,string,material,halo,hit,rest,top,clapper,crown});
  }
  const winder=new T.Group();winder.name='chime-wind-up-moon';winder.position.set(0,2.13,.09);root.add(winder);
- const dial=add(winder,new T.CylinderGeometry(.25,.25,.08,32),brass,[0,0,0]);dial.rotation.x=Math.PI/2;dial.userData.chime='moon';targets.push(dial);
+ const dial=add(winder,new T.CylinderGeometry(.31,.31,.08,32),brass,[0,0,0]);dial.rotation.x=Math.PI/2;dial.userData.chime='moon';targets.push(dial);
  const inset=add(winder,relief(moonShape()),new T.MeshStandardMaterial({color:0xeee0bb,emissive:0xe7c784,emissiveIntensity:.18,roughness:.6}),[0,0,.05]);inset.scale.setScalar(.60);
  const light=new T.PointLight(0xffd7a3,0,3.6,2);light.name='chime-practical-light';light.position.set(0,1.68,.40);root.add(light);
  // This earned object stays in the bedroom after leaving the instrument.

@@ -1,9 +1,9 @@
-"""Genuine background-tab acceptance for a held physical tea pot and sewing needle.
+"""Genuine background-tab acceptance for held tea, sewing and moon-chime input.
 
 Run with requirements-visibility.txt in a headed display (Xvfb on Linux).
 Playwright 1.60's no_defaults option leaves real focus/visibility intact only in
 the existing default context. The ordinary tea journeys keep Playwright 1.55.
-The game is driven through its UI and the shared real-mouse PotDrag and NeedleDrag helpers;
+The game is driven through its UI, real-mouse PotDrag/NeedleDrag helpers and a rendered chime;
 diagnostics only observe state. No visibility events or game time are fabricated.
 
 Official fixture pattern:
@@ -35,6 +35,7 @@ def run():
     started = time.monotonic()
     failure = None
     server = server_log = runtime = owner = browser = page = other_tab = drag = needle_drag = None
+    chime_mouse_held = False
 
     def check(name, condition):
         checks.append({'name': name, 'passed': bool(condition)})
@@ -57,6 +58,7 @@ def run():
                 viewport:{width:innerWidth,height:innerHeight},
                 state:game?.state?.()??null,tea:game?.tea?.()??null,stitch:game?.stitch?.()??null,
                 stitchTargets:game?.stitchObjects?.()??[],
+                chimes:game?.chimes?.()??null,chimeTargets:game?.chimeObjects?.()??[],
                 visual:game?.visual?.()??null,targets:game?.teaObjects?.()??[]
             };
         }''')
@@ -70,6 +72,34 @@ def run():
         # All evidence during the hidden interval is read-only JSON instead.
         assert page.evaluate('!document.hidden && document.hasFocus()'), 'Screenshots require the foreground game tab'
         page.screenshot(path=str(out / (label + '.png')), timeout=60000)
+
+    def chime_ready():
+        # This observes the last rendered pose as well as the simulation. A held
+        # note is not photographed or grabbed from an earlier released pose.
+        page.wait_for_function('''()=>{
+            const g=window.dollhouse,s=g?.chimes?.(),visual=g?.visual?.(),v=visual?.chimes;
+            return Boolean(s&&visual.chimeActive&&!visual.cameraMoving&&v?.active
+                &&v.phase===s.phase&&v.held===s.held&&Number.isFinite(v.pull)
+                &&Math.abs(v.pull-s.pull)<1e-6&&g.chimeObjects().length===5);
+        }''', timeout=60000, polling=100)
+
+    def chime_music(snapshot):
+        a = snapshot['chimes']
+        keys = ('phase', 'pattern', 'cursor', 'listenTime', 'round', 'mistakes',
+                'lastTone', 'lastPluck', 'toneSerial', 'result')
+        return {key: a[key] for key in keys}
+
+    def chime_economy(snapshot):
+        s = snapshot['state']
+        return {
+            'buttons': s['buttons'], 'earnedToday': s['earnedToday'],
+            'cares': s['cares'], 'wishes': s['wishes'],
+            'mastery': s['activities']['mastery'],
+            'completed': s['activities']['completed'],
+            'lastReward': s['activities']['lastReward'],
+            'bonds': {d['id']: d['bond'] for d in s['dolls']},
+            'restoration': s['restoration'],
+        }
 
     try:
         if not os.environ.get('PLAY_URL'):
@@ -252,6 +282,110 @@ def run():
         ready()
         check('genuine held-needle visibility journey has no JavaScript or console errors', not errors)
 
+        # Keep both earlier visibility journeys intact. This independent
+        # permanent scene target opens the instrument at every story stage.
+        page.locator('[data-room="bedroom"]').click()
+        ready()
+        for _ in range(2):
+            point = next(p for p in page.evaluate('window.dollhouse.objects()')
+                         if p['key'] == 'prop:moon-mobile')
+            assert page.evaluate('p=>document.elementFromPoint(p.x,p.y)?.id==="world"', point), 'Scene moon mobile is covered'
+            page.mouse.click(point['x'], point['y'])
+            ready()
+        page.wait_for_function('window.dollhouse.chimes()?.phase==="echo"', timeout=90000, polling=100)
+        chime_ready()
+
+        other_tab = context.new_page()
+        other_tab.goto('about:blank')
+        foreground()
+        ready()
+        chime_ready()
+        note = page.evaluate('window.dollhouse.chimes().pattern.at(-1)')
+        point = next(p for p in page.evaluate('window.dollhouse.chimeObjects()')
+                     if p['key'] == note)
+        span = page.evaluate('window.dollhouse.chimePullSpan()')
+        assert page.evaluate('''p=>Number.isFinite(p.span)&&p.span>0
+            &&Number.isFinite(p.x)&&Number.isFinite(p.y)
+            &&document.elementFromPoint(p.x,p.y)?.id==="world"
+            &&document.elementFromPoint(p.x,p.y+p.span*.7)?.id==="world"''',
+            {'x': point['x'], 'y': point['y'], 'span': span}), 'The real charm and its pull must stay reachable'
+        page.mouse.move(point['x'], point['y'])
+        page.mouse.down()
+        chime_mouse_held = True
+        page.mouse.move(point['x'], point['y'] + span * .7, steps=8)
+        page.wait_for_function('note=>{const a=window.dollhouse.chimes();return a?.held===note&&a.pull>=.65}',
+                               arg=note, timeout=20000, polling=100)
+        chime_ready()
+        capture('05-held-chime')
+        chime_before = observe('chime-before-hidden')
+        check('the foreground mobile has a genuinely pulled charm before tab loss',
+              not chime_before['visibility']['hidden'] and chime_before['visibility']['focus']
+              and not chime_before['state']['paused']
+              and chime_before['chimes']['phase'] == 'echo'
+              and chime_before['chimes']['held'] == note
+              and .65 <= chime_before['chimes']['pull'] <= .75
+              and chime_before['visual']['chimes']['held'] == note
+              and abs(chime_before['visual']['chimes']['pull'] - chime_before['chimes']['pull']) < 1e-6)
+
+        other_tab.bring_to_front()
+        page.wait_for_function('document.hidden', timeout=20000, polling=100)
+        page.wait_for_function('''()=>{
+            const g=window.dollhouse,a=g.chimes();
+            return g.state().paused&&a?.held===null&&a.pull===0;
+        }''', timeout=20000, polling=100)
+        chime_hidden = observe('chime-hidden')
+        check('a genuine hidden tab cancels the pulled charm without sounding or earning a note',
+              chime_hidden['visibility']['hidden'] and chime_hidden['visibility']['state'] == 'hidden'
+              and chime_hidden['state']['paused']
+              and chime_hidden['chimes']['held'] is None and chime_hidden['chimes']['pull'] == 0
+              and chime_music(chime_hidden) == chime_music(chime_before)
+              and chime_economy(chime_hidden) == chime_economy(chime_before))
+        # Read-only observations only while hidden. The OS mouse remains down,
+        # so a synthesized release cannot make this cancellation assertion pass.
+        page.wait_for_timeout(350)
+        chime_hidden_still = observe('chime-hidden-still')
+        check('the hidden instrument and its simulation time stay fixed without a note or reward',
+              chime_hidden_still['visibility']['hidden'] and chime_hidden_still['state']['paused']
+              and chime_hidden_still['state']['elapsed'] == chime_hidden['state']['elapsed']
+              and chime_hidden_still['chimes'] == chime_hidden['chimes']
+              and chime_economy(chime_hidden_still) == chime_economy(chime_before))
+
+        other_tab.close()
+        other_tab = None
+        foreground()
+        chime_ready()
+        page.wait_for_timeout(350)
+        chime_restored = observe('chime-restored')
+        check('returning never restores the old chime pull before the OS mouse is released',
+              not chime_restored['visibility']['hidden'] and chime_restored['visibility']['focus']
+              and not chime_restored['state']['paused']
+              and chime_restored['chimes']['held'] is None and chime_restored['chimes']['pull'] == 0
+              and chime_music(chime_restored) == chime_music(chime_before)
+              and chime_economy(chime_restored) == chime_economy(chime_before)
+              and chime_restored['visual']['chimes']['held'] is None
+              and chime_restored['visual']['chimes']['pull'] == 0)
+        page.mouse.up()
+        chime_mouse_held = False
+        chime_ready()
+        chime_released = observe('chime-after-mouseup')
+        check('releasing the canceled OS mouse cannot play a delayed note or award mastery',
+              chime_released['chimes']['held'] is None and chime_released['chimes']['pull'] == 0
+              and chime_music(chime_released) == chime_music(chime_before)
+              and chime_economy(chime_released) == chime_economy(chime_before))
+        capture('06-restored-chimes')
+        page.locator('.chime-exit').click()
+        page.wait_for_function('window.dollhouse.chimes()===null', timeout=20000, polling=100)
+        ready()
+        chime_exited = observe('chime-after-exit')
+        check('leaving the canceled instrument restores room controls without a reward',
+              chime_exited['state']['activities']['active'] is None
+              and not chime_exited['visual']['chimeActive']
+              and not page.locator('.chime-playfield').is_visible()
+              and page.locator('.room-views').is_visible()
+              and page.evaluate('document.activeElement.id==="world"')
+              and chime_economy(chime_exited) == chime_economy(chime_before))
+        check('genuine held-chime visibility journey has no JavaScript or console errors', not errors)
+
     except Exception as error:
         failure = str(error)
         if page and not page.is_closed():
@@ -280,6 +414,11 @@ def run():
         if needle_drag:
             try:
                 needle_drag.release()
+            except Exception:
+                pass
+        if chime_mouse_held and page and not page.is_closed():
+            try:
+                page.mouse.up()
             except Exception:
                 pass
         if browser:

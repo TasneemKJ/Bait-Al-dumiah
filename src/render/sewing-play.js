@@ -54,8 +54,18 @@ export function createSewingPlay(parent){
  const inlay=mesh(needle,new T.CircleGeometry(.055,16),cream,[0,table.gripHeight,table.gripDiameter/2+.003],'stitch-grip-cream-inlay');
  const tipAnchor=new T.Object3D();tipAnchor.name='stitch-tip-anchor';needle.add(tipAnchor);
  const spool=group(root,'stitch-repair-spool');spool.position.set(table.spoolOffset[0],table.spoolOffset[1],table.spoolOffset[2]);
- const spoolBody=cylinder(spool,table.spoolDiameter/2,.26,threadMaterial,[0,.13,0],'stitch-repair-grip');spoolBody.userData.stitch='spool';
- const spoolTrim=group(spool,'stitch-spool-brass-ends');for(const y of [.008,.252])cylinder(spoolTrim,table.spoolDiameter/2,.016,brass,[0,y,0]);for(const y of [.065,.13,.195])torus(spoolTrim,table.spoolDiameter/2-.004,.004,brass,[0,y,0],true);batch(spoolTrim);
+ // A single closed surface avoids coplanar caps and touching decorative rings.
+ // End flanges keep the full pick envelope; the red thread sits visibly inset.
+ const radius=table.spoolDiameter/2,profile=[[0,-.13],[radius,-.13],[radius,-.114],[.153,-.106],[.142,-.098],[.142,.098],[.153,.106],[radius,.114],[radius,.13],[0,.13]];
+ const reelGeometry=new T.LatheGeometry(profile.map(([r,y])=>new T.Vector2(r,y)),24).toNonIndexed(),reelColors=[];
+ const reelPalette=[new T.Color(P.cream),new T.Color(P.wood),new T.Color(0xa74345)],reelPosition=reelGeometry.attributes.position;
+ for(let i=0;i<reelPosition.count;i+=3){
+  const y=(reelPosition.getY(i)+reelPosition.getY(i+1)+reelPosition.getY(i+2))/3,color=Math.abs(y)<.099?reelPalette[2]:Math.abs(y)<.113?reelPalette[1]:reelPalette[0];
+  for(let j=0;j<3;j++)reelColors.push(color.r,color.g,color.b);
+ }
+ reelGeometry.setAttribute('color',new T.Float32BufferAttribute(reelColors,3));
+ const reelMaterial=new T.MeshStandardMaterial({color:0xffffff,vertexColors:true,roughness:.76});
+ const spoolBody=mesh(spool,reelGeometry,reelMaterial,[0,.13,0],'stitch-repair-grip');spoolBody.userData.stitch='spool';
  const looseLoop=mesh(root,new T.TorusGeometry(.047,.006,4,24),threadMaterial,[0,.022,0],'stitch-loose-loop');looseLoop.rotation.x=-Math.PI/2;
  const finish=group(root,'stitch-finished-tableau');finish.position.set(table.finishOffset[0],table.finishOffset[1],table.finishOffset[2]);finish.visible=false;
  const finishCloth=mesh(finish,new T.PlaneGeometry(...table.finishSize),linen,[0,.003,0],'stitch-finished-cloth');finishCloth.rotation.x=-Math.PI/2;finishCloth.userData.stitch='cloth';

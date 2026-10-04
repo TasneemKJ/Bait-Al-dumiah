@@ -3,6 +3,15 @@
 import {strings} from './locale-data.js';
 export {strings,translate,number} from './locale-data.js';
 Object.assign(strings.en,{
+ 'object-moon-mobile':'Moon mobile',
+ 'object-moon-mobileStory':'Noor’s hanging moons remember a little song. Touch them again to listen and play.',
+ "stitchFinished":"This seam is finished. Touch the cloth beside the hoop to return to the studio.",
+ "stitchReadyInstructions":"Release the needle. Touch the cloth beside the hoop to finish.",
+ "stitchReadyShort":"Release needle · cloth beside hoop: finish",
+ "stitchFinishedInstructions":"Touch the grip to sew again, or the cloth beside the hoop to return.",
+ "stitchFinishedShort":"Grip: sew again · cloth beside hoop: return",
+ "stitchMendFinishedInstructions":"Touch the cloth beside the hoop, then take the bear to Noor.",
+ "stitchMendFinishedShort":"Cloth beside hoop · take bear to Noor",
  chimeTitle:"Noor’s moon chimes",chimeListen:'Listen to the house',chimeEcho:'Your echo',chimeDone:'The room remembers',
  chimeListenHelp:'Watch the charms light up. Echo their song backwards.',
  chimeEchoHelp:'Pull a charm down and release. Touch the little moon to hear the song again.',
@@ -21,6 +30,15 @@ Object.assign(strings.en,{
  'activityRule-lullaby':'Watch and listen. Pull the hanging charms in reverse order; the little moon repeats the song.',
 });
 Object.assign(strings.ar,{
+ 'object-moon-mobile':'زينة القمر',
+ 'object-moon-mobileStory':'قميرات نور المعلّقة حافظين أغنية صغيرة. المسهن كمان مرة لتسمع وتعزف.',
+ "stitchFinished":"هالخياطة خلصت. المس القماش جنب الطوق لترجع لغرفة الخياطة.",
+ "stitchReadyInstructions":"ارفع الإبرة، وبعدين المس القماش جنب الطوق لتخلّص.",
+ "stitchReadyShort":"ارفع الإبرة · القماش جنب الطوق: خلّص",
+ "stitchFinishedInstructions":"المس مسكة الإبرة لتخيّط كمان، أو القماش جنب الطوق لترجع.",
+ "stitchFinishedShort":"الإبرة: خيّط كمان · القماش جنب الطوق: ارجع",
+ "stitchMendFinishedInstructions":"المس القماش جنب الطوق، وبعدين خد الدبدوب لعند نور.",
+ "stitchMendFinishedShort":"القماش جنب الطوق · خد الدبدوب لعند نور",
  chimeTitle:'رَنّة قمر نور',chimeListen:'اسمع شو عم يغنّي البيت',chimeEcho:'هلق دورك تردّ',chimeDone:'الغرفة تذكّرت الأغنية',
  chimeListenHelp:'شوف الزينة كيف بتنور. ردّ الأغنية من الآخر للأول.',
  chimeEchoHelp:'اسحب قطعة لتحت واتركها ترنّ. المس القمر الصغير لتسمع الأغنية كمان مرة.',
