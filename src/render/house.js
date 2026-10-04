@@ -66,6 +66,8 @@ export function makeFurniture(id){const g=new T.Group();
  if(id==='bear'){const tan=0xc19778;ball(g,0,.33,0,.2,.23,.17,tan);ball(g,0,.62,0,.23,.21,.18,tan);for(const x of [-.17,.17]){ball(g,x,.79,0,.08,.08,.06,tan);ball(g,x,.12,.04,.1,.10,.12,tan);ball(g,x*1.3,.35,.01,.09,.13,.10,tan)}ball(g,0,.56,.16,.10,.08,.045,P.cream);for(const x of [-.073,.073])ball(g,x,.65,.169,.024,.028,.016,P.ink);ball(g,0,.588,.203,.032,.023,.015,P.ink);box(g,0,.42,.164,.19,.06,.015,P.rose)}
  if(id==='musicbox'){box(g,0,.17,0,.55,.30,.44,0xbb94ab,true);box(g,0,.33,-.17,.54,.28,.05,P.gold,true).rotation.x=-.5;box(g,0,.336,0,.5,.04,.39,P.cream);cylinder(g,0,.39,0,.12,.07,P.gold);ball(g,0,.58,0,.08,.10,.08,P.cream);cylinder(g,0,.47,0,.14,.15,P.rose,1.6);line(g,[.29,.21,0],[.39,.21,0],.02,P.gold);ball(g,.40,.23,0,.03,.05,.03,P.cream)}
  if(id==='mobile'){cylinder(g,0,.025,0,.2,.05,P.wood);line(g,[0,0,0],[0,1.10,0],.019,P.gold);line(g,[-.31,1.05,0],[.31,1.05,0],.018,P.gold);for(let i=0;i<3;i++){let x=-.27+i*.27;line(g,[x,1.05,0],[x,.85-(i%2)*.2,0],.007,P.gold);ball(g,x,.75-(i%2)*.2,0,.09,.12,.035,[P.gold,P.cream,P.rose][i])}}
+ if(id==='cup')cup(g,0,.02,0,P.cream);
+ g.name=`furniture-${id}`;
  return g;
 }
 export function createHouse(scene){

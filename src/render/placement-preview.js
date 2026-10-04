@@ -18,8 +18,9 @@ export function createPlacementPreview(parent){
    copy.traverse(o=>{if(!o.material)return;const tint=m=>{if(!materials.has(m)){const c=m.clone();c.transparent=true;c.opacity=.44;c.depthWrite=false;materials.set(m,c)}return materials.get(m)};o.material=Array.isArray(o.material)?o.material.map(tint):tint(o.material);o.castShadow=o.receiveShadow=false});
    for(const child of [...copy.children])root.add(child);shown=entry.id;
   }
-  const valid=state.buttons>=entry.price&&!state.decor.some(d=>d.room===room.id&&d.slot===pose.slot);
-  root.position.set(room.x+slot.x,room.y+.14,slot.z);root.visible=true;root.userData.valid=valid;
+  const moving=state.decor.find(d=>d.id===pose.moveId);
+  const valid=(moving?.item===entry.id||state.buttons>=entry.price)&&!state.decor.some(d=>d.id!==pose.moveId&&d.room===room.id&&d.slot===pose.slot);
+  root.rotation.y=(moving?.rotation??0)*Math.PI/2;root.position.set(room.x+slot.x,room.y+.14,slot.z);root.visible=true;root.userData.valid=valid;
   root.traverse(o=>{if(o.material)for(const m of Array.isArray(o.material)?o.material:[o.material])m.color?.set(valid?0xb9d5b0:0xd28b8b)});
  },clear};
 }
