@@ -3,7 +3,8 @@
 Helpers are importable by the legacy story/restoration journeys. Diagnostics are
 read-only observations; no browser test submits a fill, score or simulation time.
 TEA_SCENARIO selects desktop, phone or progression; all runs each in a fresh
-browser context. TEA_HEADED=1 uses regular Chromium for genuine tab visibility.
+browser context. TEA_HEADED=1 uses regular Chromium with a display.
+Genuine visibility loss is checked separately by visibility_check.py.
 """
 import json
 import os
@@ -536,25 +537,8 @@ def run(scenario):
                 drag.release(cancel=True)
             page.wait_for_function('window.dollhouse.tea()===null')
             check('Escape cancels touch ownership and exits the working camera', not page.locator('.tea-playfield').is_visible())
-            # A real foreground tab change exercises visibility loss; no synthetic
-            # visibilitychange event or writable simulation hook is used.
-            enter()
-            drag = PotDrag(page).down()
-            try:
-                drag.aim(tea_status(page)['cups'][0])
-                page.wait_for_function('window.dollhouse.tea().flow>0')
-                hidden = context.new_page()
-                hidden.goto('about:blank')
-                hidden.bring_to_front()
-                page.wait_for_function('document.hidden', timeout=20000, polling=100)
-                page.wait_for_function('!window.dollhouse.tea().pressed && window.dollhouse.tea().tilt===0', polling=100)
-                check('hiding the actual page releases its pot input', not tea_status(page)['pressed'] and tea_status(page)['tilt'] == 0)
-                hidden.close()
-                page.bring_to_front()
-                page.wait_for_function('!document.hidden && document.hasFocus()', timeout=20000, polling=100)
-            finally:
-                drag.release()
-            exit_tea()
+            # Genuine hidden-tab cancellation runs in visibility_check.py with
+            # Playwright's forced-focus default disabled for that fixture.
             # Advance the first nine story touches by the real scene route. The
             # guest cup is a one-cup introduction, with no ritual payout or best.
             dismiss_sequence('lullaby', escape=True)

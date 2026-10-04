@@ -74,7 +74,20 @@ The story check completes all eleven actions through actual scene touches and po
 
 The tea checks use real mouse drags, touch gestures and keyboard input to exercise misses, partial pours, local overfill repair, serving, free practice, personal-best reloads, input cancellation and the guest's cup. Three independent journeys start from fresh saves: `TEA_SCENARIO=desktop`, `phone` or `progression`; the default runs all three. Progression earns the three-cup table through actual service, cooldowns and house days. Empty, pouring, spilled, ready and served states are captured under `artifacts/tea/<scenario>/`, alongside observed wall/game time for long waits. CI runs the journeys separately and retains evidence for each.
 
-The phone journey checks actual tab visibility, so it needs a headed browser. On Linux, the command above follows [Playwright's Xvfb setup](https://playwright.dev/python/docs/ci#running-headed). On a desktop with a display, use `TEA_HEADED=1 python scripts/tea_check.py`. A successful source build alone does not certify the rendered activity.
+The tea journeys retain Playwright 1.55.0. On Linux, the headed command above follows [Playwright's Xvfb setup](https://playwright.dev/python/docs/ci#running-headed). On a desktop with a display, use `TEA_HEADED=1 python scripts/tea_check.py`.
+
+Genuine tab visibility has its own headed check and pinned Playwright 1.60.0 environment. It uses the documented [`connect_over_cdp(no_defaults=True)`](https://playwright.dev/python/docs/api/class-browsertype#browser-type-connect-over-cdp-option-no-defaults) option on the existing default browser context, so Playwright does not force the game tab to remain active. The check enters tea through the actual kitchen prop, holds and pours with the real mouse, switches to another tab, and requires the game document to become hidden within 20 seconds and release its pot. Returning to the foreground must leave the pour released. Read-only before/hidden/restored observations and foreground-only screenshots are retained under `artifacts/visibility/`; CI runs this check independently and uploads evidence even on failure.
+
+Use a separate environment so this check does not change the normal browser-test dependency:
+
+```sh
+python -m venv /tmp/bait-visibility-venv
+/tmp/bait-visibility-venv/bin/python -m pip install -r requirements-visibility.txt
+/tmp/bait-visibility-venv/bin/python -m playwright install --with-deps chromium
+xvfb-run -a /tmp/bait-visibility-venv/bin/python scripts/visibility_check.py
+```
+
+On a desktop with a display, omit `xvfb-run -a`. The fixture always launches a headed browser. A successful source build alone does not certify the rendered activity.
 
 ## Boundaries
 

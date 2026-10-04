@@ -77,9 +77,36 @@ jobs:
       - run: python -m playwright install --with-deps chromium
       - name: Pour and serve tea through mouse, touch and keyboard
         run: xvfb-run -a python scripts/tea_check.py
+      - name: Emit original tea frames for review
+        if: always()
+        run: python scripts/emit-review-images.py artifacts/tea/${{ matrix.scenario }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: physical-tea-service-${{ matrix.scenario }}
           path: artifacts/tea/${{ matrix.scenario }}/
+          retention-days: 14
+  visibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements-visibility.txt
+      - run: python -m playwright install --with-deps chromium
+      - name: Verify a real background tab releases the held pot
+        run: xvfb-run -a python scripts/visibility_check.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: physical-tea-tab-visibility
+          path: artifacts/visibility/
           retention-days: 14
