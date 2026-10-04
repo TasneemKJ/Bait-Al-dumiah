@@ -29,7 +29,10 @@ Deploy `dist/` to any static web host. Runtime assets and Three.js are local; th
 - A full house (all three wishes in one day) pays a bonus that grows with a day-in-a-row streak.
 - Thirteen milestones in the journal. Each one's reward is paid only when you collect it.
 - The closed door: a five-step project in the journal that costs 430 buttons in all. The key step needs you to be dear to Sami, and opening the door needs all six whispers. Once the fifth room is open, you can leave the visitor one small gift a night (12 buttons) and collect the eight things they leave in return.
-- Six keepsakes, three placement slots per room, clear prices, cancellation without charge and full refunds on packing away.
+- Direct object play: select the tea set, sewing machine, moon bed or jasmine sofa for contextual care and activities. Focus a room to find keyboard/touch object controls.
+- Three distinct rituals: guided mint tea, embroidery study/recall with free hints, and a reversed moon-song echo. Mastery rewards the first two completions per activity per earned day; practice is always free and mistakes cost nothing. Rewards wait for 20 seconds of unpaused play between completions.
+- Twelve earned room-restoration stages unlocked through mastery and buttons, with visible arrangements that persist across reloads.
+- Six keepsakes, three placement slots per room, clear prices, cancellation without charge and full refunds on packing away. Select an owned keepsake in the scene to turn it or move it without buying again.
 - A four-minute day/night cycle, a manual evening/morning control, a shy sheet ghost and six journal discoveries (one per in-game night). From the third whisper on, the visitor waits for a cozier house (45% to 68%).
 - Original procedural music-box notes, gesture-gated sound, pause, reduced motion and adjustable rendering detail.
 - Versioned local saves. Hidden tabs pause. English/Arabic copy and direction switch together.
@@ -38,7 +41,7 @@ This is a first playable, not a claim of production certification. Assets are or
 
 ## Controls
 
-Tap a doll or open **Little souls**. Fulfil the highlighted wish to earn buttons. Open **Decorate**, choose a keepsake, then tap a glowing spot or choose a room and spot using the controls. After dark, greet the visitor to hear a whisper.
+Tap a doll or open **Little souls**. Tap a usable object in the house, or focus a room and use **Things to touch**, to select it and see its actions. Open **Little rituals** to practice, earn mastery, and restore rooms. Fulfil the highlighted wish to earn buttons. Open **Decorate**, choose a keepsake, then tap a glowing spot or choose a room and spot using the controls. After dark, greet the visitor to hear a whisper.
 
 Drag to turn; pinch/scroll to zoom. Arrow keys turn, `+`/`-` zoom, `H` resets the camera, `Space` pauses, `Escape` closes a sheet. DOM controls provide keyboard alternatives to 3D picking.
 
@@ -49,9 +52,12 @@ npm run verify
 python -m pip install -r requirements.txt
 python -m playwright install --with-deps chromium
 npm run test:browser
+python scripts/ui_check.py
+python scripts/art_check.py
+python scripts/expansion_check.py
 ```
 
-The browser check exercises the built HTTP application, care/rewards, placement/cancellation/refunds, night/mystery progression, pause, saving/reloading, Arabic, mobile portrait/landscape and reduced motion. It records screenshots and JSON results under `artifacts/`. CI retains evidence, including on failure. A preview being available is not proof the browser checks passed.
+The browser check exercises the built HTTP application, care/rewards, placement/cancellation/refunds, night/mystery progression, pause, saving/reloading, Arabic, mobile portrait/landscape and reduced motion. It records screenshots and JSON results under `artifacts/`. CI retains evidence, including on failure. The expansion check additionally uses actual object ray picks, relocation/rotation/reload, recall/hints, reverse echo, restoration budgets and Arabic touch controls. A preview being available is not proof the browser checks passed.
 
 `?debug=1` explicitly enables read-only diagnostics for tests. Normal play does not expose simulation state globally.
 

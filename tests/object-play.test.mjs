@@ -20,3 +20,7 @@ test('embroidery starts with study and accepts recall only after ready; hints ar
 test('moon song echoes the shown sequence in reverse without rewarding wrong input',()=>{
  const s=sim.createState();sim.beginActivity(s,'lullaby');const p=sim.activityPattern(s,'lullaby');assert.equal(sim.activityInput(s,(p.at(-1)+1)%4).mistake,true);assert.equal(s.activities.mastery.lullaby,0);let result;for(const c of [...p].reverse())result=sim.activityInput(s,c);assert.equal(result.complete,true);assert.equal(s.activities.mastery.lullaby,1);
 });
+test('moving then refunding cannot leave the original placement comfort as a farmable bonus',()=>{
+ const s=sim.createState(),before=structuredClone(s);sim.place(s,'plant','kitchen',0);const id=s.decor[0].id;
+ sim.moveDecor(s,id,'parlor',2);sim.remove(s,id);assert.equal(s.buttons,before.buttons);assert.deepEqual(s.dolls,before.dolls);assert.equal(s.decor.length,0);
+});
