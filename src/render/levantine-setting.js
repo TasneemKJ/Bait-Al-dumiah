@@ -40,7 +40,12 @@ export function createLevantineSetting(parent){
  const staticRoot=new T.Group();root.add(staticRoot);
  const stone=mat(0xe4ceb0),dark=mat(0x857666),wood=mat(P.wood),brass=mat(P.gold);
  const band=new T.MeshStandardMaterial({vertexColors:true,roughness:.91});
- for(const x of [-2.4,2.4])for(const y of [0,3.2]){const a=courtyardArch(band);a.position.set(x,y,1.64);staticRoot.add(a)}
+ let studioArch=null;
+ for(const x of [-2.4,2.4])for(const y of [0,3.2]){const a=courtyardArch(band);a.position.set(x,y,1.64);staticRoot.add(a);
+  // This original front arch crosses the raised needle's work-camera rays.
+  // Preserve its complete geometry and finish while keeping it independently hideable.
+  if(x===-2.4&&y===3.2){a.userData.noBatch=true;studioArch=a}
+ }
  for(const x of [-4.68,0,4.68])for(let i=0;i<20;i++){const b=box(staticRoot,x,.18+i*.305,1.69,.24,.295,.18,i%3===0?dark:stone);b.name='coursed-stone-pier'}
  // A small, closed door between the two ground-floor rooms echoes the journal.
  const door=arch(staticRoot,0,.14,-1.40,.80,2.15,wood,.07);door.name='closed-walnut-door';
@@ -72,7 +77,7 @@ export function createLevantineSetting(parent){
   mesh.geometry.setAttribute('color',new T.Float32BufferAttribute(colors,3));mesh.material=band;
  });
  batch(staticRoot);
- return {root,staticRoot,water,shadow,doorGlow,ripple,update(state,mix){
+ return {root,staticRoot,studioArch,water,shadow,doorGlow,ripple,update(state,mix){
   const f=nightFrame(state.elapsed,mix,state.settings.reducedMotion);
   shadow.visible=f.shadow>.001;shadow.material.opacity=f.shadow;shadow.position.x=-3.75+f.shadowX;
   doorGlow.material.opacity=f.door;doorGlow.visible=f.door>0;

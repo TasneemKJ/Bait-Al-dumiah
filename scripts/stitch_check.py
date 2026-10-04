@@ -194,15 +194,15 @@ def run(scenario):
         stitch_ready(page)
         check('machine entry focuses the canvas and opens the physical sewing cutaway',
               stitch_status(page)['mode'] == 'ritual' and
-              page.evaluate('document.activeElement.id==="world" && window.dollhouse.visual().workCeilingVisible===false'))
+              page.evaluate('document.activeElement.id==="world" && window.dollhouse.visual().workCeilingVisible===false && window.dollhouse.visual().workArchVisible===false'))
 
     def exit_stitch():
         page.locator('[data-stitch-action="exit"]').click()
         page.wait_for_function('window.dollhouse.stitch()===null',
                                timeout=20000, polling=100)
         ready()
-        check('leaving the needle restores the actual studio ceiling',
-              page.evaluate('window.dollhouse.visual().workCeilingVisible===true'))
+        check('leaving the needle restores the actual studio ceiling and front arch',
+              page.evaluate('window.dollhouse.visual().workCeilingVisible===true && window.dollhouse.visual().workArchVisible===true'))
 
     def wait_simulation(label, predicate, arg=None, timeout=180000):
         # Read-only wall/simulation evidence. The production clock and its frame
@@ -584,7 +584,7 @@ def run(scenario):
             ready()
             check('the finished cloth returns to an interactive studio',
                   not page.locator('.stitch-playfield').is_visible() and
-                  page.evaluate('!window.dollhouse.visual().stitchActive && window.dollhouse.visual().focusedRoom==="studio" && window.dollhouse.visual().workCeilingVisible===true'))
+                  page.evaluate('!window.dollhouse.visual().stitchActive && window.dollhouse.visual().focusedRoom==="studio" && window.dollhouse.visual().workCeilingVisible===true && window.dollhouse.visual().workArchVisible===true'))
             page.reload(wait_until='domcontentloaded')
             ready()
             check('earned mastery and improved bests survive reload without an active needle',

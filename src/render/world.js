@@ -73,6 +73,7 @@ export function createWorld(canvas,{onPick,onError}){
   if(house.originalTeaSet)house.originalTeaSet.visible=!teaActive;
   if(house.studioChair)house.studioChair.visible=!stitchActive;
   if(house.workCeiling)house.workCeiling.visible=!stitchActive;
+  if(courtyard.studioArch)courtyard.studioArch.visible=!stitchActive;
   applyFraming();
  }
  function setTeaActive(active){if(active)setWorkActivity('tea');else if(teaActive)setWorkActivity(null)}
@@ -170,7 +171,7 @@ export function createWorld(canvas,{onPick,onError}){
   getPortraits(){return portraitCache.getAll()},
   focusRoom(id,immediate=false){if(working()||!ROOMS.some(r=>r.id===id))return false;focusedRoom=id;focusedDoll=null;cameraMove.moveTo(framing(canvas.clientWidth,canvas.clientHeight,id),reducedMotion||immediate);return true},
   focusDoll(id){const p=residents.position(id);if(working()||!p)return false;focusedDoll=id;focusedRoom=null;cameraMove.moveTo(focusPose(),reducedMotion);return true},
-  visualStatus(){return {portraitCount:portraitCache.size,quality,focusedRoom,focusedDoll,nightMix,cameraMoving:cameraMove.active,previewVisible:preview.root.visible,previewValid:preview.root.userData.valid??false,windowMaterials:house.windows.size,activeOwnedLights:[...decor.values()].filter(o=>o.userData.ownedLight?.intensity>0).length,restoredLights:restoration.lights.filter(l=>l.intensity>0).length,reactivePoses:Object.fromEntries([...decor].map(([id,o])=>[id,{turn:o.rotation.y,rock:o.rotation.z,scale:o.scale.x}])),courtyard:house.root.getObjectByName('levantine-courtyard')?.userData.nightCue,selectedObject:objects.selected,story:storyProps.status(),teaActive,tea:teaTable.status(),stitchActive,workCeilingVisible:house.workCeiling.visible,stitch:sewingPlay.status(),stitchGuides:stitchGuidePositions(),chimeActive,chimes:moonChimes.status()}},
+  visualStatus(){return {portraitCount:portraitCache.size,quality,focusedRoom,focusedDoll,nightMix,cameraMoving:cameraMove.active,previewVisible:preview.root.visible,previewValid:preview.root.userData.valid??false,windowMaterials:house.windows.size,activeOwnedLights:[...decor.values()].filter(o=>o.userData.ownedLight?.intensity>0).length,restoredLights:restoration.lights.filter(l=>l.intensity>0).length,reactivePoses:Object.fromEntries([...decor].map(([id,o])=>[id,{turn:o.rotation.y,rock:o.rotation.z,scale:o.scale.x}])),courtyard:house.root.getObjectByName('levantine-courtyard')?.userData.nightCue,selectedObject:objects.selected,story:storyProps.status(),teaActive,tea:teaTable.status(),stitchActive,workCeilingVisible:house.workCeiling.visible,workArchVisible:courtyard.studioArch.visible,stitch:sewingPlay.status(),stitchGuides:stitchGuidePositions(),chimeActive,chimes:moonChimes.status()}},
   zoom(amount){if(working())return;cameraMove.cancel();camera.zoom=T.MathUtils.clamp(camera.zoom*amount,.8,3.5);camera.updateProjectionMatrix()},
   orbit(amount){if(working())return;cameraMove.cancel();const offset=camera.position.clone().sub(controls.target);offset.applyAxisAngle(new T.Vector3(0,1,0),amount);camera.position.copy(controls.target).add(offset);controls.update()},
   setEnabled(enabled){requestedEnabled=Boolean(enabled);controls.enabled=requestedEnabled&&!working();if(!enabled)cameraMove.cancel()},

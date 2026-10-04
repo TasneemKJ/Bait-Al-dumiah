@@ -94,7 +94,7 @@ export function makeFurniture(id){const g=new T.Group();
 }
 export function createHouse(scene){
  const root=new T.Group();root.position.y=.26;scene.add(root);const staticRoot=new T.Group();root.add(staticRoot);const lights=[];let originalTeaSet=null,studioChair=null;
- // Only the top ceiling and its front lip obstruct the raised sewing grip.
+ // The ceiling and its front lip cross the raised sewing grip's sightline.
  // Keep their original shapes/finishes in a local batch that can be restored.
  const workCeiling=new T.Group();workCeiling.name='sewing-ceiling-cutaway';root.add(workCeiling);
  for(let j=0;j<2;j++)box(staticRoot,0,j*3.2,0,9.85,.19,3.65,P.wood);
