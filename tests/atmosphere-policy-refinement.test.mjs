@@ -1,3 +1,4 @@
+import {readFileSync} from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {framing,lighting,nightSky,fog} from '../src/render/visual-policy.js';
@@ -49,4 +50,10 @@ test('ultra room practical-light policy gives each authored room a distinct rest
  for(const p of night){assert.ok(p.intensity>0&&p.intensity<=3.2);assert.ok(p.distance>=3&&p.distance<=6);}
  for(const id of ids)assert.ok(mod.roomLighting(id,0).intensity<mod.roomLighting(id,1).intensity);
  assert.deepEqual(mod.roomLighting('missing',Infinity),mod.roomLighting('kitchen',1));
+});
+test('world renderer applies room lighting to the four persistent house practicals',()=>{
+ const src=readFileSync(new URL('../src/render/world.js',import.meta.url),'utf8');
+ assert.match(src,/roomLighting/);
+ assert.match(src,/house\.lights\.forEach\(\(l,i\)/);
+ assert.match(src,/practical\.distance/);
 });
