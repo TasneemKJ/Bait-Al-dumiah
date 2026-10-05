@@ -1,8 +1,10 @@
 name: Verify dollhouse
 on:
   push:
-    branches: [main, feat/living-dollhouse]
+    branches: [main]
+    paths-ignore: ['**.md','docs/**']
   pull_request:
+    paths-ignore: ['**.md','docs/**']
 permissions:
   contents: read
 concurrency:
@@ -22,15 +24,6 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci --ignore-scripts
-      - name: Package reproducible source workspace
-        run: |
-          git ls-files -z > /tmp/dollhouse-tracked-files
-          tar -czf workspace.tgz --null -T /tmp/dollhouse-tracked-files node_modules/three/package.json node_modules/three/build node_modules/three/examples/jsm/controls/OrbitControls.js node_modules/three/LICENSE
-      - uses: actions/upload-artifact@v4
-        with:
-          name: source-workspace
-          path: workspace.tgz
-          retention-days: 1
       - run: npm run verify
       - uses: actions/setup-python@v5
         with:
@@ -48,44 +41,24 @@ jobs:
         env:
           DOLL_BASELINE: b99bf28e8eba7dd525381ff8ec99d64bdf35a715
         run: python scripts/doll_capture.py
-      - name: Retain model previews for early visual review
-        uses: actions/upload-artifact@v4
-        with:
-          name: doll-model-preview
-          path: artifacts/dolls/
-          retention-days: 1
       - name: Capture fine craft studies
         env:
           ART_BASELINE: 967feea3d9582801e07fe3c87f4d4c5d839ef1f4
         run: python scripts/craft_capture.py
-      - uses: actions/upload-artifact@v4
-        with:
-          name: craft-detail-preview
-          path: artifacts/craft/
-          retention-days: 1
       - name: Verify courtyard, Shami and audio
         run: python scripts/atmosphere_check.py
-      - uses: actions/upload-artifact@v4
-        with:
-          name: levantine-scene-preview
-          path: artifacts/levantine/
-          retention-days: 1
       - name: Play desktop and mobile game flows
         run: npm run test:browser
-      - name: Record source identity
-        if: always()
+      - name: Trim failure evidence
+        if: failure()
         run: |
-          mkdir -p artifacts
-          sha256sum src/*.js src/render/*.js src/*.css tests/* package.json index.html scripts/build.mjs scripts/serve.mjs > artifacts/source-sha256.txt
+          python -m pip install pillow
+          python scripts/trim-artifacts.py ${{ github.job }}
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: failure()
         with:
-          name: dollhouse-evidence
-          path: artifacts/
+          name: failure-evidence-${{ github.job }}
+          path: failure-evidence/
           retention-days: 1
-      - uses: actions/upload-artifact@v4
-        if: success()
-        with:
-          name: playable-dollhouse
-          path: dist/
-          retention-days: 1
+          compression-level: 9
+          if-no-files-found: ignore
