@@ -29,7 +29,7 @@ jobs:
         with:
           name: living-house-expansion
           path: artifacts/
-          retention-days: 14
+          retention-days: 1
   stories:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -53,7 +53,7 @@ jobs:
         with:
           name: hidden-house-stories
           path: artifacts/stories/
-          retention-days: 14
+          retention-days: 1
   tea:
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -87,7 +87,7 @@ jobs:
         with:
           name: physical-tea-service-${{ matrix.scenario }}
           path: artifacts/tea/${{ matrix.scenario }}/
-          retention-days: 14
+          retention-days: 1
   visibility:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -111,7 +111,7 @@ jobs:
         with:
           name: physical-tea-tab-visibility
           path: artifacts/visibility/
-          retention-days: 14
+          retention-days: 1
   stitch:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -147,4 +147,4 @@ jobs:
         with:
           name: physical-sewing-${{ matrix.scenario }}
           path: artifacts/stitch/${{ matrix.scenario }}/
-          retention-days: 14
+          retention-days: 1

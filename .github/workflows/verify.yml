@@ -30,7 +30,7 @@ jobs:
         with:
           name: source-workspace
           path: workspace.tgz
-          retention-days: 2
+          retention-days: 1
       - run: npm run verify
       - uses: actions/setup-python@v5
         with:
@@ -53,7 +53,7 @@ jobs:
         with:
           name: doll-model-preview
           path: artifacts/dolls/
-          retention-days: 7
+          retention-days: 1
       - name: Capture fine craft studies
         env:
           ART_BASELINE: 967feea3d9582801e07fe3c87f4d4c5d839ef1f4
@@ -62,14 +62,14 @@ jobs:
         with:
           name: craft-detail-preview
           path: artifacts/craft/
-          retention-days: 7
+          retention-days: 1
       - name: Verify courtyard, Shami and audio
         run: python scripts/atmosphere_check.py
       - uses: actions/upload-artifact@v4
         with:
           name: levantine-scene-preview
           path: artifacts/levantine/
-          retention-days: 7
+          retention-days: 1
       - name: Play desktop and mobile game flows
         run: npm run test:browser
       - name: Record source identity
@@ -82,10 +82,10 @@ jobs:
         with:
           name: dollhouse-evidence
           path: artifacts/
-          retention-days: 14
+          retention-days: 1
       - uses: actions/upload-artifact@v4
         if: success()
         with:
           name: playable-dollhouse
           path: dist/
-          retention-days: 14
+          retention-days: 1
