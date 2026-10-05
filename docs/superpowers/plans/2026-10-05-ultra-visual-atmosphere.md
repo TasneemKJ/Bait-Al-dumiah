@@ -37,3 +37,5 @@
 - [ ] Create one point light per authored room and update its color/intensity/distance from policy; retain global house light behavior and quality budget.
 - [ ] Run `npm test`, `npm run build`, `npm run test:browser`.
 - [ ] Commit.
+
+RED gate trigger: PR synchronization only; no production code in this commit.
