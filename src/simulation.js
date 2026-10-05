@@ -15,7 +15,7 @@ export function createState(){
   activities:{mastery:Object.fromEntries(ACTIVITIES.map(a=>[a.id,0])),completed:Object.fromEntries(ACTIVITIES.map(a=>[a.id,0])),lastReward:Object.fromEntries(ACTIVITIES.map(a=>[a.id,-ACTIVITY_COOLDOWN])),teaRecords:[null,null,null,null],stitchRecords:[null,null,null,null],active:null},
   restoration:Object.fromEntries(ROOMS.map(r=>[r.id,0])),
   story:{chapter:0,step:0,lastAction:null,lastActionAt:-10},
-  settings:{locale:'en',muted:true,reducedMotion:false,quality:'auto'}};
+  settings:{locale:'en',muted:true,reducedMotion:false,quality:'auto',largeText:false}};
 }
 export const isNight=s=>s.clock>=120;
 export const hour=s=>(8+s.clock/10)%24;
@@ -350,10 +350,28 @@ export function playStoryKeepsake(s,key){
 }
 // Whitelist all persisted fields: no saved HTML/prose, renderer objects, or wall-clock catch-up.
 // Fields added after the first release default safely, so earlier version-1 saves keep loading.
-export function restore(raw){
- const s=createState();let v;
- try{v=JSON.parse(raw)}catch{return s}
- if(!v||v.version!==1||Array.isArray(v))return s;
+// Save schema. Version 1 is the only released format (key bait-al-dumiah.v1).
+// A future format adds MIGRATIONS[n] (n -> n+1) and bumps SAVE_VERSION; restore()
+// then upgrades older saves step by step. Unknown or newer versions are refused.
+export const SAVE_VERSION=1;
+const MIGRATIONS={};
+export function migrate(v,migrations=MIGRATIONS,target=SAVE_VERSION){
+ if(!v||typeof v!=='object'||Array.isArray(v)||!Number.isInteger(v.version)||v.version<1||v.version>target)return null;
+ let out=v;
+ while(out.version<target){const step=migrations[out.version];if(typeof step!=='function')return null;const next=step(structuredClone(out));if(!next||typeof next!=='object'||next.version!==out.version+1)return null;out=next}
+ return out;
+}
+// Parses and validates a save. ok is false when text was present but unreadable,
+// so the caller can keep a backup instead of silently overwriting it.
+export function readSave(raw){
+ if(raw==null||raw==='')return {ok:true,empty:true,state:createState()};
+ let v;try{v=JSON.parse(raw)}catch{return {ok:false,reason:'corrupt',state:createState()}}
+ const current=migrate(v);if(!current)return {ok:false,reason:v&&typeof v==='object'&&Number.isInteger(v.version)&&v.version>SAVE_VERSION?'newer':'corrupt',state:createState()};
+ return {ok:true,state:restoreValid(current)};
+}
+export function restore(raw){return readSave(raw).state}
+function restoreValid(v){
+ const s=createState();
  s.elapsed=clamp(v.elapsed,0,1e9);s.clock=clamp(v.clock,0,239.999);s.day=integer(v.day,1,99999);s.buttons=integer(v.buttons,0,9999);s.unease=clamp(v.unease);s.cares=integer(v.cares,0,1e9);
  if(Array.isArray(v.dolls))for(const d of s.dolls){const a=v.dolls.find(x=>x&&x.id===d.id);if(!a)continue;for(const k of ['hunger','energy','comfort','bond'])if(Number.isFinite(a[k]))d[k]=clamp(a[k]);if(has(ROOMS,a.room))d.room=a.room;d.lastCare=-10;d.action='idle';d.actionUntil=0}
  const occupied=new Set();
@@ -377,7 +395,7 @@ export function restore(raw){
  }
  const ids=list=>Array.isArray(list)?MILESTONES.filter(m=>list.includes(m.id)).map(m=>m.id):[];
  s.milestones=ids(v.milestones);s.achieved=ids([...ids(v.achieved),...s.milestones]);
- if(v.settings&&typeof v.settings==='object'){s.settings.locale=v.settings.locale==='ar'?'ar':'en';s.settings.muted=v.settings.muted!==false;s.settings.reducedMotion=v.settings.reducedMotion===true;s.settings.quality=['auto','low','high'].includes(v.settings.quality)?v.settings.quality:'auto'}
+ if(v.settings&&typeof v.settings==='object'){s.settings.locale=v.settings.locale==='ar'?'ar':'en';s.settings.muted=v.settings.muted!==false;s.settings.reducedMotion=v.settings.reducedMotion===true;s.settings.largeText=v.settings.largeText===true;s.settings.quality=['auto','low','high'].includes(v.settings.quality)?v.settings.quality:'auto'}
  return s;
 }
 

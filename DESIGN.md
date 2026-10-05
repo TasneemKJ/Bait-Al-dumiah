@@ -10,7 +10,12 @@ Soft porcelain and cream paper, rose, mint and gold accents, terracotta roof, wa
 
 ## UI/UX principles
 - One focal point: the house. Panels are translucent paper capsules that belong to the setting, never generic web-app cards.
-- The top-left objective card says one clue and one action; counters never wrap (`.wish-count` is nowrap).
+- The objective card says one clue and one action; counters never wrap (`.wish-count` is nowrap).
+- Phone portrait: the clue folds into a compact chip (star toggle plus action). The star opens the clue text; a rose dot marks a clue not yet read. Desktop and landscape keep the open card.
+- HUD cards keep one gutter (8-12px) between them; nothing touches edge to edge.
+- Phone portrait frames the whole house, roof, stair and garden edge included (`src/render/house-framing.js`); rooms keep their close framing.
+- Directional icons follow reading direction (the objective arrow mirrors in Arabic).
+- Returning players get one short welcome line naming the most useful waiting thing (basket, journal reward, wishes), never a wall of text.
 - Bottom: room tabs above the dock (House tools, sound, pause); thumb-reachable, at least 44px.
 - Ritual overlays hide the HUD they do not need and keep Exit, sound and pause visible.
 - Night changes palette, not layout. Reduced motion keeps pieces still.

@@ -1,4 +1,5 @@
 import {createLevantineSetting} from './levantine-setting.js';
+import {houseFraming} from './house-framing.js';
 import {portraitFraming} from './doll-camera.js';
 import * as T from 'three';
 import {renderPortrait,createPortraitCache} from './doll-portraits.js';
@@ -24,7 +25,7 @@ import {chimeFraming} from './chime-camera.js';
 import {createRestoration} from './restoration.js';
 import {createCameraMove} from './camera-motion.js';
 import {createAtmosphere} from './atmosphere.js';
-import {lighting,detail,framing,fog as fogPolicy,roomLighting} from './visual-policy.js';
+import {lighting,detail,framing,fog as fogPolicy,practicalLight} from './visual-policy.js';
 
 export function createWorld(canvas,{onPick,onError}){
  const renderer=new T.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'});
@@ -35,7 +36,7 @@ export function createWorld(canvas,{onPick,onError}){
  const controls=new OrbitControls(camera,canvas);controls.enablePan=false;controls.enableDamping=true;controls.dampingFactor=.10;controls.minAzimuthAngle=-.48;controls.maxAzimuthAngle=.48;controls.minPolarAngle=1.10;controls.maxPolarAngle=1.50;controls.minZoom=.8;controls.maxZoom=3.5;
  controls.touches.ONE=T.TOUCH.ROTATE;controls.touches.TWO=T.TOUCH.DOLLY_ROTATE;
  let focusedRoom=null,focusedDoll=null,reducedMotion=false,teaActive=false,stitchActive=false,chimeActive=false,chimeSelection=-1,requestedEnabled=true;const working=()=>teaActive||stitchActive||chimeActive;const cameraMove=createCameraMove(camera,controls);const cancelCameraMove=()=>cameraMove.cancel();controls.addEventListener('start',cancelCameraMove);
- function focusPose(){if(chimeActive)return chimeFraming(canvas.clientWidth,canvas.clientHeight);if(teaActive)return teaFraming(canvas.clientWidth,canvas.clientHeight);if(stitchActive)return stitchFraming(canvas.clientWidth,canvas.clientHeight);const p=focusedDoll?residents.position(focusedDoll):null;if(p){p.add(house.root.position);return portraitFraming(canvas.clientWidth,canvas.clientHeight,p.toArray())}return framing(canvas.clientWidth,canvas.clientHeight,focusedRoom)}
+ function focusPose(){if(chimeActive)return chimeFraming(canvas.clientWidth,canvas.clientHeight);if(teaActive)return teaFraming(canvas.clientWidth,canvas.clientHeight);if(stitchActive)return stitchFraming(canvas.clientWidth,canvas.clientHeight);const p=focusedDoll?residents.position(focusedDoll):null;if(p){p.add(house.root.position);return portraitFraming(canvas.clientWidth,canvas.clientHeight,p.toArray())}return houseFraming(canvas.clientWidth,canvas.clientHeight,focusedRoom)}
  function applyFraming(){cameraMove.moveTo(focusPose(),true)}
  function home(){if(working())return;focusedRoom=null;focusedDoll=null;applyFraming()}
  home();
@@ -192,14 +193,9 @@ export function createWorld(canvas,{onPick,onError}){
    const night=isNight(state);nightMix=state.settings.reducedMotion?Number(night):T.MathUtils.damp(nightMix,Number(night),2.2,dt);
    const cue=courtyard.update(state,nightMix),look=lighting(nightMix),haze=fogPolicy(nightMix);hemi.intensity=look.ambient;key.intensity=look.key;fill.intensity=look.rim;renderer.toneMappingExposure=look.exposure;depthFog.density=haze.density;depthFog.color.setHex(haze.color);
    hemi.color.set(0xe9e0d5).lerp(new T.Color(0x849bc9),nightMix);key.color.set(0xffe5c2).lerp(new T.Color(0xb8caff),nightMix);fill.color.set(0xb8cbd5).lerp(new T.Color(0x829bdb),nightMix);
-   house.lights.forEach((l,i)=>{if(l.isLight){
-    const practical=roomLighting(ROOMS[i]?.id,nightMix),focusBoost=focusedRoom===ROOMS[i]?.id?1.12:1;
-    // Reuse the four persistent authored room lights instead of allocating
-    // extra lights per frame. Each room now has its own miniature-film color
-    // and falloff while the global night cue still owns overall lamp energy.
-    l.intensity=(look.lamps*.22+practical.intensity)*cue.lamp*focusBoost;
-    l.color.setHex(practical.color);l.distance=practical.distance;
-   }});
+   // Each persistent room lamp keeps its own miniature-film colour and falloff;
+   // the global night cue still owns overall lamp energy. Lamps are found by room tag.
+   for(const l of house.lights){if(!l.isLight||!l.userData.room)continue;const p=practicalLight(l.userData.room,nightMix,look.lamps,cue.lamp,focusedRoom===l.userData.room);l.intensity=p.intensity;l.color.setHex(p.color);l.distance=p.distance}
    house.windows.forEach(m=>{m.emissive.set(0x8baaca);m.emissiveIntensity=.14+nightMix*.44});details.update(nightMix);atmosphere.update(state,nightMix,quality);roomEffects.update(state,nightMix);restoration.update(state,nightMix);storyProps.update(state,nightMix);teaTable.update(state);sewingPlay.update(state);moonChimes.update(state,chimeSelection);roomFrame.show(working()?null:focusedRoom);preview.update(previewPose,state);
    residents.update(state,dt,selected,Math.atan2(camera.position.x-controls.target.x,camera.position.z-controls.target.z));
    for(const doll of residents.dolls){const room=state.dolls.find(d=>d.id===doll.id)?.room;doll.root.visible=!(teaActive&&room==='kitchen'||stitchActive&&room==='studio'||chimeActive&&room==='bedroom')}

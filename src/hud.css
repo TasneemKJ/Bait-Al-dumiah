@@ -1,0 +1,37 @@
+/* HUD rhythm: one gutter between floating paper cards; on phone portrait the clue folds into a chip so the house stays the focal point. */
+#ui{--hud-gutter:10px;--time-w:126px}
+.objective-toggle{display:none}
+.objective-row{display:flex;align-items:center;gap:6px;min-width:0}
+.objective-row>#objective-action{min-width:0}
+@media(max-width:680px) and (orientation:portrait){
+ .time-tools{width:var(--time-w);box-sizing:border-box}
+ .objective{width:calc(100% - 28px - var(--time-w) - var(--hud-gutter));max-width:236px;box-sizing:border-box;padding:5px 6px 6px;border-radius:12px}
+ .objective[data-expanded=false]{padding:4px;background:var(--story-text-scrim);border-radius:26px;width:auto;max-width:calc(100% - 28px - var(--time-w) - var(--hud-gutter));box-shadow:0 4px 18px #4a32301a}
+ .objective[data-expanded=false] .objective-head,.objective[data-expanded=false] #objective-copy{display:none}
+ #ui .objective .objective-toggle{position:relative;display:grid;place-items:center;flex:none;width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border-radius:50%;border:1px solid #d9c2a3;background:#fff6e9;color:#a07a45}
+ .objective-toggle .icon{width:18px;height:18px}
+ #ui .objective .objective-toggle[aria-expanded=true]{background:#efdcc4}
+ .clue-dot{position:absolute;top:7px;inset-inline-end:7px;width:8px;height:8px;border-radius:50%;background:#b0607d;box-shadow:0 0 0 2px #fff6e9;display:none}
+ .objective[data-unread=true] .clue-dot{display:block}
+ #ui .objective-row>#objective-action{flex:1 1 auto;min-height:44px;line-height:1.3;text-align:start;white-space:normal}
+ .night #ui .objective .objective-toggle{background:#302c3b;border-color:#86755b;color:#e6caa3}.night .clue-dot{box-shadow:0 0 0 2px #302c3b}
+}
+@media(max-width:360px) and (orientation:portrait){#ui{--hud-gutter:8px}}
+/* Save file: export/import sits above reset, in the same paper language as the sheet's buttons. */
+.save-file{border-top:1px dashed var(--line);padding:16px 0 18px}
+.save-file h3{font-family:Georgia,serif;font-weight:normal;font-size:16px;margin:0 0 6px}
+.save-file p{font-size:12px;line-height:1.7;color:var(--muted);margin:0 0 12px}
+.save-file .row{flex-wrap:wrap}
+.file-button{position:relative;display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px;padding:8px 16px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);font-size:13px;gap:9px;cursor:pointer}
+.file-button input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
+.file-button:focus-within{outline:2px solid var(--rose);outline-offset:2px}
+[dir=rtl] .save-file h3{font-family:Tahoma,Arial,sans-serif}
+.privacy-note{font-size:12px;line-height:1.7;color:var(--muted);margin:14px 0 0}
+.privacy-note a{color:var(--rose-dark);display:inline-flex;align-items:center;min-height:44px}
+/* Direction: the objective's forward arrow points the reading way in Arabic. */
+[dir=rtl] #objective-action .icon:last-child{transform:scaleX(-1)}
+/* Short landscape: brand, status, clue and time cards keep a gutter instead of touching. */
+@media(max-height:560px) and (orientation:landscape){
+ .objective{top:52px}
+ .time-tools{top:72px}
+}
