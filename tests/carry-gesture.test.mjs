@@ -30,3 +30,12 @@ test('cancel, invalid input, and secondary buttons cannot drop or preserve a sta
  assert.equal(g.up(point(Infinity,20)),null);
  assert.equal(g.down(point(3,4)),true);
 });
+
+test('a non-primary touch cannot start a carried-item drag',()=>{
+ const g=createCarryGesture();
+ const secondary={...point(20,30,2),isPrimary:false};
+ assert.equal(g.down(secondary),false);
+ assert.equal(g.move({...secondary,clientX:90,clientY:100}),false);
+ assert.equal(g.up({...secondary,clientX:110,clientY:120}),null);
+ assert.equal(g.down({...point(20,30,1),isPrimary:true}),true);
+});
