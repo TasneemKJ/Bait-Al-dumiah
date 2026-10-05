@@ -81,3 +81,4 @@
  .dock[data-expanded=false]{left:auto;right:auto;inset-inline-start:auto;inset-inline-end:14px;transform:none;padding:2px}
 }
 @media(prefers-reduced-motion:reduce){.carry-ghost{transform:translate(-50%,-50%)}}
+.objective-head .wish-count{white-space:nowrap;flex:none}
