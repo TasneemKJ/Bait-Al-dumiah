@@ -1,8 +1,12 @@
 name: Verify living house expansion
 on:
-  pull_request:
+  workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
+concurrency:
+  group: expansion-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   expansion:
     runs-on: ubuntu-latest
@@ -24,12 +28,19 @@ jobs:
       - run: python -m playwright install --with-deps chromium
       - run: python scripts/art_check.py
       - run: python scripts/expansion_check.py
+      - name: Trim failure evidence
+        if: failure()
+        run: |
+          python -m pip install pillow
+          python scripts/trim-artifacts.py ${{ github.job }}
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: failure()
         with:
-          name: living-house-expansion
-          path: artifacts/
+          name: failure-evidence-${{ github.job }}
+          path: failure-evidence/
           retention-days: 1
+          compression-level: 9
+          if-no-files-found: ignore
   stories:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -48,12 +59,19 @@ jobs:
       - run: python -m playwright install --with-deps chromium
       - name: Play carried-object stories on desktop and phones
         run: python scripts/story_check.py
+      - name: Trim failure evidence
+        if: failure()
+        run: |
+          python -m pip install pillow
+          python scripts/trim-artifacts.py ${{ github.job }}
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: failure()
         with:
-          name: hidden-house-stories
-          path: artifacts/stories/
+          name: failure-evidence-${{ github.job }}
+          path: failure-evidence/
           retention-days: 1
+          compression-level: 9
+          if-no-files-found: ignore
   tea:
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -79,15 +97,19 @@ jobs:
       - run: python -m playwright install --with-deps chromium
       - name: Pour and serve tea through mouse, touch and keyboard
         run: xvfb-run -a python scripts/tea_check.py
-      - name: Emit original tea frames for review
-        if: always()
-        run: python scripts/emit-review-images.py artifacts/tea/${{ matrix.scenario }}
+      - name: Trim failure evidence
+        if: failure()
+        run: |
+          python -m pip install pillow
+          python scripts/trim-artifacts.py ${{ github.job }}
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: failure()
         with:
-          name: physical-tea-service-${{ matrix.scenario }}
-          path: artifacts/tea/${{ matrix.scenario }}/
+          name: failure-evidence-${{ github.job }}-${{ matrix.scenario }}
+          path: failure-evidence/
           retention-days: 1
+          compression-level: 9
+          if-no-files-found: ignore
   visibility:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -106,12 +128,19 @@ jobs:
       - run: python -m playwright install --with-deps chromium
       - name: Verify real background tabs release held tea and sewing
         run: xvfb-run -a python scripts/visibility_check.py
+      - name: Trim failure evidence
+        if: failure()
+        run: |
+          python -m pip install pillow
+          python scripts/trim-artifacts.py ${{ github.job }}
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: failure()
         with:
-          name: physical-tea-tab-visibility
-          path: artifacts/visibility/
+          name: failure-evidence-${{ github.job }}
+          path: failure-evidence/
           retention-days: 1
+          compression-level: 9
+          if-no-files-found: ignore
   stitch:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -139,12 +168,16 @@ jobs:
       - run: python -m playwright install --with-deps chromium
       - name: Trace, repair and finish cloth through actual needle input
         run: xvfb-run -a python scripts/stitch_check.py
-      - name: Emit original sewing frames for review
-        if: always()
-        run: python scripts/emit-review-images.py artifacts/stitch/${{ matrix.scenario }}
+      - name: Trim failure evidence
+        if: failure()
+        run: |
+          python -m pip install pillow
+          python scripts/trim-artifacts.py ${{ github.job }}
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: failure()
         with:
-          name: physical-sewing-${{ matrix.scenario }}
-          path: artifacts/stitch/${{ matrix.scenario }}/
+          name: failure-evidence-${{ github.job }}-${{ matrix.scenario }}
+          path: failure-evidence/
           retention-days: 1
+          compression-level: 9
+          if-no-files-found: ignore

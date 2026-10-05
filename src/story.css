@@ -55,7 +55,7 @@
  #ui[data-object-selected]:not([data-object-selected=""]) .objective{visibility:hidden}
  [dir=rtl] .held-item,[dir=rtl] .held-item:active:not(:disabled){transform:translateX(50%)}[dir=rtl] .ribbon-copy h2{font-family:Tahoma,sans-serif;font-size:15px}[dir=rtl] .scene-response{font-family:Tahoma,sans-serif}
 }
-@media(max-width:360px){.brand h1{font-size:18px}.objective{width:calc(100% - 126px)}.objective p{font-size:12px}.object-ribbon{bottom:180px}.scene-response{bottom:292px}.room-views button{min-width:60px}.held-item{max-width:164px;min-width:130px}.object-controls>[data-object-toggle] span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}.object-controls>[data-object-toggle]{width:44px;padding:10px}}
+@media(max-width:360px){.brand h1{font-size:18px}.objective{width:calc(100% - 150px)}.objective p{font-size:12px}.object-ribbon{bottom:180px}.scene-response{bottom:292px}.room-views button{min-width:60px}.held-item{max-width:164px;min-width:130px}.object-controls>[data-object-toggle] span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}.object-controls>[data-object-toggle]{width:44px;padding:10px}}
 @media(max-height:560px) and (orientation:landscape){
  .brand{top:12px;inset-inline-start:14px}.brand .eyebrow{display:none}#ui .brand h1{font-size:20px;line-height:1.25}.brand-mark{display:none}.house-status{top:12px;inset-inline-end:14px}.time-tools{top:61px;inset-inline-end:14px}.objective{top:48px;inset-inline-start:14px;width:176px;padding:5px}.objective p{font-size:11px;margin:4px 0}
  .room-views{left:auto;right:auto;bottom:12px;inset-inline-start:14px;transform:none;display:grid;grid-template-columns:44px 44px;gap:0}.room-views button{width:44px;min-width:44px;height:44px}.room-views button span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
@@ -81,3 +81,4 @@
  .dock[data-expanded=false]{left:auto;right:auto;inset-inline-start:auto;inset-inline-end:14px;transform:none;padding:2px}
 }
 @media(prefers-reduced-motion:reduce){.carry-ghost{transform:translate(-50%,-50%)}}
+.objective-head .wish-count{white-space:nowrap;flex:none}

@@ -113,3 +113,17 @@ On a desktop with a display, omit `xvfb-run -a`. The fixture always launches a h
 Read-only references: **Al-ejar** (legible, meaningful room furnishings), **Al-bayyara** (care/progression and separation of simulation and presentation), **souq-al-layl** (warm light against darkness and restrained UI), **Al-nafetha** (mobile-first bilingual intimate spaces). No code or assets were copied from those games, and those repositories were not modified.
 
 Three.js is MIT-licensed; its license ships in `dist/vendor/THREE-LICENSE.txt`.
+
+## Checks: fast gate and full suite
+
+Pull requests and pushes to `main` run only the fast gate (`verify`: `npm ci`, `npm run verify`, about a minute). The heavy browser suites never run on PRs or deploys. Run them locally before a batch of gameplay or art changes:
+
+```sh
+npm run verify && npm run test:browser          # core flows (PORT=4391 if 4177 is busy)
+python scripts/ui_check.py && python scripts/art_check.py && python scripts/atmosphere_check.py
+python scripts/chime_check.py; python scripts/story_check.py            # moon chimes, object stories
+python scripts/expansion_check.py                                       # three rituals journey
+xvfb-run -a python scripts/tea_check.py; xvfb-run -a python scripts/stitch_check.py; xvfb-run -a python scripts/visibility_check.py
+```
+
+The `Full suite` workflow runs the browser suite plus the chimes and expansion workflows every Monday on `main`, and on demand (`workflow_dispatch`, as do `chimes.yml` and `expansion.yml`). Failures upload one trimmed, 1-day evidence artifact (`scripts/trim-artifacts.py`).
