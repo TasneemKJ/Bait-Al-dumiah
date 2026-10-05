@@ -1,0 +1,281 @@
+name: Bait final story and chime acceptance
+on:
+  push:
+    branches: ['qa/bait-final-f3ea87d-20261005']
+permissions:
+  contents: read
+jobs:
+  physical-phone:
+    name: Physical ${{ matrix.journey }} candidate
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ matrix.job_minutes }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include:
+          - journey: chimes-phone
+            family: chimes
+            scenario: phone
+            script: scripts/chime_check.py
+            command: python -u scripts/chime_check.py
+            directory: artifacts/chimes/phone
+            report: checks.json
+            run_minutes: 15
+            job_minutes: 23
+            images: '["02-touch-held.png","05-earned-constellation.png","07-house-568x320.png"]'
+          - journey: carried-object-stories
+            family: stories
+            scenario: mixed
+            script: scripts/story_check.py
+            command: python -u scripts/story_check.py
+            directory: artifacts/stories
+            report: results.json
+            run_minutes: 15
+            job_minutes: 23
+            images: '["06-arabic-water-in-hand.png","09-landscape-welcome.png","11-house-remembers.png"]'
+    defaults:
+      run:
+        shell: bash
+        working-directory: source
+    env:
+      SOURCE_SHA: f3ea87d175c44cec09b082e9bd12d172690883df
+      REVIEW_REVISION: candidate
+      REVIEW_GAME: Bait-Al-dumiah
+      TEA_SCENARIO: phone
+      TEA_HEADED: '1'
+      STITCH_SCENARIO: phone
+      STITCH_HEADED: '1'
+      CHIME_SCENARIO: phone
+      PYTHONUNBUFFERED: '1'
+      # Set to '0' to omit the optional original-image log transport.
+      EMIT_PHYSICAL_ORIGINALS: '1'
+      EVIDENCE_DIRECTORY: ${{ matrix.directory }}
+      REPORT_NAME: ${{ matrix.report }}
+      JOURNEY: ${{ matrix.journey }}
+    steps:
+      - name: Check out immutable candidate source
+        id: checkout
+        uses: actions/checkout@v7
+        with:
+          ref: f3ea87d175c44cec09b082e9bd12d172690883df
+          persist-credentials: false
+          path: source
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: source/package-lock.json
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Verify exact source and unchanged browser pin
+        id: identity
+        run: |
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          test "$(cat requirements.txt)" = 'playwright==1.63.0'
+          printf 'PRODUCT_SOURCE candidate %s\n' "$SOURCE_SHA"
+          git rev-parse 'HEAD^{tree}'
+          python -m py_compile "${{ matrix.script }}" scripts/tea_check.py scripts/stitch_gestures.py scripts/chime_gestures.py
+      - name: Install and build the unchanged game
+        id: build
+        run: |
+          npm ci --ignore-scripts
+          npm run build
+      - name: Install the pinned standard-suite browser
+        id: browser
+        run: |
+          python -m pip install -r requirements.txt pillow
+          python -m playwright install --with-deps chromium
+          command -v xvfb-run
+      - name: Run one independent standard physical journey
+        id: journey
+        # GNU timeout leaves a margin for summary, optional originals and trim.
+        # Exit status 124/137 remains a failure; no continue-on-error or retries.
+        run: |
+          mkdir -p "$EVIDENCE_DIRECTORY"
+          printf '%s\n' "$SOURCE_SHA" > "$EVIDENCE_DIRECTORY/review-source-commit.txt"
+          start=$(date +%s)
+          set +e
+          timeout --signal=INT --kill-after=45s ${{ matrix.run_minutes }}m ${{ matrix.command }} 2>&1 | tee "$EVIDENCE_DIRECTORY/journey.log"
+          status=${PIPESTATUS[0]}
+          set -e
+          elapsed=$(( $(date +%s) - start ))
+          printf '{"exitCode":%d,"wallSeconds":%d,"limitMinutes":%d}\n' "$status" "$elapsed" "${{ matrix.run_minutes }}" > "$EVIDENCE_DIRECTORY/command-status.json"
+          exit "$status"
+      - name: Log the exact outcome and bounded observations
+        if: ${{ always() }}
+        working-directory: ${{ github.workspace }}
+        env:
+          OUTCOMES: ${{ toJSON(steps) }}
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          steps = json.loads(os.environ['OUTCOMES'])
+          directory = Path('source') / os.environ['EVIDENCE_DIRECTORY']
+          outcomes = {name: steps.get(name, {}).get('outcome', 'not-run')
+                      for name in ('checkout', 'identity', 'build', 'browser', 'journey')}
+          summary = {'sourceCommit': os.environ['SOURCE_SHA'], 'revision': 'candidate',
+                     'journey': os.environ['JOURNEY'], 'outcomes': outcomes,
+                     'physicalFixture': {'hasTouch': True, 'deviceScaleFactor': 1, 'cpuThrottle': 1}}
+          report = directory / os.environ['REPORT_NAME']
+          if report.is_file():
+              result = json.loads(report.read_text())
+              checks = result.get('checks', [])
+              summary['checks'] = {'total': len(checks),
+                  'passed': sum(check.get('passed') is True for check in checks),
+                  'failed': [check.get('name') for check in checks if not check.get('passed')]}
+              summary['errors'] = result.get('errors', [])
+          else:
+              summary['report'] = 'missing; journey was not run or did not finish normally'
+          status = directory / 'command-status.json'
+          if status.is_file():
+              summary['command'] = json.loads(status.read_text())
+          print('PHYSICAL_REVIEW_OUTCOME ' + json.dumps(summary, ensure_ascii=False))
+          for name in ('render-stats.json', 'waits.json', 'failure-state.json', 'failure.txt'):
+              path = directory / name
+              if path.is_file():
+                  text = path.read_text(errors='replace')
+                  print('PHYSICAL_OBSERVATION ' + json.dumps({'name': name,
+                      'text': text[:24000], 'truncated': len(text) > 24000}, ensure_ascii=False))
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as output:
+              output.write('Physical journey: ' + summary['journey'] + '\n\n')
+              output.write('Exact candidate: ' + summary['sourceCommit'] + '\n\n')
+              output.write('\n'.join('- ' + name + ': ' + outcome for name, outcome in outcomes.items()) + '\n\n')
+              output.write('Standard physical input fixture: actual touch; DPR 1; no CPU throttle. Separate DPR 2 / 4x CPU images remain required. A timeout or partial report is not a pass.\n')
+              if 'checks' in summary:
+                  output.write('\nChecks: ' + json.dumps(summary['checks'], ensure_ascii=False) + '\n')
+          PY
+      - name: Optional bounded canonical originals after a successful journey
+        if: ${{ !cancelled() && steps.journey.outcome == 'success' && env.EMIT_PHYSICAL_ORIGINALS == '1' }}
+        timeout-minutes: 2
+        env:
+          SELECTED_IMAGES: ${{ matrix.images }}
+          PHYSICAL_FAMILY: ${{ matrix.family }}
+          PHYSICAL_SCENARIO: ${{ matrix.scenario }}
+        run: |
+          python - <<'PY'
+          import base64, hashlib, json, os, struct, subprocess
+          from pathlib import Path
+          commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          assert commit == os.environ['SOURCE_SHA']
+          directory = Path(os.environ['EVIDENCE_DIRECTORY']).resolve()
+          artifacts = Path('artifacts').resolve()
+          assert directory.is_relative_to(artifacts)
+          used = 0
+          names = json.loads(os.environ['SELECTED_IMAGES'])
+          assert len(names) <= 3
+          for name in names:
+              assert Path(name).name == name and name.endswith('.png')
+              path = directory / name
+              assert path.resolve().is_relative_to(artifacts) and path.is_file(), name
+              data = path.read_bytes()
+              assert len(data) >= 24 and data[:8] == b'\x89PNG\r\n\x1a\n', name
+              if len(data) > 2 * 1024 * 1024 or used + len(data) > 4 * 1024 * 1024:
+                  print('SCENE_IMAGE_SKIPPED_BUDGET ' + name, flush=True)
+                  continue
+              used += len(data)
+              width, height = struct.unpack('>II', data[16:24])
+              encoded = base64.b64encode(data).decode('ascii')
+              metadata = {'name': Path(name).stem, 'path': 'physical-' + os.environ['JOURNEY'] + '-' + name,
+                  'activity': os.environ['PHYSICAL_FAMILY'], 'scenario': os.environ['PHYSICAL_SCENARIO'],
+                  'revision': 'candidate', 'sourceCommit': commit, 'game': os.environ['REVIEW_GAME'],
+                  'width': width, 'height': height, 'bytes': len(data), 'purpose': 'canonical-game',
+                  'sha256': hashlib.sha256(data).hexdigest(), 'base64Length': len(encoded)}
+              print('SCENE_IMAGE_BEGIN ' + json.dumps(metadata), flush=True)
+              for start in range(0, len(encoded), 12000):
+                  print('SCENE_IMAGE_DATA ' + encoded[start:start + 12000], flush=True)
+              print('SCENE_IMAGE_END ' + name, flush=True)
+          print('PHYSICAL_IMAGE_TRANSPORT ' + json.dumps({'originalBytes': used, 'limitBytes': 4194304}), flush=True)
+          PY
+      - name: Trim failure evidence using the repository policy
+        if: ${{ failure() && steps.browser.outcome == 'success' }}
+        run: python scripts/trim-artifacts.py "physical-${{ matrix.journey }}"
+      - name: Retain one small failure artifact
+        if: ${{ failure() && steps.browser.outcome == 'success' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: failure-evidence-composition-${{ matrix.journey }}
+          path: source/failure-evidence/
+          retention-days: 1
+          compression-level: 9
+          if-no-files-found: ignore
+  scene-regression:
+    name: Scene input ${{ matrix.case }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        case: [ar-reduced, en-motion, ar-throttled, en-throttled]
+    defaults:
+      run:
+        working-directory: source
+        shell: bash
+    env:
+      SCENE_CASE: ${{ matrix.case }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: f3ea87d175c44cec09b082e9bd12d172690883df
+          persist-credentials: false
+          path: source
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Exact source build and browser
+        run: |
+          test "$(git rev-parse HEAD)" = "f3ea87d175c44cec09b082e9bd12d172690883df"
+          git rev-parse HEAD 'HEAD^{tree}'
+          npm ci --ignore-scripts
+          npm run build
+          python -m pip install -r requirements.txt
+          python -m playwright install --with-deps chromium
+      - name: Real first-attempt scene gestures
+        run: python -u scripts/scene_input_check.py
+      - name: Record regression outcomes and observations
+        if: always()
+        run: |
+          cat artifacts/scene-input/$SCENE_CASE/results.json
+          test ! -f artifacts/scene-input/$SCENE_CASE/input-observations.json || cat artifacts/scene-input/$SCENE_CASE/input-observations.json
+  ui-art:
+    name: Final source DOM and art contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: source
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: f3ea87d175c44cec09b082e9bd12d172690883df
+          persist-credentials: false
+          path: source
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - run: |
+          test "$(git rev-parse HEAD)" = "f3ea87d175c44cec09b082e9bd12d172690883df"
+          npm ci --ignore-scripts
+          test "$(git rev-parse HEAD:src)" = 'e7ad1fcc23fb26acc4493b2f31d1fdbb368e4369'
+          test "$(git rev-parse HEAD:public)" = '940909d5f7e0a8911e9e7a6f0afe5b313890a155'
+          test "$(git rev-parse HEAD:scripts/tea_check.py)" = '94d21d6de3861959cb538f6d1dc00842c9f1cdcb'
+          test "$(git rev-parse HEAD:scripts/stitch_check.py)" = '7bb069a4fdc34f8c60171bdc784e9de893d16c0a'
+          test "$(git rev-parse HEAD:scripts/scene_gestures.py)" = 'c838694585467c1b89b60d52b278371fd9e8db08'
+          printf 'UNCHANGED_RUNTIME_AND_ACCEPTED_TEA_SEWING_HELPER identity passed\n'
+          npm run verify
+          python -m pip install -r requirements.txt
+          python -m playwright install --with-deps chromium
+      - run: python -u scripts/ui_check.py
+      - run: python -u scripts/art_check.py
