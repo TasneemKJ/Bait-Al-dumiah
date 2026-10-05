@@ -11,6 +11,17 @@ export function fog(mix){
  const channel=shift=>Math.round(lerp((a>>shift)&255,(b>>shift)&255));
  return {density:lerp(.0012,.0105),color:(channel(16)<<16)|(channel(8)<<8)|channel(0)};
 }
+const ROOM_LIGHTS=Object.freeze({
+ kitchen:{color:0xffc27d,night:2.72,distance:4.8},
+ parlor:{color:0xffa88f,night:2.38,distance:5.1},
+ studio:{color:0xf2c48f,night:2.55,distance:4.4},
+ bedroom:{color:0xffd9a8,night:2.26,distance:5.5},
+});
+export function roomLighting(roomId,mix){
+ const profile=ROOM_LIGHTS[roomId]||ROOM_LIGHTS.kitchen;
+ const t=Number.isFinite(mix)?clamp(mix,0,1):1;
+ return {color:profile.color,intensity:.18+(profile.night-.18)*t,distance:profile.distance};
+}
 export function detail(width,height,preference='auto',dpr=1){
  const level=preference==='high'?'high':preference==='low'?'low':Math.min(width,height)<700?'low':'high';
  return {level,pixelRatio:clamp(dpr,1,level==='low'?1.25:1.75),shadows:level==='high'};
