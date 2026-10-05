@@ -1,4 +1,3 @@
-import {readFileSync} from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {framing,lighting,nightSky,fog} from '../src/render/visual-policy.js';
@@ -41,21 +40,23 @@ test('night depth haze stays subtle and deterministic',()=>{
  assert.deepEqual(fog(5),night);
 });
 test('ultra room practical-light policy gives each authored room a distinct restrained profile',async()=>{
- const mod=await import('../src/render/visual-policy.js');
- assert.equal(typeof mod.roomLighting,'function');
- if(typeof mod.roomLighting!=='function')return;
+ const {roomLighting}=await import('../src/render/visual-policy.js');
  const ids=['kitchen','parlor','studio','bedroom'];
- const night=ids.map(id=>mod.roomLighting(id,1));
+ const night=ids.map(id=>roomLighting(id,1));
  assert.equal(new Set(night.map(p=>p.color)).size,4);
  for(const p of night){assert.ok(p.intensity>0&&p.intensity<=3.2);assert.ok(p.distance>=3&&p.distance<=6);}
- for(const id of ids)assert.ok(mod.roomLighting(id,0).intensity<mod.roomLighting(id,1).intensity);
- assert.deepEqual(mod.roomLighting('missing',Infinity),mod.roomLighting('kitchen',1));
+ for(const id of ids)assert.ok(roomLighting(id,0).intensity<roomLighting(id,1).intensity);
+ assert.deepEqual(roomLighting('missing',Infinity),roomLighting('kitchen',1));
 });
-test('world renderer applies room lighting to the four persistent house practicals',()=>{
- const src=readFileSync(new URL('../src/render/world.js',import.meta.url),'utf8');
- assert.match(src,/roomLighting/);
- assert.match(src,/house\.lights\.forEach\(\(l,i\)/);
- assert.match(src,/practical\.distance/);
+test('each tagged room lamp gets its own profile, scaled by the night cue and focus',async()=>{
+ const {practicalLight,roomLighting,lighting}=await import('../src/render/visual-policy.js');
+ const lamps=lighting(1).lamps;
+ const studio=practicalLight('studio',1,lamps),bedroom=practicalLight('bedroom',1,lamps);
+ assert.equal(studio.color,roomLighting('studio',1).color);assert.equal(bedroom.distance,roomLighting('bedroom',1).distance);
+ assert.notEqual(studio.color,bedroom.color);
+ assert.ok(practicalLight('studio',1,lamps,1,true).intensity>studio.intensity);
+ assert.equal(practicalLight('studio',1,lamps,0).intensity,0);
+ for(const bad of [NaN,-5,Infinity])assert.ok(Number.isFinite(practicalLight('kitchen',1,bad,bad).intensity));
 });
 test('forty-pass dollhouse refinement exposes eight five-pass groups',async()=>{
  const mod=await import('../src/render/visual-policy.js');
