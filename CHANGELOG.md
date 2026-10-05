@@ -2,6 +2,7 @@
 Each merged batch adds an entry and a `vX.Y.Z` tag.
 
 ## Unreleased
+- Audio: a soft D-minor chord swells once (about 4 s, slow attack) when day turns to night while sound is on; never on load, while muted or paused.
 - Self-teaching: in the first three days a soft gold ring breathes under any idle resident whose wish is still unspoken; it goes out when the wish is granted and is steady under reduced motion.
 - Accessibility: a Larger text setting (saved, off by default, lazily whitelisted) scales the settings, household and journal panels.
 - Writing: the loading card shows a Levantine saying, "الجار قبل الدار", with its English line.
