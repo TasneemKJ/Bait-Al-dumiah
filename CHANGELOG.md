@@ -2,6 +2,7 @@
 Each merged batch adds an entry and a `vX.Y.Z` tag.
 
 ## Unreleased
+- Retention: when a returning player opens the house, the residents wave one after another (reuses the greeting pose; skipped under reduced motion and on a first visit).
 - Self-teaching: in the first three days a soft gold ring breathes under any idle resident whose wish is still unspoken; it goes out when the wish is granted and is steady under reduced motion.
 - Accessibility: a Larger text setting (saved, off by default, lazily whitelisted) scales the settings, household and journal panels.
 - Writing: the loading card shows a Levantine saying, "الجار قبل الدار", with its English line.
