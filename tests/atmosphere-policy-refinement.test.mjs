@@ -1,3 +1,4 @@
+import {readFileSync} from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {framing,lighting,nightSky,fog} from '../src/render/visual-policy.js';
@@ -38,4 +39,33 @@ test('night depth haze stays subtle and deterministic',()=>{
  assert.notEqual(day.color,night.color);
  assert.deepEqual(fog(-2),day);
  assert.deepEqual(fog(5),night);
+});
+test('ultra room practical-light policy gives each authored room a distinct restrained profile',async()=>{
+ const mod=await import('../src/render/visual-policy.js');
+ assert.equal(typeof mod.roomLighting,'function');
+ if(typeof mod.roomLighting!=='function')return;
+ const ids=['kitchen','parlor','studio','bedroom'];
+ const night=ids.map(id=>mod.roomLighting(id,1));
+ assert.equal(new Set(night.map(p=>p.color)).size,4);
+ for(const p of night){assert.ok(p.intensity>0&&p.intensity<=3.2);assert.ok(p.distance>=3&&p.distance<=6);}
+ for(const id of ids)assert.ok(mod.roomLighting(id,0).intensity<mod.roomLighting(id,1).intensity);
+ assert.deepEqual(mod.roomLighting('missing',Infinity),mod.roomLighting('kitchen',1));
+});
+test('world renderer applies room lighting to the four persistent house practicals',()=>{
+ const src=readFileSync(new URL('../src/render/world.js',import.meta.url),'utf8');
+ assert.match(src,/roomLighting/);
+ assert.match(src,/house\.lights\.forEach\(\(l,i\)/);
+ assert.match(src,/practical\.distance/);
+});
+test('forty-pass dollhouse refinement exposes eight five-pass groups',async()=>{
+ const mod=await import('../src/render/visual-policy.js');
+ assert.equal(typeof mod.houseRefinement40,'function');
+ if(typeof mod.houseRefinement40!=='function')return;
+ const full=mod.houseRefinement40('studio',1,'high',false),low=mod.houseRefinement40('studio',1,'low',false);
+ const stillA=mod.houseRefinement40('studio',1,'high',true),stillB=mod.houseRefinement40('studio',1,'high',true);
+ const groups=['depth','light','materials','air','motion','grounding','mobile','signature'];
+ assert.equal(groups.flatMap(k=>full[k]).length,40);
+ groups.forEach(k=>assert.equal(full[k].length,5));
+ assert.ok(low.mobile[0]<full.mobile[0]);
+ assert.deepEqual(stillA.motion,stillB.motion);
 });

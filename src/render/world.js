@@ -25,7 +25,7 @@ import {chimeFraming} from './chime-camera.js';
 import {createRestoration} from './restoration.js';
 import {createCameraMove} from './camera-motion.js';
 import {createAtmosphere} from './atmosphere.js';
-import {lighting,detail,framing,fog as fogPolicy} from './visual-policy.js';
+import {lighting,detail,framing,fog as fogPolicy,roomLighting} from './visual-policy.js';
 
 export function createWorld(canvas,{onPick,onError}){
  const renderer=new T.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'});
@@ -193,7 +193,14 @@ export function createWorld(canvas,{onPick,onError}){
    const night=isNight(state);nightMix=state.settings.reducedMotion?Number(night):T.MathUtils.damp(nightMix,Number(night),2.2,dt);
    const cue=courtyard.update(state,nightMix),look=lighting(nightMix),haze=fogPolicy(nightMix);hemi.intensity=look.ambient;key.intensity=look.key;fill.intensity=look.rim;renderer.toneMappingExposure=look.exposure;depthFog.density=haze.density;depthFog.color.setHex(haze.color);
    hemi.color.set(0xe9e0d5).lerp(new T.Color(0x849bc9),nightMix);key.color.set(0xffe5c2).lerp(new T.Color(0xb8caff),nightMix);fill.color.set(0xb8cbd5).lerp(new T.Color(0x829bdb),nightMix);
-   house.lights.forEach(l=>{if(l.isLight){l.intensity=look.lamps*cue.lamp;l.color.set(0xffca8e)}});
+   house.lights.forEach((l,i)=>{if(l.isLight){
+    const practical=roomLighting(ROOMS[i]?.id,nightMix),focusBoost=focusedRoom===ROOMS[i]?.id?1.12:1;
+    // Reuse the four persistent authored room lights instead of allocating
+    // extra lights per frame. Each room now has its own miniature-film color
+    // and falloff while the global night cue still owns overall lamp energy.
+    l.intensity=(look.lamps*.22+practical.intensity)*cue.lamp*focusBoost;
+    l.color.setHex(practical.color);l.distance=practical.distance;
+   }});
    house.windows.forEach(m=>{m.emissive.set(0x8baaca);m.emissiveIntensity=.14+nightMix*.44});details.update(nightMix);atmosphere.update(state,nightMix,quality);roomEffects.update(state,nightMix);restoration.update(state,nightMix);storyProps.update(state,nightMix);teaTable.update(state);sewingPlay.update(state);moonChimes.update(state,chimeSelection);roomFrame.show(working()?null:focusedRoom);preview.update(previewPose,state);
    residents.update(state,dt,selected,Math.atan2(camera.position.x-controls.target.x,camera.position.z-controls.target.z));
    for(const doll of residents.dolls){const room=state.dolls.find(d=>d.id===doll.id)?.room;doll.root.visible=!(teaActive&&room==='kitchen'||stitchActive&&room==='studio'||chimeActive&&room==='bedroom')}
