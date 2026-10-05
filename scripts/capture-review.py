@@ -65,7 +65,10 @@ try:
                         activate('[data-action="panel-settings"]')
                         page.locator('[data-field="locale"]').select_option('ar')
                         activate('#sheet [data-action="close"]')
-                        activate('[data-action="toggle-tools"]')
+                        # Opening a sheet already collapses the tool dock. Do not
+                        # re-expand it and hide the actual room controls.
+                        if page.locator('.dock').get_attribute('data-expanded') == 'true':
+                            activate('[data-action="toggle-tools"]')
                     room = 'kitchen' if locale == 'en' else 'bedroom'
                     activate(f'[data-room="{room}"]')
                     page.wait_for_function('!dollhouse.visual().cameraMoving')
