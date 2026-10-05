@@ -17,3 +17,10 @@
 .door-entries .entry-number .icon{width:14px;color:#5f7f6b}
 .gift-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.gift{padding:10px;border-radius:10px;background:#efe4ec;display:flex;flex-direction:column;gap:4px;min-width:0}.gift strong{font-size:11px;font-weight:500}.gift small{font-size:10px;color:var(--muted);line-height:1.5}.gift.locked{background:#f4e9dc;opacity:.7}.gift.locked strong{color:#b497ae}
 [dir=rtl] .door-next strong{font-family:Tahoma,Arial,sans-serif}
+
+/* Keepsake shelf: each gift is a small picture over its name, newest tonight glows. */
+.gift{align-items:center;text-align:center}.gift-picture{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:radial-gradient(circle,#fbf4e9 55%,#f0e2d8);box-shadow:inset 0 0 0 1px #dfcdbf}
+.gift.locked .gift-picture{font-size:20px;color:#b497ae;background:#f0e4d7}
+.gift.newest{box-shadow:0 0 0 2px #e5b471;background:#f6e9ee}
+@media(prefers-reduced-motion:no-preference){body:not(.reduced-motion) .gift.newest .gift-picture{animation:giftGlow 3s ease-in-out infinite}}
+@keyframes giftGlow{50%{box-shadow:inset 0 0 0 1px #dfcdbf,0 0 12px #e5b471}}
