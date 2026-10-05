@@ -16,14 +16,36 @@ export function storyMemoriesMarkup(s,t){
  return `<section class="story-memories"><h3 class="section-heading">${t('storyMemories')}</h3>${status.completed.map(id=>`<article><span aria-hidden="true">✦</span><div><h4>${t('story-'+id+'-title')}</h4><p>${t('story-'+id+'-memory')}</p></div></article>`).join('')}</section>`;
 }
 
+// Pick the edge with the greater clear distance from the actual selected
+// screen point. This changes paper placement, never input or the camera.
+export function ribbonEdge(y,top,bottom,height){
+ if(![y,top,bottom,height].every(Number.isFinite))return 'bottom';
+ const topClear=Math.max(top-y,y-top-height),bottomClear=Math.max(bottom-height-y,y-bottom);
+ return topClear>bottomClear?'top':'bottom';
+}
+
 // A held item and a small scene ribbon. Neither pauses nor obscures the room.
 // Physical input uses the same simulation command as keyboard activation.
-export function createStoryUI(host,getState,dispatch){
+export function createStoryUI(host,getState,dispatch,project=()=>null){
  const root=document.createElement('section');root.className='story-playfield';
  const ghost=document.createElement('div');ghost.className='carry-ghost';ghost.hidden=true;ghost.setAttribute('aria-hidden','true');
  const gesture=createCarryGesture();let selected=null,signature='',feedback=null,previousFocus=null,dragPointer=null,dragToken=null,skipClick=false;
  const t=key=>translate(getState().settings.locale,key);
  const current=()=>objectInfo(getState(),selected);
+ function placeRibbon(){
+  if(dragPointer!==null)return; // Never move paper or a drop target mid-gesture.
+  const ribbon=root.querySelector('.object-ribbon'),bounds=host.getBoundingClientRect();
+  if(!ribbon||bounds.width>680||bounds.height<=bounds.width){root.dataset.ribbonEdge='bottom';return}
+  const point=project(selected),roomEdge=host.querySelector('.room-views')?.getBoundingClientRect();
+  const timeEdge=host.querySelector('.time-tools')?.getBoundingClientRect();
+  const top=Math.max(136,(timeEdge?.bottom??bounds.top+124)-bounds.top+12);
+  // The ordinary ribbon ends 14px above room navigation. A held token owns
+  // the next 64px above that edge; its actual measured height stays separate.
+  const bottom=(roomEdge?.top??bounds.bottom-112)-bounds.top-14-(root.querySelector('.held-item')?64:0);
+  root.style.setProperty('--ribbon-top',top+'px');
+  root.dataset.ribbonEdge=ribbonEdge(point?.y,top,bottom,ribbon.getBoundingClientRect().height);
+ }
+ const resize=new ResizeObserver(placeRibbon);resize.observe(host);
  function cancelDrag(){
   gesture.cancel();ghost.hidden=true;root.classList.remove('carrying');
   const token=dragToken,pointer=dragPointer;dragPointer=null;dragToken=null;
@@ -38,7 +60,7 @@ export function createStoryUI(host,getState,dispatch){
   host.dataset.objectSelected=selected??'';
   const action=sceneObjectAction(s,selected),object=current(),held=STORY_ITEMS.find(i=>i.id===status.held);
   const next=JSON.stringify([s.settings.locale,selected,status.index,status.step,held?.id,action?.disabled,object?.active,object?.rotation,object?.tendedDay,feedback]);
-  if(signature===next)return;
+  if(signature===next){placeRibbon();return}
   // A state change cannot leave a stale item image being dragged after use/reset.
   if(dragPointer!==null)cancelDrag();
   const focused=root.contains(document.activeElement)?document.activeElement.dataset.sceneAction:null;
@@ -48,6 +70,7 @@ export function createStoryUI(host,getState,dispatch){
   root.innerHTML=`${held?`<button type="button" class="held-item" data-scene-action="held" data-held-item="${held.id}" aria-label="${t('held-'+held.id)}. ${t('storyDragHint')}" title="${t('storyDragHint')}"><span class="held-art">${icon(held.icon)}</span><span><small>${t('storyInHand')}</small><strong>${t('held-'+held.id)}</strong><em>${t('storyDragShort')}</em></span></button>`:''}
    ${object?`<div class="object-ribbon" aria-label="${t('selectedObject')}"><span class="ribbon-emblem" aria-hidden="true">${icon(object.icon)}</span><div class="ribbon-copy"><small>${t(object.room+'Short')}</small><h2>${t(object.title)}</h2><p ${feedback?'class="ribbon-feedback" role="status"':''}>${feedback?t(feedback.message):t('storyTouchAgain').replace('{action}',label)}</p></div><button type="button" class="scene-primary" data-scene-action="activate" ${action?.disabled?'disabled':''}>${icon(action?.icon??'spark')}<span>${label}</span></button><button type="button" class="icon-button scene-inspect" data-scene-action="inspect" aria-label="${t('storyInspect')}">${icon('plus')}</button><button type="button" class="icon-button" data-scene-action="close" aria-label="${t('close')}">${icon('close')}</button></div>`:''}
    ${object?'':response}`;
+  placeRibbon();
   if(focused)root.querySelector(`[data-scene-action="${focused}"]`)?.focus({preventScroll:true});
  }
  root.addEventListener('click',e=>{
@@ -81,6 +104,6 @@ export function createStoryUI(host,getState,dispatch){
   clear(restoreFocus=false){cancelDrag();selected=null;feedback=null;update();if(restoreFocus){const origin=previousFocus?.matches('[data-object]')?host.querySelector('[data-object-toggle]'):previousFocus;if(origin?.isConnected&&origin.getClientRects().length)origin.focus({preventScroll:true});else document.querySelector('#world')?.focus({preventScroll:true})}},
   respond(message,complete=false,reward=0){feedback={message,complete,reward};update()},
   update,cancelDrag,
-  dispose(){cancelDrag();root.remove();ghost.remove()},
+  dispose(){resize.disconnect();cancelDrag();root.remove();ghost.remove()},
  };
 }

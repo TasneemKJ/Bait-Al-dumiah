@@ -13,7 +13,7 @@ export function playfieldInsets(width,height,regions=[]){
  }
  return {top:Math.round(Math.min(height-120,Math.max(0,top))),bottom:Math.round(Math.min(height-120,Math.max(0,bottom)))};
 }
-const upper='.brand,.house-status,.time-tools,.objective,.visitor-hint';
+const upper='.brand,.house-status,.time-tools,.objective,.visitor-hint,.story-playfield[data-ribbon-edge="top"] .object-ribbon';
 const lower='.room-views,.dock,.camera-tools,.object-controls>[data-object-toggle],.object-ribbon,.held-item,.scene-response';
 export function createPlayfieldLayout(host,onChange){
  let pending=0,signature='',disposed=false;
@@ -48,7 +48,7 @@ export function createPlayfieldLayout(host,onChange){
    return node===host||Boolean(node.closest?.(upper+','+lower+',.story-playfield,.object-controls'));
   }))schedule();
  });
- changes.observe(host,{subtree:true,childList:true,attributes:true,attributeOldValue:true,attributeFilter:['hidden','data-expanded','data-arrived','data-object-selected','data-focus-room','data-tea-active','data-stitch-active','data-chime-active','class']});
+ changes.observe(host,{subtree:true,childList:true,attributes:true,attributeOldValue:true,attributeFilter:['hidden','data-expanded','data-arrived','data-object-selected','data-ribbon-edge','data-focus-room','data-tea-active','data-stitch-active','data-chime-active','class']});
  sizes.observe(host);window.addEventListener('resize',schedule);window.visualViewport?.addEventListener('resize',schedule);schedule();
  return {measure:schedule,dispose(){disposed=true;cancelAnimationFrame(pending);changes.disconnect();sizes.disconnect();window.removeEventListener('resize',schedule);window.visualViewport?.removeEventListener('resize',schedule)}};
 }

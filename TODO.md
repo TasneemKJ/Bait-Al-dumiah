@@ -41,3 +41,10 @@ Twenty ideas and IDEAL/5Ws for this slice are recorded in the iteration ledger. 
 - [ ] Review material/contact-depth refinements as a separate later art slice.
 
 Selected ideas: camera composition, folded contextual guidance, material-led navigation and arrival self-teaching. The other sixteen ideas remain an explicit sequenced backlog in the spec; none is reported as implemented by this batch.
+
+## Stable scene selection correction
+- [x] Trace the native unchanged-coordinate second-touch miss and compare camera/paper alternatives.
+- [x] Add failing projection/gesture regressions, preserve direct scene poses and cache pending insets.
+- [x] Place portrait selection paper by measured clearance; classify top paper correctly and hold it during drag.
+- [x] Add unchanged-position native touch checks and strengthen actual held destination checks in the full story journey.
+- [ ] Verify exact corrected source through native same-position, bilingual short-phone and full physical journeys; inspect original images before merging.

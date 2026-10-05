@@ -68,7 +68,7 @@ function announce(event){
  if(event.type==='sewn')say(t('sewnHint'));
 }
 function showError(kind){fatal=true;syncPause();save();document.querySelector('#loading')?.remove();if(ui?.panel)ui.close();const error=document.createElement('section');error.className='error-screen';error.setAttribute('role','alert');const h=document.createElement('h2'),p=document.createElement('p'),b=document.createElement('button');h.textContent=ui.t(kind==='context'?'contextTitle':'webglTitle');p.textContent=ui.t(kind==='context'?'contextHelp':'webglHelp');b.textContent=ui.t('reload');b.addEventListener('click',()=>location.reload());error.append(h,p,b);host.append(error)}
-async function dispatch(action,value){
+async function dispatch(action,value,origin='control'){
  switch(action){
   case 'tools-state':if(value){storyUI?.clear();world?.clearObjectSelection();objectControls?.collapse()}break;
   case 'panel-state':
@@ -79,7 +79,10 @@ async function dispatch(action,value){
   case 'select-object':{
    const o=objectInfo(state,value);if(!o||fatal||manualPause||panelOpen||ui.placement)break;
    ui.collapseTools();
-   if(storyUI?.select(value)){world?.focusRoom(o.room,true);host.dataset.focusRoom=o.room;host.dataset.focusDoll='';world?.selectObject(value);roomViews.update();objectControls?.update()}break;
+   // A scene touch selects where the player touched. Only discovery controls
+   // request a new room view; selection must not relocate its second tap.
+   if(origin!=='scene'){world?.focusRoom(o.room,true);host.dataset.focusRoom=o.room;host.dataset.focusDoll=''}
+   if(storyUI?.select(value)){world?.selectObject(value);roomViews.update();objectControls?.update()}break;
   }
   case 'activate-object':{
    if(fatal||manualPause||panelOpen||ui.placement)break;
@@ -248,13 +251,13 @@ ui=createUI(host,()=>state,dispatch);
 const residentLabel=createResidentLabel(host);
 const roomViews=createRoomViews(host,()=>state,id=>dispatch('focus-room',id));
 try{world=createWorld(canvas,{onPick:data=>{
- if(data.object)dispatch(storyUI?.selected===data.object?'activate-object':'select-object',data.object);
+ if(data.object)dispatch(storyUI?.selected===data.object?'activate-object':'select-object',data.object,'scene');
  if(data.doll)ui.open('household',data.doll);
  if(data.ghost)dispatch('discover');
  if(data.slot&&ui.placement)dispatch(ui.moveId!==null?'relocate-object':'place',{id:ui.moveId,item:ui.placement,...data.slot});
 },onError:showError});document.querySelector('#loading')?.remove();}catch(error){console.error('Dollhouse renderer could not start:',error);showError('webgl')}
 objectControls=createObjectControls(host,()=>state,key=>dispatch('select-object',key));
-storyUI=createStoryUI(host,()=>state,dispatch);
+storyUI=createStoryUI(host,()=>state,dispatch,key=>world?.objectPositions().find(point=>point.key===key));
 teaUI=createTeaUI(host,canvas,()=>state,dispatch,{pick:(x,y)=>world?.teaAt(x,y),aimAt:(x,y)=>world?.teaAimAt(x,y)});
 stitchUI=createStitchUI(host,canvas,()=>state,dispatch,{pick:(x,y)=>world?.stitchAt(x,y),pointAt:(x,y)=>world?.stitchPointAt(x,y)});
 chimeUI=createChimeUI(host,canvas,()=>state,dispatch,{pick:(x,y)=>world?.chimeAt(x,y),pullSpan:()=>world?.chimePullSpan()??0});

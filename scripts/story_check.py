@@ -98,6 +98,11 @@ def drag_to(key, touch=False):
     else:
         page.mouse.move(p['x'], p['y'], steps=12)
     check('real pointer drag shows the carried item', page.locator('.carry-ghost').is_visible())
+    current = next(v for v in page.evaluate('window.dollhouse.objects()') if v['key'] == key)
+    check('held drag keeps its destination fixed: ' + key,
+          abs(current['x']-p['x']) < .25 and abs(current['y']-p['y']) < .25)
+    check('held drag keeps its destination exposed: ' + key,
+          page.evaluate('p=>document.elementFromPoint(p.x,p.y)?.id === "world"', p))
     if touch:
         session.send('Input.dispatchTouchEvent', {'type':'touchEnd','touchPoints':[]})
         session.detach()

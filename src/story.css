@@ -158,3 +158,9 @@
 .object-ribbon .ribbon-feedback{display:block;color:var(--ink);font-size:11px;line-height:1.5}
 .night .object-ribbon .ribbon-feedback{display:block;color:#f1ddbb}
 #ui[data-object-selected]:not([data-object-selected=""]) .visitor-hint{display:none}
+
+/* Keep selected scene props where they were touched. On portrait phones the
+   ribbon uses the clear edge instead of asking the camera to flee it. */
+@media(max-width:680px) and (orientation:portrait){
+ .story-playfield[data-ribbon-edge="top"] .object-ribbon{top:var(--ribbon-top,calc(136px + env(safe-area-inset-top)));bottom:auto}
+}

@@ -40,6 +40,11 @@ test('layout lifecycle ignores ritual HUDs, remeasures exit, and never repeats u
   for(let i=0;i<10;i++)mutation([{type:'attributes',target:unrelated,attributeName:'hidden',oldValue:''},{type:'attributes',target:host,attributeName:'data-chime-active',oldValue:'false'}]);
   assert.equal(pending.size,0,'unchanged activity flags and unrelated resident updates do not even schedule layout reads');
   change();change();flush();assert.equal(values.length,1,'unchanged DOM never re-centers manual camera input');
+  const ribbon=node('ribbon',12,137,378,281);
+  ribbon.matches=selector=>selector.includes('.story-playfield[data-ribbon-edge="top"] .object-ribbon');
+  nodes=[upper,lower,ribbon];change();flush();
+  assert.deepEqual(values.at(-1),{top:293,bottom:126},'a top ribbon never poisons the cached footer reservation');
+  nodes=[upper,lower];change();flush();
   for(const activity of ['teaActive','stitchActive','chimeActive']){
    host.dataset[activity]='true';nodes=[node('bottom',282,12,378,64)];change();flush();
    assert.deepEqual(values.at(-1),{top:130,bottom:126},'top-mounted work dock must not poison room framing');
