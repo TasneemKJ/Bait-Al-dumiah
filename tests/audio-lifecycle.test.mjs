@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {DollhouseAudio} from '../src/audio.js';
+import {DollhouseAudio,DUSK_SWELL} from '../src/audio.js';
 
 // The only stub is the browser's asynchronous resume boundary. Actual waveform
 // synthesis is separately exercised through OfflineAudioContext in art checks.
@@ -25,4 +25,25 @@ test('enabling sound from paused settings leaves the audio context suspended',as
  const {audio,context,release}=pendingAudio(t);audio.paused=true;const result=audio.enable();release();
  assert.equal(await result,true);assert.equal(audio.enabled,true);assert.equal(context.suspends,1);
  audio.tick(true);assert.equal(audio.nodes.size,0);
+});
+
+// A tiny audio graph that records gain automation so the swell's shape is real data.
+function graph(){
+ const events=[],param=()=>({value:0,setValueAtTime(v,t){events.push(['set',v,t])},linearRampToValueAtTime(v,t){events.push(['ramp',v,t])},exponentialRampToValueAtTime(v,t){events.push(['exp',v,t])}});
+ const node=extra=>({connect(){},disconnect(){},...extra});
+ const context={currentTime:10,createOscillator:()=>node({frequency:{value:0},start(){},stop(){},type:''}),
+  createBiquadFilter:()=>node({frequency:{value:0},Q:{value:0}}),createGain:()=>node({gain:param()})};
+ return {context,events};
+}
+test('dusk swell plays once when day turns to night while listening, with a slow rise',()=>{
+ const {context,events}=graph(),audio=new DollhouseAudio();audio.context=context;audio.master={};audio.enabled=true;audio.next=Infinity;
+ audio.tick(false);assert.equal(audio.nodes.size,0);
+ audio.tick(true);assert.equal(audio.nodes.size,DUSK_SWELL.length*1);
+ const rises=events.filter(e=>e[0]==='ramp'&&e[2]-context.currentTime>1);assert.ok(rises.length>=DUSK_SWELL.length,'slow attack, not a pluck');
+ const before=audio.nodes.size;audio.tick(true);assert.equal(audio.nodes.size,before,'no repeat while night continues');
+});
+test('no swell when the game opens at night, when muted, or when paused',()=>{
+ const a=graph(),opened=new DollhouseAudio();opened.context=a.context;opened.master={};opened.enabled=true;opened.next=Infinity;opened.tick(true);assert.equal(opened.nodes.size,0);
+ const b=graph(),muted=new DollhouseAudio();muted.context=b.context;muted.master={};muted.enabled=false;muted.sawDay=true;muted.tick(true);assert.equal(muted.nodes.size,0);
+ const c=graph(),paused=new DollhouseAudio();paused.context=c.context;paused.master={};paused.enabled=true;paused.paused=true;paused.tick(false);paused.tick(true);assert.equal(paused.nodes.size,0);
 });
