@@ -15,13 +15,17 @@ export function playfieldInsets(width,height,regions=[]){
 }
 const upper='.brand,.house-status,.time-tools,.objective,.visitor-hint,.story-playfield[data-ribbon-edge="top"] .object-ribbon';
 const lower='.room-views,.dock,.camera-tools,.object-controls>[data-object-toggle],.object-ribbon,.held-item,.scene-response';
-export function createPlayfieldLayout(host,onChange){
+export function createPlayfieldLayout(host,onChange,prepare=()=>{}){
  let pending=0,signature='',disposed=false;
  const watched=new Set();
  function schedule(){if(!pending&&!disposed)pending=requestAnimationFrame(measure)}
  const sizes=new ResizeObserver(schedule);
  function measure(){
   pending=0;if(disposed)return;
+  // One owner for resize ordering: update the projection, release carried
+  // input and place current-orientation paper before reading any occluders.
+  // Window rAF and ResizeObserver may arrive in either order.
+  prepare();
   // Work surfaces move sound/pause to the top. Never mistake that dock for
   // a house footer or cache its dimensions for the room returned to later.
   if(['teaActive','stitchActive','chimeActive'].some(key=>host.dataset[key]==='true')){signature='';return;}

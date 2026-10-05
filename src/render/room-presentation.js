@@ -14,7 +14,7 @@ export function createRoomPresentation(refit,blocked=()=>false){
    // or a pointer gesture. Explicit navigation/resize reads the cached value.
    // A real viewport change is explicit navigation of the presentation.
    // Its final measured safe area must replace the old orientation's cache.
-   if(resized||!blocked())refit();return true;
+   if(resized||!blocked())refit(resized);return true;
   },
  };
 }

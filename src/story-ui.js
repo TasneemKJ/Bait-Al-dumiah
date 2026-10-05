@@ -48,7 +48,6 @@ export function createStoryUI(host,getState,dispatch,project=()=>null){
   if(root.style.getPropertyValue('--ribbon-top')!==top+'px')root.style.setProperty('--ribbon-top',top+'px');
   if(root.dataset.ribbonEdge!==edge)root.dataset.ribbonEdge=edge;
  }
- const resize=new ResizeObserver(()=>{cancelDrag();placeRibbon()});resize.observe(host);
  function cancelDrag(){
   gesture.cancel();ghost.hidden=true;root.classList.remove('carrying');
   const token=dragToken,pointer=dragPointer;dragPointer=null;dragToken=null;
@@ -106,7 +105,7 @@ export function createStoryUI(host,getState,dispatch,project=()=>null){
   select(key){if(!objectInfo(getState(),key))return false;if(key!==selected)previousFocus=document.activeElement;selected=key;feedback=null;update();if(previousFocus?.matches('[data-object]'))root.querySelector('[data-scene-action="activate"]')?.focus({preventScroll:true});return true},
   clear(restoreFocus=false){cancelDrag();selected=null;feedback=null;update();if(restoreFocus){const origin=previousFocus?.matches('[data-object]')?host.querySelector('[data-object-toggle]'):previousFocus;if(origin?.isConnected&&origin.getClientRects().length)origin.focus({preventScroll:true});else document.querySelector('#world')?.focus({preventScroll:true})}},
   respond(message,complete=false,reward=0){feedback={message,complete,reward};update()},
-  update,cancelDrag,
-  dispose(){resize.disconnect();cancelDrag();root.remove();ghost.remove()},
+  update,cancelDrag,layout:placeRibbon,
+  dispose(){cancelDrag();root.remove();ghost.remove()},
  };
 }

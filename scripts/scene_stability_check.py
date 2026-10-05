@@ -158,6 +158,7 @@ try:
                 page.screenshot(path=str(OUT/(locale+'-held-selected.png')),timeout=60000,scale='css')
                 # A real viewport rotation cancels the held input and must use
                 # the newly measured layout even while selection remains.
+                before_rotate = page.evaluate('''()=>{const s=dollhouse.state();return {story:s.story,buttons:s.buttons,earnedToday:s.earnedToday,activities:s.activities,held:document.querySelector('[data-held-item]')?.dataset.heldItem}}''')
                 b = page.locator('.held-item').bounding_box()
                 x,y = b['x']+b['width']/2,b['y']+b['height']/2
                 cdp.send('Input.dispatchTouchEvent', {'type':'touchStart','touchPoints':[{'x':x,'y':y,'id':1}]})
@@ -167,6 +168,8 @@ try:
                 scene_ready(page)
                 check(locale+' rotation cancels carry safely',not page.locator('.carry-ghost').is_visible() and page.locator('[data-held-item="red-thread"]').is_visible())
                 cdp.send('Input.dispatchTouchEvent', {'type':'touchEnd','touchPoints':[]})
+                after_rotate = page.evaluate('''()=>{const s=dollhouse.state();return {story:s.story,buttons:s.buttons,earnedToday:s.earnedToday,activities:s.activities,held:document.querySelector('[data-held-item]')?.dataset.heldItem}}''')
+                check(locale+' canceled rotation consumes, rewards and drops nothing',after_rotate==before_rotate)
                 rotated = point(page,'prop:tea-set')
                 check(locale+' selected rotation uses current measured safe area',page.evaluate('''p=>{const v=dollhouse.visual();return v.selectedObject==='prop:tea-set' && p.y>=v.presentation.top && p.y<=innerHeight-v.presentation.bottom && document.elementFromPoint(p.x,p.y)?.id==='world'}''',rotated))
                 page.screenshot(path=str(OUT/(locale+'-selected-landscape.png')),timeout=60000,scale='css')

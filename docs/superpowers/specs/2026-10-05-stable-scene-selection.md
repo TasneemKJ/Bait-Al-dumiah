@@ -46,3 +46,17 @@ Native acceptance must use unchanged coordinates between actual first/second tou
 
 ## Independent correction review
 The first frozen candidate3991a362 exposed a selected-rotation ordering gap: world resize applied cached portrait insets and the later new-orientation measurement was still locked. A real Three.js regression reproduced tin y332.7 instead of154.6 after390×844→844×390. Layout measurements now carry viewport dimensions; a changed viewport permits the final measured refit once, then ordinary selection-only changes are locked again. Real viewport resize also releases carried input. The native regression rotates during a held selected state, checks cancellation, actual safe-area reachability and portrait return, plus unchanged touches at412×915 and844×390. The first candidate is diagnostic only, not release acceptance.
+
+## One owner for the resize boundary
+A second review traced the complete browser ordering: resize events may schedule layout rAF before ResizeObserver delivers story ribbon placement. In candidate 66692f8, stale portrait `data-ribbon-edge` could therefore classify the landscape bottom ribbon as a top occluder; a later correct same-size measurement was locked. This is a coordination defect, not a reason for more timers or camera exceptions.
+
+The measurement callback now owns the complete synchronous boundary:
+1. Synchronize canvas dimensions once, using the current physical viewport.
+2. If size changed, release carried input without a destination.
+3. Place and classify current-orientation ribbon paper from the resized projection.
+4. Measure the actual visible rectangles.
+5. Apply the new-viewport safe-area fit immediately, including while paused.
+
+Independent world and story ResizeObservers were removed. Window, visual-viewport and layout ResizeObserver notifications only schedule the same layout owner; duplicate notifications are idempotent. The existing controller still locks ordinary selection/pointer HUD changes and only treats a real viewport-size change as explicit reframing. No settling timer or broad unlocked period exists.
+
+Integration regressions use the real layout owner, real presentation controller, Three.js projection, actual carry gesture adapter and real story simulation. They cover rAF-first and ResizeObserver-first order, repeated portrait/landscape rotations, duplicate callbacks and selection with/without carrying. A canceled release emits no destination and preserves the full inventory/story/reward/activity state; a fresh deliberate drag can resume. The native regression compares corresponding gameplay snapshots around a held rotation before continuing the real thread-to-sewing drop.
