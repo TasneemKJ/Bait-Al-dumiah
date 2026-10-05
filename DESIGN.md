@@ -21,3 +21,6 @@ Soft porcelain and cream paper, rose, mint and gold accents, terracotta roof, wa
 - Night changes palette, not layout. Reduced motion keeps pieces still.
 - Phone landscape collapses room tabs into an icon grid; verify at 844x390.
 - Check every change at 360x640, 390x844, 412x915, 844x390 in English and Arabic before shipping.
+
+## Wish glow
+Days 1-3: a soft gold floor ring breathes under an idle resident whose wish is unspoken. It is wider and fainter than the selection halo, steady with reduced motion, and retires after day 3 or once the wish is granted.

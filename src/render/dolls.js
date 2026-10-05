@@ -7,6 +7,7 @@ import {createArm,levelCup,balanceWalk,gaze,express,carePose,greeting,nightCurio
 import {createApron,createOveralls,createFoot,createSock} from './doll-wardrobe.js';
 import {createHair,fabricBow} from './doll-hair.js';
 import {createSculptedHead,createPortraitEye,createBrow,closePortraitEye,createPortraitMouth,createNose,createEar,bisqueMaterial,createNeckJoint} from './doll-face.js';
+import {wishGlowActive,wishGlowOpacity} from '../wish-glow.js';
 import {createTeaSteam,createComfortHearts,createSleepCrescent} from './resident-effects.js';
 import {DOLLS,ROOMS} from '../content.js';
 import {palette as P,box,cylinder,ring,line,mat,cup,batch} from './primitives.js';
@@ -62,11 +63,12 @@ function makeDoll(def){
  const hit=new T.Mesh(new T.CapsuleGeometry(.38,.74,3,8),new T.MeshBasicMaterial({visible:false}));hit.position.y=.72;hit.userData.doll=def.id;root.add(hit);
  const halo=new T.Mesh(new T.RingGeometry(.37,.40,48),new T.MeshBasicMaterial({color:0xe5b471,transparent:true,opacity:.8,side:T.DoubleSide,depthWrite:false}));halo.rotation.x=-Math.PI/2;halo.position.y=.035;root.add(halo);
  const shadow=new T.Mesh(new T.PlaneGeometry(.90,.66),new T.MeshBasicMaterial({map:softTexture(),color:0x453041,transparent:true,opacity:.35,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.012;root.add(shadow);
+ const wishGlow=new T.Mesh(new T.RingGeometry(.43,.66,56),new T.MeshBasicMaterial({color:0xe8b25a,transparent:true,opacity:0,side:T.DoubleSide,depthWrite:false}));wishGlow.name='wish-glow';wishGlow.rotation.x=-Math.PI/2;wishGlow.scale.y=.78;wishGlow.position.y=.03;wishGlow.visible=false;root.add(wishGlow);
  const comfortHearts=createComfortHearts(root),sleepCrescent=createSleepCrescent(root);
  const sparkles=new T.Group();sparkles.position.y=1.65;root.add(sparkles);
  for(let i=0;i<3;i++){const s=new T.Mesh(new T.OctahedronGeometry(.037),mat(0xf0cc8b,{emissive:0xf0cc8b,emissiveIntensity:.5}));s.position.set((i-1)*.18,Math.sin(i)*.13,0);sparkles.add(s)}
  const staticBody=new T.Group();for(const o of [...body.children])if(o.isMesh)staticBody.add(o);body.add(staticBody);batch(staticBody);
- return batchDoll({root,body,torso,head,spectacles,skirt:clothSkirt,garments,hairStyle,faceHull,brows,mouth,nose,ears,arms,legs,eyes,hit,halo,tea,steam,comfortHearts,sleepCrescent,sparkles,room:null,id:def.id});
+ return batchDoll({root,body,torso,head,spectacles,skirt:clothSkirt,garments,hairStyle,faceHull,brows,mouth,nose,ears,arms,legs,eyes,hit,halo,tea,steam,wishGlow,comfortHearts,sleepCrescent,sparkles,room:null,id:def.id});
 }
 export function createDolls(parent){
  const dolls=DOLLS.map((def,i)=>{const v=makeDoll(def);parent.add(v.root);const r=ROOMS.find(x=>x.id===def.room);v.root.position.set(r.x+.85,r.y+.12,.88);return v});
@@ -83,6 +85,7 @@ export function createDolls(parent){
    const previousX=v.root.position.x;
    v.root.position.x=state.settings.reducedMotion?r.x+base:T.MathUtils.damp(v.root.position.x,r.x+base+walk,3,dt);
    if(!state.paused){const speed=Math.abs(v.root.position.x-previousX)/Math.max(dt,.001);v.walkSpeed=speed;v.legs.forEach((leg,j)=>{const phase=Math.sin(t*3.2+i+j*Math.PI),strength=motion&&d.action==='idle'?Math.min(1,speed*15):0;leg.rotation.x=phase*.16*strength;leg.shin.rotation.x=Math.max(0,phase)*.22*strength;leg.position.y=.40+Math.max(0,phase)*.022*strength})}
+   {const on=wishGlowActive(state,d.id),o=wishGlowOpacity(on,t,!motion);v.wishGlow.visible=on;v.wishGlow.material.opacity=o}
    v.halo.visible=selected===d.id;v.tea.visible=d.action==='tea';v.steam.update(t,d.action==='tea',!motion);v.comfortHearts.update(t,d.action==='soothe',!motion);v.sleepCrescent.update(t,d.action==='rest',!motion);v.sparkles.visible=d.action==='play';
    v.sparkles.rotation.y=motion?t*.7:0;
    v.body.position.y=motion?(d.action==='play'?Math.abs(Math.sin(t*4.6))*.065:0):0;
