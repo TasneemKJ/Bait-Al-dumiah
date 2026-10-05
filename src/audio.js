@@ -70,6 +70,11 @@ export class DollhouseAudio{
    this.nextKnock=now+47;
   }
  }
+ chime(index){
+  if(!Number.isInteger(index)||index<0||index>3||!this.enabled||!this.context||this.paused||this.disposed)return;
+  const frequency=[293.665,349.228,392,440][index];
+  this.track(playPluck(this.context,this.master,frequency,this.context.currentTime,1.3,.055));
+ }
  effect(kind){
   if(!this.enabled||!this.context||this.paused)return;
   const t=this.context.currentTime,notes=kind==='secret'?[293.665,311.127,392]:kind==='place'?[392,493.883]:kind==='musicbox'?[523.251,659.255,783.991,659.255]:kind==='mobile'?[392,493.883,587.33]:[440,523.251];

@@ -18,8 +18,10 @@ export function createCameraMove(camera,controls){
  return {get active(){return Boolean(flight)},cancel(){flight=null},tick,
   moveTo(pose,instant=false){
    if(!Array.isArray(pose?.target)||pose.target.length!==3||!pose.target.every(Number.isFinite)||!Number.isFinite(pose.zoom))return false;
+   const eye=Object.hasOwn(pose,'eyeOffset')?pose.eyeOffset:[5.8,5.6,24];
+   if(!Array.isArray(eye)||eye.length!==3||!eye.every(Number.isFinite)||Math.hypot(...eye)<.1)return false;
    const damping=controls.enableDamping;controls.enableDamping=false;controls.update();controls.enableDamping=damping;
-   const to=new T.Vector3(...pose.target);flight={fromHeight:camera.top-camera.bottom,toHeight:Number.isFinite(pose.height)&&pose.height>0?pose.height:null,aspect:Number.isFinite(pose.aspect)&&pose.aspect>0?pose.aspect:(camera.right-camera.left)/(camera.top-camera.bottom),elapsed:0,from:controls.target.clone(),to,fromCamera:camera.position.clone(),toCamera:to.clone().add(new T.Vector3(5.8,5.6,24)),fromZoom:camera.zoom,toZoom:T.MathUtils.clamp(pose.zoom,controls.minZoom,controls.maxZoom)};
+   const to=new T.Vector3(...pose.target);flight={fromHeight:camera.top-camera.bottom,toHeight:Number.isFinite(pose.height)&&pose.height>0?pose.height:null,aspect:Number.isFinite(pose.aspect)&&pose.aspect>0?pose.aspect:(camera.right-camera.left)/(camera.top-camera.bottom),elapsed:0,from:controls.target.clone(),to,fromCamera:camera.position.clone(),toCamera:to.clone().add(new T.Vector3(...eye)),fromZoom:camera.zoom,toZoom:T.MathUtils.clamp(pose.zoom,controls.minZoom,controls.maxZoom)};
    if(instant)tick(0,true);return true;
   }
  };

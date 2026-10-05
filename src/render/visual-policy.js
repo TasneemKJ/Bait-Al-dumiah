@@ -16,9 +16,16 @@ export function detail(width,height,preference='auto',dpr=1){
  return {level,pixelRatio:clamp(dpr,1,level==='low'?1.25:1.75),shadows:level==='high'};
 }
 export function framing(width,height,roomId=null){
- const aspect=Math.max(1,width)/Math.max(1,height),room=ROOMS.find(r=>r.id===roomId);
+ const w=Number.isFinite(width)?Math.max(1,width):390,h=Number.isFinite(height)?Math.max(1,height):844;
+ const aspect=w/h,room=ROOMS.find(r=>r.id===roomId);
  const heightWorld=Math.max(11.7,10.8/aspect);
- return {height:heightWorld,zoom:room?(width<700?3.15:1.85):1,target:room?[room.x,room.y+1.65,.15]:[0,3.65,0]};
+ if(!room)return {height:heightWorld,zoom:1,target:[0,3.65,0]};
+ // Fit the room's projected width and depth inside the free playfield. A fixed
+ // phone zoom cut off the tin, plant and cabinet at the edges of the room.
+ const phone=w<700&&h>w,short=h<560,top=phone?166:short?48:112,bottom=phone?308:short?138:248;
+ const usable=Math.max(120,h-top-bottom),span=Math.max(5.95/aspect,4.25*h/usable),zoom=Math.min(1.85,heightWorld/span);
+ const effectiveSpan=heightWorld/zoom,upY=Math.hypot(5.8,24)/Math.hypot(5.8,5.6,24),offset=((top+usable/2)/h-.5)*effectiveSpan/upY;
+ return {height:heightWorld,aspect,zoom,target:[room.x,room.y+1.875+offset,.325]};
 }
 
 // Shader uniforms are linear RGB. Hex art-direction swatches are sRGB.

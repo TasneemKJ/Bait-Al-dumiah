@@ -6,7 +6,9 @@ permissions:
 jobs:
   expansion:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # This journey performs all three real rituals and the owned-keepsake tail.
+    # cf787a2 reached 43/48 checks at the former 20-minute cap, with no failures.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -27,4 +29,122 @@ jobs:
         with:
           name: living-house-expansion
           path: artifacts/
+          retention-days: 14
+  stories:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements.txt
+      - run: python -m playwright install --with-deps chromium
+      - name: Play carried-object stories on desktop and phones
+        run: python scripts/story_check.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hidden-house-stories
+          path: artifacts/stories/
+          retention-days: 14
+  tea:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: [desktop, phone, progression]
+    env:
+      TEA_SCENARIO: ${{ matrix.scenario }}
+      TEA_HEADED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements.txt
+      - run: python -m playwright install --with-deps chromium
+      - name: Pour and serve tea through mouse, touch and keyboard
+        run: xvfb-run -a python scripts/tea_check.py
+      - name: Emit original tea frames for review
+        if: always()
+        run: python scripts/emit-review-images.py artifacts/tea/${{ matrix.scenario }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: physical-tea-service-${{ matrix.scenario }}
+          path: artifacts/tea/${{ matrix.scenario }}/
+          retention-days: 14
+  visibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements-visibility.txt
+      - run: python -m playwright install --with-deps chromium
+      - name: Verify real background tabs release held tea and sewing
+        run: xvfb-run -a python scripts/visibility_check.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: physical-tea-tab-visibility
+          path: artifacts/visibility/
+          retention-days: 14
+  stitch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: [desktop, phone, progression]
+    env:
+      STITCH_SCENARIO: ${{ matrix.scenario }}
+      STITCH_HEADED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile the affected physical-play fixtures
+        run: python -m py_compile scripts/stitch_check.py scripts/stitch_gestures.py scripts/visibility_check.py scripts/story_check.py scripts/expansion_check.py scripts/tea_check.py scripts/emit-review-images.py
+      - run: python -m pip install -r requirements.txt
+      - run: python -m playwright install --with-deps chromium
+      - name: Trace, repair and finish cloth through actual needle input
+        run: xvfb-run -a python scripts/stitch_check.py
+      - name: Emit original sewing frames for review
+        if: always()
+        run: python scripts/emit-review-images.py artifacts/stitch/${{ matrix.scenario }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: physical-sewing-${{ matrix.scenario }}
+          path: artifacts/stitch/${{ matrix.scenario }}/
           retention-days: 14

@@ -24,7 +24,14 @@ def capture(page,name):
  (OUT/f'{name}-capture.json').write_text(json.dumps({'viewport':page.viewport_size,'visual':page.evaluate('window.dollhouse?.visual?.() ?? null')},indent=2))
  page.screenshot(path=str(OUT/f'{name}.png'),full_page=False,timeout=60000)
 def state(page):return page.evaluate('window.dollhouse.state()')
-def click(page,action):page.locator(f'[data-action="{action}"]:visible').click()
+def click(page,action):
+ target=page.locator(f'[data-action="{action}"]:visible')
+ if not target.count() and action.startswith('panel-'):page.locator('[data-action="toggle-tools"]').click()
+ page.locator(f'[data-action="{action}"]:visible').click()
+def inspect_object(page,key):
+ target=page.locator(f'[data-object="{key}"]')
+ if not target.is_visible():page.locator('[data-object-toggle]').click()
+ target.click();page.locator('[data-scene-action="inspect"]').click()
 def open_settings(page):click(page,'panel-settings')
 def reload_game(page):
  # After a long software-WebGL session, teardown/re-init can exceed the 12s click deadline.
@@ -63,7 +70,9 @@ try:
   click(page,'camera');check('whole house clears portrait focus and hidden-HUD state',page.evaluate('window.dollhouse.visual().focusedDoll===null && document.querySelector("#ui").dataset.focusDoll===""'))
   page.locator('[data-room=kitchen]').click()
   before=state(page);click(page,'objective');after=state(page)
-  check('first wish feeds Lina and awards only net 6 buttons',after['dolls'][0]['hunger']>before['dolls'][0]['hunger'] and after['buttons']==42 and after['wishes']==['lina'])
+  check('story objective focuses its room without buying care or changing wishes',after['buttons']==before['buttons'] and after['wishes']==before['wishes'] and page.evaluate('window.dollhouse.visual().focusedRoom==="kitchen"'))
+  inspect_object(page,'prop:tea-set');page.locator('.object-detail [data-action="care"][data-care="tea"]').click();after=state(page)
+  check('optional tea-set care feeds Lina and awards only net 6 buttons',after['dolls'][0]['hunger']>before['dolls'][0]['hunger'] and after['buttons']==42 and after['wishes']==['lina'])
   page.wait_for_timeout(200);capture(page,'tea-reaction');click(page,'camera')
   click(page,'panel-household');page.locator('[data-action="select"][data-id="noor"]').click();capture(page,'doll-care')
   page.locator('[data-action="care"][data-care="rest"]').click()
@@ -92,7 +101,19 @@ try:
   click(page,'panel-decorate');page.locator('[data-action="choose-item"][data-id="plant"]').click();click(page,'place-confirm');after=state(page)
   check('placing a decoration changes ownership and charges exact price',after['buttons']==money-8 and len(after['decor'])==1)
   click(page,'panel-decorate');page.locator('[data-action="remove"]').click();check('packing away refunds the full price',state(page)['buttons']==money and not state(page)['decor']);click(page,'close')
-  click(page,'panel-decorate');page.locator('[data-action="choose-item"][data-id="musicbox"]').click();page.locator('#place-room').select_option('parlor');click(page,'place-confirm')
+  click(page,'panel-decorate');page.locator('[data-action="choose-item"][data-id="musicbox"]').click();page.locator('#place-room').select_option('parlor')
+  # Plant confirmation above retains actual mouse-click coverage. Exercise the
+  # native keyboard route for this purchase without waiting for consecutive
+  # paint frames merely to establish a stationary button's mouse stability.
+  musicbox_before=state(page);confirm=page.locator('[data-action="place-confirm"]:visible')
+  check('musicbox placement exposes a visible enabled confirmation',confirm.is_visible() and confirm.is_enabled())
+  page.locator('#place-room').focus();page.keyboard.press('Tab')
+  check('placement keyboard navigation reaches the slot selector',page.evaluate('document.activeElement.id==="place-slot"'))
+  page.keyboard.press('Tab')
+  check('placement keyboard navigation reaches the confirmation button',page.evaluate('document.activeElement.dataset.action==="place-confirm"'))
+  page.keyboard.press('Enter');musicbox_after=state(page)
+  # The authored musicbox catalogue price in src/content.js is twenty buttons.
+  check('keyboard placement buys the parlor musicbox for its exact twenty-button price',musicbox_after['buttons']==musicbox_before['buttons']-20 and len(musicbox_after['decor'])==len(musicbox_before['decor'])+1 and any(d['item']=='musicbox' and d['room']=='parlor' and d['slot']==0 for d in musicbox_after['decor']))
   click(page,'light');page.wait_for_function('window.dollhouse.visual().nightMix>.99',timeout=60000);capture(page,'desktop-night')
   check('night capture uses the settled lighting rather than a transition',page.evaluate('window.dollhouse.visual().nightMix')>.99)
   check('nightfall changes the simulation and reveals a visitor',state(page)['clock']>=120 and page.locator('.visitor-hint').is_visible())
@@ -103,16 +124,25 @@ try:
   saved=state(page);reload_game(page);page.wait_for_timeout(1000);after=state(page)
   check('reload preserves ownership, money and journal',after['buttons']==saved['buttons'] and [(d['item'],d['room'],d['slot']) for d in after['decor']]==[(d['item'],d['room'],d['slot']) for d in saved['decor']] and after['journal']==saved['journal'])
   open_settings(page);page.locator('[data-field="motion"]').check();page.locator('[data-field="locale"]').select_option('ar');capture(page,'arabic-settings');click(page,'close')
-  check('Arabic switches document direction and visible content',page.locator('html').get_attribute('dir')=='rtl' and 'أهل البيت' in page.locator('.dock').inner_text())
+  if not page.locator('.dock [data-action="panel-household"]').is_visible():click(page,'toggle-tools')
+  check('Arabic switches document direction and visible content',page.locator('html').get_attribute('dir')=='rtl' and 'أهل البيت' in page.locator('.dock [data-action="panel-household"]').inner_text())
+  click(page,'toggle-tools')
   check('reduced motion is applied and saved',state(page)['settings']['reducedMotion'] and 'reduced-motion' in page.locator('body').get_attribute('class'))
   page.set_viewport_size({'width':390,'height':844});page.wait_for_timeout(800);capture(page,'mobile-arabic-night')
   check('mobile viewport has no horizontal overflow',page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
   page.locator('[data-room=bedroom]').click();page.wait_for_timeout(300);capture(page,'mobile-room-closeup')
   check('mobile room closeup uses the selected room and battery budget',page.evaluate('window.dollhouse.visual().focusedRoom==="bedroom" && window.dollhouse.visual().quality==="low"'))
   click(page,'camera')
-  targets=page.locator('.dock button,.camera-tools button,.objective button,.time-tools button').evaluate_all('(els)=>els.map(e=>({name:e.dataset.action,w:e.getBoundingClientRect().width,h:e.getBoundingClientRect().height}))')
+  targets={}
+  for expanded in [False,True]:
+   toggle=page.locator('[data-action="toggle-tools"]')
+   if (toggle.get_attribute('aria-expanded')=='true')!=expanded:toggle.click()
+   entries=page.locator('.dock button:visible,.camera-tools button:visible,.objective button:visible,.time-tools button:visible').evaluate_all('(els)=>els.map(e=>({name:e.dataset.action,w:e.getBoundingClientRect().width,h:e.getBoundingClientRect().height}))')
+   targets['expanded' if expanded else 'collapsed']=entries
+   check(f'{"expanded" if expanded else "collapsed"} mobile controls are at least 44 by 44 px',bool(entries) and all(e['h']>=44 and e['w']>=44 for e in entries))
+   check('secondary panels follow the mobile tools toggle',page.locator('.dock [data-action^="panel-"]:visible').count()==(5 if expanded else 0))
+  page.locator('[data-action="toggle-tools"]').click()
   (OUT/'touch-targets.json').write_text(json.dumps(targets,indent=2))
-  check('all persistent mobile controls are at least 44 by 44 px',all(e['h']>=44 and e['w']>=44 for e in targets))
   open_settings(page);page.locator('[data-field="locale"]').select_option('en');click(page,'close');click(page,'light');capture(page,'mobile-day')
   click(page,'panel-household');capture(page,'mobile-care');page.keyboard.press('Escape');check('Escape dismisses the sheet',not page.locator('dialog[open]').count())
   click(page,'panel-household');page.locator('[data-action="select"][data-id="noor"]').click();click(page,'focus-doll');capture(page,'mobile-doll-closeup')
@@ -129,6 +159,20 @@ try:
   print(json.dumps({'checks':checks,'errors':errors,'render':stats},indent=2))
 except Exception as exc:
  errors.append(str(exc));traceback.print_exc()
+ # Retain state/actionability evidence even if the independent screenshot
+ # cannot finish on a saturated software renderer.
+ try:
+  diagnostics=page.evaluate('''()=>{
+   const button=document.querySelector('[data-action="place-confirm"]'),active=document.activeElement;
+   const rect=button?.getBoundingClientRect(),hit=rect?document.elementFromPoint(rect.left+rect.width/2,rect.top+rect.height/2):null;
+   const describe=e=>e?{tag:e.tagName,id:e.id,action:e.dataset.action}:null;
+   return {state:window.dollhouse?.state?.(),visual:window.dollhouse?.visual?.(),
+    viewport:{width:innerWidth,height:innerHeight},visibility:document.visibilityState,
+    activeElement:describe(active),confirmation:button?{text:button.textContent,disabled:button.disabled,
+     visible:button.getClientRects().length>0,rect:rect.toJSON(),hit:describe(hit),receivesInput:hit===button||button.contains(hit)}:null};
+  }''')
+  (OUT/'failure-diagnostics.json').write_text(json.dumps(diagnostics,indent=2))
+ except Exception:pass
  try:capture(page,'failure-state')
  except Exception:pass
 finally:

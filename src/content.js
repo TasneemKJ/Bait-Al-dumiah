@@ -50,10 +50,53 @@ export const ACTIVITIES=[
  {id:'lullaby',resident:'noor',room:'bedroom',icon:'music',choices:['moon','music','spark','heart'],seed:3},
 ];
 export const ACTIVITY_THRESHOLDS=[0,2,5,9],ACTIVITY_DAILY_CAP=2,ACTIVITY_COOLDOWN=20;
+// Shared table geometry; simulation alone judges stream landing and fill targets.
+export const TEA_TABLE={room:'kitchen',x:-.53,y:.779,z:.10,aimSpan:.45,cupZ:.14,cupRadius:.112,cupOuterRadius:.14,cupHeight:.24};
+// Physical sewing coordinates are normalized cloth x/z; rules own all acceptance.
+export const STITCH_TABLE={room:'studio',x:-.35,y:.891,z:.05,clothScale:.46,hoopRadius:.46,gripHeight:.38,boardSize:[1.68,.06,1.15],boardEdgePadding:.015,spoolOffset:[.65,0,.03],finishOffset:[-.65,0,.15],gripDiameter:.35,spoolDiameter:.35,finishSize:[.35,.54]};
+const stitchSections=(anchors,bend)=>anchors.slice(0,-1).map((p,i)=>[p,[(p[0]+anchors[i+1][0])/2*bend,(p[1]+anchors[i+1][1])/2*bend],anchors[i+1]]);
+export const STITCH_PATTERNS=[
+ {id:'bear-seam',sections:[[[-.58,-.05],[-.30,-.20],[0,-.05]],[[0,-.05],[.30,.15],[.58,-.05]]]},
+ {id:'leaf',sections:[[[-.60,0],[-.30,-.40],[0,-.60]],[[0,-.60],[.30,-.30],[.60,0]],[[.60,0],[.20,.35],[-.60,0]]]},
+ {id:'diamond',sections:stitchSections([[-.60,0],[0,-.60],[.60,0],[0,.60],[-.60,0]],1.20)},
+ {id:'jasmine',sections:stitchSections([[0,-.68],[.65,-.21],[.40,.55],[-.40,.55],[-.65,-.21],[0,-.68]],.45)},
+ {id:'heart',sections:stitchSections([[0,-.15],[.35,-.45],[.65,-.15],[.40,.35],[0,.65],[-.40,.35],[-.65,-.15],[-.35,-.45],[0,-.15]],1)},
+];
 export const RESTORATION_COSTS=[45,85,140],RESTORATION_MASTERY=[1,3,6];
 export const INTERACTIVE_PROPS=[
  {id:'tea-set',room:'kitchen',position:[-.53,.92,.1],size:[1.1,.55,.75],icon:'tea',activity:'tea',resident:'lina',care:'tea'},
  {id:'sewing-machine',room:'studio',position:[-.35,1.08,-.78],size:[.9,.60,.55],icon:'button',activity:'stitch',resident:'sami',care:'play'},
  {id:'moon-bed',room:'bedroom',position:[-.48,.75,-.42],size:[1.8,1.1,2.1],icon:'rest',activity:'lullaby',resident:'noor',care:'rest'},
+ {id:'moon-mobile',room:'bedroom',position:[-1.70,2.36,-.60],size:[.90,1.00,.30],icon:'music',activity:'lullaby'},
  {id:'parlor-sofa',room:'parlor',position:[.42,.74,-.63],size:[2.5,1.1,1.0],icon:'heart',resident:'lina',care:'play'},
+ {id:'mint-tin',room:'kitchen',position:[-.30,1.20,-1.04],size:[.36,.26,.30],icon:'leaf',story:true},
+ {id:'music-cabinet',room:'parlor',position:[1.66,.75,.25],size:[.64,1.18,.60],icon:'music',story:true},
+ {id:'wash-basin',room:'kitchen',position:[-1.27,1.08,-1.06],size:[.62,.28,.50],icon:'tea',story:true},
+ {id:'jasmine-window',room:'parlor',position:[-.90,1.48,-1.43],size:[.54,.78,.32],icon:'leaf',story:true},
+ {id:'doorstep',room:'parlor',position:[.2,.27,1.95],size:[.78,.40,.46],icon:'ghost',story:true},
+];
+// Stable story steps define the only carried item; saved progress derives inventory.
+export const STORY_ITEMS=[
+ {id:'red-thread',icon:'button'},{id:'mended-bear',icon:'bear'},
+ {id:'brass-key',icon:'spark'},{id:'bent-cylinder',icon:'music'},{id:'repaired-cylinder',icon:'music'},
+ {id:'water-ewer',icon:'tea'},{id:'jasmine-sprig',icon:'leaf'},{id:'guest-cup',icon:'tea'},
+];
+export const STORY_CHAPTERS=[
+ {id:'mended-friend',icon:'bear',reward:12,steps:[
+  {object:'mint-tin',gives:'red-thread',icon:'leaf'},
+  {object:'sewing-machine',gives:'mended-bear',icon:'button'},
+  {object:'moon-bed',gives:null,icon:'bear'},
+ ]},
+ {id:'lost-song',icon:'music',reward:16,steps:[
+  {object:'parlor-sofa',gives:'brass-key',icon:'heart'},
+  {object:'music-cabinet',gives:'bent-cylinder',icon:'spark'},
+  {object:'sewing-machine',gives:'repaired-cylinder',icon:'button'},
+  {object:'music-cabinet',gives:null,icon:'music'},
+ ]},
+ {id:'guest-tea',icon:'tea',reward:20,steps:[
+  {object:'wash-basin',gives:'water-ewer',icon:'tea'},
+  {object:'jasmine-window',gives:'jasmine-sprig',icon:'leaf'},
+  {object:'tea-set',gives:'guest-cup',icon:'tea'},
+  {object:'doorstep',gives:null,icon:'ghost'},
+ ]},
 ];

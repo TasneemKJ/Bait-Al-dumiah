@@ -3,6 +3,18 @@ import {crescentGeometry} from './resident-effects.js';
 import {drapedCurtain,valance,doily} from './fabric-shapes.js';
 import {ROOMS} from '../content.js';
 import {palette as P,box,ball,cylinder,ring,line,arch,mat,texture,texturedPlane,plant,lamp,cup,books,batch} from './primitives.js';
+const originalTeaPaint=new T.MeshStandardMaterial({vertexColors:true,roughness:.82});
+const housePaint=new T.MeshStandardMaterial({vertexColors:true,roughness:.82});housePaint.name='house-painted-matte';
+function unifyPaintedColors(root){
+ root.traverse(o=>{
+  if(!o.isMesh)return;for(let n=o;n&&n!==root;n=n.parent)if(n.userData.noBatch)return;
+  const m=o.material;
+  // Only the primitive factory's ordinary opaque matte finish is equivalent.
+  // Textiles, porcelain, brass, window emissives and moving roots stay intact.
+  if(!m?.isMeshStandardMaterial||m.isMeshPhysicalMaterial||m.vertexColors||m.map||m.bumpMap||m.normalMap||m.roughnessMap||m.metalnessMap||m.alphaMap||m.aoMap||m.lightMap||m.displacementMap||m.envMap||m.metalness!==0||m.roughness!==.82||m.transparent||m.opacity!==1||m.side!==T.FrontSide||m.emissive.getHex()!==0||m.flatShading||m.alphaTest||m.wireframe)return;
+  const g=o.geometry.clone(),count=g.attributes.position.count,c=m.color,data=new Float32Array(count*3);for(let i=0;i<count;i++)data.set([c.r,c.g,c.b],i*3);g.setAttribute('color',new T.BufferAttribute(data,3));o.geometry=g;o.material=housePaint;
+ });
+}
 function window(p,x,y,theme,lights){
  valance(p,x,y+1.57,-1.18);
  arch(p,x,y,-1.655,1.05,1.65,P.cream,.10);
@@ -13,7 +25,7 @@ function window(p,x,y,theme,lights){
  for(const side of [-1,1]){box(p,x+side*.72,y+.73,-1.53,.28,1.5,.08,theme);for(let j=0;j<7;j++)box(p,x+side*.72,y+.13+j*.18,-1.465,.23,.05,.08,P.cream);drapedCurtain(p,x+side*.53,y+.76,-1.28,side);ring(p,x+side*.5,y+.79,-1.3,.09,.02,P.gold,true)}
  line(p,[x-.75,y+1.67,-1.28],[x+.75,y+1.67,-1.28],.025,P.gold);
 }
-function chair(p,x,z,color,rot=0){const g=new T.Group();g.position.set(x,0,z);g.rotation.y=rot;p.add(g);box(g,0,.51,0,.48,.11,.48,color,true);box(g,0,.88,-.21,.45,.68,.07,color,true);for(const a of [-1,1])for(const b of [-1,1])box(g,a*.17,.24,b*.16,.045,.5,.045,P.wood);for(let i=0;i<3;i++)box(g,-.12+i*.12,.9,-.162,.025,.4,.03,P.cream)}
+function chair(p,x,z,color,rot=0){const g=new T.Group();g.position.set(x,0,z);g.rotation.y=rot;p.add(g);box(g,0,.51,0,.48,.11,.48,color,true);box(g,0,.88,-.21,.45,.68,.07,color,true);for(const a of [-1,1])for(const b of [-1,1])box(g,a*.17,.24,b*.16,.045,.5,.045,P.wood);for(let i=0;i<3;i++)box(g,-.12+i*.12,.9,-.162,.025,.4,.03,P.cream);return g}
 function kitchen(p){
  doily(p,-.52,.773,.1,.69);
  for(let i=0;i<3;i++){const x=-1.45+i*.83;box(p,x,.48,-1.1,.81,.92,.71,0x8bac9d,true);box(p,x,.5,-.722,.68,.71,.04,0xa7c5b2,true);ball(p,x+.20,.58,-.674,.035,.035,.025,P.gold)}
@@ -25,9 +37,15 @@ function kitchen(p){
  ball(p,1.40,1.22,-1.13,.17,.18,.17,0xbc969f);cylinder(p,1.40,1.39,-1.13,.13,.035,P.gold);ring(p,1.40,1.38,-1.13,.14,.02,P.gold);line(p,[1.25,1.21,-1.13],[1.11,1.36,-1.13],.036,0xbc969f);
  box(p,-.3,2.26,-1.35,1.65,.085,.50,P.wood);for(let i=0;i<4;i++){cylinder(p,-.88+i*.36,2.44,-1.32,.12,.3,[0xe2baa5,0xb09cbd,0xe3d6af,0x9db9ad][i]);cylinder(p,-.88+i*.36,2.60,-1.32,.13,.04,P.wood)}
  box(p,-.53,.70,.1,1.12,.10,.75,P.wood,true);for(const x of [-.94,-.12])for(const z of [-.15,.36])box(p,x,.34,z,.06,.70,.06,P.wood);
- box(p,-.53,.758,.1,.34,.014,.73,0xe3b6bc);cup(p,-.73,.77,.1);cup(p,-.30,.77,.13,0xa3c3b0);cylinder(p,-.49,.775,.13,.12,.015,P.cream);ball(p,-.49,.807,.13,.06,.026,.06,0xb98d65);
+ box(p,-.53,.758,.1,.34,.014,.73,0xe3b6bc);
+ const teaSet=new T.Group();teaSet.name='kitchen-original-tea-set';p.add(teaSet);
+ cup(teaSet,-.73,.77,.1);cup(teaSet,-.30,.77,.13,0xa3c3b0);cylinder(teaSet,-.49,.775,.13,.12,.015,P.cream);ball(teaSet,-.49,.807,.13,.06,.026,.06,0xb98d65);
+ // Preserve the two porcelain glazes; painted tea/snack/plate share one batch.
+ teaSet.traverse(o=>{if(!o.isMesh||o.material.isMeshPhysicalMaterial)return;const g=o.geometry.clone(),count=g.attributes.position.count,c=o.material.color,data=new Float32Array(count*3);for(let i=0;i<count;i++)data.set([c.r,c.g,c.b],i*3);g.setAttribute('color',new T.BufferAttribute(data,3));o.geometry=g;o.material=originalTeaPaint});
+ batch(teaSet);teaSet.userData.noBatch=true;
  chair(p,-1.50,.08,0xc1d1b4,Math.PI/2);chair(p,.4,.15,0xc1d1b4,-Math.PI/2);
  window(p,-1.45,1.15,0x8caf9d,[]);
+ return teaSet;
 }
 function parlor(p){
  doily(p,.15,.511,.45,.66);
@@ -45,10 +63,14 @@ function studio(p){
  box(p,.56,.50,-.8,.52,.58,.65,0xb8a6c8);for(let i=0;i<2;i++){box(p,.56,.33+i*.27,-.45,.44,.23,.04,0xd0bfd8);ball(p,.56,.33+i*.27,-.41,.035,.035,.02,P.gold)}
  box(p,-.35,.89,-.78,.8,.07,.4,0x5d5664,true);box(p,-.15,1.10,-.82,.20,.42,.27,0x5d5664,true);box(p,-.35,1.28,-.82,.55,.16,.26,0x5d5664,true);box(p,-.58,1.07,-.82,.05,.30,.05,P.gold);ring(p,.016,1.16,-.82,.13,.025,P.gold).rotation.y=Math.PI/2;
  for(let i=0;i<3;i++){cylinder(p,-1.10+i*.19,.98,-.93,.06,.20,[0xdaa3ad,0x88b5a9,0xe6d1ad][i]);cylinder(p,-1.10+i*.19,1.09,-.93,.075,.024,P.wood)}
- chair(p,-.38,.28,0xad99bd);
+ const studioChair=chair(p,-.38,.28,0xad99bd);studioChair.name='studio-work-chair';
+ // Batch this complete chair before excluding it from room-wide batching.
+ // The work camera can hide and restore it without losing any upholstery.
+ unifyPaintedColors(studioChair);batch(studioChair);studioChair.userData.noBatch=true;
  box(p,1.50,.35,-.63,.65,.68,.76,0xb99a81,true);box(p,1.50,.7,-.63,.70,.09,.8,P.cream);books(p,1.25,.75,-.62);
  window(p,-1.35,1.30,0xb1a2c3,[]);
  box(p,.50,2.04,-1.40,1.30,.73,.04,0xd2bba0);for(let i=0;i<5;i++){line(p,[.02+i*.25,2.33,-1.34],[.02+i*.25,1.90,-1.34],.008,P.wood);cylinder(p,.02+i*.25,2.12,-1.3,.071,.19,[P.rose,P.mint,P.cream,P.lavender,P.gold][i]).rotation.x=Math.PI/2}
+ return studioChair;
 }
 function bedroom(p){
  box(p,-.48,.35,-.42,1.79,.40,2.12,P.wood,true);arch(p,-.48,.28,-1.51,1.96,1.45,0xc496a0,.12);arch(p,-.48,.31,-1.37,1.69,1.25,0xebc9c7,.03);
@@ -71,8 +93,12 @@ export function makeFurniture(id){const g=new T.Group();
  return g;
 }
 export function createHouse(scene){
- const root=new T.Group();root.position.y=.26;scene.add(root);const staticRoot=new T.Group();root.add(staticRoot);const lights=[];
- for(let j=0;j<2;j++)box(staticRoot,0,j*3.2,0,9.85,.19,3.65,P.wood);box(staticRoot,0,6.4,-.02,9.85,.16,3.65,P.cream);
+ const root=new T.Group();root.position.y=.26;scene.add(root);const staticRoot=new T.Group();root.add(staticRoot);const lights=[];let originalTeaSet=null,studioChair=null;
+ // The ceiling and its front lip cross the raised sewing grip's sightline.
+ // Keep their original shapes/finishes in a local batch that can be restored.
+ const workCeiling=new T.Group();workCeiling.name='sewing-ceiling-cutaway';root.add(workCeiling);
+ for(let j=0;j<2;j++)box(staticRoot,0,j*3.2,0,9.85,.19,3.65,P.wood);
+ box(workCeiling,0,6.4,-.02,9.85,.16,3.65,P.cream).name='work-ceiling-slab';
  for(const room of ROOMS){const g=new T.Group();g.position.set(room.x,room.y,0);staticRoot.add(g);
  box(g,0,1.57,-1.75,4.76,3.10,.15,room.tint);
  const color={kitchen:'#dfd5b8',parlor:'#d5b99c',studio:'#d6c9b2',bedroom:'#dfcca9'}[room.id];texturedPlane(g,0,1.87,-1.665,4.70,2.45,texture('wall',[color,'#fff0dc']));
@@ -80,14 +106,14 @@ export function createHouse(scene){
  box(g,0,.13,-1.55,4.70,.13,.12,P.cream);box(g,0,3.08,-1.59,4.78,.15,.19,P.cream);
  texturedPlane(g,0,.101,0,4.71,3.40,texture('tile',room.id==='kitchen'?['#e7dcc5','#90aba0']:['#dfc6b5','#b0938e']),true);
  if(room.id!=='kitchen')texturedPlane(g,0,.111,.15,3.6,2.6,texture('rug',room.id==='parlor'?['#be8297','#f0d7b7']:room.id==='studio'?['#a798bb','#e5d1ba']:['#a6afbb','#e9d0bc']),true);
- if(room.id==='kitchen')kitchen(g);if(room.id==='parlor')parlor(g);if(room.id==='studio')studio(g);if(room.id==='bedroom')bedroom(g);
+ if(room.id==='kitchen')originalTeaSet=kitchen(g);if(room.id==='parlor')parlor(g);if(room.id==='studio')studioChair=studio(g);if(room.id==='bedroom')bedroom(g);
  // Warm little pools of light, kept independent of decorative meshes.
  const light=new T.PointLight(0xffd4a0,1.7,5,2);light.position.set(room.x,room.y+2,-.3);root.add(light);lights.push(light);
  }
  for(const x of [-4.84,0,4.84]){box(staticRoot,x,3.2,-1.70,.19,6.4,.28,P.cream);box(staticRoot,x,3.2,1.65,.14,6.4,.20,P.cream);for(const y of [.17,3.3,6.35])box(staticRoot,x,y,1.65,.23,.20,.26,P.cream,true)}
  // Side walls are deliberately cut back: the front and near corners stay open for play.
  for(const x of [-4.83,4.83])box(staticRoot,x,3.2,-.99,.14,6.4,1.35,0xd4c2b0);
- for(const y of [0,3.2,6.4]){box(staticRoot,0,y+.03,1.77,9.91,.15,.10,P.cream);box(staticRoot,0,y-.065,1.80,9.87,.03,.04,P.gold)}
+ for(const y of [0,3.2,6.4]){const assembly=y===6.4?workCeiling:staticRoot;const cream=box(assembly,0,y+.03,1.77,9.91,.15,.10,P.cream),gold=box(assembly,0,y-.065,1.80,9.87,.03,.04,P.gold);if(y===6.4){cream.name='work-ceiling-cream-fascia';gold.name='work-ceiling-gold-fascia'}}
  const roofShape=new T.Shape();roofShape.moveTo(-4.90,6.4);roofShape.lineTo(0,8.20);roofShape.lineTo(4.90,6.4);roofShape.closePath();const gable=new T.Mesh(new T.ExtrudeGeometry(roofShape,{depth:.15,bevelEnabled:false}),mat(0xe8d7c1));gable.position.z=-1.77;staticRoot.add(gable);
  for(const sign of [-1,1]){const roof=box(staticRoot,sign*2.56,7.30,-.05,5.5,.18,3.97,0x8a5d4d);roof.rotation.z=-sign*.355;
  for(let row=0;row<7;row++)for(let col=0;col<13;col++){const x=sign*(.20+col*.40),y=8.40-Math.abs(x)*.3707,z=-1.88+row*.57;const tile=box(staticRoot,x,y,z,.40,.065,.51,[0xa8755d,0x9c644e,0xb18064][(row+col)%3],true);tile.rotation.z=-sign*.355}
@@ -100,5 +126,5 @@ export function createHouse(scene){
  // Twelve tiny outside steps make the two-storey miniature legible.
  for(let i=0;i<12;i++)box(staticRoot,5.02,.13+i*.266,1.48-i*.23,.52,.20,.31,0xc5ac94);
  line(staticRoot,[5.31,.55,1.62],[5.31,3.60,-1.18],.023,P.cream);for(let i=0;i<6;i++)line(staticRoot,[5.31,.18+i*.53,1.44-i*.46],[5.31,.73+i*.53,1.44-i*.46],.022,P.cream);
- const windows=new Set();staticRoot.traverse(o=>{if(o.material?.color?.getHex()===0xb9cacc)windows.add(o.material)});batch(staticRoot);return {root,lights,windows};
+ const windows=new Set();staticRoot.traverse(o=>{if(o.material?.color?.getHex()===0xb9cacc)windows.add(o.material)});unifyPaintedColors(workCeiling);batch(workCeiling);workCeiling.userData.noBatch=true;unifyPaintedColors(staticRoot);batch(staticRoot);return {root,lights,windows,originalTeaSet,studioChair,workCeiling};
 }
