@@ -2,6 +2,7 @@
 Each merged batch adds an entry and a `vX.Y.Z` tag.
 
 ## Unreleased
+- Retention: when a returning player opens the house, the residents wave one after another (reuses the greeting pose; skipped under reduced motion and on a first visit).
 - Replayability: the visitor's gifts become a keepsake shelf with a small hand-drawn picture for each of the eight gifts, locked slots shown as soft stars, and tonight's gift highlighted (still under reduced motion).
 - Self-teaching: in the first three days a soft gold ring breathes under any idle resident whose wish is still unspoken; it goes out when the wish is granted and is steady under reduced motion.
 - Accessibility: a Larger text setting (saved, off by default, lazily whitelisted) scales the settings, household and journal panels.

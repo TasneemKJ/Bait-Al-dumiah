@@ -12,7 +12,7 @@ import {createUI} from './ui.js';
 import {createResidentLabel} from './render/resident-label.js';
 import {createRoomViews} from './render/room-views.js';
 import {DollhouseAudio} from './audio.js';
-import {returnGreeting} from './return-greeting.js';
+import {returnGreeting,waveSchedule} from './return-greeting.js';
 
 let stored=null;try{stored=localStorage.getItem(SAVE_KEY)}catch{}
 // An unreadable or newer save is kept under a backup key before the fresh house can overwrite it.
@@ -259,8 +259,9 @@ async function dispatch(action,value){
   }
  }
 }
+let welcomeWave=false;
 ui=createUI(host,()=>state,dispatch);
-if(saveRecovered)ui.toast(ui.t('saveRecovered'));else{const greeting=returnGreeting(state);if(greeting)say(ui.t(greeting.key).replace('{count}',ui.n(greeting.count)))}
+if(saveRecovered)ui.toast(ui.t('saveRecovered'));else{const greeting=returnGreeting(state);if(greeting){say(ui.t(greeting.key).replace('{count}',ui.n(greeting.count)));welcomeWave=true}}
 const residentLabel=createResidentLabel(host);
 const roomViews=createRoomViews(host,()=>state,id=>dispatch('focus-room',id));
 try{world=createWorld(canvas,{onPick:data=>{
@@ -268,7 +269,7 @@ try{world=createWorld(canvas,{onPick:data=>{
  if(data.doll)ui.open('household',data.doll);
  if(data.ghost)dispatch('discover');
  if(data.slot&&ui.placement)dispatch(ui.moveId!==null?'relocate-object':'place',{id:ui.moveId,item:ui.placement,...data.slot});
-},onError:showError});document.querySelector('#loading')?.remove();}catch(error){console.error('Dollhouse renderer could not start:',error);showError('webgl')}
+},onError:showError});if(welcomeWave)world?.welcomeBack(waveSchedule(DOLLS.length,state.elapsed));document.querySelector('#loading')?.remove();}catch(error){console.error('Dollhouse renderer could not start:',error);showError('webgl')}
 objectControls=createObjectControls(host,()=>state,key=>dispatch('select-object',key));
 storyUI=createStoryUI(host,()=>state,dispatch);
 teaUI=createTeaUI(host,canvas,()=>state,dispatch,{pick:(x,y)=>world?.teaAt(x,y),aimAt:(x,y)=>world?.teaAimAt(x,y)});

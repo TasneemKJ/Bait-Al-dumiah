@@ -168,7 +168,7 @@ export function createWorld(canvas,{onPick,onError}){
  const observer=new ResizeObserver(()=>{resize();if(focusedRoom||focusedDoll)applyFraming()});observer.observe(canvas);resize();
  return {
   renderer,camera,scene,home,setChimeActive,chimeAt,chimePositions,chimePullSpan,setChimeSelection(index){chimeSelection=Number.isInteger(index)&&index>=0&&index<4?index:-1},setTeaActive,teaAt,teaAimAt,teaPositions,setStitchActive,stitchAt,stitchPointAt,stitchPositions,projectStitch,
-  selectObject(key){return objects.select(key)},clearObjectSelection(){objects.clear()},objectAt,objectPositions(){return objects.project(camera,canvas.clientWidth,canvas.clientHeight)},
+  welcomeBack(times){residents.greetAll(times)},selectObject(key){return objects.select(key)},clearObjectSelection(){objects.clear()},objectAt,objectPositions(){return objects.project(camera,canvas.clientWidth,canvas.clientHeight)},
   getPortraits(){return portraitCache.getAll()},
   focusRoom(id,immediate=false){if(working()||!ROOMS.some(r=>r.id===id))return false;focusedRoom=id;focusedDoll=null;cameraMove.moveTo(framing(canvas.clientWidth,canvas.clientHeight,id),reducedMotion||immediate);return true},
   focusDoll(id){const p=residents.position(id);if(working()||!p)return false;focusedDoll=id;focusedRoom=null;cameraMove.moveTo(focusPose(),reducedMotion);return true},
