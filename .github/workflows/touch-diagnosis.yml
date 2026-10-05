@@ -1,0 +1,52 @@
+name: Bait touch diagnosis 9fe9e84
+on:
+  push:
+    branches: ['qa/bait-touch-diagnosis-9fe9e84-20261005']
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          path: harness
+          persist-credentials: false
+      - uses: actions/checkout@v7
+        with:
+          ref: 9fe9e8480da80d15a7bdffe2ef60b228c55f3ad6
+          path: source
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Source identity and build
+        working-directory: source
+        run: |
+          test "$(git rev-parse HEAD)" = '9fe9e8480da80d15a7bdffe2ef60b228c55f3ad6'
+          git rev-parse HEAD 'HEAD^{tree}'
+          cat requirements.txt
+          npm ci --ignore-scripts
+          npm run verify
+          python -m pip install -r requirements.txt
+          python -m playwright install --with-deps chromium
+      - name: Real touch boundary observations
+        working-directory: source
+        run: python -u ../harness/scripts/diagnose-touch.py
+      - name: Bounded original evidence
+        if: always()
+        working-directory: source
+        run: |
+          python - <<'PY'
+          import base64,hashlib,json,struct
+          from pathlib import Path
+          for path in sorted(Path('artifacts/touch-diagnosis').glob('*.png'))[:8]:
+              b=path.read_bytes();w,h=struct.unpack('>II',b[16:24]);s=base64.b64encode(b).decode()
+              print('SCENE_IMAGE_BEGIN '+json.dumps({'name':path.stem,'path':path.name,'sourceCommit':'9fe9e8480da80d15a7bdffe2ef60b228c55f3ad6','revision':'diagnostic','width':w,'height':h,'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest(),'base64Length':len(s)}))
+              for i in range(0,len(s),12000):print('SCENE_IMAGE_DATA '+s[i:i+12000])
+              print('SCENE_IMAGE_END '+path.name)
+          PY
