@@ -1,0 +1,76 @@
+name: Bait same-position touch comparison
+on:
+  push:
+    branches: ['qa/bait-same-position-f3ea87d-20261005']
+permissions:
+  contents: read
+jobs:
+  probe:
+    name: Same-position ${{ matrix.revision }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - revision: baseline
+            sha: cbb00e4aa5cc164cc5bef38b5b12c5920776b09a
+          - revision: candidate
+            sha: f3ea87d175c44cec09b082e9bd12d172690883df
+    env:
+      SOURCE_SHA: ${{ matrix.sha }}
+      REVIEW_REVISION: ${{ matrix.revision }}
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          path: harness
+          persist-credentials: false
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ matrix.sha }}
+          path: source
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Verify immutable source and build
+        working-directory: source
+        run: |
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          git rev-parse HEAD 'HEAD^{tree}'
+          npm ci --ignore-scripts
+          npm run build
+          python -m pip install -r requirements.txt pillow
+          python -m playwright install --with-deps chromium
+      - name: Observe unchanged-position real touches
+        working-directory: source
+        run: |
+          timeout --signal=INT --kill-after=20s 10m python -u ../harness/scripts/review-same-position.py
+      - name: Report bounded canonical originals
+        if: always()
+        working-directory: source
+        run: |
+          python - <<'PY'
+          import base64,hashlib,json,os,struct
+          from pathlib import Path
+          for path in sorted(Path('artifacts/same-position').glob('*.png'))[:2]:
+              b=path.read_bytes();w,h=struct.unpack('>II',b[16:24]);s=base64.b64encode(b).decode()
+              print('SCENE_IMAGE_BEGIN '+json.dumps({'path':path.name,'sourceCommit':os.environ['SOURCE_SHA'],'revision':os.environ['REVIEW_REVISION'],'width':w,'height':h,'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest(),'base64Length':len(s)}))
+              for i in range(0,len(s),12000):print('SCENE_IMAGE_DATA '+s[i:i+12000])
+              print('SCENE_IMAGE_END '+path.name)
+          PY
+      - name: Trim unsuccessful probe evidence
+        if: failure()
+        working-directory: source
+        run: python scripts/trim-artifacts.py same-position
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: same-position-${{ matrix.revision }}-failure
+          path: source/failure-evidence
+          retention-days: 1
