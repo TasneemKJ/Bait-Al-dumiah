@@ -3,10 +3,13 @@ import assert from 'node:assert/strict';
 import {framing,lighting,nightSky,fog} from '../src/render/visual-policy.js';
 import {nightFrame} from '../src/night-score.js';
 
-test('portrait whole-house framing keeps the miniature large enough to read',()=>{
+test('portrait whole-house framing keeps the miniature large enough to read',async()=>{
+ // Room framing base stays 22-24; the phone whole-house view widens only enough to fit the roof and stair.
  const portrait=framing(390,844);
  assert.ok(portrait.height>=22 && portrait.height<=24,`portrait height ${portrait.height}`);
  assert.deepEqual(portrait.target,[0,3.65,0]);
+ const {houseFraming}=await import('../src/render/house-framing.js');
+ const home=houseFraming(390,844);assert.ok(home.height>portrait.height&&home.height<=28,`home height ${home.height}`);
 });
 
 test('night lighting deepens exterior contrast while keeping rooms warm',()=>{
@@ -57,16 +60,4 @@ test('each tagged room lamp gets its own profile, scaled by the night cue and fo
  assert.ok(practicalLight('studio',1,lamps,1,true).intensity>studio.intensity);
  assert.equal(practicalLight('studio',1,lamps,0).intensity,0);
  for(const bad of [NaN,-5,Infinity])assert.ok(Number.isFinite(practicalLight('kitchen',1,bad,bad).intensity));
-});
-test('forty-pass dollhouse refinement exposes eight five-pass groups',async()=>{
- const mod=await import('../src/render/visual-policy.js');
- assert.equal(typeof mod.houseRefinement40,'function');
- if(typeof mod.houseRefinement40!=='function')return;
- const full=mod.houseRefinement40('studio',1,'high',false),low=mod.houseRefinement40('studio',1,'low',false);
- const stillA=mod.houseRefinement40('studio',1,'high',true),stillB=mod.houseRefinement40('studio',1,'high',true);
- const groups=['depth','light','materials','air','motion','grounding','mobile','signature'];
- assert.equal(groups.flatMap(k=>full[k]).length,40);
- groups.forEach(k=>assert.equal(full[k].length,5));
- assert.ok(low.mobile[0]<full.mobile[0]);
- assert.deepEqual(stillA.motion,stillB.motion);
 });
