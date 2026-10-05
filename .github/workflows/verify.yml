@@ -11,54 +11,18 @@ concurrency:
   group: dollhouse-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  # Fast gate (target under 2 minutes): node tests plus the static build.
+  # Heavy browser suites are manual or weekly; see full-suite.yml and README.
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
       - run: npm ci --ignore-scripts
       - run: npm run verify
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - run: python -m pip install -r requirements.txt
-      - run: python -m playwright install --with-deps chromium
-      - name: Verify UI regressions
-        run: |
-          mkdir -p artifacts
-          python scripts/ui_check.py > artifacts/ui-regressions.json
-          cat artifacts/ui-regressions.json
-      - name: Verify Three artwork construction
-        run: python scripts/art_check.py
-      - name: Capture actual doll models
-        env:
-          DOLL_BASELINE: b99bf28e8eba7dd525381ff8ec99d64bdf35a715
-        run: python scripts/doll_capture.py
-      - name: Capture fine craft studies
-        env:
-          ART_BASELINE: 967feea3d9582801e07fe3c87f4d4c5d839ef1f4
-        run: python scripts/craft_capture.py
-      - name: Verify courtyard, Shami and audio
-        run: python scripts/atmosphere_check.py
-      - name: Play desktop and mobile game flows
-        run: npm run test:browser
-      - name: Trim failure evidence
-        if: failure()
-        run: |
-          python -m pip install pillow
-          python scripts/trim-artifacts.py ${{ github.job }}
-      - uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: failure-evidence-${{ github.job }}
-          path: failure-evidence/
-          retention-days: 1
-          compression-level: 9
-          if-no-files-found: ignore
