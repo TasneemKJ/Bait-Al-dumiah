@@ -42,4 +42,4 @@ jobs:
             artifacts/chimes/
             artifacts/chime-dom-checks.json
             artifacts/art-checks.json
-          retention-days: 14
+          retention-days: 1
