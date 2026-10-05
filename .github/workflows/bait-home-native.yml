@@ -1,0 +1,79 @@
+name: Bait reviewed Home and retained stability acceptance
+on:
+  push:
+    branches: ['qa/bait-home-6f6e7b5-20261005']
+permissions:
+  contents: read
+jobs:
+  acceptance:
+    name: Home slice ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - name: home-entry
+            command: python -u ../harness/scripts/review-home-entry.py
+            minutes: 25
+          - name: stability-and-landscape
+            command: python -u scripts/scene_stability_check.py; scene=$?; python -u ../harness/scripts/review-home-landscape.py; landscape=$?; test "$scene" = 0 -a "$landscape" = 0
+            minutes: 32
+    defaults:
+      run:
+        working-directory: source
+        shell: bash
+    env:
+      SOURCE_SHA: 6f6e7b56a9572c23b675ed8070994e03462e1c1c
+      STABILITY_GROUP: all
+      PYTHONUNBUFFERED: '1'
+      JOURNEY: ${{ matrix.name }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          path: harness
+          persist-credentials: false
+      - uses: actions/checkout@v7
+        with:
+          ref: 6f6e7b56a9572c23b675ed8070994e03462e1c1c
+          path: source
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Verify immutable reviewed source and install pinned browser
+        run: |
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          test "$(git rev-parse 'HEAD^{tree}')" = df02c1537c98dd733921f6395e23c8b6debe662c
+          git rev-parse HEAD 'HEAD^{tree}'
+          npm ci --ignore-scripts
+          npm run verify
+          python -m py_compile scripts/game_entry.py scripts/scene_stability_check.py ../harness/scripts/review-home-entry.py ../harness/scripts/review-home-landscape.py ../harness/scripts/report-home-evidence.py
+          python -m pip install -r requirements.txt pillow
+          python -m playwright install --with-deps chromium
+      - name: Native real entry and input acceptance
+        run: |
+          mkdir -p artifacts/home-native-wave
+          set +e
+          timeout --signal=INT --kill-after=45s ${{ matrix.minutes }}m bash -c '${{ matrix.command }}' 2>&1 | tee artifacts/home-native-wave/journey.log
+          status=${PIPESTATUS[0]}
+          set -e
+          printf 'COMMAND_EXIT %s\n' "$status"
+          exit "$status"
+      - name: Exact-source results and canonical PNG originals
+        if: always()
+        run: python ../harness/scripts/report-home-evidence.py
+      - name: Prepare bounded failed-job evidence
+        if: failure()
+        run: python scripts/trim-artifacts.py home-slice-${{ matrix.name }}
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: home-slice-${{ matrix.name }}-failure
+          path: source/failure-evidence
+          retention-days: 1
+          if-no-files-found: ignore
