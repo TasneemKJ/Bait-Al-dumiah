@@ -22,7 +22,7 @@ test('room views and landscape keep their existing scale',()=>{
 test('phone-portrait clue folds into a 44px chip and an unread dot',()=>{
  const css=readFileSync(new URL('../src/hud.css',import.meta.url),'utf8');
  assert.match(css,/orientation:portrait\)\{[^]*\.objective\[data-expanded=false\] \.objective-head,\.objective\[data-expanded=false\] #objective-copy\{display:none\}/);
- assert.match(css,/\.objective-toggle\{[^}]*width:44px;height:44px/);
+ assert.match(css,/#ui \.objective \.objective-toggle\{[^}]*width:44px;height:44px/);
  assert.match(css,/\.objective\[data-unread=true\] \.clue-dot\{display:block\}/);
  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');assert.ok(html.indexOf('hud.css')>html.indexOf('chime.css'),'hud.css loads last');
 });

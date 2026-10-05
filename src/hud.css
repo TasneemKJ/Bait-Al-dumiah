@@ -8,13 +8,13 @@
  .objective{width:calc(100% - 28px - var(--time-w) - var(--hud-gutter));max-width:236px;box-sizing:border-box;padding:5px 6px 6px;border-radius:12px}
  .objective[data-expanded=false]{padding:4px;background:var(--story-text-scrim);border-radius:26px;width:auto;max-width:calc(100% - 28px - var(--time-w) - var(--hud-gutter));box-shadow:0 4px 18px #4a32301a}
  .objective[data-expanded=false] .objective-head,.objective[data-expanded=false] #objective-copy{display:none}
- .objective-toggle{position:relative;display:grid;place-items:center;flex:none;width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border-radius:50%;border:1px solid #d9c2a3;background:#fff6e9;color:#a07a45}
+ #ui .objective .objective-toggle{position:relative;display:grid;place-items:center;flex:none;width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border-radius:50%;border:1px solid #d9c2a3;background:#fff6e9;color:#a07a45}
  .objective-toggle .icon{width:18px;height:18px}
- .objective-toggle[aria-expanded=true]{background:#efdcc4}
+ #ui .objective .objective-toggle[aria-expanded=true]{background:#efdcc4}
  .clue-dot{position:absolute;top:7px;inset-inline-end:7px;width:8px;height:8px;border-radius:50%;background:#b0607d;box-shadow:0 0 0 2px #fff6e9;display:none}
  .objective[data-unread=true] .clue-dot{display:block}
  #ui .objective-row>#objective-action{flex:1 1 auto;min-height:44px;line-height:1.3;text-align:start;white-space:normal}
- .night .objective-toggle{background:#302c3b;border-color:#86755b;color:#e6caa3}.night .clue-dot{box-shadow:0 0 0 2px #302c3b}
+ .night #ui .objective .objective-toggle{background:#302c3b;border-color:#86755b;color:#e6caa3}.night .clue-dot{box-shadow:0 0 0 2px #302c3b}
 }
 @media(max-width:360px) and (orientation:portrait){#ui{--hud-gutter:8px}}
 /* Save file: export/import sits above reset, in the same paper language as the sheet's buttons. */
