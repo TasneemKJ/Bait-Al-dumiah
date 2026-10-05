@@ -7,6 +7,7 @@ failure. SCENE_CASE selects one independently isolated real-browser fixture.
 import json, os, subprocess, time, urllib.request
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from game_entry import enter_game
 from scene_gestures import scene_ready
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -61,7 +62,7 @@ try:
         page.on('pageerror', lambda error: errors.append(str(error)))
         session = context.new_cdp_session(page)
         session.send('Emulation.setCPUThrottlingRate', {'rate': throttle})
-        page.goto('http://127.0.0.1:4192/?debug=1')
+        page.goto('http://127.0.0.1:4192/?debug=1'); enter_game(page)
         scene_ready(page)
         page.locator('[data-action="toggle-tools"]').click()
         page.locator('[data-action="panel-settings"]').click()

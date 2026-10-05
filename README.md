@@ -46,6 +46,8 @@ This is a first playable, not a claim of production certification. Assets are or
 
 ## Controls
 
+On launch, choose **Play** or **Continue** to enter the actual house. **Preferences** opens one flat Sound/Language/Back surface. Home does not advance the house or replace its save. Saved sound starts only after a Play or Sound gesture. This cold-launch entry is an incremental UI change; the gameplay controls described below remain in place pending the world-led simplification.
+
 Follow the clue into a room. **Touch an object once to select it, then touch the same object again to act.** When something is in your hand, drag it onto an object in the room; a wrong destination leaves it safely in your hand. Tap the held item to find the next room. Story progress and carried items survive reloads.
 
 For keyboard play, choose a room, open **Things to touch**, select an object and activate its scene action. **Look closer** opens optional details. **House tools** opens the household, ritual, decoration, journal and settings controls. Tap a doll to check its care and wishes. Practice rituals for mastery and earn room restorations; choose and place keepsakes through Decorate. After dark, greet the visitor to hear a whisper.

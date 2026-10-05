@@ -6,6 +6,7 @@ item drop reuse unchanged coordinates; observation never changes game state.
 import json, os, subprocess, time, urllib.request
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from game_entry import enter_game
 from scene_gestures import scene_ready
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -43,7 +44,7 @@ def fixture(browser, locale, motion, width, height, rate):
     page.on('pageerror', lambda error: errors.append(str(error)))
     cdp = context.new_cdp_session(page)
     cdp.send('Emulation.setCPUThrottlingRate', {'rate': rate})
-    page.goto('http://127.0.0.1:4194/?debug=1')
+    page.goto('http://127.0.0.1:4194/?debug=1'); enter_game(page)
     scene_ready(page)
     page.locator('[data-action="toggle-tools"]').click()
     page.locator('[data-action="panel-settings"]').click()
@@ -132,6 +133,9 @@ try:
         if GROUP in ('all', 'reachability'):
             for locale,motion in [('en','no-preference'),('ar','reduce')]:
                 context,page,cdp = fixture(browser,locale,motion,360,640,4)
+                # Fresh Play now focuses the kitchen; this case must start from
+                # the original whole-house pose before selecting the tin.
+                page.locator('[data-action="camera"]:visible').click()
                 scene_ready(page)
                 select_at(page,'prop:mint-tin')
                 check(locale+' whole-house scene selection does not navigate',page.evaluate('window.dollhouse.visual().focusedRoom===null && window.dollhouse.state().story.step===0'))

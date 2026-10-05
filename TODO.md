@@ -51,3 +51,15 @@ Selected ideas: camera composition, folded contextual guidance, material-led nav
 - [x] Reproduce and inspect the bilingual whole-house landscape ribbon overlap with unchanged-coordinate native input.
 - [x] Extend measured-clearance placement to short landscape, respecting intersecting controls and safe areas; add final-fit exposure regressions.
 - [ ] Obtain independent review and fresh exact-source focused native acceptance before full ritual journeys or merge.
+
+
+## Simple opening, first bounded slice
+- [x] Real cold-launch Home: Play/Continue plus Preferences; flat Sound/Language/Back.
+- [x] Test-first canonical time/save gate, once-only activation, saved preference handling, failed-read protection and visible audio failure.
+- [x] Keep native house, costs/rewards, physical rituals and stable selection/rotation source unchanged.
+- [ ] Independent frozen-source review, then exact-source native EN/AR small-phone/landscape/rotation/keyboard/touch/reload acceptance and original screenshot inspection.
+- [ ] Execute a real fresh-profile 120-second opening; source-clock tests are not native play evidence.
+- [ ] Replace gameplay chrome only after every command family has a tested world/context route, including care alternatives, restoration, placement, visitor, earned claims and advanced saves.
+- [ ] Simplify all remaining surfaces, not just Home: main play, Pause, utilities, focused actions/choices, rituals/results and recovery. No giant catalog hidden behind one button.
+
+The twenty current ideas and chosen/deferred boundary are recorded in the iteration ledger and `docs/superpowers/plans/2026-10-05-safe-home-entry.md`. No retention or rapid-tap claim is made.

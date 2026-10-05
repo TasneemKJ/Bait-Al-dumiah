@@ -3,6 +3,10 @@
 import {strings} from './locale-data.js';
 export {strings,translate,number} from './locale-data.js';
 Object.assign(strings.en,{
+ homePlay:'Play',homeContinue:'Continue',homePreferences:'Preferences',homeBack:'Back',homeSoundOn:'Sound on',homeSoundOff:'Sound off',
+ homeReadFailed:'Your saved house could not be read. This visit will not replace it.',
+ homeInvalidSave:'This save could not be opened. Play starts a fresh house.',
+
  storyFindObject:'Find {object}',storyReadClue:'Unfold the clue',storyFoldClue:'Fold the clue',
  'object-moon-mobile':'Moon mobile',
  'object-moon-mobileStory':'Noor’s hanging moons remember a little song. Touch them again to listen and play.',
@@ -31,6 +35,10 @@ Object.assign(strings.en,{
  'activityRule-lullaby':'Watch and listen. Pull the hanging charms in reverse order; the little moon repeats the song.',
 });
 Object.assign(strings.ar,{
+ homePlay:'العب',homeContinue:'كمّل',homePreferences:'تفضيلات',homeBack:'رجوع',homeSoundOn:'الصوت شغّال',homeSoundOff:'الصوت مطفّي',
+ homeReadFailed:'ما قدرنا نقرأ بيتك المحفوظ. هالزيارة ما رح تستبدله.',
+ homeInvalidSave:'ما قدرنا نفتح هالحفظ. اللعب بيفتح بيت جديد.',
+
  storyFindObject:'دوّر على {object}',storyReadClue:'افتح الورقة',storyFoldClue:'اطوي الورقة',
  'object-moon-mobile':'زينة القمر',
  'object-moon-mobileStory':'قميرات نور المعلّقة حافظين أغنية صغيرة. المسهن كمان مرة لتسمع وتعزف.',

@@ -16,6 +16,7 @@ import urllib.request
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
+from game_entry import enter_game
 from scene_gestures import scene_ready
 from stitch_gestures import (
     NeedleDrag, finish_stitch, stitch_ready, stitch_status, tap_stitch,
@@ -362,7 +363,7 @@ def run(scenario):
         page.set_default_timeout(20000)
         page.on('pageerror', lambda error: errors.append(str(error)))
         page.on('console', lambda message: errors.append(message.text) if message.type == 'error' else None)
-        page.goto(base + '/?debug=1')
+        page.goto(base + '/?debug=1'); enter_game(page)
         ready()
         check(scenario + ' begins with fresh sewing records, mastery and story progress',
               state()['activities']['mastery']['stitch'] == 0 and
@@ -586,7 +587,7 @@ def run(scenario):
             check('the finished cloth returns to an interactive studio',
                   not page.locator('.stitch-playfield').is_visible() and
                   page.evaluate('!window.dollhouse.visual().stitchActive && window.dollhouse.visual().focusedRoom==="studio" && window.dollhouse.visual().workCeilingVisible===true && window.dollhouse.visual().workArchVisible===true'))
-            page.reload(wait_until='domcontentloaded')
+            page.reload(wait_until='domcontentloaded'); enter_game(page)
             ready()
             check('earned mastery and improved bests survive reload without an active needle',
                   state()['activities']['mastery']['stitch'] == 1 and
@@ -694,7 +695,7 @@ def run(scenario):
             targets_fit('320px bear seam')
             trace_stitch(page, touch=True, until_section=1)
             capture('09-small-phone-bear-seam')
-            page.reload(wait_until='domcontentloaded')
+            page.reload(wait_until='domcontentloaded'); enter_game(page)
             ready()
             check('reload discards an unfinished seam and preserves story thread and ritual records',
                   progress() == 1 and stitch_status(page) is None and
@@ -716,7 +717,7 @@ def run(scenario):
             page.wait_for_function('window.dollhouse.stitch()===null',
                                    timeout=20000, polling=100)
             ready()
-            page.reload(wait_until='domcontentloaded')
+            page.reload(wait_until='domcontentloaded'); enter_game(page)
             ready()
             check('reload after finishing restores the carried bear rather than reopening a needle',
                   progress() == 2 and stitch_status(page) is None and
@@ -729,7 +730,7 @@ def run(scenario):
                   progress() == 3 and state()['buttons'] == mend_before['buttons'] + 12 and
                   state()['activities']['mastery']['stitch'] == 0 and
                   state()['activities']['stitchRecords'] == [None, None, None, None])
-            page.reload(wait_until='domcontentloaded')
+            page.reload(wait_until='domcontentloaded'); enter_game(page)
             ready()
             resize(PHONE)
             room('bedroom')
@@ -818,7 +819,7 @@ def run(scenario):
                   state()['activities']['stitchRecords'][1] is not None)
             records = state()['activities']['stitchRecords']
             new_earned_day()
-            page.reload(wait_until='domcontentloaded')
+            page.reload(wait_until='domcontentloaded'); enter_game(page)
             ready()
             check('both played difficulty records and earned mastery survive a new day and reload',
                   state()['activities']['stitchRecords'] == records and
@@ -895,7 +896,7 @@ def run(scenario):
             check('finished Enter returns to the studio without opening a new sewing session',
                   not page.locator('.stitch-playfield').is_visible() and
                   state()['activities']['mastery']['stitch'] == 6)
-            page.reload(wait_until='domcontentloaded')
+            page.reload(wait_until='domcontentloaded'); enter_game(page)
             ready()
             check('all three genuinely played records survive reload with no active capture',
                   state()['activities']['stitchRecords'] == records and
