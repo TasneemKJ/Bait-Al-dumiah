@@ -71,7 +71,8 @@
  .object-controls{top:auto;bottom:12px;left:auto;right:auto;inset-inline-start:118px;inset-inline-end:auto}
  .object-controls>[data-object-toggle]{width:44px;min-width:44px;height:44px;min-height:44px;padding:10px}
  .object-controls>[data-object-toggle] span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
- .object-list{bottom:68px}
+ /* 118 + 80 leaves 8px beyond the 14 + 176 clue; keep 14px at the far edge. */
+ .object-list{bottom:68px;inset-inline-start:80px;width:min(185px,calc(100vw - 212px))}
 }
 @media(max-height:360px) and (orientation:landscape) and (max-width:567px){
  .dock[data-expanded=false]>.tools-toggle{width:44px;min-width:44px;padding-inline:10px;flex:none}
