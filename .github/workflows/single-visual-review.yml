@@ -1,0 +1,116 @@
+name: Single visual review 648e5f3
+# Disposable verification branch only. Do not merge this workflow into a product PR.
+on:
+  push:
+    branches: ['qa/atmosphere-bait-648e5f3-20261005']
+permissions:
+  contents: read
+concurrency:
+  group: single-visual-review-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  review:
+    name: Render ${{ matrix.revision }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - revision: baseline
+            source: 5e1d9dfb02d5c3e40b3fdef0fa460fb05a3cd228
+          - revision: candidate
+            source: 648e5f339b2da47f2649c62ce576d10dc0f95b5d
+    defaults:
+      run:
+        shell: bash
+        working-directory: source
+    env:
+      SOURCE_SHA: ${{ matrix.source }}
+      REVIEW_REVISION: ${{ matrix.revision }}
+    steps:
+      - name: Check out disposable review harness
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          path: harness
+      - name: Check out exact product source
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ matrix.source }}
+          persist-credentials: false
+          path: source
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: source/package-lock.json
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Verify immutable source identity
+        run: |
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          printf 'PRODUCT_SOURCE %s %s\n' "$REVIEW_REVISION" "$SOURCE_SHA"
+          git rev-parse 'HEAD^{tree}'
+      - id: install
+        run: npm ci --ignore-scripts
+      - name: Source tests (failure stays visible; rendering is independent)
+        id: tests
+        run: npm test
+      - name: Build exact source even if a source contract is red
+        id: build
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run build
+      - name: Install pinned browser dependency
+        id: browser
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          python -m pip install -r requirements.txt
+          python -m playwright install --with-deps chromium
+      - name: Canonical phone and desktop before/after frames
+        id: captures
+        if: ${{ !cancelled() && steps.browser.outcome == 'success' }}
+        timeout-minutes: 12
+        run: flock /tmp/browser.lock python ../harness/scripts/capture-review.py
+      - name: UI and safe room-key fallback
+        id: ui
+        if: ${{ !cancelled() && matrix.revision == 'candidate' && steps.browser.outcome == 'success' }}
+        timeout-minutes: 4
+        run: flock /tmp/browser.lock python scripts/ui_check.py
+      - name: Artwork and OfflineAudioContext contracts
+        id: art
+        if: ${{ !cancelled() && matrix.revision == 'candidate' && steps.browser.outcome == 'success' }}
+        timeout-minutes: 4
+        run: flock /tmp/browser.lock python scripts/art_check.py
+      - name: Shipped atmosphere and gesture-gated audio
+        id: atmosphere
+        if: ${{ !cancelled() && matrix.revision == 'candidate' && steps.browser.outcome == 'success' }}
+        timeout-minutes: 5
+        run: flock /tmp/browser.lock python scripts/atmosphere_check.py
+      - name: Existing real-touch story journey
+        id: story
+        if: ${{ !cancelled() && matrix.revision == 'candidate' && steps.browser.outcome == 'success' }}
+        timeout-minutes: 12
+        run: flock /tmp/browser.lock python scripts/story_check.py
+      - name: Original PNG log transport (artifact quota fallback)
+        if: ${{ !cancelled() && steps.browser.outcome == 'success' }}
+        run: python ../harness/scripts/emit-originals.py artifacts/single-review
+      - name: Explicit test and rendering outcomes
+        if: ${{ always() }}
+        env:
+          OUTCOMES: ${{ toJSON(steps) }}
+        run: |
+          python - <<'PY'
+          import json, os
+          steps = json.loads(os.environ['OUTCOMES'])
+          names = ['tests', 'build', 'browser', 'captures', 'ui', 'art', 'atmosphere', 'story']
+          outcome = {name: steps.get(name, {}).get('outcome', 'not-run') for name in names}
+          result = {'sourceCommit': os.environ['SOURCE_SHA'], 'revision': os.environ['REVIEW_REVISION'], 'outcomes': outcome}
+          print('REVIEW_OUTCOMES ' + json.dumps(result))
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as output:
+              output.write('Exact source: ' + result['sourceCommit'] + '\n\n')
+              output.write('\n'.join('- ' + name + ': ' + state for name, state in outcome.items()) + '\n')
+              output.write('\nCanonical PNGs are transported without alteration through the bounded image-log step. No artifact storage or deploy action is used.\n')
+          PY
