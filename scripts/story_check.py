@@ -131,6 +131,9 @@ try:
     context = browser.new_context(viewport={'width': 1280, 'height': 900}, has_touch=True)
     page = context.new_page()
     page.set_default_timeout(20000)
+    # Software WebGL can delay navigation events after the new document boots.
+    # Keep navigation bounded by the same 60s budget as scene readiness.
+    page.set_default_navigation_timeout(60000)
     page.on('pageerror', lambda error: errors.append(str(error)))
     page.goto(BASE+'/?debug=1')
     ready()
