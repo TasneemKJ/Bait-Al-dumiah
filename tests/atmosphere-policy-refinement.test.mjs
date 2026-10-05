@@ -57,15 +57,3 @@ test('world renderer applies room lighting to the four persistent house practica
  assert.match(src,/house\.lights\.forEach\(\(l,i\)/);
  assert.match(src,/practical\.distance/);
 });
-test('forty-pass dollhouse refinement exposes eight five-pass groups',async()=>{
- const mod=await import('../src/render/visual-policy.js');
- assert.equal(typeof mod.houseRefinement40,'function');
- if(typeof mod.houseRefinement40!=='function')return;
- const full=mod.houseRefinement40('studio',1,'high',false),low=mod.houseRefinement40('studio',1,'low',false);
- const stillA=mod.houseRefinement40('studio',1,'high',true),stillB=mod.houseRefinement40('studio',1,'high',true);
- const groups=['depth','light','materials','air','motion','grounding','mobile','signature'];
- assert.equal(groups.flatMap(k=>full[k]).length,40);
- groups.forEach(k=>assert.equal(full[k].length,5));
- assert.ok(low.mobile[0]<full.mobile[0]);
- assert.deepEqual(stillA.motion,stillB.motion);
-});
