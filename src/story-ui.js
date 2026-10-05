@@ -34,18 +34,21 @@ export function createStoryUI(host,getState,dispatch,project=()=>null){
  const current=()=>objectInfo(getState(),selected);
  function placeRibbon(){
   if(dragPointer!==null)return; // Never move paper or a drop target mid-gesture.
-  const ribbon=root.querySelector('.object-ribbon'),bounds=host.getBoundingClientRect();
-  if(!ribbon||bounds.width>680||bounds.height<=bounds.width){root.dataset.ribbonEdge='bottom';return}
+  const ribbon=root.querySelector('.object-ribbon');
+  if(!ribbon)return;
+  const bounds=host.getBoundingClientRect();
+  if(bounds.width>680||bounds.height<=bounds.width){if(root.dataset.ribbonEdge!=='bottom')root.dataset.ribbonEdge='bottom';return}
   const point=project(selected),roomEdge=host.querySelector('.room-views')?.getBoundingClientRect();
   const timeEdge=host.querySelector('.time-tools')?.getBoundingClientRect();
   const top=Math.max(136,(timeEdge?.bottom??bounds.top+124)-bounds.top+12);
   // The ordinary ribbon ends 14px above room navigation. A held token owns
   // the next 64px above that edge; its actual measured height stays separate.
   const bottom=(roomEdge?.top??bounds.bottom-112)-bounds.top-14-(root.querySelector('.held-item')?64:0);
-  root.style.setProperty('--ribbon-top',top+'px');
-  root.dataset.ribbonEdge=ribbonEdge(point?.y,top,bottom,ribbon.getBoundingClientRect().height);
+  const edge=ribbonEdge(point?.y,top,bottom,ribbon.getBoundingClientRect().height);
+  if(root.style.getPropertyValue('--ribbon-top')!==top+'px')root.style.setProperty('--ribbon-top',top+'px');
+  if(root.dataset.ribbonEdge!==edge)root.dataset.ribbonEdge=edge;
  }
- const resize=new ResizeObserver(placeRibbon);resize.observe(host);
+ const resize=new ResizeObserver(()=>{cancelDrag();placeRibbon()});resize.observe(host);
  function cancelDrag(){
   gesture.cancel();ghost.hidden=true;root.classList.remove('carrying');
   const token=dragToken,pointer=dragPointer;dragPointer=null;dragToken=null;

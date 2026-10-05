@@ -109,6 +109,7 @@ try:
                 for delay,rate in [(80,1),(250,1),(650,1),(250,4)]]
             cases += [(locale,motion,250,4,360,640)
                 for locale,motion in [('en','no-preference'),('ar','reduce')]]
+            cases += [(locale,motion,250,4,width,height) for locale,motion in [('en','no-preference'),('ar','reduce')] for width,height in [(412,915),(844,390)]]
             for locale,motion,delay,rate,width,height in cases:
                 label = f'{locale}-{motion}-{width}x{height}-{delay}ms-cpu{rate}'
                 context,page,cdp = fixture(browser,locale,motion,width,height,rate)
@@ -131,6 +132,10 @@ try:
         if GROUP in ('all', 'reachability'):
             for locale,motion in [('en','no-preference'),('ar','reduce')]:
                 context,page,cdp = fixture(browser,locale,motion,360,640,4)
+                scene_ready(page)
+                select_at(page,'prop:mint-tin')
+                check(locale+' whole-house scene selection does not navigate',page.evaluate('window.dollhouse.visual().focusedRoom===null && window.dollhouse.state().story.step===0'))
+                page.keyboard.press('Escape')
                 room(page,'bedroom')
                 select_at(page,'prop:moon-mobile')
                 check(locale+' upper prop uses lower ribbon',page.locator('.story-playfield').get_attribute('data-ribbon-edge')=='bottom')
@@ -151,6 +156,23 @@ try:
                 scene_ready(page)
                 check(locale+' localized feedback leaves tea reachable',reachable(page,tea) and unchanged(tea,point(page,'prop:tea-set')))
                 page.screenshot(path=str(OUT/(locale+'-held-selected.png')),timeout=60000,scale='css')
+                # A real viewport rotation cancels the held input and must use
+                # the newly measured layout even while selection remains.
+                b = page.locator('.held-item').bounding_box()
+                x,y = b['x']+b['width']/2,b['y']+b['height']/2
+                cdp.send('Input.dispatchTouchEvent', {'type':'touchStart','touchPoints':[{'x':x,'y':y,'id':1}]})
+                cdp.send('Input.dispatchTouchEvent', {'type':'touchMove','touchPoints':[{'x':x+15,'y':y-15,'id':1}]})
+                check(locale+' rotation starts from a real held gesture',page.locator('.carry-ghost').is_visible())
+                page.set_viewport_size({'width':844,'height':390})
+                scene_ready(page)
+                check(locale+' rotation cancels carry safely',not page.locator('.carry-ghost').is_visible() and page.locator('[data-held-item="red-thread"]').is_visible())
+                cdp.send('Input.dispatchTouchEvent', {'type':'touchEnd','touchPoints':[]})
+                rotated = point(page,'prop:tea-set')
+                check(locale+' selected rotation uses current measured safe area',page.evaluate('''p=>{const v=dollhouse.visual();return v.selectedObject==='prop:tea-set' && p.y>=v.presentation.top && p.y<=innerHeight-v.presentation.bottom && document.elementFromPoint(p.x,p.y)?.id==='world'}''',rotated))
+                page.screenshot(path=str(OUT/(locale+'-selected-landscape.png')),timeout=60000,scale='css')
+                page.set_viewport_size({'width':360,'height':640})
+                scene_ready(page)
+                check(locale+' selected portrait return remains reachable',reachable(page,point(page,'prop:tea-set')))
                 room(page,'studio')
                 sewing = select_at(page,'prop:sewing-machine')
                 drop(page,cdp,sewing,locale+' thread to sewing')

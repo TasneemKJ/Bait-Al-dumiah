@@ -35,7 +35,7 @@ export function createPlayfieldLayout(host,onChange){
    regions.push({edge:node.matches(upper)?'top':'bottom',left:r.left-root.left,right:r.right-root.left,top:r.top-root.top,bottom:r.bottom-root.top});
   }
   const value=playfieldInsets(root.width,root.height,regions),next=JSON.stringify([root.width,root.height,value]);
-  if(next!==signature){signature=next;onChange(value)}
+  if(next!==signature){signature=next;onChange(value,{width:root.width,height:root.height})}
  }
  // Only presentation changes schedule a read; animation and simulation ticks
  // never continually re-center a camera the player has turned by hand.

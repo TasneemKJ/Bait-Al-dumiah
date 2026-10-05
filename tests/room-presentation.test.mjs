@@ -15,8 +15,8 @@ function fixture(width=390,height=844){
  };
  const presentation=createRoomPresentation(apply,()=>selected||!enabled||pointerDown);
  const point=()=>{const prop=INTERACTIVE_PROPS.find(p=>p.id==='mint-tin'),room=ROOMS.find(r=>r.id===prop.room),p=new T.Vector3(room.x+prop.position[0],room.y+prop.position[1]+.26,prop.position[2]).project(camera);return [(p.x+1)*width/2,(1-p.y)*height/2]};
- presentation.update({top:137,bottom:124});
- return {presentation,point,apply,get refits(){return refits},select(){selected=true},clear(){selected=false},hold(){enabled=false},release(){enabled=true},down(){pointerDown=true},up(){pointerDown=false}};
+ presentation.update({top:137,bottom:124},{width,height});
+ return {presentation,point,apply,resize(w,h){width=w;height=h;apply()},get refits(){return refits},select(){selected=true},clear(){selected=false},hold(){enabled=false},release(){enabled=true},down(){pointerDown=true},up(){pointerDown=false}};
 }
 
 test('selection HUD measurements retain the exact active prop position and cache safe-area insets',()=>{
@@ -35,4 +35,16 @@ test('unselected browsing still refits measured layout and unchanged measurement
  const f=fixture(),before=f.point();assert.equal(f.presentation.update({top:137,bottom:124}),false);assert.equal(f.refits,1);
  f.presentation.update({top:258,bottom:124});assert.notDeepEqual(f.point(),before);assert.equal(f.refits,2);
  f.presentation.reset();assert.deepEqual(f.presentation.value,{});f.presentation.update({top:137,bottom:124});assert.deepEqual(f.point(),before);
+});
+
+
+test('a selected viewport rotation applies its new measured insets once, not stale portrait reservations',()=>{
+ const f=fixture();f.select();f.presentation.update({top:281,bottom:188},{width:390,height:844});
+ f.resize(844,390);const stale=f.point(),before=f.refits;
+ f.presentation.update({top:48,bottom:138},{width:844,height:390});
+ const expected=fixture(844,390);expected.presentation.update({top:48,bottom:138},{width:844,height:390});
+ assert.deepEqual(f.point(),expected.point(),'rotation must finish with current landscape measurements');
+ assert.notDeepEqual(f.point(),stale);assert.equal(f.refits,before+1);
+ const settled=f.point();f.presentation.update({top:48,bottom:180},{width:844,height:390});
+ assert.deepEqual(f.point(),settled,'ordinary later selection layout stays locked again');
 });
