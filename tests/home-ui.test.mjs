@@ -29,3 +29,10 @@ test('essential save-read failure is non-interactive and translated',()=>{
 test('Home CSS reserves its own native scene stage with touch, small-phone, landscape and safe-area rules',()=>{
  const path=new URL('../src/home.css',import.meta.url);assert.ok(existsSync(path),'Home needs its own presentation layout');const css=readFileSync(path,'utf8');assert.match(css,/safe-area-inset/);assert.match(css,/min-height:44px/);assert.match(css,/orientation:landscape/);assert.match(css,/\[data-screen="home"\] #world/);assert.match(css,/#home\[hidden\]/);
 });
+test('Home Preferences panel positioning never targets the same-named action button in RTL',()=>{
+ const {root}=setup();assert.equal(root.all().filter(n=>n.className==='home-preferences').length,2,'regression fixture retains the section and action sharing a class');
+ const css=readFileSync(new URL('../src/home.css',import.meta.url),'utf8');
+ const placement=[...css.matchAll(/([^{}]+)\{([^{}]+)\}/g)].filter(([,selector,body])=>/\.home-preferences(?!-)/.test(selector)&&/transform:translate/.test(body));
+ assert.equal(placement.length,2,'both LTR and RTL panel placement are exercised');
+ for(const [,selector]of placement)assert.match(selector,/section\.home-preferences/,`panel transform must not match BUTTON: ${selector.trim()}`);
+});

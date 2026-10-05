@@ -5,8 +5,8 @@
 #home .home-title{position:absolute;inset-inline:16px;top:max(24px,env(safe-area-inset-top));text-align:center;font-size:clamp(26px,6vw,44px);line-height:1.15;letter-spacing:-.04em;color:#80545d}
 #home .home-actions{position:absolute;inset-inline:24px;bottom:max(24px,env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:12px}
 #home .home-play{width:min(300px,100%);min-height:58px;border-radius:32px;font-size:28px;background:#804a64;border-color:#804a64;box-shadow:0 9px 22px #583b5518}
-#home .home-preferences{width:min(480px,calc(100% - 40px));position:absolute;inset-inline-start:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:stretch;gap:16px}
-[dir=rtl] #home .home-preferences{transform:translate(50%,-50%)}
+#home section.home-preferences{width:min(480px,calc(100% - 40px));position:absolute;inset-inline-start:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:stretch;gap:16px}
+[dir=rtl] #home section.home-preferences{transform:translate(50%,-50%)}
 #home .home-preferences-title{text-align:center;font-size:30px;line-height:1.2;margin-bottom:12px}
 #home button.home-preferences{position:static;inset:auto;transform:none;width:auto;min-width:160px;border:1px solid #a87681;background:transparent;border-radius:24px;padding:10px 22px}
 #home .home-sound,#home .home-language,#home .home-back{background:transparent;border-color:#bca39a;border-radius:24px;min-height:48px}
@@ -21,7 +21,7 @@
  #home .home-actions{inset-inline-start:60%;inset-inline-end:max(22px,env(safe-area-inset-right));bottom:max(30px,env(safe-area-inset-bottom));gap:10px}
  #home .home-play{font-size:24px;min-height:52px}
  #home .home-notice{top:80px;inset-inline-start:58%;font-size:12px;padding:5px}
- #home .home-preferences{gap:8px;width:min(340px,calc(100% - 40px))}
+ #home section.home-preferences{gap:8px;width:min(340px,calc(100% - 40px))}
  #home .home-preferences-title{font-size:26px;margin-bottom:4px}
  #home .home-back{margin-top:0}
  [dir=rtl] #app[data-screen="home"] #world{left:auto;right:0}
