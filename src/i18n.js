@@ -4,6 +4,12 @@ import {strings} from './locale-data.js';
 export {strings,translate,number} from './locale-data.js';
 Object.assign(strings.en,{
  'object-moon-mobile':'Moon mobile',
+ clueToggle:'Read the clue',
+ returnBasket:'Welcome home. While you were away, the dolls sewed buttons into the basket: {count}.',returnMilestone:'Welcome home. Rewards waiting in the journal: {count}.',returnWishes:'Welcome home. Little wishes waiting today: {count}.',returnCalm:'Welcome home. The house kept your place, and the kettle is still warm.',
+ privacyNote:'No accounts, ads or tracking. Your house stays in this browser.',creditsLink:'Credits and licences',
+ saveFile:'Save file',saveFileHelp:'Keep a copy of your house, or bring one back from another browser.',saveExport:'Save a copy',saveImport:'Open a copy',
+ saveExported:'A copy of your house was saved.',saveExportFailed:'This browser could not save a copy.',saveImported:'Your house came back from the copy.',saveImportFailed:'That file is not a house this game can open. Nothing changed.',
+ saveRecovered:'Your last save could not be read, so a fresh house opened. The old save is kept safely in this browser.',
  'object-moon-mobileStory':'Noor’s hanging moons remember a little song. Touch them again to listen and play.',
  "stitchFinished":"This seam is finished. Touch the cloth beside the hoop to return to the studio.",
  "stitchReadyInstructions":"Release the needle. Touch the cloth beside the hoop to finish.",
@@ -31,6 +37,12 @@ Object.assign(strings.en,{
 });
 Object.assign(strings.ar,{
  'object-moon-mobile':'زينة القمر',
+ clueToggle:'اقرا الدليل',
+ returnBasket:'أهلين رجعت. وانت غايب، الدمى خيّطوا أزرار بالسلة: {count}.',returnMilestone:'أهلين رجعت. هدايا ناطرتك بالدفتر: {count}.',returnWishes:'أهلين رجعت. أمنيات صغيرة ناطرة اليوم: {count}.',returnCalm:'أهلين رجعت. البيت حفظلك مطرحك، والإبريق لسا سخن.',
+ privacyNote:'ما في حسابات ولا إعلانات ولا تتبّع. بيتك بيضل بهالمتصفح.',creditsLink:'الشكر والتراخيص',
+ saveFile:'ملف الحفظ',saveFileHelp:'خلّي نسخة من بيتك، أو رجّع نسخة من متصفح تاني.',saveExport:'احفظ نسخة',saveImport:'افتح نسخة',
+ saveExported:'انحفظت نسخة من بيتك.',saveExportFailed:'هالمتصفح ما قدر يحفظ نسخة.',saveImported:'رجع بيتك من النسخة.',saveImportFailed:'هالملف مش بيت بتعرف اللعبة تفتحه. ما تغيّر شي.',
+ saveRecovered:'ما قدرنا نقرا آخر حفظ، فانفتح بيت جديد. الحفظ القديم محفوظ بأمان بهالمتصفح.',
  'object-moon-mobileStory':'قميرات نور المعلّقة حافظين أغنية صغيرة. المسهن كمان مرة لتسمع وتعزف.',
  "stitchFinished":"هالخياطة خلصت. المس القماش جنب الطوق لترجع لغرفة الخياطة.",
  "stitchReadyInstructions":"ارفع الإبرة، وبعدين المس القماش جنب الطوق لتخلّص.",

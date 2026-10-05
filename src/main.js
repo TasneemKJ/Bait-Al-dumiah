@@ -12,9 +12,13 @@ import {createUI} from './ui.js';
 import {createResidentLabel} from './render/resident-label.js';
 import {createRoomViews} from './render/room-views.js';
 import {DollhouseAudio} from './audio.js';
+import {returnGreeting} from './return-greeting.js';
 
 let stored=null;try{stored=localStorage.getItem(SAVE_KEY)}catch{}
-let state=stored?sim.restore(stored):sim.createState();
+// An unreadable or newer save is kept under a backup key before the fresh house can overwrite it.
+const loaded=sim.readSave(stored);let saveRecovered=false;
+if(!loaded.ok){try{localStorage.setItem(SAVE_KEY+'.backup',stored);saveRecovered=true}catch{}}
+let state=loaded.state;
 if(!stored)state.settings.reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 // A saved unmute preference never overrides a fresh page's audio gesture boundary.
 state.settings.muted=true;
@@ -238,12 +242,24 @@ async function dispatch(action,value){
    if(value.key==='motion')state.settings.reducedMotion=Boolean(value.value);
    save();refreshUI();break;
   }
+  case 'save-export':{
+   try{const blob=new Blob([JSON.stringify(state)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`bait-al-dumiah-day-${state.day}.json`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);say(ui.t('saveExported'))}catch{say(ui.t('saveExportFailed'))}
+   break;
+  }
+  case 'save-import':{
+   const file=value;if(!file||file.size>512000){say(ui.t('saveImportFailed'));break}
+   file.text().then(text=>{const result=sim.readSave(text);if(!result.ok||result.empty){say(ui.t('saveImportFailed'));return}
+    cancelWorkInput();world?.setTeaActive(false);world?.setStitchActive(false);world?.setChimeActive(false);notices.length=0;ui.close();ui.clearPlacement();ui.setActivityResult(null);
+    result.state.settings.muted=state.settings.muted;state=result.state;manualPause=false;syncPause();dispatch('camera');world?.setPlacement(null);save();refreshUI();say(ui.t('saveImported'))}).catch(()=>say(ui.t('saveImportFailed')));
+   break;
+  }
   case 'reset-yes':{
    cancelWorkInput();world?.setTeaActive(false);world?.setStitchActive(false);world?.setChimeActive(false);notices.length=0;const settings={...state.settings};ui.close();ui.clearPlacement();ui.setActivityResult(null);state=sim.createState();state.settings=settings;manualPause=false;syncPause();dispatch('camera');world?.setPlacement(null);save();refreshUI();break;
   }
  }
 }
 ui=createUI(host,()=>state,dispatch);
+if(saveRecovered)ui.toast(ui.t('saveRecovered'));else{const greeting=returnGreeting(state);if(greeting)say(ui.t(greeting.key).replace('{count}',ui.n(greeting.count)))}
 const residentLabel=createResidentLabel(host);
 const roomViews=createRoomViews(host,()=>state,id=>dispatch('focus-room',id));
 try{world=createWorld(canvas,{onPick:data=>{

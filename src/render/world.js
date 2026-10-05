@@ -1,4 +1,5 @@
 import {createLevantineSetting} from './levantine-setting.js';
+import {houseFraming} from './house-framing.js';
 import {portraitFraming} from './doll-camera.js';
 import * as T from 'three';
 import {renderPortrait,createPortraitCache} from './doll-portraits.js';
@@ -35,7 +36,7 @@ export function createWorld(canvas,{onPick,onError}){
  const controls=new OrbitControls(camera,canvas);controls.enablePan=false;controls.enableDamping=true;controls.dampingFactor=.10;controls.minAzimuthAngle=-.48;controls.maxAzimuthAngle=.48;controls.minPolarAngle=1.10;controls.maxPolarAngle=1.50;controls.minZoom=.8;controls.maxZoom=3.5;
  controls.touches.ONE=T.TOUCH.ROTATE;controls.touches.TWO=T.TOUCH.DOLLY_ROTATE;
  let focusedRoom=null,focusedDoll=null,reducedMotion=false,teaActive=false,stitchActive=false,chimeActive=false,chimeSelection=-1,requestedEnabled=true;const working=()=>teaActive||stitchActive||chimeActive;const cameraMove=createCameraMove(camera,controls);const cancelCameraMove=()=>cameraMove.cancel();controls.addEventListener('start',cancelCameraMove);
- function focusPose(){if(chimeActive)return chimeFraming(canvas.clientWidth,canvas.clientHeight);if(teaActive)return teaFraming(canvas.clientWidth,canvas.clientHeight);if(stitchActive)return stitchFraming(canvas.clientWidth,canvas.clientHeight);const p=focusedDoll?residents.position(focusedDoll):null;if(p){p.add(house.root.position);return portraitFraming(canvas.clientWidth,canvas.clientHeight,p.toArray())}return framing(canvas.clientWidth,canvas.clientHeight,focusedRoom)}
+ function focusPose(){if(chimeActive)return chimeFraming(canvas.clientWidth,canvas.clientHeight);if(teaActive)return teaFraming(canvas.clientWidth,canvas.clientHeight);if(stitchActive)return stitchFraming(canvas.clientWidth,canvas.clientHeight);const p=focusedDoll?residents.position(focusedDoll):null;if(p){p.add(house.root.position);return portraitFraming(canvas.clientWidth,canvas.clientHeight,p.toArray())}return houseFraming(canvas.clientWidth,canvas.clientHeight,focusedRoom)}
  function applyFraming(){cameraMove.moveTo(focusPose(),true)}
  function home(){if(working())return;focusedRoom=null;focusedDoll=null;applyFraming()}
  home();

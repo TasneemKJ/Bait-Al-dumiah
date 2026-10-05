@@ -32,6 +32,8 @@ jobs:
       - run: python scripts/art_check.py
       - run: python scripts/atmosphere_check.py
       - run: npm run test:browser
+      - name: Phone performance budgets (4x CPU throttle)
+        run: python scripts/perf_check.py
       - name: Trim failure evidence
         if: failure()
         run: |
