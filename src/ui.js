@@ -12,6 +12,9 @@ const dockIcons={household:'souls',activities:'play',decorate:'leaf',journal:'bo
 export function createUI(host,getState,dispatch){
  let panel=null,selected='lina',placement=null,placementRoom='kitchen',placementSlot=0,previousFocus=null,toastTimer,resetConfirm=false;
  let portraits={};
+ const authoredMarkup=new WeakMap();
+ // HTML serialization expands self-closing SVG tags; compare authored content.
+ function setMarkup(node,markup){if(authoredMarkup.get(node)!==markup){node.innerHTML=markup;authoredMarkup.set(node,markup)}}
  let activityResult=null,selectedObject=null,moveId=null,toolsExpanded=false;
  const t=key=>translate(getState().settings.locale,key),n=value=>number(getState().settings.locale,value);
  const button=(action,label,ico,extra='')=>`<button type="button" data-action="${action}" ${extra}>${ico?icon(ico):''}<span>${label}</span></button>`;
@@ -113,12 +116,12 @@ export function createUI(host,getState,dispatch){
   if(panel==='activities')updateActivityStatus(host,s,t,n);
   host.style.setProperty('--day-progress',(Number.isFinite(s.clock)?Math.max(0,Math.min(240,s.clock))*1.5:0)+'deg');
   const story=storyStatus(s),values={buttons:n(s.buttons),cozy:n(coziness(s))+'%',wishes:story.finished?`${n(s.wishes.length)} / ${n(3)}`:`${n(story.index+1)} / ${n(3)}`,day:t('day')+' '+n(s.day),time:t(isNight(s)?'evening':'morning')};
-  const heading=host.querySelector('[data-story-heading]');if(heading)heading.textContent=t(story.finished?'objectiveLabel':'story-'+story.chapter.id+'-title');
+  const heading=host.querySelector('[data-story-heading]'),headingText=t(story.finished?'objectiveLabel':'story-'+story.chapter.id+'-title');if(heading&&heading.textContent!==headingText)heading.textContent=headingText;
   for(const [key,value] of Object.entries(values)){const el=host.querySelector(`[data-value="${key}"]`);if(el&&el.textContent!==value)el.textContent=value}
   const {copy,label,ico}=nextStep();
   const objective=host.querySelector('#objective-copy');if(objective.textContent!==copy)objective.textContent=copy;
-  const action=host.querySelector('#objective-action');const content=icon(ico)+`<span>${label}</span>`+icon('arrow');if(action.innerHTML!==content)action.innerHTML=content;
-  const light=host.querySelector('#light-button'),lightHtml=icon(isNight(s)?'sun':'moon')+`<span>${t(isNight(s)?'dawn':'night')}</span>`;if(light.innerHTML!==lightHtml)light.innerHTML=lightHtml;
+  const action=host.querySelector('#objective-action');const content=icon(ico)+`<span>${label}</span>`+icon('arrow');setMarkup(action,content);
+  const light=host.querySelector('#light-button'),lightHtml=icon(isNight(s)?'sun':'moon')+`<span>${t(isNight(s)?'dawn':'night')}</span>`;setMarkup(light,lightHtml);
   host.querySelector('.visitor-hint').hidden=!isNight(s)||s.lastSecretDay===s.day||s.journal.length===6||Boolean(placement);
   host.querySelector('.dock [data-action="panel-household"]')?.classList.toggle('has-news',s.basket>0);host.querySelector('.dock [data-action="panel-journal"]')?.classList.toggle('has-news',unclaimed(s).length>0);
   host.querySelector('.pause-overlay').hidden=!s.paused||Boolean(panel);

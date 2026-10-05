@@ -139,5 +139,87 @@ with sync_playwright() as p:
   results.append({'name':f'{locale} populated room object list remains reachable on 667px landscape phone','passed':visible})
  page.evaluate("fixtureUI.beginMove(1);fixtureUI.open('settings')")
  results.append({'name':'opening a menu cancels relocation UI and stale move identity','passed':page.evaluate('fixtureUI.moveId===null') and not page.locator('.placement').is_visible()})
+ # Unchanged HUD content must preserve the real parsed DOM across ticks.
+ page.evaluate("fixtureUI.close();fixtureUI.clearObject();fixtureStory.clear();fixtureUI.collapseTools();fixtureState.story.chapter=0;fixtureState.story.step=0;fixtureState.settings.locale='en';fixtureState.clock=0;fixtureUI.refresh()")
+ results.extend(page.evaluate(r'''async()=>{
+  const {icon}=await import('fixture/icons.js');
+  const action=()=>document.querySelector('#objective-action'),light=()=>document.querySelector('#light-button');
+  const label=button=>button.querySelector('span')?.textContent;
+  const matchesIcon=(svg,name)=>{const expected=document.createElement('template');expected.innerHTML=icon(name);return Boolean(svg?.isEqualNode(expected.content.firstElementChild))};
+  const remember=elements=>elements.map(el=>({el,nodes:[...el.childNodes]}));
+  const unchanged=tracked=>tracked.every(({el,nodes})=>el.isConnected&&el.childNodes.length===nodes.length&&nodes.every((node,index)=>node===el.childNodes[index]&&node.isConnected));
+  const stable=elements=>{const tracked=remember(elements);for(let i=0;i<10;i++)fixtureUI.tick();return unchanged(tracked)};
+  const objectiveMatches=ico=>label(action())===fixtureUI.objective().label&&document.querySelector('#objective-copy').textContent===fixtureUI.objective().copy&&matchesIcon(action().firstElementChild,ico)&&matchesIcon(action().lastElementChild,'arrow');
+  const checks=[];
+  const initial=[action(),light(),document.querySelector('[data-story-heading]')],tracked=remember(initial);
+  let focusStable=true;
+  for(const button of initial.slice(0,2)){button.focus();stable(initial);focusStable=focusStable&&document.activeElement===button}
+  checks.push({name:'unchanged HUD ticks preserve objective/light children, heading text node and keyboard focus',passed:unchanged(tracked)&&focusStable});
+  const firstLabel=label(action()),firstNodes=remember([action()]);
+  fixtureState.story.step=1;fixtureUI.tick();
+  const stepUpdated=label(action())!==firstLabel&&!unchanged(firstNodes)&&objectiveMatches('bear')&&stable([action()]);
+  const oldIcon=action().firstElementChild;
+  fixtureState.story.chapter=1;fixtureState.story.step=0;fixtureUI.tick();
+  checks.push({name:'changed story step and chapter update objective content once and then remain stable',passed:stepUpdated&&action().firstElementChild!==oldIcon&&objectiveMatches('music')&&document.querySelector('[data-story-heading]').textContent===fixtureUI.t('story-lost-song-title')&&stable([action(),document.querySelector('[data-story-heading]')])});
+  fixtureState.clock=0;fixtureUI.tick();
+  const dayCorrect=label(light())===fixtureUI.t('night')&&matchesIcon(light().firstElementChild,'moon'),moon=light().firstElementChild;
+  fixtureState.clock=120;fixtureUI.tick();
+  const sun=light().querySelector('svg > circle[cx="12"][cy="12"][r="4"]');
+  light().focus();
+  checks.push({name:'day/night changes update the light label and sun geometry while unchanged ticks preserve it',passed:dayCorrect&&label(light())===fixtureUI.t('dawn')&&Boolean(sun)&&matchesIcon(light().firstElementChild,'sun')&&light().firstElementChild!==moon&&stable([light()])&&document.activeElement===light()});
+  const localized=[];let localeCorrect=true;
+  for(const locale of ['ar','en']){
+   const previous=[action(),light()];fixtureState.settings.locale=locale;fixtureUI.refresh();
+   const current=[action(),light()];current[0].focus();
+   localeCorrect=localeCorrect&&current.every((el,index)=>el!==previous[index]&&!previous[index].isConnected)&&document.documentElement.lang===locale&&document.documentElement.dir===(locale==='ar'?'rtl':'ltr')&&objectiveMatches('music')&&label(light())===fixtureUI.t('dawn')&&matchesIcon(light().firstElementChild,'sun')&&stable(current)&&document.activeElement===current[0];
+   localized.push({locale,objective:label(action()),light:label(light())});
+  }
+  checks.push({name:'Arabic/English HUD rebuilds populate new nodes with translated text and stable SVG children',passed:localeCorrect&&localized[0].objective!==localized[1].objective&&localized[0].light!==localized[1].light,labels:localized});
+  return checks;
+ }'''))
+ # Test the normal house controls separately from the physical work surfaces.
+ page.evaluate(r'''() => {
+  window.fixtureHudRect=el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}};
+  window.fixtureHudInside=r=>Object.values(r).every(Number.isFinite)&&r.width>0&&r.height>0&&r.left>=-1e-6&&r.top>=-1e-6&&r.right<=innerWidth+1e-6&&r.bottom<=innerHeight+1e-6;
+  window.fixtureHudProbe=el=>{
+   if(!el)return {valid:false,key:'missing'};
+   const rect=fixtureHudRect(el),style=getComputedStyle(el),label=(el.getAttribute('aria-label')||el.textContent).trim();
+   const hits=[[0,0],[-20,0],[20,0],[0,-20],[0,20]].map(([dx,dy])=>{const x=rect.left+rect.width/2+dx,y=rect.top+rect.height/2+dy,hit=document.elementFromPoint(x,y);return {x,y,reachable:Boolean(hit&&el.contains(hit))}});
+   return {key:el.id||el.dataset.room||el.dataset.action||el.dataset.object||(el.hasAttribute('data-object-toggle')?'discovery':el.tagName),label,rect,hits,valid:Boolean(el.getClientRects().length&&style.display!=='none'&&style.visibility==='visible'&&Number(style.opacity)>0&&label&&rect.width>=44-1e-6&&rect.height>=44-1e-6&&fixtureHudInside(rect)&&hits.every(hit=>hit.reachable))};
+  };
+ }''')
+ for locale in ['en','ar']:
+  for width in [667,568,480,360]:
+   page.set_viewport_size({'width':width,'height':320})
+   page.evaluate(r'''locale=>{
+   fixtureUI.close();fixtureUI.clearObject();fixtureStory.clear();fixtureUI.collapseTools();
+   fixtureState.settings.locale=locale;fixtureState.story.chapter=0;fixtureState.story.step=0;
+   fixtureState.decor=['plant','bear','lamp'].map((item,index)=>({id:index+1,item,room:'kitchen',slot:index,rotation:0,originRoom:'kitchen',active:false,tendedDay:0,lastUse:-10}));
+   fixtureUI.refresh();const host=document.querySelector('#ui');host.dataset.focusRoom='kitchen';host.dataset.focusDoll='';
+   fixtureViews.update();fixtureObjects.collapse();fixtureStory.update();
+  }''',locale)
+   hud=page.evaluate(r'''() => {
+   const visible=el=>el.getClientRects().length&&getComputedStyle(el).display!=='none'&&getComputedStyle(el).visibility==='visible';
+   const rooms=[...document.querySelectorAll('.room-views [data-room]')],dock=[...document.querySelectorAll('.dock[data-expanded=false]>button')].filter(visible);
+   const discovery=document.querySelector('[data-object-toggle]'),outer=fixtureHudRect(document.querySelector('.object-controls'));
+   const controls=[document.querySelector('#objective-action'),discovery,...rooms,...dock].map(fixtureHudProbe);
+   const overlaps=['.objective','.room-views','.dock'].filter(selector=>{const b=fixtureHudRect(document.querySelector(selector));return outer.left<b.right&&outer.right>b.left&&outer.top<b.bottom&&outer.bottom>b.top});
+   return {controls,outer,overlaps,passed:controls.length===9&&new Set(controls.map(c=>c.key)).size===9&&controls.every(c=>c.valid)&&rooms.length===4&&['kitchen','parlor','studio','bedroom'].every(room=>rooms.some(button=>button.dataset.room===room))&&discovery.getAttribute('aria-expanded')==='false'&&!overlaps.length};
+  }''')
+   hud['namedTools']=page.get_by_role('button',name=page.evaluate("fixtureUI.t('houseTools')"),exact=True).count()==1
+   hud['namedDiscovery']=page.get_by_role('button',name=page.evaluate("fixtureUI.t('roomObjects')"),exact=True).count()==1
+   results.append({'name':f'{locale} {width}x320 normal HUD has nine clear 44px controls with five reachable points','passed':hud['passed'] and hud['namedTools'] and hud['namedDiscovery'],'observed':hud})
+   page.locator('[data-object-toggle]').click()
+   entries=page.locator('.object-list [data-object]')
+   ends=[]
+   for endpoint in [entries.first,entries.last]:
+    endpoint.scroll_into_view_if_needed()
+    ends.append(endpoint.evaluate(r'''el=>{
+    const target=fixtureHudProbe(el),list=el.closest('.object-list'),bounds=fixtureHudRect(list),dock=fixtureHudRect(document.querySelector('.dock')),r=target.rect;
+    const contained=r.left>=bounds.left-1e-6&&r.right<=bounds.right+1e-6&&r.top>=bounds.top-1e-6&&r.bottom<=bounds.bottom+1e-6;
+    return {target,bounds,scrollTop:list.scrollTop,clientHeight:list.clientHeight,scrollHeight:list.scrollHeight,passed:target.valid&&contained&&fixtureHudInside(bounds)&&bounds.bottom<=dock.top+1e-6&&document.querySelector('[data-object-toggle]').getAttribute('aria-expanded')==='true'};
+   }'''))
+   results.append({'name':f'{locale} {width}x320 discovery list keeps its first and last objects reachable above the dock','passed':entries.count()>=2 and all(end['passed'] for end in ends) and ends[1]['scrollTop']>ends[0]['scrollTop'],'observed':ends})
+   page.locator('[data-object-toggle]').click()
  print(json.dumps(results,indent=2));browser.close()
  if any(not r['passed'] for r in results):raise SystemExit(1)

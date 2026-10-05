@@ -46,6 +46,7 @@ def house_hud_fit(label):
   const rect=e=>{const r=e.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}};
   const visible=e=>e.getClientRects().length&&getComputedStyle(e).visibility==='visible';
   const inside=r=>r.width>0&&r.height>0&&r.left>=0&&r.top>=0&&r.right<=innerWidth&&r.bottom<=innerHeight;
+  const overlap=(a,b)=>a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top;
   const titleElement=document.querySelector('.brand h1'),clueElement=document.querySelector('.objective');
   const title=rect(titleElement),clue=rect(clueElement);
   const objectives=[...document.querySelectorAll('[data-action="objective"]')],objectiveRects=objectives.map(rect);
@@ -60,16 +61,64 @@ def house_hud_fit(label):
   }));
   const roomButtons=[...document.querySelectorAll('.room-views [data-room]')];
   const dockButtons=[...document.querySelectorAll('.dock[data-expanded=false]>button')].filter(visible);
-  const controls=[...roomButtons,...dockButtons].map(e=>{
-   const r=rect(e),hit=document.elementFromPoint((r.left+r.right)/2,(r.top+r.bottom)/2);
-   return {key:e.dataset.room??e.dataset.action,rect:r,reachable:visible(e)&&inside(r)&&r.width>=44&&r.height>=44&&Boolean(hit&&e.contains(hit))};
+  const discovery=document.querySelector('[data-object-toggle]'),discoveryRect=discovery?rect(discovery):null;
+  const panels={clue,rooms:rect(document.querySelector('.room-views')),dock:rect(document.querySelector('.dock[data-expanded=false]'))};
+  const controls=[...roomButtons,...dockButtons,...objectives,discovery].filter(Boolean).map(e=>{
+   const r=rect(e),cx=(r.left+r.right)/2,cy=(r.top+r.bottom)/2;
+   const hits=[[0,0],[-20,0],[20,0],[0,-20],[0,20]].map(([dx,dy])=>{const hit=document.elementFromPoint(cx+dx,cy+dy);return Boolean(hit&&e.contains(hit))});
+   return {key:e.hasAttribute('data-object-toggle')?'discovery':e.dataset.room??e.dataset.action,rect:r,hits,reachable:visible(e)&&inside(r)&&r.width>=44&&r.height>=44&&hits.every(Boolean)};
   });
-  return {viewport:{width:innerWidth,height:innerHeight},title,clue,objectiveRects,labelCopies,topEdge,singleObjective:objectives.length===1&&visible(objectives[0])&&inside(objectiveRects[0])&&objectiveRects[0].left>=clue.left&&objectiveRects[0].right<=clue.right&&objectiveRects[0].top>=clue.top&&objectiveRects[0].bottom<=clue.bottom,clearTitle:visible(titleElement)&&visible(clueElement)&&inside(title)&&inside(clue)&&!(title.left<clue.right&&title.right>clue.left&&title.top<clue.bottom&&title.bottom>clue.top),roomKeys:roomButtons.map(e=>e.dataset.room),controls};
+  const controlsSeparate=controls.every((a,i)=>controls.slice(i+1).every(b=>!overlap(a.rect,b.rect)));
+  return {viewport:{width:innerWidth,height:innerHeight},title,clue,objectiveRects,labelCopies,topEdge,discoveryRect,panels,discoveryClear:Boolean(discoveryRect&&visible(discovery)&&inside(discoveryRect)&&Object.values(panels).every(r=>!overlap(discoveryRect,r))),singleObjective:objectives.length===1&&visible(objectives[0])&&inside(objectiveRects[0])&&objectiveRects[0].left>=clue.left&&objectiveRects[0].right<=clue.right&&objectiveRects[0].top>=clue.top&&objectiveRects[0].bottom<=clue.bottom,clearTitle:visible(titleElement)&&visible(clueElement)&&inside(title)&&inside(clue)&&!overlap(title,clue),roomKeys:roomButtons.map(e=>e.dataset.room),controls,controlsSeparate};
  }''')
  print('SCENE_HUD_BOUNDS '+json.dumps({'label':label,**result}),flush=True)
  check(label+' title and clue stay fully visible without overlap',result['clearTitle'])
  check(label+' has one visible objective action inside its clue card',result['singleObjective'])
- check(label+' room and dock controls remain real reachable 44px targets',set(result['roomKeys'])=={'kitchen','parlor','studio','bedroom'} and len(result['controls'])==7 and all(c['reachable'] for c in result['controls']))
+ check(label+' nine scene controls retain separate reachable 44px areas',set(result['roomKeys'])=={'kitchen','parlor','studio','bedroom'} and len(result['controls'])==9 and result['controlsSeparate'] and all(c['reachable'] for c in result['controls']))
+ check(label+' discovery stays clear of the clue, room grid and dock',result['discoveryClear'])
+
+def discover_objects(label,frame):
+ toggle=page.locator('[data-object-toggle]')
+ before_box=toggle.bounding_box()
+ before_progress=(snapshot()['buttons'],snapshot()['activities']['mastery']['lullaby'])
+ page.touchscreen.tap(before_box['x']+before_box['width']/2,before_box['y']+before_box['height']/2)
+ page.locator('.object-list').wait_for(state='visible')
+ opened=page.locator('.object-list').evaluate('''e=>{const r=e.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}}''')
+ after_box=toggle.bounding_box()
+ check(label+' touch opens an in-bounds list without moving discovery',opened['left']>=0 and opened['right']<=page.viewport_size['width'] and opened['top']>=0 and opened['bottom']<=page.viewport_size['height'] and all(abs(before_box[k]-after_box[k])<.01 for k in before_box))
+ reachable=[]
+ for item in [page.locator('.object-list button').first,page.locator('.object-list button').last]:
+  item.scroll_into_view_if_needed()
+  reachable.append(item.evaluate('''e=>{
+   const r=e.getBoundingClientRect(),p=e.parentElement.getBoundingClientRect(),cx=(r.left+r.right)/2,cy=(r.top+r.bottom)/2;
+   return r.width>=44&&r.height>=44&&r.left>=0&&r.right<=innerWidth&&r.top>=Math.max(0,p.top)&&r.bottom<=Math.min(innerHeight,p.bottom)&&[[0,0],[-20,0],[20,0],[0,-20],[0,20]].every(([dx,dy])=>{const hit=document.elementFromPoint(cx+dx,cy+dy);return Boolean(hit&&e.contains(hit))});
+  }'''))
+ check(label+' first and last discovery objects have real reachable 44px areas',all(reachable))
+ capture(frame)
+ page.touchscreen.tap(after_box['x']+after_box['width']/2,after_box['y']+after_box['height']/2)
+ check(label+' closing discovery restores the house without starting or paying a ritual',toggle.get_attribute('aria-expanded')=='false' and not page.locator('.object-list').is_visible() and status() is None and (snapshot()['buttons'],snapshot()['activities']['mastery']['lullaby'])==before_progress)
+
+def paint_probe():
+ # These explicitly named diagnostics are not canonical game screenshots.
+ # Compare unchanged A, temporary containment B, and exactly restored A.
+ observe='''()=>{const c=document.querySelector('.objective'),b=document.querySelector('#objective-action');const rect=e=>{const r=e.getBoundingClientRect();return [r.left,r.top,r.width,r.height]};return {style:c.getAttribute('style'),card:rect(c),button:rect(b),label:b.textContent}}'''
+ original=page.evaluate(observe)
+ observations=[]
+ try:
+  for variant in ['a','b-contained','a-restored']:
+   if variant=='b-contained':
+    page.locator('.objective').evaluate("e=>e.style.setProperty('contain','paint')")
+   elif variant=='a-restored':
+    page.locator('.objective').evaluate("(e,style)=>{if(style===null)e.removeAttribute('style');else e.setAttribute('style',style)}",original['style'])
+   page.evaluate('()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())))')
+   capture('diagnostic-paint-'+variant)
+   observed=page.evaluate(observe)
+   observations.append(observed)
+   print('HUD_PAINT_PROBE '+json.dumps({'variant':variant,**observed}),flush=True)
+ finally:
+  page.locator('.objective').evaluate("(e,style)=>{if(style===null)e.removeAttribute('style');else e.setAttribute('style',style)}",original['style'])
+ restored=page.evaluate(observe)
+ check('temporary paint probe preserves HUD bounds and restores source styling',restored['style']==original['style'] and all(o['card']==original['card'] and o['button']==original['button'] and o['label']==original['label'] for o in observations))
 
 def start_from_scene():
  page.locator('[data-room=bedroom]').click()
@@ -180,6 +229,16 @@ try:
   check('leaving retains an earned star in the bedroom',page.evaluate('window.dollhouse.visual().chimes.earnedStars===1'))
   house_hud_fit('returned house')
   capture('05-earned-constellation')
+  if SCENARIO=='phone':
+   discover_objects('667x320 Arabic house','06-discovery-667x320')
+   page.set_viewport_size({'width':568,'height':320})
+   page.wait_for_function('innerWidth===568&&!window.dollhouse.visual().cameraMoving',timeout=60000)
+   page.evaluate('()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())))')
+   house_hud_fit('568x320 Arabic house')
+   capture('07-house-568x320')
+   discover_objects('568x320 Arabic house','08-discovery-568x320')
+  else:
+   paint_probe()
   if SCENARIO=='desktop':
    page.reload(wait_until='domcontentloaded',timeout=60000);page.wait_for_function('window.dollhouse&&!document.querySelector("#loading")',timeout=90000)
    check('earned moon mastery survives a real HTTP reload',snapshot()['activities']['mastery']['lullaby']==1 and status() is None)
