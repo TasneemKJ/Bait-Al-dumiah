@@ -3,6 +3,7 @@
 import {strings} from './locale-data.js';
 export {strings,translate,number} from './locale-data.js';
 Object.assign(strings.en,{
+ storyFindObject:'Find {object}',storyReadClue:'Unfold the clue',storyFoldClue:'Fold the clue',
  'object-moon-mobile':'Moon mobile',
  'object-moon-mobileStory':'Noor’s hanging moons remember a little song. Touch them again to listen and play.',
  "stitchFinished":"This seam is finished. Touch the cloth beside the hoop to return to the studio.",
@@ -30,6 +31,7 @@ Object.assign(strings.en,{
  'activityRule-lullaby':'Watch and listen. Pull the hanging charms in reverse order; the little moon repeats the song.',
 });
 Object.assign(strings.ar,{
+ storyFindObject:'دوّر على {object}',storyReadClue:'افتح الورقة',storyFoldClue:'اطوي الورقة',
  'object-moon-mobile':'زينة القمر',
  'object-moon-mobileStory':'قميرات نور المعلّقة حافظين أغنية صغيرة. المسهن كمان مرة لتسمع وتعزف.',
  "stitchFinished":"هالخياطة خلصت. المس القماش جنب الطوق لترجع لغرفة الخياطة.",

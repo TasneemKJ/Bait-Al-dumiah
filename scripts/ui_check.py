@@ -227,5 +227,69 @@ with sync_playwright() as p:
    }'''))
    results.append({'name':f'{locale} {width}x320 discovery list keeps its first and last objects reachable above the dock','passed':entries.count()>=2 and all(end['passed'] for end in ends) and ends[1]['scrollTop']>ends[0]['scrollTop'],'observed':ends})
    page.locator('[data-object-toggle]').click()
+ # Folded clue and measured playfield contract, exercised in the real DOM.
+ page.evaluate('''async()=>{
+  const {createPlayfieldLayout}=await import('fixture/playfield-layout.js');
+  window.fixtureLayoutUpdates=[];
+  window.fixtureLayout=createPlayfieldLayout(document.querySelector('#ui'),value=>fixtureLayoutUpdates.push(value));
+ }''')
+ for locale in ['en','ar']:
+  for width,height in [(360,640),(390,844),(412,915),(844,390)]:
+   page.set_viewport_size({'width':width,'height':height})
+   page.evaluate('''locale=>{
+    fixtureUI.close();fixtureUI.collapseTools();fixtureStory.clear();fixtureObjects.collapse();
+    fixtureState.settings.locale=locale;fixtureState.story.chapter=0;fixtureState.story.step=0;fixtureState.clock=0;fixtureState.paused=false;
+    document.querySelector('#ui').dataset.focusRoom='kitchen';fixtureUI.refresh();fixtureViews.update();fixtureStory.update();fixtureObjects.update();
+   }''',locale)
+   toggle=page.locator('[data-action="toggle-clue"]')
+   if toggle.get_attribute('aria-expanded')=='true':toggle.click()
+   page.wait_for_timeout(60)
+   folded=page.locator('.objective').evaluate('''e=>{
+    const r=e.getBoundingClientRect(),a=e.querySelector('#objective-action'),b=e.querySelector('.clue-toggle');
+    const controls=[a,b].map(fixtureHudProbe);
+    return {height:r.height,area:r.width*r.height,controls,arrived:e.dataset.arrived,label:a.textContent,detailHidden:e.querySelector('#objective-detail').hidden,foldIconVisible:getComputedStyle(b.querySelector('.icon')).display!=='none',insets:fixtureLayoutUpdates.at(-1)};
+   }''')
+   results.append({'name':f'{locale} {width}x{height} folded clue has separate reachable action and 44px unfold control','passed':folded['detailHidden'] and folded['foldIconVisible'] and folded['arrived']=='true' and all(c['valid'] for c in folded['controls']) and (height<width or folded['height']<=76 and folded['area']<19000),'observed':folded})
+   toggle.click()
+   page.wait_for_timeout(60)
+   expanded=page.locator('.objective').evaluate('''e=>({visible:!e.querySelector('#objective-detail').hidden,copy:e.querySelector('#objective-copy').textContent,insets:fixtureLayoutUpdates.at(-1)})''')
+   page.evaluate('fixtureUI.refresh();fixtureViews.update();fixtureStory.update();fixtureObjects.update()')
+   results.append({'name':f'{locale} {width}x{height} full clue stays available through HUD rebuild','passed':expanded['visible'] and bool(expanded['copy']) and page.locator('[data-action="toggle-clue"]').get_attribute('aria-expanded')=='true' and page.locator('#objective-copy').is_visible()})
+   page.locator('[data-action="toggle-clue"]').click()
+   results.append({'name':f'{locale} {width}x{height} folding keeps keyboard focus on its visible toggle','passed':page.evaluate('document.activeElement.matches("[data-action=toggle-clue]")')})
+   if height>width:
+    page.wait_for_timeout(60)
+    idle=page.evaluate('fixtureLayoutUpdates.at(-1)')
+    page.evaluate("fixtureStory.select('prop:mint-tin')")
+    page.wait_for_timeout(60)
+    selected=page.evaluate('fixtureLayoutUpdates.at(-1)')
+    page.evaluate('fixtureStory.clear()')
+    page.wait_for_timeout(60)
+    restored=page.evaluate('fixtureLayoutUpdates.at(-1)')
+    results.append({'name':f'{locale} {width}x{height} only an actually visible selection reserves ribbon space','passed':selected['bottom']>=idle['bottom']+60 and restored==idle and idle['bottom']<=140,'observed':{'idle':idle,'selected':selected,'restored':restored}})
+   page.wait_for_timeout(60)
+   stable=page.evaluate('''async()=>{const before=fixtureLayoutUpdates.length;for(let i=0;i<10;i++)fixtureUI.tick();await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));return fixtureLayoutUpdates.length===before}''')
+   results.append({'name':f'{locale} {width}x{height} unchanged UI ticks do not reframe the player camera','passed':stable})
+ for locale in ['en','ar']:
+  page.set_viewport_size({'width':360,'height':640})
+  page.evaluate("""locale=>{
+   fixtureStory.clear();fixtureState.settings.locale=locale;fixtureState.story.chapter=0;fixtureState.story.step=1;fixtureState.clock=180;
+   document.querySelector('#ui').dataset.focusRoom='kitchen';fixtureUI.refresh();fixtureViews.update();fixtureObjects.update();fixtureStory.select('prop:tea-set');fixtureStory.respond('storyNotHere');fixtureUI.tick();
+  }""",locale)
+  page.wait_for_timeout(60)
+  crowded=page.evaluate("""()=>({insets:fixtureLayoutUpdates.at(-1),inline:document.querySelector('.ribbon-feedback')?.textContent,separate:!!document.querySelector('.scene-response'),visitor:getComputedStyle(document.querySelector('.visitor-hint')).display})""")
+  results.append({'name':locale+' short-phone night response stays within the selected ribbon and leaves a real room band','passed':bool(crowded['inline']) and not crowded['separate'] and crowded['visitor']=='none' and 640-crowded['insets']['top']-crowded['insets']['bottom']>=120,'observed':crowded})
+ page.evaluate('fixtureStory.clear();fixtureState.story.step=0;fixtureUI.tick();fixtureStory.update()')
+ page.wait_for_timeout(60)
+ for activity in ['tea','stitch','chime']:
+  before=page.evaluate('fixtureLayoutUpdates.length')
+  page.evaluate("activity=>document.querySelector('#ui').dataset[activity+'Active']='true'",activity)
+  page.wait_for_timeout(60)
+  during=page.evaluate('fixtureLayoutUpdates.length')
+  page.evaluate("activity=>document.querySelector('#ui').dataset[activity+'Active']='false'",activity)
+  page.wait_for_timeout(60)
+  after=page.evaluate('fixtureLayoutUpdates.length')
+  results.append({'name':activity+' work dock never becomes a house footer reservation, and exit remeasures','passed':during==before and after==before+1})
+ page.evaluate('fixtureLayout.dispose()')
  print(json.dumps(results,indent=2));browser.close()
  if any(not r['passed'] for r in results):raise SystemExit(1)

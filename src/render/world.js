@@ -34,8 +34,8 @@ export function createWorld(canvas,{onPick,onError}){
  const depthFog=new T.FogExp2(0xe7d8c8,.0012);scene.fog=depthFog;
  const controls=new OrbitControls(camera,canvas);controls.enablePan=false;controls.enableDamping=true;controls.dampingFactor=.10;controls.minAzimuthAngle=-.48;controls.maxAzimuthAngle=.48;controls.minPolarAngle=1.10;controls.maxPolarAngle=1.50;controls.minZoom=.8;controls.maxZoom=3.5;
  controls.touches.ONE=T.TOUCH.ROTATE;controls.touches.TWO=T.TOUCH.DOLLY_ROTATE;
- let focusedRoom=null,focusedDoll=null,reducedMotion=false,teaActive=false,stitchActive=false,chimeActive=false,chimeSelection=-1,requestedEnabled=true;const working=()=>teaActive||stitchActive||chimeActive;const cameraMove=createCameraMove(camera,controls);const cancelCameraMove=()=>cameraMove.cancel();controls.addEventListener('start',cancelCameraMove);
- function focusPose(){if(chimeActive)return chimeFraming(canvas.clientWidth,canvas.clientHeight);if(teaActive)return teaFraming(canvas.clientWidth,canvas.clientHeight);if(stitchActive)return stitchFraming(canvas.clientWidth,canvas.clientHeight);const p=focusedDoll?residents.position(focusedDoll):null;if(p){p.add(house.root.position);return portraitFraming(canvas.clientWidth,canvas.clientHeight,p.toArray())}return framing(canvas.clientWidth,canvas.clientHeight,focusedRoom)}
+ let presentation={},focusedRoom=null,focusedDoll=null,reducedMotion=false,teaActive=false,stitchActive=false,chimeActive=false,chimeSelection=-1,requestedEnabled=true;const working=()=>teaActive||stitchActive||chimeActive;const cameraMove=createCameraMove(camera,controls);const cancelCameraMove=()=>cameraMove.cancel();controls.addEventListener('start',cancelCameraMove);
+ function focusPose(){if(chimeActive)return chimeFraming(canvas.clientWidth,canvas.clientHeight);if(teaActive)return teaFraming(canvas.clientWidth,canvas.clientHeight);if(stitchActive)return stitchFraming(canvas.clientWidth,canvas.clientHeight);const p=focusedDoll?residents.position(focusedDoll):null;if(p){p.add(house.root.position);return portraitFraming(canvas.clientWidth,canvas.clientHeight,p.toArray())}return framing(canvas.clientWidth,canvas.clientHeight,focusedRoom,presentation)}
  function applyFraming(){cameraMove.moveTo(focusPose(),true)}
  function home(){if(working())return;focusedRoom=null;focusedDoll=null;applyFraming()}
  home();
@@ -68,6 +68,7 @@ export function createWorld(canvas,{onPick,onError}){
   const next=['tea','stitch','lullaby'].includes(id)?id:null;if(next===current)return;
   const room={tea:'kitchen',stitch:'studio',lullaby:'bedroom'}[next??current]??'bedroom';
   teaActive=next==='tea';stitchActive=next==='stitch';chimeActive=next==='lullaby';chimeSelection=-1;
+  if(!next)presentation={}; // The returned house starts with its folded idle edge.
   tapGesture.cancel();cameraMove.cancel();objects.clear();focusedRoom=room;focusedDoll=null;
   controls.enabled=requestedEnabled&&!working();controls.enableDamping=false;controls.minPolarAngle=working()?.8:1.10;controls.maxPolarAngle=1.50;
   if(house.originalTeaSet)house.originalTeaSet.visible=!teaActive;
@@ -169,9 +170,15 @@ export function createWorld(canvas,{onPick,onError}){
   renderer,camera,scene,home,setChimeActive,chimeAt,chimePositions,chimePullSpan,setChimeSelection(index){chimeSelection=Number.isInteger(index)&&index>=0&&index<4?index:-1},setTeaActive,teaAt,teaAimAt,teaPositions,setStitchActive,stitchAt,stitchPointAt,stitchPositions,projectStitch,
   selectObject(key){return objects.select(key)},clearObjectSelection(){objects.clear()},objectAt,objectPositions(){return objects.project(camera,canvas.clientWidth,canvas.clientHeight)},
   getPortraits(){return portraitCache.getAll()},
-  focusRoom(id,immediate=false){if(working()||!ROOMS.some(r=>r.id===id))return false;focusedRoom=id;focusedDoll=null;cameraMove.moveTo(framing(canvas.clientWidth,canvas.clientHeight,id),reducedMotion||immediate);return true},
+  setPresentation(value){
+   if(working())return;
+   if(presentation.top===value.top&&presentation.bottom===value.bottom)return;
+   presentation={top:value.top,bottom:value.bottom};
+   if(focusedRoom&&!focusedDoll&&!working())cameraMove.moveTo(focusPose(),reducedMotion);
+  },
+  focusRoom(id,immediate=false){if(working()||!ROOMS.some(r=>r.id===id))return false;focusedRoom=id;focusedDoll=null;cameraMove.moveTo(framing(canvas.clientWidth,canvas.clientHeight,id,presentation),reducedMotion||immediate);return true},
   focusDoll(id){const p=residents.position(id);if(working()||!p)return false;focusedDoll=id;focusedRoom=null;cameraMove.moveTo(focusPose(),reducedMotion);return true},
-  visualStatus(){return {portraitCount:portraitCache.size,quality,focusedRoom,focusedDoll,nightMix,cameraMoving:cameraMove.active,previewVisible:preview.root.visible,previewValid:preview.root.userData.valid??false,windowMaterials:house.windows.size,activeOwnedLights:[...decor.values()].filter(o=>o.userData.ownedLight?.intensity>0).length,restoredLights:restoration.lights.filter(l=>l.intensity>0).length,reactivePoses:Object.fromEntries([...decor].map(([id,o])=>[id,{turn:o.rotation.y,rock:o.rotation.z,scale:o.scale.x}])),courtyard:house.root.getObjectByName('levantine-courtyard')?.userData.nightCue,selectedObject:objects.selected,story:storyProps.status(),teaActive,tea:teaTable.status(),stitchActive,workCeilingVisible:house.workCeiling.visible,workArchVisible:courtyard.studioArch.visible,stitch:sewingPlay.status(),stitchGuides:stitchGuidePositions(),chimeActive,chimes:moonChimes.status()}},
+  visualStatus(){return {portraitCount:portraitCache.size,quality,focusedRoom,focusedDoll,presentation:{...presentation},nightMix,cameraMoving:cameraMove.active,previewVisible:preview.root.visible,previewValid:preview.root.userData.valid??false,windowMaterials:house.windows.size,activeOwnedLights:[...decor.values()].filter(o=>o.userData.ownedLight?.intensity>0).length,restoredLights:restoration.lights.filter(l=>l.intensity>0).length,reactivePoses:Object.fromEntries([...decor].map(([id,o])=>[id,{turn:o.rotation.y,rock:o.rotation.z,scale:o.scale.x}])),courtyard:house.root.getObjectByName('levantine-courtyard')?.userData.nightCue,selectedObject:objects.selected,story:storyProps.status(),teaActive,tea:teaTable.status(),stitchActive,workCeilingVisible:house.workCeiling.visible,workArchVisible:courtyard.studioArch.visible,stitch:sewingPlay.status(),stitchGuides:stitchGuidePositions(),chimeActive,chimes:moonChimes.status()}},
   zoom(amount){if(working())return;cameraMove.cancel();camera.zoom=T.MathUtils.clamp(camera.zoom*amount,.8,3.5);camera.updateProjectionMatrix()},
   orbit(amount){if(working())return;cameraMove.cancel();const offset=camera.position.clone().sub(controls.target);offset.applyAxisAngle(new T.Vector3(0,1,0),amount);camera.position.copy(controls.target).add(offset);controls.update()},
   setEnabled(enabled){requestedEnabled=Boolean(enabled);controls.enabled=requestedEnabled&&!working();if(!enabled)cameraMove.cancel()},

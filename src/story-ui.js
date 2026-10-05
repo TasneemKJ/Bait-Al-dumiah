@@ -5,10 +5,11 @@ import {translate,number} from './i18n.js';
 import {icon} from './icons.js';
 import {createCarryGesture} from './carry-gesture.js';
 
-export function storyObjective(s,t){
+export function storyObjective(s,t,focusedRoom=null){
  const status=storyStatus(s);if(status.finished)return null;
  const prop=INTERACTIVE_PROPS.find(p=>p.id===status.next.object);
- return {copy:t(`story-${status.chapter.id}-${status.step}-clue`),label:t('storyFindRoom').replace('{room}',t(prop.room+'Short')),ico:status.chapter.icon,action:'story-hint',value:prop.room};
+ const arrived=focusedRoom===prop.room;
+ return {copy:t(`story-${status.chapter.id}-${status.step}-clue`),label:arrived?t('storyFindObject').replace('{object}',t('object-'+prop.id)):t('storyFindRoom').replace('{room}',t(prop.room+'Short')),ico:status.chapter.icon,action:'story-hint',value:prop.room,arrived};
 }
 export function storyMemoriesMarkup(s,t){
  const status=storyStatus(s);if(!status.completed.length)return '';
@@ -45,8 +46,8 @@ export function createStoryUI(host,getState,dispatch){
   const label=action?t(action.label).replace('{item}',t('held-'+action.item)):'';
   const response=feedback?`<p class="scene-response ${feedback.complete?'chapter-finished':''}" role="status">${feedback.complete?icon('check'):''}<span>${t(feedback.message)}</span>${feedback.reward?`<small>+${number(s.settings.locale,feedback.reward)} ${icon('button')}</small>`:''}</p>`:'';
   root.innerHTML=`${held?`<button type="button" class="held-item" data-scene-action="held" data-held-item="${held.id}" aria-label="${t('held-'+held.id)}. ${t('storyDragHint')}" title="${t('storyDragHint')}"><span class="held-art">${icon(held.icon)}</span><span><small>${t('storyInHand')}</small><strong>${t('held-'+held.id)}</strong><em>${t('storyDragShort')}</em></span></button>`:''}
-   ${object?`<div class="object-ribbon" aria-label="${t('selectedObject')}"><span class="ribbon-emblem" aria-hidden="true">${icon(object.icon)}</span><div class="ribbon-copy"><small>${t(object.room+'Short')}</small><h2>${t(object.title)}</h2><p>${t('storyTouchAgain').replace('{action}',label)}</p></div><button type="button" class="scene-primary" data-scene-action="activate" ${action?.disabled?'disabled':''}>${icon(action?.icon??'spark')}<span>${label}</span></button><button type="button" class="icon-button scene-inspect" data-scene-action="inspect" aria-label="${t('storyInspect')}">${icon('plus')}</button><button type="button" class="icon-button" data-scene-action="close" aria-label="${t('close')}">${icon('close')}</button></div>`:''}
-   ${response}`;
+   ${object?`<div class="object-ribbon" aria-label="${t('selectedObject')}"><span class="ribbon-emblem" aria-hidden="true">${icon(object.icon)}</span><div class="ribbon-copy"><small>${t(object.room+'Short')}</small><h2>${t(object.title)}</h2><p ${feedback?'class="ribbon-feedback" role="status"':''}>${feedback?t(feedback.message):t('storyTouchAgain').replace('{action}',label)}</p></div><button type="button" class="scene-primary" data-scene-action="activate" ${action?.disabled?'disabled':''}>${icon(action?.icon??'spark')}<span>${label}</span></button><button type="button" class="icon-button scene-inspect" data-scene-action="inspect" aria-label="${t('storyInspect')}">${icon('plus')}</button><button type="button" class="icon-button" data-scene-action="close" aria-label="${t('close')}">${icon('close')}</button></div>`:''}
+   ${object?'':response}`;
   if(focused)root.querySelector(`[data-scene-action="${focused}"]`)?.focus({preventScroll:true});
  }
  root.addEventListener('click',e=>{

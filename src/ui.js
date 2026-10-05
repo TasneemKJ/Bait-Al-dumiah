@@ -15,7 +15,7 @@ export function createUI(host,getState,dispatch){
  const authoredMarkup=new WeakMap();
  // HTML serialization expands self-closing SVG tags; compare authored content.
  function setMarkup(node,markup){if(authoredMarkup.get(node)!==markup){node.innerHTML=markup;authoredMarkup.set(node,markup)}}
- let activityResult=null,selectedObject=null,moveId=null,toolsExpanded=false;
+ let activityResult=null,selectedObject=null,moveId=null,toolsExpanded=false,clueExpanded=false;
  const t=key=>translate(getState().settings.locale,key),n=value=>number(getState().settings.locale,value);
  const button=(action,label,ico,extra='')=>`<button type="button" data-action="${action}" ${extra}>${ico?icon(ico):''}<span>${label}</span></button>`;
  function avatar(id){const portrait=portraitMarkup(id,portraits[id]);if(portrait)return portrait;return `<span class="avatar ${id}" aria-hidden="true"><span class="hair"></span><span class="face"><i></i><i></i></span><span class="dress"></span></span>`}
@@ -24,7 +24,7 @@ export function createUI(host,getState,dispatch){
   document.body.classList.toggle('reduced-motion',s.settings.reducedMotion);document.querySelector('#world').setAttribute('aria-label',t('canvasLabel'));
   host.innerHTML=`<header class="brand"><span class="brand-mark">${icon('home')}</span><div><p class="eyebrow">${t('brandArabic')}</p><h1>${t('title')}</h1><p class="tagline">${t('subtitle')}</p></div></header>
    <section class="house-status" aria-label="${t('allWishes')}"><div class="currency" title="${t('buttons')}">${icon('button')}<strong data-value="buttons"></strong><span>${t('buttons')}</span></div><div class="cozy">${icon('heart')}<strong data-value="cozy"></strong><span>${t('cozy')}</span></div></section>
-   <aside class="objective"><div class="objective-head"><span class="tiny-star">✦</span><span data-story-heading>${t('storyTitle')}</span><span class="wish-count" data-value="wishes"></span></div><p id="objective-copy"></p><button id="objective-action" type="button" data-action="objective"></button></aside>
+   <aside class="objective" data-expanded="${clueExpanded}"><div id="objective-detail" ${clueExpanded?'':'hidden'}><div class="objective-head"><span class="tiny-star">✦</span><span data-story-heading>${t('storyTitle')}</span><span class="wish-count" data-value="wishes"></span></div><p id="objective-copy"></p></div><div class="clue-edge"><button id="objective-action" type="button" data-action="objective"></button><button type="button" class="clue-toggle" data-action="toggle-clue" aria-expanded="${clueExpanded}" aria-controls="objective-detail" aria-label="${t(clueExpanded?'storyFoldClue':'storyReadClue')}">${icon('book')}</button></div></aside>
    <div class="time-tools"><button type="button" data-action="light" id="light-button"></button><div class="clock"><span data-value="day"></span><span class="clock-dot">·</span><span data-value="time"></span></div></div>
    <div class="camera-tools" aria-label="${t('resetCamera')}">${button('zoom-in',t('zoomIn'),'plus',`class="icon-button" title="${t('zoomIn')}"`)}${button('zoom-out',t('zoomOut'),'minus',`class="icon-button" title="${t('zoomOut')}"`)}${button('camera',t('resetCamera'),'home',`class="icon-button" title="${t('resetCamera')}"`)}</div>
    <div class="visitor-hint" hidden><button type="button" data-action="discover">${icon('ghost')}<span>${t('investigate')}</span><span class="notification-dot"></span></button></div>
@@ -93,7 +93,7 @@ export function createUI(host,getState,dispatch){
  // One suggested next step: wishes, first keepsake, rewards to collect, then the night's whisper.
  function nextStep(){
   const s=getState(),wish=DOLLS.find(d=>!s.wishes.includes(d.id));
-  const story=storyObjective(s,t);if(story)return story;
+  const story=storyObjective(s,t,host.dataset.focusRoom);if(story)return story;
   if(wish){const action=wishFor(s,wish.id);return {copy:t(wishKey(wish.id,action)),label:t(action),ico:actionIcon[action],action:'care',value:{id:wish.id,action}}}
   if(!s.decor.length)return {copy:t('objectiveDecorate'),label:t('decorate'),ico:'leaf',action:'panel',value:'decorate'};
   const readyRoom=ROOMS.find(r=>{const next=restorationReady(s,r.id);return next.ready&&s.buttons>=next.cost});
@@ -118,7 +118,7 @@ export function createUI(host,getState,dispatch){
   const story=storyStatus(s),values={buttons:n(s.buttons),cozy:n(coziness(s))+'%',wishes:story.finished?`${n(s.wishes.length)} / ${n(3)}`:`${n(story.index+1)} / ${n(3)}`,day:t('day')+' '+n(s.day),time:t(isNight(s)?'evening':'morning')};
   const heading=host.querySelector('[data-story-heading]'),headingText=t(story.finished?'objectiveLabel':'story-'+story.chapter.id+'-title');if(heading&&heading.textContent!==headingText)heading.textContent=headingText;
   for(const [key,value] of Object.entries(values)){const el=host.querySelector(`[data-value="${key}"]`);if(el&&el.textContent!==value)el.textContent=value}
-  const {copy,label,ico}=nextStep();
+  const {copy,label,ico,arrived}=nextStep();host.querySelector('.objective').dataset.arrived=String(Boolean(arrived));
   const objective=host.querySelector('#objective-copy');if(objective.textContent!==copy)objective.textContent=copy;
   const action=host.querySelector('#objective-action');const content=icon(ico)+`<span>${label}</span>`+icon('arrow');setMarkup(action,content);
   const light=host.querySelector('#light-button'),lightHtml=icon(isNight(s)?'sun':'moon')+`<span>${t(isNight(s)?'dawn':'night')}</span>`;setMarkup(light,lightHtml);
@@ -139,6 +139,7 @@ export function createUI(host,getState,dispatch){
  const click=event=>{
   const target=event.target.closest('[data-action]');if(!target||target.disabled)return;const action=target.dataset.action;
   if(action==='toggle-tools'){setTools(!toolsExpanded);return}
+  if(action==='toggle-clue'){clueExpanded=!clueExpanded;const clue=host.querySelector('.objective');clue.dataset.expanded=String(clueExpanded);host.querySelector('#objective-detail').hidden=!clueExpanded;target.setAttribute('aria-expanded',String(clueExpanded));target.setAttribute('aria-label',t(clueExpanded?'storyFoldClue':'storyReadClue'));return}
   if(action==='story-interact'){dispatch(action,target.dataset.object);return}
   if(action.startsWith('panel-'))return open(action.slice(6));
   if(action==='close')return close();
