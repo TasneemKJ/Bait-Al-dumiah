@@ -84,6 +84,14 @@ def discover_objects(label,frame):
  page.touchscreen.tap(before_box['x']+before_box['width']/2,before_box['y']+before_box['height']/2)
  page.locator('.object-list').wait_for(state='visible')
  opened=page.locator('.object-list').evaluate('''e=>{const r=e.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}}''')
+ expanded=page.locator('.object-list').evaluate('''e=>{
+  const rect=n=>{const r=n.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}};
+  const bounds=rect(e),overlap=(a,b)=>a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top;
+  const panels=['.objective','.room-views','.dock'].map(selector=>({selector,bounds:rect(document.querySelector(selector))}));
+  return {bounds,panels,overlaps:panels.filter(panel=>overlap(bounds,panel.bounds)).map(panel=>panel.selector)};
+ }''')
+ print('SCENE_DISCOVERY_BOUNDS '+json.dumps({'label':label,**expanded}),flush=True)
+ check(label+' expanded discovery stays clear of the clue, room grid and dock',not expanded['overlaps'])
  after_box=toggle.bounding_box()
  check(label+' touch opens an in-bounds list without moving discovery',opened['left']>=0 and opened['right']<=page.viewport_size['width'] and opened['top']>=0 and opened['bottom']<=page.viewport_size['height'] and all(abs(before_box[k]-after_box[k])<.01 for k in before_box))
  reachable=[]

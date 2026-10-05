@@ -28,7 +28,7 @@ with sync_playwright() as p:
   def resolve(match):
    target=posixpath.normpath(posixpath.join(posixpath.dirname(name),match[2]))
    return 'from '+json.dumps(target)
-  modules[name]=re.sub(r'from\s*([\'"])(\.{1,2}/[^\'"]+)\1',resolve,file.read_text())
+  modules[name]=re.sub(r'from\s*([\'\"])(\.{1,2}/[^\'\"]+)\1',resolve,file.read_text())
  page.evaluate('''async modules=>{
   const imports={};for(const [id,source] of Object.entries(modules))imports[id]=URL.createObjectURL(new Blob([source],{type:'text/javascript'}));
   const map=document.createElement('script');map.type='importmap';map.textContent=JSON.stringify({imports});document.head.append(map);
@@ -210,6 +210,12 @@ with sync_playwright() as p:
    hud['namedDiscovery']=page.get_by_role('button',name=page.evaluate("fixtureUI.t('roomObjects')"),exact=True).count()==1
    results.append({'name':f'{locale} {width}x320 normal HUD has nine clear 44px controls with five reachable points','passed':hud['passed'] and hud['namedTools'] and hud['namedDiscovery'],'observed':hud})
    page.locator('[data-object-toggle]').click()
+   expanded=page.locator('.object-list').evaluate(r'''el=>{
+    const bounds=fixtureHudRect(el),overlap=(a,b)=>a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top;
+    const panels=['.objective','.room-views','.dock'].map(selector=>({selector,bounds:fixtureHudRect(document.querySelector(selector))}));
+    return {bounds,panels,overlaps:panels.filter(panel=>overlap(bounds,panel.bounds)).map(panel=>panel.selector),inside:fixtureHudInside(bounds)};
+   }''')
+   results.append({'name':f'{locale} {width}x320 expanded discovery does not obscure the clue, room grid or dock','passed':expanded['inside'] and not expanded['overlaps'],'observed':expanded})
    entries=page.locator('.object-list [data-object]')
    ends=[]
    for endpoint in [entries.first,entries.last]:
