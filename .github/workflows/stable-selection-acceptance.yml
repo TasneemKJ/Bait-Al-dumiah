@@ -1,0 +1,131 @@
+name: Bait focused stable selection and landscape acceptance
+on:
+  push:
+    branches: ['qa/bait-core-283b490-20261005']
+permissions:
+  contents: read
+jobs:
+  acceptance:
+    name: Stable selection ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - name: stable-scene-and-rotation
+            command: python -u scripts/scene_stability_check.py
+            group: all
+            directory: artifacts/scene-stability/all
+            report: results.json
+            minutes: 20
+            images: '["en-upper-prop.png","en-held-selected.png","ar-upper-prop.png","ar-held-selected.png","ar-selected-landscape.png"]'
+          - name: whole-house-landscape
+            command: python -u ../harness/scripts/review-home-landscape.py
+            group: ''
+            directory: artifacts/scene-stability/home-landscape
+            report: results.json
+            minutes: 10
+            images: '["en-after-two-taps.png","ar-after-two-taps.png","en-unreachable-before.png","ar-unreachable-before.png"]'
+    defaults:
+      run:
+        working-directory: source
+        shell: bash
+    env:
+      SOURCE_SHA: 283b4905cde1864cf236178c2114f0582f247457
+      STABILITY_GROUP: ${{ matrix.group }}
+      TEA_SCENARIO: phone
+      TEA_HEADED: '1'
+      STITCH_SCENARIO: phone
+      STITCH_HEADED: '1'
+      CHIME_SCENARIO: phone
+      PYTHONUNBUFFERED: '1'
+      EVIDENCE_DIRECTORY: ${{ matrix.directory }}
+      REPORT_NAME: ${{ matrix.report }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          path: harness
+          persist-credentials: false
+      - uses: actions/checkout@v7
+        with:
+          ref: 283b4905cde1864cf236178c2114f0582f247457
+          path: source
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Exact corrected source and pinned browser
+        run: |
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          git rev-parse HEAD 'HEAD^{tree}'
+          npm ci --ignore-scripts
+          npm run build
+          python -m py_compile scripts/scene_stability_check.py scripts/story_check.py
+          python -m pip install -r requirements.txt pillow
+          python -m playwright install --with-deps chromium
+      - name: Native unchanged-input acceptance
+        id: journey
+        run: |
+          mkdir -p "$EVIDENCE_DIRECTORY"
+          set +e
+          timeout --signal=INT --kill-after=45s ${{ matrix.minutes }}m bash -c '${{ matrix.command }}' 2>&1 | tee "$EVIDENCE_DIRECTORY/journey.log"
+          status=${PIPESTATUS[0]}
+          set -e
+          printf 'COMMAND_EXIT %s\n' "$status"
+          exit "$status"
+      - name: Bounded result and exact source evidence
+        if: always()
+        env:
+          JOURNEY: ${{ matrix.name }}
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=Path(os.environ['EVIDENCE_DIRECTORY']);p=d/os.environ['REPORT_NAME']
+          summary={'sourceCommit':os.environ['SOURCE_SHA'],'journey':os.environ['JOURNEY'],'reportPresent':p.is_file()}
+          if p.is_file():
+              r=json.loads(p.read_text());c=r.get('checks',[]) if isinstance(r,dict) else r
+              summary.update(checks=len(c),passed=sum(x.get('passed') is True for x in c),failed=[x for x in c if not x.get('passed')])
+              if isinstance(r,dict):
+                  summary['errors']=r.get('errors',[])
+                  for observation in r.get('observations',[]):
+                      if 'actualGapMs' in observation:
+                          print('UNCHANGED_INPUT_TIMING '+json.dumps({key:observation.get(key) for key in ('case','locale','requestedGapMs','actualGapMs','target')}))
+          print('STABLE_SELECTION_RESULT '+json.dumps(summary,ensure_ascii=False))
+          for p in [d/'failure-state.json',d/'failure.txt']:
+              if p.is_file():print('FAILURE_OBSERVATION '+p.read_text()[:24000])
+          PY
+      - name: Canonical originals for independent visual inspection
+        if: always()
+        env:
+          SELECTED_IMAGES: ${{ matrix.images }}
+        run: |
+          python - <<'PY'
+          import base64,hashlib,json,os,struct
+          from pathlib import Path
+          used=0;directory=Path(os.environ['EVIDENCE_DIRECTORY'])
+          for name in json.loads(os.environ['SELECTED_IMAGES']):
+              path=directory/name
+              if not path.is_file():continue
+              data=path.read_bytes()
+              if len(data)>2*1024*1024 or used+len(data)>4*1024*1024:continue
+              used+=len(data);w,h=struct.unpack('>II',data[16:24]);s=base64.b64encode(data).decode()
+              print('SCENE_IMAGE_BEGIN '+json.dumps({'path':name,'sourceCommit':os.environ['SOURCE_SHA'],'revision':'candidate','width':w,'height':h,'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest(),'base64Length':len(s)}))
+              for i in range(0,len(s),12000):print('SCENE_IMAGE_DATA '+s[i:i+12000])
+              print('SCENE_IMAGE_END '+name)
+          PY
+      - name: Trim only failed-job evidence
+        if: failure()
+        run: python scripts/trim-artifacts.py stable-selection-${{ matrix.name }}
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: stable-selection-${{ matrix.name }}-failure
+          path: source/failure-evidence
+          retention-days: 1
+          if-no-files-found: ignore
