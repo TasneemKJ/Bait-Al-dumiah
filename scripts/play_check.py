@@ -3,10 +3,11 @@ import json,os,subprocess,time,traceback,urllib.request
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'artifacts';OUT.mkdir(exist_ok=True)
-BASE=os.environ.get('PLAY_URL','http://127.0.0.1:4177')
+PORT=os.environ.get('PORT','4177')
+BASE=os.environ.get('PLAY_URL',f'http://127.0.0.1:{PORT}')
 server=None
 if not os.environ.get('PLAY_URL'):
- server=subprocess.Popen(['node','scripts/serve.mjs','dist'],cwd=ROOT,stdout=(OUT/'browser-server.log').open('w'),stderr=subprocess.STDOUT)
+ server=subprocess.Popen(['node','scripts/serve.mjs','dist'],cwd=ROOT,env={**os.environ,'PORT':PORT},stdout=(OUT/'browser-server.log').open('w'),stderr=subprocess.STDOUT)
  for _ in range(100):
   try: urllib.request.urlopen(BASE,timeout=1);break
   except Exception:time.sleep(.1)
