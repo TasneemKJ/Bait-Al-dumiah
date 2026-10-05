@@ -1,6 +1,10 @@
 # Changelog
 Each merged batch adds an entry and a `vX.Y.Z` tag.
 
+## Unreleased
+- Accessibility: a Larger text setting (saved, off by default, lazily whitelisted) scales the settings, household and journal panels.
+- Writing: the loading card shows a Levantine saying, "الجار قبل الدار", with its English line.
+
 ## 0.2.0 - 2026-10-05
 - Phone portrait: the clue folds into a compact chip with an unread dot and opens on tap; HUD cards keep an 8-12px gutter; the whole house, roof included, fits at 360-412px wide.
 - Save safety: explicit save version with a tested migration path; unreadable or newer saves are kept under `bait-al-dumiah.v1.backup` instead of being overwritten; export and import a save file from Settings.

@@ -21,10 +21,10 @@ Brainstorm, 20 ideas (IDEAL: problem, definition, options, act, look back; 5Ws: 
 12. Doll waves when a returning player opens the house (feel, retention) - later; needs acting work
 13. Dusk music swell (audio) - later
 14. Tea steam and dust motes (atmosphere) - owned by the atmosphere work in PR #20
-15. Larger-text setting (accessibility) - later
+15. Larger-text setting (accessibility) - **shipped (panels)**
 16. Daily wish glow on the doll who wishes (self-teaching) - later
 17. Gift collection page for visitor gifts (replayability) - later
-18. Shami proverb on the loading card (writing, Levantine) - later
+18. Shami proverb on the loading card (writing, Levantine) - **shipped**
 19. Minified three.js upgrade path (performance, upgrades) - later; #18 closed because 0.186 dropped .min builds
 20. Low-detail auto fallback when frames drop (performance) - later, after budgets are measured on CI
 

@@ -15,7 +15,7 @@ export function createState(){
   activities:{mastery:Object.fromEntries(ACTIVITIES.map(a=>[a.id,0])),completed:Object.fromEntries(ACTIVITIES.map(a=>[a.id,0])),lastReward:Object.fromEntries(ACTIVITIES.map(a=>[a.id,-ACTIVITY_COOLDOWN])),teaRecords:[null,null,null,null],stitchRecords:[null,null,null,null],active:null},
   restoration:Object.fromEntries(ROOMS.map(r=>[r.id,0])),
   story:{chapter:0,step:0,lastAction:null,lastActionAt:-10},
-  settings:{locale:'en',muted:true,reducedMotion:false,quality:'auto'}};
+  settings:{locale:'en',muted:true,reducedMotion:false,quality:'auto',largeText:false}};
 }
 export const isNight=s=>s.clock>=120;
 export const hour=s=>(8+s.clock/10)%24;
@@ -395,7 +395,7 @@ function restoreValid(v){
  }
  const ids=list=>Array.isArray(list)?MILESTONES.filter(m=>list.includes(m.id)).map(m=>m.id):[];
  s.milestones=ids(v.milestones);s.achieved=ids([...ids(v.achieved),...s.milestones]);
- if(v.settings&&typeof v.settings==='object'){s.settings.locale=v.settings.locale==='ar'?'ar':'en';s.settings.muted=v.settings.muted!==false;s.settings.reducedMotion=v.settings.reducedMotion===true;s.settings.quality=['auto','low','high'].includes(v.settings.quality)?v.settings.quality:'auto'}
+ if(v.settings&&typeof v.settings==='object'){s.settings.locale=v.settings.locale==='ar'?'ar':'en';s.settings.muted=v.settings.muted!==false;s.settings.reducedMotion=v.settings.reducedMotion===true;s.settings.largeText=v.settings.largeText===true;s.settings.quality=['auto','low','high'].includes(v.settings.quality)?v.settings.quality:'auto'}
  return s;
 }
 

@@ -240,6 +240,7 @@ async function dispatch(action,value){
    if(value.key==='locale'&&['en','ar'].includes(value.value))state.settings.locale=value.value;
    if(value.key==='quality'&&['auto','low','high'].includes(value.value))state.settings.quality=value.value;
    if(value.key==='motion')state.settings.reducedMotion=Boolean(value.value);
+   if(value.key==='largeText')state.settings.largeText=Boolean(value.value);
    save();refreshUI();break;
   }
   case 'save-export':{
