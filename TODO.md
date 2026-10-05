@@ -20,6 +20,8 @@ Brainstorm, 20 ideas (IDEAL: problem, definition, options, act, look back; 5Ws: 
 11. Unread-clue dot as a gentle first-five-minutes cue (onboarding) - **shipped**
 12. Doll waves when a returning player opens the house (feel, retention) - later; needs acting work
 13. Dusk music swell (audio) - **shipped**
+12. Doll waves when a returning player opens the house (feel, retention) - **shipped** (reuses greeting pose)
+13. Dusk music swell (audio) - later
 14. Tea steam and dust motes (atmosphere) - owned by the atmosphere work in PR #20
 15. Larger-text setting (accessibility) - **shipped (panels)**
 16. Daily wish glow on the doll who wishes (self-teaching) - **shipped** (first three days)
