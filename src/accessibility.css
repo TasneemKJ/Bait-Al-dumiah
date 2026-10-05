@@ -1,7 +1,0 @@
-/* Keep touch and keyboard targets generous, including compact audio/pause icons. */
-.dock>button{min-width:44px}.dock>.icon-button{width:44px;min-width:44px}
-@media(max-width:380px){.dock{width:calc(100% - 20px)}.dock>button{padding-inline:4px}}
-
-.night .time-tools>button:hover:not(:disabled){background:#61445d;color:#fff0d7}
-.scene-caption>span{padding:6px 12px;border-radius:20px;background:#fbf4e9e8;color:#71575f}
-.night .scene-caption>span{background:#443448e8;color:#ebd9df}
