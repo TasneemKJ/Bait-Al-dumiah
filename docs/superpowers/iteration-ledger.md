@@ -263,3 +263,46 @@ The active correction and its complete acceptance are finished at runtime commit
 The same existing hourly continuation, **Bait Development & Visuals** (6ac2d2615d3c8191b78c1f2e5266c934), was updated and confirmed enabled at 2026-10-05T00:56:34.253306+00:00. Its recurrence remains FREQ=HOURLY, with the existing schedule and Asia/Amman timezone preserved. No duplicate task was created. It now follows draft PR #12 / feat/scene-play-polish, the accepted runtime and the committed jasmine design, while requiring fresh live-head/PR/CI checks and respecting any later active-session reservation.
 
 Continue until the user asks to stop; then disable this task. The next implementation is the prepared eighth iteration, not an already completed feature. If a later live ledger shows it underway or complete, preserve that work and follow its current next step. Use exactly twenty ideas before each subsequent coherent iteration, genuine desktop/phone/keyboard play and original-image review, independent review for substantial changes, and an honest commit after each completed iteration. Ordinary design decisions remain delegated. Keep the Levantine identity, bilingual access, local assets, save v1, earned economy and existing production boundary. If PR #12 has been merged, start a fresh development branch from updated main.
+
+## 2026-10-05 — Tactile material atmosphere, safe source slice, rendered acceptance blocked
+
+Scope: the approved miniature-film direction, existing mint-tin → bear seam → Noor's bed story. No new story, economy, simulation state, saved field, menu, or remote asset.
+
+IDEAL: Identify the story landmarks' generic painted/wooden finishes; define a quieter material contrast and tactile response that reads without text; explore the twenty ideas below; act on enamel, cloth and gesture-gated foley plus safe room-light input; look back using real mesh/material tests, rendered captures, mobile checks and the unchanged budgets.
+
+5Ws: Who: casual phone players discovering the first story. What: recognize a cool enamel tin and soft mended companion, then feel a small response when touching them. When: taking thread and returning/replaying the earned bear. Where: kitchen shelf and Noor's moon bed. Why: physical, persistent consequences invite a return to the home without rewards or more chrome.
+
+Exactly twenty ideas for this coherent slice:
+1. Tin enamel separates from matte painted furniture (visuals; selected).
+2. Existing rolled brass rim catches a soft practical highlight (visuals; retain existing finish).
+3. Bear body and patch share woven textile relief rather than walnut grain (atmosphere; selected).
+4. A brief bear compression settles back onto its bed (game feel; selected).
+5. A small tin resonance replaces its generic reward melody (audio; selected).
+6. A filtered cloth rustle accompanies bear handling (audio; selected).
+7. Keep selection feedback inside the room instead of new UI (UI/UX; retain).
+8. Let the earned red seam teach the lasting consequence (self-teaching; retain).
+9. Match Arabic object wording to the same physical action (writing; no new copy needed).
+10. Freeze the tactile response without hiding earned objects (accessibility; selected).
+11. Preserve existing tap/select/act and drag destinations (controls; retain).
+12. Replay the bear without repeated payouts (loop/balance; retain and test).
+13. A later doll glance toward the earned bear (replayability; deferred).
+14. Tin cavity shading that exposes the thread before taking (visuals; deferred).
+15. Contact shade under the bear, if achievable within draw budget (depth; deferred).
+16. Matte jasmine pollen, sharing the flower's paint batch (performance; selected to fund enamel).
+17. Avoid allocating new lights or materials per update (performance; selected invariant).
+18. Reject prototype-key room IDs before light lookup (stability; selected defect fix).
+19. Verify old saves leave audio muted and outcomes earned (data safety; retain and test).
+20. Preserve a baseline and honest remaining-pass roadmap (release readiness; selected).
+
+Ruling: replace the unimplemented `houseRefinement40` array-count assertion with real renderer/material and input behavior assertions. The old contract accepted any forty numbers and had no consumer; its numeric shape was not a valid rendering requirement. The approved forty-item roadmap remains open; this slice does not claim forty iterations. Cost if wrong: none of the unrelated roadmap items gain implementation through this replacement, so they must remain explicit future work.
+
+Baseline: dependency setup required a writable npm cache (`/tmp/bait-npm-cache`). `npm test`: 245 tests, 244 pass, one existing missing `houseRefinement40` failure. `npm run build`: pass. Story tableaux: 19 visible mesh calls and 7,266 triangles. Source capture/QA paths are external to the repository. Initial cloud Chromium launch is blocked by sandbox socket permissions and an escalated runtime mount error; screenshot review is pending, not passed.
+
+TDD: the inherited `constructor` room ID produced undefined color/distance and NaN intensity in the new regression test. Restricting room keys to authored own string properties makes all nine lighting-policy tests pass. Material and foley tests are initially RED for absent enamel/cloth response and generic-note sound.
+
+
+Final scope ruling: the cloud browser cannot access localhost:4391 (`ERR_BLOCKED_BY_CLIENT`), while executor Chromium fails before launch because of sandbox socket/mount restrictions. Keep the reproduced safe-light fix and tested foley routing, but defer all enamel, cloth-mesh, compression, pollen and contact-shadow changes. The initially RED material test was a newly written candidate and is not included in this source-only batch because its associated visual implementation is explicitly deferred. No earlier valid material test was removed. Cost: this draft does not deliver a reviewed visual improvement yet.
+
+Actual passes in this batch: (1) safe lighting fallback, reproduced RED then GREEN; (2) material-specific audio dispatch/lifecycle, reproduced RED then GREEN. Five new real OfflineAudioContext waveform checks are authored in the existing browser art suite but cannot be executed here. They are not evidence of heard or rendered audio until that suite runs. The geometry/material/lighting composition remains unchanged, so the twenty-idea material shortlist and the remaining forty-roadmap are open work.
+
+Fresh source gate: `npm run verify` exits 0 with 248 tests passed, zero failures/cancellations/skips, and a successful self-contained static build. Baseline was 244/245 plus a successful build. `node --test tests/atmosphere-policy-refinement.test.mjs` passes 9/9; `node --test tests/story-foley.test.mjs tests/audio-lifecycle.test.mjs` passes 5/5. No browser, mobile/Arabic, reduced-motion render, 4x CPU, waveform render or listening result is claimed. Screenshot set: none, blocked before capture. Independent reviewer dispatch hit the session's global thread limit; parent review is still required before release.

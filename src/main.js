@@ -104,7 +104,7 @@ async function dispatch(action,value){
     // A successful handoff changes the destination. Reveal its clue instead of
     // leaving a now-invalid source action as the largest control on a phone.
     storyUI?.clear();world?.clearObjectSelection();
-    storyUI?.respond(result.message,result.chapterComplete,result.reward);audio.effect(result.chapterComplete?'secret':result.effect==='music-cabinet'?'musicbox':'care');save();ui.tick();roomViews.update();objectControls?.update();
+    storyUI?.respond(result.message,result.chapterComplete,result.reward);audio.effect(['mint-tin','moon-bed'].includes(result.effect)?result.effect:result.chapterComplete?'secret':result.effect==='music-cabinet'?'musicbox':'care');save();ui.tick();roomViews.update();objectControls?.update();
    }else storyUI?.respond(result.reason);break;
   }
   case 'carry-start':carrying=true;world?.setEnabled(false);break;
@@ -116,7 +116,7 @@ async function dispatch(action,value){
   case 'play-story-keepsake':{
    if(fatal||manualPause)break;if(ui.panel)ui.close();
    const result=sim.playStoryKeepsake(state,value);
-   if(result.ok){storyUI?.respond(result.message);audio.effect(result.effect==='music-cabinet'?'musicbox':'care');save()}else storyUI?.respond(result.reason);break;
+   if(result.ok){storyUI?.respond(result.message);audio.effect(result.effect==='moon-bed'?'moon-bed':result.effect==='music-cabinet'?'musicbox':'care');save()}else storyUI?.respond(result.reason);break;
   }
   case 'use-object':{
    const item=state.decor.find(d=>d.id===value),result=sim.useDecor(state,value);

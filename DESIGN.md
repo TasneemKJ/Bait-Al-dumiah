@@ -16,3 +16,6 @@ Soft porcelain and cream paper, rose, mint and gold accents, terracotta roof, wa
 - Night changes palette, not layout. Reduced motion keeps pieces still.
 - Phone landscape collapses room tabs into an icon grid; verify at 844x390.
 - Check every change at 360x640, 390x844, 412x915, 844x390 in English and Arabic before shipping.
+
+## Material sound, 2026-10-05
+The existing mint-tin touch uses a short, quiet synthesized metal resonance; returning or replaying Noor's earned bear uses a soft filtered cloth rustle. These are successful-object responses, not a new reward or story loop. They remain silent until the player's sound gesture and respect pause, mute and disposal. Enamel/cloth mesh refinements remain deferred until rendered baseline and after-images can be reviewed.

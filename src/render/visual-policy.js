@@ -18,7 +18,7 @@ const ROOM_LIGHTS=Object.freeze({
  bedroom:{color:0xffd9a8,night:2.26,distance:5.5},
 });
 export function roomLighting(roomId,mix){
- const profile=ROOM_LIGHTS[roomId]||ROOM_LIGHTS.kitchen;
+ const profile=typeof roomId==='string'&&Object.hasOwn(ROOM_LIGHTS,roomId)?ROOM_LIGHTS[roomId]:ROOM_LIGHTS.kitchen;
  const t=Number.isFinite(mix)?clamp(mix,0,1):1;
  return {color:profile.color,intensity:.18+(profile.night-.18)*t,distance:profile.distance};
 }

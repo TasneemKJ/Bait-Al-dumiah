@@ -17,3 +17,14 @@
 
 ## Brainstorm (iteration 2026-10-05, 20 ideas)
 Chosen: nowrap counter (UI/UX, mobile), docs set (stability for later sessions). Others, not yet built: first-night greeting hint (onboarding), soft lullaby swell at dusk (audio), return-day greeting from dolls (retention), collection page for visitor gifts (replayability), save export (data safety), wider portrait framing (visuals), lower-poly fallback on weak phones (performance), larger text option (accessibility), gamepad rail for room tabs (controls), Levantine proverb on loading (writing), dust motes in sunbeams (atmosphere), tea steam particles (game feel), jasmine scent journal entry (authenticity), share card (release), error-boundary retry button (stability), nightly gift choice (loop), daily wish hint glow (self-teaching), pause-on-hidden toast (session), button-economy dashboard (balance), seed-varied dolls' wishes (replayability).
+
+## Active atmosphere slice — 2026-10-05
+- [x] Reproduce and fix inherited-key room lighting fallback (behavioral regression).
+- [ ] Distinct mint enamel and woven bear finish, within existing story-art budget.
+- [x] Material-specific, gesture-gated tin/cloth foley with source behavior tests.
+- [ ] Brief bear cloth response; deferred with material visual changes until browser access works.
+- [ ] Rendered desktop/phone, Arabic, reduced-motion and 4x CPU checks.
+- [ ] Review actual screenshots and listen to foley before release; draft publication may record the blocker.
+- [ ] Continue the unfinished forty-item roadmap in `docs/visual-40/2026-10-05-ultra-atmosphere.md`; numeric arrays do not count as passes.
+
+Twenty ideas and IDEAL/5Ws for this slice are recorded in the iteration ledger. Selected: enamel, woven bear, bounded touch response, tin/cloth foley, matte pollen batching, safe lighting lookup. Other ideas remain deferred or preserved invariants.
