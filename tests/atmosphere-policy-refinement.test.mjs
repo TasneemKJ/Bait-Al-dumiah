@@ -39,3 +39,14 @@ test('night depth haze stays subtle and deterministic',()=>{
  assert.deepEqual(fog(-2),day);
  assert.deepEqual(fog(5),night);
 });
+test('ultra room practical-light policy gives each authored room a distinct restrained profile',async()=>{
+ const mod=await import('../src/render/visual-policy.js');
+ assert.equal(typeof mod.roomLighting,'function');
+ if(typeof mod.roomLighting!=='function')return;
+ const ids=['kitchen','parlor','studio','bedroom'];
+ const night=ids.map(id=>mod.roomLighting(id,1));
+ assert.equal(new Set(night.map(p=>p.color)).size,4);
+ for(const p of night){assert.ok(p.intensity>0&&p.intensity<=3.2);assert.ok(p.distance>=3&&p.distance<=6);}
+ for(const id of ids)assert.ok(mod.roomLighting(id,0).intensity<mod.roomLighting(id,1).intensity);
+ assert.deepEqual(mod.roomLighting('missing',Infinity),mod.roomLighting('kitchen',1));
+});
