@@ -6,6 +6,7 @@ submits synthetic rewards, calls simulation functions or bypasses hit testing.
 import json, os, subprocess, time, urllib.request
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from scene_gestures import scene_ready
 from tea_check import complete_tea, tea_ready, tea_status, tap_tea
 from stitch_gestures import finish_stitch, stitch_ready, stitch_status
 
@@ -37,7 +38,7 @@ def progress():
 
 def ready():
     page.wait_for_function('window.dollhouse && !document.querySelector("#loading")', timeout=60000)
-    page.wait_for_function('!window.dollhouse.visual().cameraMoving', timeout=60000)
+    scene_ready(page)
 
 
 def capture(name):
@@ -56,6 +57,7 @@ def room(name):
 
 
 def point(key):
+    scene_ready(page)
     p = next(p for p in page.evaluate('window.dollhouse.objects()') if p['key'] == key)
     check('scene target is reachable: ' + key, page.evaluate(
         'p => document.elementFromPoint(p.x,p.y)?.id === "world"', p))

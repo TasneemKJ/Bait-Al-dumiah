@@ -16,6 +16,7 @@ import urllib.request
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
+from scene_gestures import scene_ready
 from stitch_gestures import (
     NeedleDrag, finish_stitch, stitch_ready, stitch_status, tap_stitch,
     trace_stitch,
@@ -72,8 +73,7 @@ def run(scenario):
     def ready():
         page.wait_for_function('window.dollhouse && !document.querySelector("#loading")',
                                timeout=60000, polling=100)
-        page.wait_for_function('!window.dollhouse.visual().cameraMoving',
-                               timeout=60000, polling=100)
+        scene_ready(page)
 
     def observe():
         return page.evaluate('''()=>{
@@ -141,6 +141,7 @@ def run(scenario):
         ready()
 
     def object_point(key):
+        scene_ready(page)
         point = next(p for p in page.evaluate('window.dollhouse.objects()')
                      if p['key'] == key)
         check('scene target is physically reachable: ' + key,

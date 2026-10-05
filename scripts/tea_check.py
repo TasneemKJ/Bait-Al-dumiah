@@ -13,6 +13,7 @@ import time
 import urllib.request
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from scene_gestures import scene_ready
 from stitch_gestures import finish_stitch, stitch_ready, stitch_status
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -191,7 +192,7 @@ def run(scenario):
 
     def ready():
         page.wait_for_function('window.dollhouse && !document.querySelector("#loading")', timeout=60000)
-        page.wait_for_function('!window.dollhouse.visual().cameraMoving', timeout=60000)
+        scene_ready(page)
 
     def resize(viewport):
         # ResizeObserver and the work camera can still describe the old viewport
@@ -282,6 +283,7 @@ def run(scenario):
         ready()
 
     def object_point(key):
+        scene_ready(page)
         point = next(p for p in page.evaluate('window.dollhouse.objects()') if p['key'] == key)
         check('scene object remains physically reachable: ' + key, page.evaluate('p=>document.elementFromPoint(p.x,p.y)?.id==="world"', point))
         return point
