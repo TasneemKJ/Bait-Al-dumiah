@@ -85,7 +85,7 @@
 
 /* A folded thread-note and the miniature's presentation edge.
    Real target sizes stay generous; the surrounding filled chrome is removed. */
-#ui{--edge-bottom:max(10px,env(safe-area-inset-bottom));--edge-paper:#ecd9c7;--thread:#9b5065;--edge-ink:#62444e}
+#ui{--ribbon-safe-top:env(safe-area-inset-top,0px);--edge-bottom:max(10px,env(safe-area-inset-bottom));--edge-paper:#ecd9c7;--thread:#9b5065;--edge-ink:#62444e}
 .night #ui{--edge-paper:#292635;--thread:#d5a6a9;--edge-ink:#efdbc3}
 .objective,.night .objective{top:106px;width:244px;padding:0;border:1px solid #bb9b714d;border-inline-start:2px solid var(--thread);border-radius:3px 12px 12px 3px;background:var(--story-text-scrim);box-shadow:0 3px 9px #3823250d}
 [dir=rtl] .objective{border-radius:12px 3px 3px 12px}
@@ -159,8 +159,8 @@
 .night .object-ribbon .ribbon-feedback{display:block;color:#f1ddbb}
 #ui[data-object-selected]:not([data-object-selected=""]) .visitor-hint{display:none}
 
-/* Keep selected scene props where they were touched. On portrait phones the
-   ribbon uses the clear edge instead of asking the camera to flee it. */
-@media(max-width:680px) and (orientation:portrait){
+/* Keep selected scene props where they were touched. Responsive paper uses
+   the clear measured edge instead of asking the camera to flee it. */
+@media(max-width:680px) and (orientation:portrait),(max-height:560px) and (orientation:landscape){
  .story-playfield[data-ribbon-edge="top"] .object-ribbon{top:var(--ribbon-top,calc(136px + env(safe-area-inset-top)));bottom:auto}
 }

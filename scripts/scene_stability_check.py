@@ -172,6 +172,23 @@ try:
                 check(locale+' canceled rotation consumes, rewards and drops nothing',after_rotate==before_rotate)
                 rotated = point(page,'prop:tea-set')
                 check(locale+' selected rotation uses current measured safe area',page.evaluate('''p=>{const v=dollhouse.visual();return v.selectedObject==='prop:tea-set' && p.y>=v.presentation.top && p.y<=innerHeight-v.presentation.bottom && document.elementFromPoint(p.x,p.y)?.id==='world'}''',rotated))
+                def final_clearance():
+                    return page.evaluate('''() => {
+                        const p=dollhouse.objects().find(p=>p.key==='prop:tea-set'),r=document.querySelector('.object-ribbon').getBoundingClientRect();
+                        return {point:p,ribbon:{left:r.left,right:r.right,top:r.top,bottom:r.bottom},
+                            owner:document.elementFromPoint(p.x,p.y)?.id,
+                            covered:p.x>=r.left&&p.x<=r.right&&p.y>=r.top&&p.y<=r.bottom,
+                            insets:dollhouse.visual().presentation};
+                    }''')
+                fitted=final_clearance()
+                check(locale+' final rotated prop is outside the actual ribbon',not fitted['covered'] and fitted['owner']=='world')
+                # Revisit the same focused room while selected; inspect the
+                # final fitted point, not the earlier pre-navigation sample.
+                page.locator('[data-room="kitchen"]').click()
+                scene_ready(page)
+                navigated=final_clearance()
+                check(locale+' final explicit room fit leaves selected prop exposed',not navigated['covered'] and navigated['owner']=='world')
+                observations.append({'case':locale+'-final-landscape-clearance','rotated':fitted,'navigated':navigated})
                 page.screenshot(path=str(OUT/(locale+'-selected-landscape.png')),timeout=60000,scale='css')
                 page.set_viewport_size({'width':360,'height':640})
                 scene_ready(page)

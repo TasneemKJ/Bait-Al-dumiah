@@ -48,3 +48,6 @@ Selected ideas: camera composition, folded contextual guidance, material-led nav
 - [x] Place portrait selection paper by measured clearance; classify top paper correctly and hold it during drag.
 - [x] Add unchanged-position native touch checks and strengthen actual held destination checks in the full story journey.
 - [ ] Verify exact corrected source through native same-position, bilingual short-phone and full physical journeys; inspect original images before merging.
+- [x] Reproduce and inspect the bilingual whole-house landscape ribbon overlap with unchanged-coordinate native input.
+- [x] Extend measured-clearance placement to short landscape, respecting intersecting controls and safe areas; add final-fit exposure regressions.
+- [ ] Obtain independent review and fresh exact-source focused native acceptance before full ritual journeys or merge.

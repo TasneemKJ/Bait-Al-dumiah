@@ -24,6 +24,18 @@ export function ribbonEdge(y,top,bottom,height){
  return topClear>bottomClear?'top':'bottom';
 }
 
+// Measured paper placement policy, separate from camera/input state.
+export function ribbonPlacement({width,height,y,rect,upper=[],bottom,safeTop=0}){
+ const portrait=width<=680&&height>width,landscape=height<=560&&width>height;
+ if(!portrait&&!landscape)return {edge:'bottom',top:12};
+ let top=Math.max(12,Number.isFinite(safeTop)?safeTop:0);
+ for(const region of upper){
+  if(![region.left,region.right,region.bottom].every(Number.isFinite))continue;
+  if(region.right>rect.left&&region.left<rect.right)top=Math.max(top,region.bottom+12);
+ }
+ return {edge:ribbonEdge(y,top,bottom,rect.height),top};
+}
+
 // A held item and a small scene ribbon. Neither pauses nor obscures the room.
 // Physical input uses the same simulation command as keyboard activation.
 export function createStoryUI(host,getState,dispatch,project=()=>null){
@@ -36,15 +48,21 @@ export function createStoryUI(host,getState,dispatch,project=()=>null){
   if(dragPointer!==null)return; // Never move paper or a drop target mid-gesture.
   const ribbon=root.querySelector('.object-ribbon');
   if(!ribbon)return;
-  const bounds=host.getBoundingClientRect();
-  if(bounds.width>680||bounds.height<=bounds.width){if(root.dataset.ribbonEdge!=='bottom')root.dataset.ribbonEdge='bottom';return}
-  const point=project(selected),roomEdge=host.querySelector('.room-views')?.getBoundingClientRect();
-  const timeEdge=host.querySelector('.time-tools')?.getBoundingClientRect();
-  const top=Math.max(136,(timeEdge?.bottom??bounds.top+124)-bounds.top+12);
-  // The ordinary ribbon ends 14px above room navigation. A held token owns
-  // the next 64px above that edge; its actual measured height stays separate.
-  const bottom=(roomEdge?.top??bounds.bottom-112)-bounds.top-14-(root.querySelector('.held-item')?64:0);
-  const edge=ribbonEdge(point?.y,top,bottom,ribbon.getBoundingClientRect().height);
+  const bounds=host.getBoundingClientRect(),portrait=bounds.width<=680&&bounds.height>bounds.width,landscape=bounds.height<=560&&bounds.width>bounds.height;
+  if(!portrait&&!landscape){if(root.dataset.ribbonEdge!=='bottom')root.dataset.ribbonEdge='bottom';return}
+  const point=project(selected),paper=ribbon.getBoundingClientRect();
+  const roomEdge=host.querySelector('.room-views')?.getBoundingClientRect();
+  const upper=[...host.querySelectorAll('.brand,.house-status,.time-tools,.objective,.visitor-hint')].flatMap(node=>{
+   if(!node.getClientRects().length)return [];const style=getComputedStyle(node);
+   if(style.visibility==='hidden'||style.display==='none')return [];
+   const r=node.getBoundingClientRect();return [{left:r.left-bounds.left,right:r.right-bounds.left,bottom:r.bottom-bounds.top}];
+  });
+  // Portrait paper clears navigation and the held token. Short landscape
+  // keeps its authored 75px lower edge; side controls do not fill the center.
+  const bottom=landscape?bounds.height-75:(roomEdge?.top??bounds.bottom-112)-bounds.top-14-(root.querySelector('.held-item')?64:0);
+  const safeTop=parseFloat(getComputedStyle(host).getPropertyValue('--ribbon-safe-top'))||0;
+  const {edge,top}=ribbonPlacement({width:bounds.width,height:bounds.height,y:point?.y,
+   rect:{left:paper.left-bounds.left,right:paper.right-bounds.left,height:paper.height},upper,bottom,safeTop});
   if(root.style.getPropertyValue('--ribbon-top')!==top+'px')root.style.setProperty('--ribbon-top',top+'px');
   if(root.dataset.ribbonEdge!==edge)root.dataset.ribbonEdge=edge;
  }
