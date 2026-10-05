@@ -59,11 +59,24 @@
 @media(max-height:560px) and (orientation:landscape){
  .brand{top:12px;inset-inline-start:14px}.brand .eyebrow{display:none}#ui .brand h1{font-size:20px;line-height:1.25}.brand-mark{display:none}.house-status{top:12px;inset-inline-end:14px}.time-tools{top:61px;inset-inline-end:14px}.objective{top:48px;inset-inline-start:14px;width:176px;padding:5px}.objective p{font-size:11px;margin:4px 0}
  .room-views{left:auto;right:auto;bottom:12px;inset-inline-start:14px;transform:none;display:grid;grid-template-columns:44px 44px;gap:0}.room-views button{width:44px;min-width:44px;height:44px}.room-views button span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
- .dock[data-expanded=false]{bottom:12px}.dock[data-expanded=true]{bottom:10px;max-width:calc(100vw - 225px)}.dock[data-expanded=true]>button{padding-inline:7px;font-size:9px}.dock .tools-toggle span{display:none}
+ .dock[data-expanded=false]{bottom:12px}.dock[data-expanded=true]{bottom:10px;max-width:calc(100vw - 225px)}.dock[data-expanded=true]>button{padding-inline:7px;font-size:9px}.dock .tools-toggle span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
  .object-controls{top:auto;bottom:118px;inset-inline-start:14px;inset-inline-end:auto;width:auto;max-height:none}.object-list{max-height:calc(100svh - 150px);width:185px}
  .object-ribbon{bottom:75px;max-width:calc(100% - 235px);width:max-content;display:flex;padding:8px;gap:5px}.ribbon-copy{min-width:90px;max-width:130px}.ribbon-copy h2{font-size:14px}.ribbon-copy p{display:none}.object-ribbon .scene-primary{font-size:10px;padding-inline:8px;width:auto;max-width:160px}.object-ribbon .scene-inspect{display:flex}
  .held-item{inset-inline-start:auto;inset-inline-end:14px;bottom:12px;width:145px;min-width:0;padding:6px;gap:7px;transform:none}.held-item:active:not(:disabled),[dir=rtl] .held-item,[dir=rtl] .held-item:active:not(:disabled){transform:none}.held-art{width:35px;height:35px}.held-item strong{font-size:11px}.held-item small{display:none}.held-item em{display:block;font-size:9px}
  .scene-response,.story-playfield:not(:has(.object-ribbon)) .scene-response{left:auto;right:auto;inset-inline-end:14px;bottom:12px;transform:none;width:max-content;max-width:min(195px,calc(100vw - 300px));padding:6px 8px;gap:6px;font-size:11px;line-height:1.4;text-align:start;box-shadow:none}
  .story-playfield:has(.held-item) .scene-response{bottom:140px;max-width:155px}.camera-tools{left:auto;right:auto;bottom:83px;inset-inline-end:14px;flex-direction:row}.camera-tools>button[data-action^="zoom"]{display:none}
+}
+/* Keep discovery beside the room keys in short landscape, clear of the clue. */
+@media(max-height:360px) and (orientation:landscape){
+ .object-controls{top:auto;bottom:12px;left:auto;right:auto;inset-inline-start:118px;inset-inline-end:auto}
+ .object-controls>[data-object-toggle]{width:44px;min-width:44px;height:44px;min-height:44px;padding:10px}
+ .object-controls>[data-object-toggle] span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+ .object-list{bottom:68px}
+}
+@media(max-height:360px) and (orientation:landscape) and (max-width:567px){
+ .dock[data-expanded=false]>.tools-toggle{width:44px;min-width:44px;padding-inline:10px;flex:none}
+}
+@media(max-height:360px) and (orientation:landscape) and (max-width:483px){
+ .dock[data-expanded=false]{left:auto;right:auto;inset-inline-start:auto;inset-inline-end:14px;transform:none;padding:2px}
 }
 @media(prefers-reduced-motion:reduce){.carry-ghost{transform:translate(-50%,-50%)}}

@@ -26,10 +26,11 @@ SELECTED = {
         ],
     },
     'chimes': {
-        'desktop': ['00-bedroom-mobile', '01-instrument', '02-held-charm', '03-finished-mobile', '05-earned-constellation'],
+        'desktop': ['00-bedroom-mobile', '01-instrument', '02-held-charm', '03-finished-mobile', '05-earned-constellation', 'diagnostic-paint-a', 'diagnostic-paint-b-contained', 'diagnostic-paint-a-restored'],
         'phone': [
             '00-bedroom-mobile', '01-instrument', '02-touch-held', '03-finished-mobile',
             '04-arabic-320x568', '04-arabic-667x320', '05-earned-constellation',
+            '06-discovery-667x320', '07-house-568x320', '08-discovery-568x320',
         ],
     },
     'stitch': {
@@ -83,6 +84,7 @@ def main():
             'name': name, 'scenario': scenario, 'activity': family,
             'sourceCommit': os.environ.get('GITHUB_SHA', 'local'),
             'width': width, 'height': height, 'bytes': len(data),
+            'purpose': 'temporary-style-diagnostic' if name.startswith('diagnostic-paint-') else 'canonical-game',
             'sha256': hashlib.sha256(data).hexdigest(),
             'base64Length': len(encoded),
         }
