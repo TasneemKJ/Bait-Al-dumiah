@@ -14,7 +14,7 @@ Static site, no bundler at runtime: `scripts/build.mjs` copies `index.html`, `sr
 2. Saves: key `bait-al-dumiah.v1`, version 1. `restore()` whitelists, clamps and defaults every field; no saved HTML, renderer objects or wall-clock catch-up. Events are transient. Muted is always true on load.
 3. All copy has English and Arabic entries; direction switches with language.
 4. No remote assets or analytics.
-5. Budgets (phone profile 390x844, dpr 3, 4x CPU throttle, measured by `scripts/perf_check.py`, weekly in `full-suite.yml`): dist at most 2 MB; ready in at most 25 s under software WebGL; under 400k triangles and 388 draw calls; median frame at most 400 ms under SwiftShader (a regression ceiling, not a device claim). `play_check.py` also enforces the triangle and call ceilings.
+5. Budgets (phone profile 390x844, dpr 3, 4x CPU throttle, measured by `scripts/perf_check.py`, weekly in `full-suite.yml`): dist at most 2 MB; ready in at most 25 s under software WebGL; under 400k triangles and 388 draw calls; main-thread work per frame at most 50 ms (script at most 35 ms) under 4x throttle, about 12 ms unthrottled. SwiftShader wall-clock frame time is reported only: it measures the software GPU, not a phone. `play_check.py` also enforces the triangle and call ceilings.
 6. Saves: `SAVE_VERSION` and `migrate()` in `simulation.js`; `readSave()` reports unreadable or newer saves, and `main.js` keeps them under `bait-al-dumiah.v1.backup` before a fresh house is saved. Export/import in Settings uses the same validation.
 7. Hidden tabs pause; held tea, needle and chimes release safely.
 
