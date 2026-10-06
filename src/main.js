@@ -12,7 +12,7 @@ import {createUI} from './ui.js';
 import {createResidentLabel} from './render/resident-label.js';
 import {createRoomViews} from './render/room-views.js';
 import {DollhouseAudio} from './audio.js';
-import {returnGreeting,waveSchedule} from './return-greeting.js';
+import {returnGreeting,waveSchedule,waveRoom} from './return-greeting.js';
 
 let stored=null;try{stored=localStorage.getItem(SAVE_KEY)}catch{}
 // An unreadable or newer save is kept under a backup key before the fresh house can overwrite it.
@@ -260,6 +260,14 @@ async function dispatch(action,value){
  }
 }
 let welcomeWave=false;
+// While the residents wave, glance at the busiest room for a moment, then return,
+// but only if the player has not touched anything and motion is allowed.
+function welcomeGlance(){
+ if(state.settings.reducedMotion)return;const room=waveRoom(state);if(!room)return;
+ let touched=false;const mark=()=>{touched=true};host.addEventListener('pointerdown',mark,{once:true,capture:true});host.addEventListener('keydown',mark,{once:true,capture:true});
+ setTimeout(()=>{if(touched||ui.panel||state.paused)return;dispatch('focus-room',room);
+  setTimeout(()=>{if(!touched&&host.dataset.focusRoom===room)dispatch('camera')},2600)},700);
+}
 ui=createUI(host,()=>state,dispatch);
 if(saveRecovered)ui.toast(ui.t('saveRecovered'));else{const greeting=returnGreeting(state);if(greeting){say(ui.t(greeting.key).replace('{count}',ui.n(greeting.count)));welcomeWave=true}}
 const residentLabel=createResidentLabel(host);
@@ -269,7 +277,7 @@ try{world=createWorld(canvas,{onPick:data=>{
  if(data.doll)ui.open('household',data.doll);
  if(data.ghost)dispatch('discover');
  if(data.slot&&ui.placement)dispatch(ui.moveId!==null?'relocate-object':'place',{id:ui.moveId,item:ui.placement,...data.slot});
-},onError:showError});if(welcomeWave)world?.welcomeBack(waveSchedule(DOLLS.length,state.elapsed));document.querySelector('#loading')?.remove();}catch(error){console.error('Dollhouse renderer could not start:',error);showError('webgl')}
+},onError:showError});if(welcomeWave){world?.welcomeBack(waveSchedule(DOLLS.length,state.elapsed));welcomeGlance()}document.querySelector('#loading')?.remove();}catch(error){console.error('Dollhouse renderer could not start:',error);showError('webgl')}
 objectControls=createObjectControls(host,()=>state,key=>dispatch('select-object',key));
 storyUI=createStoryUI(host,()=>state,dispatch);
 teaUI=createTeaUI(host,canvas,()=>state,dispatch,{pick:(x,y)=>world?.teaAt(x,y),aimAt:(x,y)=>world?.teaAimAt(x,y)});

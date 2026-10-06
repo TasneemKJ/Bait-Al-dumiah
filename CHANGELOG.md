@@ -2,6 +2,7 @@
 Each merged batch adds an entry and a `vX.Y.Z` tag.
 
 ## Unreleased
+- Retention: while the residents wave on a returning load, the camera glances at the busiest room for about 2.6 s and then returns; skipped under reduced motion, or if the player touched or pressed a key first.
 - Accessibility: Larger text now also scales the HUD card text (clue, wishes, buttons and cozy counters) and the story ribbon copy; card anchors, safe areas and 44px targets are untouched.
 - Audio: a soft D-minor chord swells once (about 4 s, slow attack) when day turns to night while sound is on; never on load, while muted or paused.
 - Retention: when a returning player opens the house, the residents wave one after another (reuses the greeting pose; skipped under reduced motion and on a first visit).
