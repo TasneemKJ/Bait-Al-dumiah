@@ -54,6 +54,8 @@ with sync_playwright() as p:
   page.set_viewport_size({'width':390,'height':844})
   bounds=buttons.evaluate_all('(els)=>els.map(e=>({width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height}))')
   results.append({'name':'room closeup controls meet mobile 44px targets','passed':all(b['width']>=44 and b['height']>=44 for b in bounds)})
+  clue=page.evaluate('''()=>{const toggle=document.querySelector('.clue-toggle'),copy=document.querySelector('#objective-detail'),r=toggle.getBoundingClientRect(),before=getComputedStyle(copy).display;toggle.click();const after=getComputedStyle(copy).display,expanded=toggle.getAttribute('aria-expanded');toggle.click();return {w:r.width,h:r.height,before,after,expanded,back:getComputedStyle(copy).display}}''')
+  results.append({'name':'phone clue chip toggle is a 44px target and opens/closes the clue text','passed':clue['w']>=44 and clue['h']>=44 and clue['before']=='none' and clue['after']!='none' and clue['expanded']=='true' and clue['back']=='none','clue':clue})
   page.evaluate("fixtureUI.open('decorate')")
   page.locator('[data-action=choose-item][data-id=plant]').click()
   page.evaluate('fixtureViews.update()')

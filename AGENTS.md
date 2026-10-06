@@ -23,7 +23,7 @@ Read `README.md`, then `ARCHITECTURE.md`, `DESIGN_RULES.md`, `DESIGN.md`, `TODO.
 npm install ; npm run verify          # node tests + build (the fast gate)
 PORT=4391 CHROMIUM_PATH=/opt/pw-browsers/chromium npm run test:browser   # play_check.py; needs `pip install -r requirements.txt`
 ```
-`scripts/play_check.py` honours `PORT` (default 4177). Other machine-wide browser scripts are listed in `README.md`. On a shared machine pick a unique port and wrap Playwright runs in `flock /tmp/browser.lock` (start servers outside the lock).
+`scripts/play_check.py` honours `PORT` (default 4177). Other machine-wide browser scripts are listed in `README.md`. On a shared machine pick a unique port, and wrap each single browser command (one journey, one screenshot batch or one play_check, under about 10 minutes) in `flock /tmp/browser.lock`, never a whole round script. Start servers outside the lock. Competitive lessons live in `docs/COMPETITIVE.md`.
 
 ## Standing rules (from the owner; apply every session)
 - **Mobile first**, including phone WebGL performance. Check with touch emulation at 360x640, 390x844, 412x915 and landscape 844x390, in both languages; measure with 4x CPU throttle. A mobile failure blocks the PR.

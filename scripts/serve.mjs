@@ -2,11 +2,12 @@ import {createServer} from 'node:http';
 import {readFile,stat} from 'node:fs/promises';
 import path from 'node:path';
 const root=path.resolve(process.argv[2]||'.');const port=Number(process.env.PORT||4177);
-const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.json':'application/json','.png':'image/png'};
+const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.json':'application/json','.png':'image/png','.txt':'text/plain; charset=utf-8','.webmanifest':'application/manifest+json','.jpg':'image/jpeg'};
 const developmentVendor={
  '/vendor/three.module.min.js':'node_modules/three/build/three.module.min.js',
  '/vendor/three.core.min.js':'node_modules/three/build/three.core.min.js',
  '/vendor/OrbitControls.js':'node_modules/three/examples/jsm/controls/OrbitControls.js',
+ '/credits.txt':'CREDITS.md',
 };
 createServer(async(req,res)=>{
  try{const url=decodeURIComponent(new URL(req.url,'http://localhost').pathname);let file=path.resolve(root,'.'+(url==='/'?'/index.html':url));if(file!==root&&!file.startsWith(root+path.sep)){res.writeHead(403);return res.end()}

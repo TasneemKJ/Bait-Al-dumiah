@@ -15,6 +15,7 @@ import {createUI} from './ui.js';
 import {createResidentLabel} from './render/resident-label.js';
 import {createRoomViews} from './render/room-views.js';
 import {DollhouseAudio} from './audio.js';
+import {returnGreeting} from './return-greeting.js';
 
 let storage;try{storage=localStorage}catch{}
 const session=createHomeSession({storage,reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches});
@@ -70,17 +71,20 @@ function announce(event){
 }
 function showError(kind){fatal=true;syncPause();save();homeUI?.hide();document.querySelector('#loading')?.remove();if(ui?.panel)ui.close();const error=document.createElement('section');error.className='error-screen';error.setAttribute('role','alert');const h=document.createElement('h2'),p=document.createElement('p'),b=document.createElement('button');h.textContent=ui.t(kind==='context'?'contextTitle':'webglTitle');p.textContent=ui.t(kind==='context'?'contextHelp':'webglHelp');b.textContent=ui.t('reload');b.addEventListener('click',()=>location.reload());error.append(h,p,b);document.querySelector('#app').append(error)}
 async function dispatch(action,value,origin='control'){
- if(!session.entered&&!['home-play','home-sound','home-language','sound'].includes(action))return;
+ if(!session.entered&&!['home-play','home-reload','home-sound','home-language','sound'].includes(action))return;
  switch(action){
   case 'home-play':{
-   if(fatal||!world||!session.enter())break;
+   if(fatal||!world)break;
+   if(!session.enter()){if(!session.entered&&session.entryIssue)homeUI.requireReload(session.entryIssue==='changed'?'homeEntryChanged':'homeEntryUnreadable');break;}
    homeUI.hide();document.querySelector('#app').dataset.screen='play';host.hidden=false;host.inert=false;canvas.inert=false;canvas.removeAttribute('aria-hidden');canvas.setAttribute('tabindex','0');
    syncPause();world.syncViewport();world.setEnabled(!state.paused);refreshUI();playfieldLayout.measure();
    if(!session.canContinue)dispatch('focus-room','kitchen');
    last=performance.now();lastSave=last;canvas.focus({preventScroll:true});
-   if(!state.settings.muted&&!audio.enabled)void audio.enable().then(ok=>{if(!ok)ui.toast(ui.t('audioUnavailable'));audio.setPaused(state.paused)});
-   save();break;
+   let entrySaved=false;
+   if(!state.settings.muted&&!audio.enabled)void audio.enable().then(ok=>{if(!ok)ui.toast((entrySaved?'':ui.t('savingFailed')+' ')+ui.t('audioUnavailable'));audio.setPaused(state.paused)});
+   entrySaved=save();if(entrySaved){if(session.recovered)say(ui.t('saveRecovered'));else{const greeting=returnGreeting(state);if(greeting)say(ui.t(greeting.key).replace('{count}',ui.n(greeting.count)))}}break;
   }
+  case 'home-reload':if(!session.entered&&session.entryIssue)location.reload();break;
   case 'home-language':if(!session.entered&&['en','ar'].includes(value)){state.settings.locale=value;refreshUI();saveSettings()}break;
   case 'home-sound':if(!session.entered)await dispatch('sound');break;
   case 'tools-state':if(value){storyUI?.clear();world?.clearObjectSelection();objectControls?.collapse()}break;
@@ -253,7 +257,19 @@ async function dispatch(action,value,origin='control'){
    if(value.key==='locale'&&['en','ar'].includes(value.value))state.settings.locale=value.value;
    if(value.key==='quality'&&['auto','low','high'].includes(value.value))state.settings.quality=value.value;
    if(value.key==='motion')state.settings.reducedMotion=Boolean(value.value);
+   if(value.key==='largeText')state.settings.largeText=Boolean(value.value);
    refreshUI();saveSettings();break;
+  }
+  case 'save-export':{
+   try{const blob=new Blob([JSON.stringify(state)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`bait-al-dumiah-day-${state.day}.json`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);say(ui.t('saveExported'))}catch{say(ui.t('saveExportFailed'))}
+   break;
+  }
+  case 'save-import':{
+   const file=value;if(!file||file.size>512000){say(ui.t('saveImportFailed'));break}
+   file.text().then(text=>{const result=sim.readSave(text);if(!result.ok||result.empty){say(ui.t('saveImportFailed'));return}
+    cancelWorkInput();world?.setTeaActive(false);world?.setStitchActive(false);world?.setChimeActive(false);notices.length=0;ui.close();ui.clearPlacement();ui.setActivityResult(null);
+    result.state.settings.muted=state.settings.muted;state=result.state;manualPause=false;syncPause();dispatch('camera');world?.setPlacement(null);save();refreshUI();say(ui.t('saveImported'))}).catch(()=>say(ui.t('saveImportFailed')));
+   break;
   }
   case 'reset-yes':{
    cancelWorkInput();world?.setTeaActive(false);world?.setStitchActive(false);world?.setChimeActive(false);notices.length=0;const settings={...state.settings};ui.close();ui.clearPlacement();ui.setActivityResult(null);state=sim.createState();state.settings=settings;manualPause=false;syncPause();dispatch('camera');world?.setPlacement(null);save();refreshUI();break;

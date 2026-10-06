@@ -19,7 +19,7 @@ test('one activation enters real play once and then normal progression can save'
  assert.equal(state.elapsed,.1);assert.equal(home.save(state),true);assert.equal(JSON.parse(storage.data.get(SAVE_KEY)).elapsed,.1);
 });
 test('Continue preserves canonical save bytes throughout Home and retains earned state on entry',()=>{
- const saved=createState();saved.buttons=214;saved.day=8;saved.story.chapter=1;saved.story.step=2;saved.milestones=['firstCare'];saved.settings={locale:'ar',muted:false,reducedMotion:true,quality:'low'};
+ const saved=createState();saved.buttons=214;saved.day=8;saved.story.chapter=1;saved.story.step=2;saved.milestones=['firstCare'];saved.settings={locale:'ar',muted:false,reducedMotion:true,quality:'low',largeText:false};
  const raw=JSON.stringify(saved),storage=memory({[SAVE_KEY]:raw}),home=create({storage,reducedMotion:false}),before=structuredClone(home.state);
  home.advance(home.state,120);home.save(home.state);
  assert.equal(home.canContinue,true);assert.deepEqual(home.state,before);assert.equal(storage.data.get(SAVE_KEY),raw);assert.equal(storage.writes.length,0);
@@ -29,11 +29,11 @@ test('Home preferences persist separately and only whitelist legitimate settings
  const saved=createState();saved.buttons=177;const raw=JSON.stringify(saved),storage=memory({[SAVE_KEY]:raw}),home=create({storage});
  home.state.settings.locale='ar';home.state.settings.muted=false;
  assert.equal(home.savePreferences({...home.state.settings,buttons:9999,script:'bad'}),true);
- assert.equal(storage.data.get(SAVE_KEY),raw);assert.deepEqual(JSON.parse(storage.data.get(prefKey)),{locale:'ar',muted:false,reducedMotion:false,quality:'auto',_base:JSON.stringify(saved.settings)});
+ assert.equal(storage.data.get(SAVE_KEY),raw);assert.deepEqual(JSON.parse(storage.data.get(prefKey)),{locale:'ar',muted:false,reducedMotion:false,quality:'auto',largeText:false,_base:JSON.stringify(saved.settings)});
  const reloaded=create({storage});assert.equal(reloaded.state.buttons,177);assert.equal(reloaded.state.settings.locale,'ar');assert.equal(reloaded.state.settings.muted,false);
 });
 test('invalid preference fields cannot override authoritative saved values',()=>{
- const saved=createState();saved.settings={locale:'ar',muted:false,reducedMotion:true,quality:'low'};
+ const saved=createState();saved.settings={locale:'ar',muted:false,reducedMotion:true,quality:'low',largeText:false};
  const storage=memory({[SAVE_KEY]:JSON.stringify(saved),[prefKey]:JSON.stringify({locale:'xx',muted:'false',reducedMotion:null,quality:'ultra'})});
  assert.deepEqual(create({storage}).state.settings,saved.settings);
 });

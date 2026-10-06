@@ -22,6 +22,13 @@ export function roomLighting(roomId,mix){
  const t=Number.isFinite(mix)?clamp(mix,0,1):1;
  return {color:profile.color,intensity:.18+(profile.night-.18)*t,distance:profile.distance};
 }
+// One room practical's values. The house light list also holds window glass,
+// so callers identify a lamp by its room tag, never by its list position.
+export function practicalLight(roomId,mix,lamps,cue=1,focused=false){
+ const practical=roomLighting(roomId,mix),energy=Number.isFinite(lamps)?Math.max(0,lamps):0,gain=Number.isFinite(cue)?Math.max(0,cue):1;
+ return {color:practical.color,distance:practical.distance,intensity:(energy*PRACTICAL_SHARE+practical.intensity)*gain*(focused?1.12:1)};
+}
+const PRACTICAL_SHARE=.22;
 export function detail(width,height,preference='auto',dpr=1){
  const level=preference==='high'?'high':preference==='low'?'low':Math.min(width,height)<700?'low':'high';
  return {level,pixelRatio:clamp(dpr,1,level==='low'?1.25:1.75),shadows:level==='high'};

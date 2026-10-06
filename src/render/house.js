@@ -108,7 +108,7 @@ export function createHouse(scene){
  if(room.id!=='kitchen')texturedPlane(g,0,.111,.15,3.6,2.6,texture('rug',room.id==='parlor'?['#be8297','#f0d7b7']:room.id==='studio'?['#a798bb','#e5d1ba']:['#a6afbb','#e9d0bc']),true);
  if(room.id==='kitchen')originalTeaSet=kitchen(g);if(room.id==='parlor')parlor(g);if(room.id==='studio')studioChair=studio(g);if(room.id==='bedroom')bedroom(g);
  // Warm little pools of light, kept independent of decorative meshes.
- const light=new T.PointLight(0xffd4a0,1.7,5,2);light.position.set(room.x,room.y+2,-.3);root.add(light);lights.push(light);
+ const light=new T.PointLight(0xffd4a0,1.7,5,2);light.position.set(room.x,room.y+2,-.3);light.userData.room=room.id;root.add(light);lights.push(light);
  }
  for(const x of [-4.84,0,4.84]){box(staticRoot,x,3.2,-1.70,.19,6.4,.28,P.cream);box(staticRoot,x,3.2,1.65,.14,6.4,.20,P.cream);for(const y of [.17,3.3,6.35])box(staticRoot,x,y,1.65,.23,.20,.26,P.cream,true)}
  // Side walls are deliberately cut back: the front and near corners stay open for play.
