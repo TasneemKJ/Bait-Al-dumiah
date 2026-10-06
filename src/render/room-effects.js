@@ -9,7 +9,7 @@ export function createRoomEffects(parent){
  const curtains=[];parent.traverse(o=>{if(o.name==='draped-curtain')curtains.push(o)});
  const pools=[];parent.traverse(o=>{if(o.name==='lamp-pool-static')pools.push(o)});
  const anchor=(()=>{let a=null;parent.traverse(o=>{if(o.name==='kettle-steam-anchor')a=o});return a})();
- const kettleSteam=anchor?createTeaSteam(anchor,{color:0xd8ccc4,strength:2.2}):null;if(kettleSteam)kettleSteam.root.scale.setScalar(6);
+ const kettleSteam=anchor?createTeaSteam(anchor,{color:0xcfc2ba,strength:3.6}):null;if(kettleSteam)kettleSteam.root.scale.setScalar(8);
  const flames=[];const silhouette=new T.Shape();silhouette.moveTo(0,0);silhouette.bezierCurveTo(-.15,.02,-.10,.21,.01,.35);silhouette.bezierCurveTo(-.03,.20,.16,.12,.06,.025);silhouette.quadraticCurveTo(.04,0,0,0);
  const shape=new T.ShapeGeometry(silhouette,14);
  for(let i=0;i<3;i++){

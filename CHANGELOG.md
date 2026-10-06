@@ -2,6 +2,7 @@
 Each merged batch adds an entry and a `vX.Y.Z` tag.
 
 ## Unreleased
+- Atmosphere: a CSS-only vignette and paper-grain layer between the canvas and the HUD (hidden under prefers-contrast and reduced-transparency), a slightly stronger kettle steam, and brighter night windows.
 - Atmosphere: soft warm light pools on the floor under the parlor lamp and every owned lamp (brightness follows the lamp), and a faint steam wisp from the kitchen kettle while Lina is idle. No new lights; steam is static under reduced motion and hidden when paused.
 - Atmosphere: golden hour. For about half a minute before night the sky gains a warm horizon band, the key light turns amber and the windows glow warm; it hands over to the night look and is zero for the rest of the day.
 - Writing: one calm day-one line ("The house breathes out...") after the opening burst, once, only after the player has cared for someone; stored in the optional whitelisted `hints.calm`.
