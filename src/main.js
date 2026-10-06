@@ -15,7 +15,7 @@ import {createUI} from './ui.js';
 import {createResidentLabel} from './render/resident-label.js';
 import {createRoomViews} from './render/room-views.js';
 import {DollhouseAudio} from './audio.js';
-import {returnGreeting,waveSchedule} from './return-greeting.js';
+import {returnGreeting,waveSchedule,waveRoom} from './return-greeting.js';
 
 let storage;try{storage=localStorage}catch{}
 const session=createHomeSession({storage,reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches});
