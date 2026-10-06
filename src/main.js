@@ -15,7 +15,7 @@ import {createUI} from './ui.js';
 import {createResidentLabel} from './render/resident-label.js';
 import {createRoomViews} from './render/room-views.js';
 import {DollhouseAudio} from './audio.js';
-import {returnGreeting} from './return-greeting.js';
+import {returnGreeting,waveSchedule} from './return-greeting.js';
 
 let storage;try{storage=localStorage}catch{}
 const session=createHomeSession({storage,reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches});
@@ -82,7 +82,7 @@ async function dispatch(action,value,origin='control'){
    last=performance.now();lastSave=last;canvas.focus({preventScroll:true});
    let entrySaved=false;
    if(!state.settings.muted&&!audio.enabled)void audio.enable().then(ok=>{if(!ok)ui.toast((entrySaved?'':ui.t('savingFailed')+' ')+ui.t('audioUnavailable'));audio.setPaused(state.paused)});
-   entrySaved=save();if(entrySaved){if(session.recovered)say(ui.t('saveRecovered'));else{const greeting=returnGreeting(state);if(greeting)say(ui.t(greeting.key).replace('{count}',ui.n(greeting.count)))}}break;
+   entrySaved=save();if(entrySaved){if(session.recovered)say(ui.t('saveRecovered'));else{const greeting=returnGreeting(state);if(greeting){say(ui.t(greeting.key).replace('{count}',ui.n(greeting.count)));if(!state.settings.reducedMotion)world?.welcomeBack(waveSchedule(DOLLS.length,state.elapsed))}}}break;
   }
   case 'home-reload':if(!session.entered&&session.entryIssue)location.reload();break;
   case 'home-language':if(!session.entered&&['en','ar'].includes(value)){state.settings.locale=value;refreshUI();saveSettings()}break;
@@ -295,7 +295,7 @@ chimeUI=createChimeUI(host,canvas,()=>state,dispatch,{pick:(x,y)=>world?.chimeAt
 const playfieldLayout=createPlayfieldLayout(host,(value,viewport)=>{if(session.entered){world?.setPresentation(value,viewport);storyUI?.layout()}},()=>{if(world?.syncViewport()&&session.entered)storyUI?.cancelDrag();if(session.entered)storyUI?.layout()});
 let last=performance.now(),lastUI=0,lastSave=0,stopped=false;
 function frame(now){if(stopped)return;const dt=Math.min(.1,Math.max(0,(now-last)/1000));last=now;
- if(!document.hidden&&!fatal&&!session.entered){world?.render(state,0,null)}
+ if(!document.hidden&&!fatal&&!session.entered&&homeUI?.previewVisible){world?.render(state,0,null)}
  if(!document.hidden&&!fatal&&session.entered){updateWorkUI(dt);session.advance(state,dt);if(state.events.length)for(const event of state.events.splice(0))announce(event);if(notices.length&&now>=noticeAt&&!physicalActivity())showNotice(now);world?.render(state,dt,ui.selected);residentLabel.update(state,ui.selected,host.dataset.focusRoom||(host.dataset.focusDoll?state.dolls.find(d=>d.id===host.dataset.focusDoll)?.room:''),world?.project(ui.selected,.05),Boolean(ui.panel||ui.placement||state.paused||storyUI?.selected||physicalActivity()));if(physicalActivity()!=='lullaby')audio.tick(sim.isNight(state));if(now-lastUI>250){ui.tick();roomViews.update();objectControls.update();storyUI.update();lastUI=now}if(now-lastSave>8000){save();lastSave=now}}
  requestAnimationFrame(frame);
 }

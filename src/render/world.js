@@ -179,7 +179,7 @@ export function createWorld(canvas,{onPick,onError}){
  syncViewport();
  return {
   renderer,camera,scene,home,syncViewport,setChimeActive,chimeAt,chimePositions,chimePullSpan,setChimeSelection(index){chimeSelection=Number.isInteger(index)&&index>=0&&index<4?index:-1},setTeaActive,teaAt,teaAimAt,teaPositions,setStitchActive,stitchAt,stitchPointAt,stitchPositions,projectStitch,
-  selectObject(key){return objects.select(key)},clearObjectSelection(){objects.clear()},objectAt,objectPositions(){return objects.project(camera,canvas.clientWidth,canvas.clientHeight)},
+  welcomeBack(times){residents.greetAll(times)},selectObject(key){return objects.select(key)},clearObjectSelection(){objects.clear()},objectAt,objectPositions(){return objects.project(camera,canvas.clientWidth,canvas.clientHeight)},
   getPortraits(){return portraitCache.getAll()},
   setPresentation(value,viewport){if(!working())presentation.update(value,viewport)},
   focusRoom(id,immediate=false){if(working()||!ROOMS.some(r=>r.id===id))return false;focusedRoom=id;focusedDoll=null;cameraMove.moveTo(framing(canvas.clientWidth,canvas.clientHeight,id,presentation.value),reducedMotion||immediate);return true},

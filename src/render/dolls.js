@@ -73,7 +73,7 @@ function makeDoll(def){
 export function createDolls(parent){
  const dolls=DOLLS.map((def,i)=>{const v=makeDoll(def);parent.add(v.root);const r=ROOMS.find(x=>x.id===def.room);v.root.position.set(r.x+.85,r.y+.12,.88);return v});
  let previousSelection=null;
- return {dolls,targets:dolls.map(v=>v.hit),update(state,dt,selected,viewerYaw=0){
+ return {dolls,targets:dolls.map(v=>v.hit),greetAll(times){dolls.forEach((v,i)=>{if(Number.isFinite(times[i]))v.greetedAt=times[i]})},update(state,dt,selected,viewerYaw=0){
   dolls.forEach(v=>{v.halo.visible=selected===v.id});if(state.paused)return;
   const motion=!state.settings.reducedMotion&&!state.paused,t=state.elapsed;
   if(previousSelection!==null&&previousSelection!==selected){const doll=dolls.find(v=>v.id===selected);if(doll)doll.greetedAt=motion?t:-Infinity}previousSelection=selected;

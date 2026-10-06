@@ -26,5 +26,5 @@ export function createHomeUI(root,getState,dispatch,{canContinue=false,loadStatu
  }
  root.addEventListener('keydown',event=>{if(event.key==='Escape'&&preferencesOpen){event.preventDefault();showPreferences(false)}});
  root.dataset.view='home';preferences.hidden=true;root.setAttribute('aria-labelledby',title.id);refresh();
- return {refresh,requireReload(message){reloadRequired=true;recoveryMessage=message;play.setAttribute('data-home-action','reload');refresh();play.focus({preventScroll:true})},ready(){play.disabled=false},hide(){root.hidden=true;root.inert=true},notify(message){notice.textContent=message;notice.hidden=false}};
+ return {get previewVisible(){return !preferencesOpen&&!root.hidden},refresh,requireReload(message){reloadRequired=true;recoveryMessage=message;play.setAttribute('data-home-action','reload');refresh();play.focus({preventScroll:true})},ready(){play.disabled=false},hide(){root.hidden=true;root.inert=true},notify(message){notice.textContent=message;notice.hidden=false}};
 }

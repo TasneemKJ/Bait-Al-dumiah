@@ -5,6 +5,7 @@ import {activityMarkup,updateActivityStatus} from './activities-ui.js';
 import {DOLLS,ROOMS,CATALOG,SECRETS,ACTIONS,MILESTONES,SEW_DAILY,BASKET_MAX,DOOR_STEPS,GIFT_COST,VISITOR_GIFTS} from './content.js';
 import {translate,number} from './i18n.js';
 import {isNight,coziness,wishFor,wishReward,bondLevel,nextBond,isContent,contentThreshold,delighted,inFavoriteRoom,currentStreak,unclaimed,secretCozyNeeded,doorOpen,nextDoorStep,doorReady,restorationReady,storyStatus} from './simulation.js';
+import {giftArt} from './gift-art.js';
 import {icon} from './icons.js';
 const actionIcon={tea:'tea',play:'play',rest:'rest',soothe:'heart'};
 const wishKey=(id,action)=>DOLLS.find(d=>d.id===id).wish===action?id+'Wish':id+'Wish_'+action;
@@ -48,7 +49,7 @@ export function createUI(host,getState,dispatch){
   const step=nextDoorStep(s),ready=step&&doorReady(s,step);
   const done=DOOR_STEPS.slice(0,s.door).map((d,i)=>`<article><span class="entry-number">${icon('check')}</span><div><h3>${t('door_'+d.id+'Title')}</h3><p>${t('door_'+d.id+'Text')}</p></div></article>`).join('');
   const next=step?`<div class="door-next"><div><strong>${t('door_'+step.id+'Title')}</strong><small>${ready?'':t('needs_'+step.needs)}</small></div>${button('mend-door',t('mend')+' · '+n(step.cost),'button',`class="primary" ${ready&&s.buttons>=step.cost?'':'disabled'}`)}</div><p class="door-progress" aria-hidden="true">${DOOR_STEPS.map((d,i)=>`<span class="${i<s.door?'done':''}"></span>`).join('')}</p>`:'';
-  const gifts=doorOpen(s)?`<h3 class="section-heading">${t('gifts')} <small>${n(s.gifts.length)}/${n(VISITOR_GIFTS.length)}</small></h3><p class="sheet-intro">${t('giftsIntro')}</p>${button('gift',t('leaveGift')+' · '+n(GIFT_COST),'ghost',`class="primary wide" ${isNight(s)&&s.lastGiftDay!==s.day&&s.buttons>=GIFT_COST?'':'disabled'}`)}<div class="gift-grid">${VISITOR_GIFTS.map(g=>s.gifts.includes(g)?`<div class="gift"><strong>${t('gift-'+g+'Title')}</strong><small>${t('gift-'+g+'Text')}</small></div>`:`<div class="gift locked"><strong>✦</strong><small>${t('giftUnknown')}</small></div>`).join('')}</div>`:'';
+  const gifts=doorOpen(s)?`<h3 class="section-heading">${t('gifts')} <small>${n(s.gifts.length)}/${n(VISITOR_GIFTS.length)}</small></h3><p class="sheet-intro">${t('giftsIntro')}</p>${button('gift',t('leaveGift')+' · '+n(GIFT_COST),'ghost',`class="primary wide" ${isNight(s)&&s.lastGiftDay!==s.day&&s.buttons>=GIFT_COST?'':'disabled'}`)}<div class="gift-grid">${VISITOR_GIFTS.map(g=>s.gifts.includes(g)?`<div class="gift${s.lastGiftDay===s.day&&g===s.gifts[s.gifts.length-1]?' newest':''}"><span class="gift-picture">${giftArt(g)}</span><strong>${t('gift-'+g+'Title')}</strong><small>${t('gift-'+g+'Text')}</small></div>`:`<div class="gift locked"><span class="gift-picture" aria-hidden="true">✦</span><small>${t('giftUnknown')}</small></div>`).join('')}</div>`:'';
   return `<h3 class="section-heading">${t('door')} <small>${n(s.door)}/${n(DOOR_STEPS.length)}</small></h3><p class="sheet-intro">${t(doorOpen(s)?'doorOpenedNote':'doorIntro')}</p><div class="journal-entries door-entries">${done}</div>${next}${gifts}`;
  }
  function renderPanel(){
