@@ -1,0 +1,55 @@
+name: Bait pinned render and navigation diagnosis
+on:
+  push:
+    branches: ['qa/render-probe-cf21591-20261006']
+permissions:
+  contents: read
+jobs:
+  probe:
+    name: Runtime probe CPU ${{ matrix.cpu }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        cpu: [1, 4]
+    env:
+      SOURCE_SHA: cf2159197cfe3d2da64b070eb59721ca41b8f6d0
+      SOURCE_TREE: 2b25016ab7a15165529a52c0e9f580757cb5b4cd
+      CPU_RATE: ${{ matrix.cpu }}
+      PYTHONUNBUFFERED: '1'
+    defaults:
+      run:
+        shell: bash
+        working-directory: source
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          path: harness
+          persist-credentials: false
+      - uses: actions/checkout@v7
+        with:
+          path: source
+          persist-credentials: false
+          ref: cf2159197cfe3d2da64b070eb59721ca41b8f6d0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Exact source and probe contracts
+        run: |
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          test "$(git rev-parse HEAD^{tree})" = "$SOURCE_TREE"
+          npm ci --ignore-scripts
+          npm run verify
+          python ../harness/scripts/test-probe.py
+          python -m py_compile ../harness/scripts/probe.py ../harness/scripts/report-probe.py
+          python -m pip install -r requirements.txt
+          python -m playwright install --with-deps chromium
+      - name: Measure real render, visibility and original load milestones
+        run: timeout --signal=INT --kill-after=30s 10m python -u ../harness/scripts/probe.py
+      - name: Preserve raw profiles and measurements without artifact quota dependency
+        if: always()
+        run: python ../harness/scripts/report-probe.py
