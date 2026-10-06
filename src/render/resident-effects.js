@@ -1,12 +1,12 @@
 import * as T from 'three';
 
-export function createTeaSteam(parent){
+export function createTeaSteam(parent,{color=0xf7e6ce,strength=1}={}){
  const root=new T.Group();root.name='tea-steam';root.position.y=.15;parent.add(root);
  for(let i=0;i<3;i++){
   const curve=new T.CatmullRomCurve3([new T.Vector3(0,0,0),new T.Vector3(.015,.035,0),new T.Vector3(-.013,.075,0),new T.Vector3(.009,.12,0)]);
-  const mesh=new T.Mesh(new T.TubeGeometry(curve,12,.0035,4,false),new T.MeshBasicMaterial({color:0xf7e6ce,transparent:true,opacity:.26,depthWrite:false}));root.add(mesh);
+  const mesh=new T.Mesh(new T.TubeGeometry(curve,12,.0035,4,false),new T.MeshBasicMaterial({color,transparent:true,opacity:.26,depthWrite:false}));root.add(mesh);
  }
- return {root,update(time,active,still){root.visible=active;if(!active)return;const t=still?0:time;root.children.forEach((o,i)=>{const phase=((t*.32+i/3)%1+1)%1;o.position.set((i-1)*.025,phase*.045,0);o.rotation.y=i*1.8;o.material.opacity=.17+Math.sin(phase*Math.PI)*.15})}};
+ return {root,update(time,active,still){root.visible=active;if(!active)return;const t=still?0:time;root.children.forEach((o,i)=>{const phase=((t*.32+i/3)%1+1)%1;o.position.set((i-1)*.025,phase*.045,0);o.rotation.y=i*1.8;o.material.opacity=Math.min(.8,(.17+Math.sin(phase*Math.PI)*.15)*strength)})}};
 }
 let heartGeometry=null;
 export function createComfortHearts(parent){
