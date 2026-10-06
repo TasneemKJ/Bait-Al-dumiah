@@ -1,0 +1,29 @@
+# Arabic strings awaiting native review
+
+No string in this game has been reviewed by a native Arabic reader: all Arabic was written by the maintainers and AI collaborators in a Levantine (Shami) register, and the checks so far are mechanical (`tests/arabic-agreement.test.mjs`, `tests/levantine-copy.test.mjs`, screenshots at phone size in RTL). This file lists the lines added or reworded in the audit rounds of 2026-10-05/06, which are the newest and the least tested by eye. Please read each in the game's context (the "check" column says what to look for) and send corrections as replacements for the key. The earlier body of copy (about 550 keys in `src/locale-data.js`) is also unreviewed; ask for a full pass if there is budget.
+
+Register: colloquial Levantine for UI and narration (`بيكبّر`, `هلّق`, `ناطر`, `لسا`), Modern Standard only for headings and system words (`احفظ`, `الشكر والتراخيص`). Numbers are Arabic-Indic through `Intl` (`ar-JO`). The player is addressed in the masculine by default (see TODO: deliberate, flagged for a decision).
+
+| key | Arabic | gloss | what to check |
+|---|---|---|---|
+| `calmDayOne` | البيت عم يرتاح. لينا بتدندن حدّ الإبريق، وما في شي مستعجل هلّق. | The house is resting. Lina hums by the kettle and there is nothing urgent now. | `حدّ` (beside) vs `جنب`; does "عم يرتاح" suit a house; tone calm, not babyish |
+| `firstNightHint` | نزل الليل. في حدا صغير ناطر عالباب: اضغط «سلّم عالزائر». | Night has fallen. Someone small is waiting at the door: press "Greet the visitor". | `في حدا` for "someone"; `اضغط` (imperative, masculine) matches the button label |
+| `investigate` | سلّم عالزائر | Greet the visitor (button) | `سلّم عـ` as "say hello to"; short enough for the button |
+| `largeText` / `largeTextHelp` | خطّ أكبر / بيكبّر الكتابة بالبطاقات والقوائم لتصير أسهل للقراية. | Larger text / Enlarges text on cards and lists so it is easier to read. | `القراية` vs `القراءة`; `بالبطاقات` for "cards" |
+| `returnBasket` | أهلين رجعت. وانت غايب، الدمى خيّطوا أزرار بالسلة: {count}. | Welcome back. While you were away the dolls sewed buttons into the basket: {count}. | `خيّطوا` agreement with `الدمى` (plural non-human: should it be `خيّطت`?); masculine `رجعت/غايب` |
+| `returnMilestone` | أهلين رجعت. هدايا ناطرتك بالدفتر: {count}. | Welcome back. Rewards waiting in the notebook: {count}. | `هدايا` for "rewards"; `ناطرتك` agreement |
+| `returnWishes` | أهلين رجعت. أمنيات صغيرة ناطرة اليوم: {count}. | Welcome back. Little wishes waiting today: {count}. | a count after a plural noun phrase: reads naturally? |
+| `returnCalm` | أهلين رجعت. البيت حفظلك مطرحك، والإبريق لسا سخن. | Welcome back. The house kept your place and the kettle is still warm. | `مطرحك` (your spot), `سخن` (warm/hot) |
+| `storyFindRoom` + `kitchenIn` `parlorIn` `studioIn` `bedroomIn` | شوف {room}; بالمطبخ، بالليوان، بأوضة التطريز، بأوضة النوم | Look {in the kitchen / in the liwan / in the embroidery room / in the bedroom} | the clue button must read `شوف بالمطبخ` etc.; `أوضة` (Levantine) vs `غرفة` |
+| `activityCooldown` | المكافأة الجاية بتجهز بعد {x} من ثواني اللعب. فيك تتمرّن هلّق. | The next reward is ready after {x} of seconds of play. You can practise now. | the partitive `{x} من ثواني` for any number; `تتمرّن` |
+| `teaProgress` / `stitchProgress` / `chimeProgress` | الفناجين الجاهزة: {ready} / {total} ؛ الأجزاء المخيّطة: {done} / {total} ؛ النغمات المردودة: {done} / {total} | Cups ready / Sections sewn / Notes echoed, as "label: n / total" | the label form avoids dual/plural agreement; `المردودة` for "echoed back" is unusual: better word? |
+| `chimeReward` | الأغنية خلصت · +{reward} زرّ | Song finished · +{reward} button(s) | `زرّ` after a number of any size vs `أزرار` for 3-10 |
+| `privacyNote` | ما في حسابات ولا إعلانات ولا تتبّع. بيتك بيضل بهالمتصفح. | No accounts, ads or tracking. Your house stays in this browser. | `تتبّع`; `بهالمتصفح` |
+| `creditsLink` | الشكر والتراخيص | Credits and licences | `الشكر` as "credits"; `التراخيص` as software licences |
+| `saveFile` `saveFileHelp` `saveExport` `saveImport` | ملف الحفظ؛ خلّي نسخة من بيتك، أو رجّع نسخة من متصفح تاني؛ احفظ نسخة؛ افتح نسخة | Save file; keep a copy of your house, or bring one back from another browser; Save a copy; Open a copy | the button verbs `احفظ/افتح` are imperative masculine and MSA while the help is colloquial: consistent enough? |
+| `saveExported` `saveExportFailed` `saveImported` `saveImportFailed` `saveRecovered` | انحفظت نسخة من بيتك. ؛ هالمتصفح ما قدر يحفظ نسخة. ؛ رجع بيتك من النسخة. ؛ هالملف مش بيت بتعرف اللعبة تفتحه. ما تغيّر شي. ؛ ما قدرنا نقرا آخر حفظ، فانفتح بيت جديد. الحفظ القديم محفوظ بأمان بهالمتصفح. | saved / could not save / came back / not a house the game can open / last save unreadable, a fresh house opened, old one kept | reassurance tone for a data-loss moment; `انحفظت` passive; `ما تغيّر شي` |
+| `activity-lullabyIntro` `activityRule-lullaby` | اسحب زينة القمر واتركها ترنّ. اسمع الأغنية وردّها من الآخر للأول. ؛ شوف واسمع. اسحب القطع من آخر نغمة للأولى؛ القمر الصغير بيعيد الأغنية. | Pull the moon charms and let them ring. Hear the song and echo it back to front. ; … | `ردّها من الآخر للأول` for "reverse"; `الأولى` agreement with `نغمة` |
+| loading card (`index.html`) | الجار قبل الدار / نفتح باب البيت الصغير… | The neighbour before the house (proverb) / Opening the little house's door… | the proverb is quoted correctly and fits a house game; spelling `الدار` |
+| `qualityLightened` (branch only, not shipped) | البيت صار أخف عشان يضل سلس. فيك تغيّر هالشي من الإعدادات. | The house now runs lighter so it stays smooth. You can change this in Settings. | only if the governor branch is ever merged |
+
+How to reply: edit the Arabic in `src/i18n.js` (the override block) or `src/locale-data.js`, or paste replacements keyed by the first column; `npm test` re-checks digits, placeholders and the plural rules.
