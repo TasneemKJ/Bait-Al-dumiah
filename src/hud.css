@@ -37,3 +37,6 @@
 }
 /* Arabic light-switch label ("خلّي الليل يجي") fits the 126px time card on one line at 360px wide. */
 html[lang=ar] .time-tools>button{white-space:nowrap;font-size:11px;gap:5px;max-width:100%}
+/* Narrow phones: keep short labels on one line without touching layout or target size. */
+@media(max-width:420px) and (orientation:portrait){.night .time-tools>button{font-size:10.5px;gap:4px;letter-spacing:-.1px}}
+@media(max-width:340px) and (orientation:portrait){html[lang=ar] #ui .objective-row>#objective-action{font-size:10.5px;gap:4px;padding-inline:8px}}

@@ -1,5 +1,5 @@
 /* Keepsake-paper UI: the scene stays primary, closeups are one tap away. */
-:root{--ink:#53404d;--muted:#7e6670;--paper:#fbf1e1;--line:#cfb89f;--rose-dark:#775166}
+:root{--ink:#53404d;--muted:#786069;--paper:#fbf1e1;--line:#cfb89f;--rose-dark:#775166}
 .brand h1{text-shadow:0 1px 12px #fff8e066}.brand-mark{background:#f8eddd66;box-shadow:inset 0 0 0 3px #f7ead6}
 .objective{background:linear-gradient(110deg,#f5e6d4b8,transparent);padding:15px 12px;border-radius:0 0 14px 0}
 .objective-head{color:#735b66}.objective p{color:#543f4b}
