@@ -2,15 +2,15 @@ import {lullabyBeat} from './lullaby-score.js';
 // Original synthesized music and room sounds. No samples, network requests or
 // claim of reproducing an acoustic instrument. Audio remains gesture-gated.
 const bounded=(n,lo,hi,fallback)=>Math.max(lo,Math.min(hi,Number.isFinite(n)?n:fallback));
-function voice(context,destination,frequency,start,length,volume,type,cutoff){
+function voice(context,destination,frequency,start,length,volume,type,cutoff,attack=.012){
  const when=Math.max(context.currentTime+.001,Number.isFinite(start)?start:context.currentTime);
- const duration=bounded(length,.06,4,1),level=bounded(volume,0,.10,.04);
+ const duration=bounded(length,.06,4,1),level=bounded(volume,0,.10,.04),rise=bounded(attack,.012,duration*.6,.012);
  const osc=context.createOscillator(),overtone=context.createOscillator();
  const filter=context.createBiquadFilter(),gain=context.createGain(),partial=context.createGain();
  osc.type=type;osc.frequency.value=bounded(frequency,65,1800,196);
  overtone.type='sine';overtone.frequency.value=osc.frequency.value*2.002;partial.gain.value=.15;
  filter.type='lowpass';filter.frequency.value=cutoff;filter.Q.value=.3;
- gain.gain.setValueAtTime(0,when);gain.gain.linearRampToValueAtTime(level,when+.012);
+ gain.gain.setValueAtTime(0,when);gain.gain.linearRampToValueAtTime(level,when+rise);
  gain.gain.exponentialRampToValueAtTime(.00001,when+duration);gain.gain.setValueAtTime(0,when+duration+.02);
  osc.connect(filter);overtone.connect(partial);partial.connect(filter);filter.connect(gain);gain.connect(destination);
  let remaining=2,closed=false;
@@ -25,8 +25,10 @@ export function playPluck(context,destination,frequency,start,length=1.7,volume=
 export function playWoodTap(context,destination,start,volume=.025){
  return voice(context,destination,126,start,.15,volume,'sine',420);
 }
+// A soft D-minor chord that rises once as dusk turns to night: D3, A3, D4.
+export const DUSK_SWELL=[146.832,220,293.665];
 export class DollhouseAudio{
- constructor(){this.context=null;this.master=null;this.enabled=false;this.paused=false;this.next=0;this.index=0;this.night=false;this.nodes=new Set();this.nextKnock=Infinity;this.disposed=false;this.enableGeneration=0}
+ constructor(){this.context=null;this.master=null;this.enabled=false;this.paused=false;this.next=0;this.index=0;this.night=false;this.nodes=new Set();this.nextKnock=Infinity;this.sawDay=false;this.disposed=false;this.enableGeneration=0}
  async enable(){
   if(this.disposed)return false;
   const generation=++this.enableGeneration;
@@ -49,14 +51,20 @@ export class DollhouseAudio{
   if(paused){this.stopVoices();this.context.suspend().catch(()=>{})}
   else if(this.enabled){this.next=this.context.currentTime+.15;this.nextKnock=this.context.currentTime+18;this.context.resume().catch(()=>{})}
  }
- tone(frequency,start,length,volume=.04,type='sine'){
+ tone(frequency,start,length,volume=.04,type='sine',attack){
   if(!this.context||!this.enabled||this.paused)return;
-  return this.track(voice(this.context,this.master,frequency,start,length,volume,type,1800));
+  return this.track(voice(this.context,this.master,frequency,start,length,volume,type,1800,attack));
+ }
+ // Heard only when day turns to night while listening, never on load or after a resume.
+ duskSwell(){
+  if(!this.context)return;const t=this.context.currentTime;
+  DUSK_SWELL.forEach((f,i)=>this.tone(f,t+i*.35,4,.022,'sine',1.8));
  }
  tick(night){
   if(!this.context||!this.enabled||this.paused||this.disposed)return;
   const now=this.context.currentTime;
-  if(this.night!==night){this.night=night;this.nextKnock=night?now+18:Infinity}
+  if(!night)this.sawDay=true;
+  if(this.night!==night){this.night=night;this.nextKnock=night?now+18:Infinity;if(night&&this.sawDay){this.sawDay=false;this.duskSwell()}}
   // One current beat only: an idle tab or resumed context never replays backlog.
   if(now>=this.next){
    const beat=lullabyBeat(this.index,night);
