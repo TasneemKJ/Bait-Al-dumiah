@@ -3,6 +3,7 @@
 import {strings} from './locale-data.js';
 export {strings,translate,number} from './locale-data.js';
 Object.assign(strings.en,{
+ kitchenIn:'Kitchen',parlorIn:'Liwan',studioIn:'Studio',bedroomIn:'Bedroom',
  'object-moon-mobile':'Moon mobile',
  firstNightHint:'Night has fallen. Someone small is waiting by the door: touch “Greet the visitor”.',
  largeText:'Larger text',largeTextHelp:'Makes the cards and lists easier to read.',
@@ -38,6 +39,11 @@ Object.assign(strings.en,{
  'activityRule-lullaby':'Watch and listen. Pull the hanging charms in reverse order; the little moon repeats the song.',
 });
 Object.assign(strings.ar,{
+ kitchenIn:'بالمطبخ',parlorIn:'بالليوان',studioIn:'بأوضة التطريز',bedroomIn:'بأوضة النوم',
+ // Counts read as "label: n / total" so no number has to agree with a noun (two cups would need the dual).
+ stitchProgress:'الأجزاء المخيّطة: {done} / {total}',teaProgress:'الفناجين الجاهزة: {ready} / {total}',
+ activityCooldown:'المكافأة الجاية بتجهز بعد {x} من ثواني اللعب. فيك تتمرّن هلّق.',
+ storyFindRoom:'شوف {room}',
  'object-moon-mobile':'زينة القمر',
  firstNightHint:'نزل الليل. في حدا صغير ناطر عالباب: اضغط «سلّم عالزائر».',
  largeText:'خطّ أكبر',largeTextHelp:'بيكبّر الكتابة بالبطاقات والقوائم لتصير أسهل للقراية.',
@@ -65,8 +71,8 @@ Object.assign(strings.ar,{
  chimeExit:'ارجع عالبيت',chimeRegion:'مكان عزف رنّة القمر',chimeCanvas:'رنّة القمر. أربع قطع معلّقة وقمر صغير. اسحب قطعة واتركها لتعزف.',
  chimeMoon:'الهلال',chimeStar:'النجمة',chimeJasmine:'الياسمينة',chimeHeart:'القلب',
  chimeSelected:'اخترت: {name}',chimePullReadout:'السحبة: {pull}٪. اتركها بعد سحبة صغيرة.',
- chimeProgress:'{done} / {total} نغمات',chimePractice:'تدريب ببلاش. الضو اللي كسبته بيضل إلك.',
- chimeReward:'الأغنية خلصت · +{reward} أزرار',chimeMistake:'هاي نغمة تانية. اسمع مرة كمان، ما راح عليك شي.',
+ chimeProgress:'النغمات المردودة: {done} / {total}',chimePractice:'تدريب ببلاش. الضو اللي كسبته بيضل إلك.',
+ chimeReward:'الأغنية خلصت · +{reward} زرّ',chimeMistake:'هاي نغمة تانية. اسمع مرة كمان، ما راح عليك شي.',
  chimeDemonstration:'ردّ هالأغنية من الآخر للأول: {notes}',chimePhysical:'اعزف عالزينة المعلّقة بإيدك.',
  chimeNotActive:'افتح تخت القمر بالأول.',chimeFinished:'هالأغنية خلصت.',chimeListening:'اسمع الأغنية بالأول.',chimeHeld:'اترك القطعة اللي بإيدك بالأول.',chimeNotHeld:'امسك قطعة بالأول.',
  'activity-lullabyIntro':'اسحب زينة القمر واتركها ترنّ. اسمع الأغنية وردّها من الآخر للأول.',

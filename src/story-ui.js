@@ -8,7 +8,7 @@ import {createCarryGesture} from './carry-gesture.js';
 export function storyObjective(s,t){
  const status=storyStatus(s);if(status.finished)return null;
  const prop=INTERACTIVE_PROPS.find(p=>p.id===status.next.object);
- return {copy:t(`story-${status.chapter.id}-${status.step}-clue`),label:t('storyFindRoom').replace('{room}',t(prop.room+'Short')),ico:status.chapter.icon,action:'story-hint',value:prop.room};
+ return {copy:t(`story-${status.chapter.id}-${status.step}-clue`),label:t('storyFindRoom').replace('{room}',t(prop.room+'In')),ico:status.chapter.icon,action:'story-hint',value:prop.room};
 }
 export function storyMemoriesMarkup(s,t){
  const status=storyStatus(s);if(!status.completed.length)return '';
