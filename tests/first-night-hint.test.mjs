@@ -16,7 +16,7 @@ test('switching the light to night also gives the pointer once',()=>{
 test('the flag survives a save round trip and is whitelisted',()=>{
  const s=createState();run(s,125);const back=readSave(JSON.stringify(s));assert.equal(back.ok,true);assert.equal(back.state.hints.night,true);
  const junk=createState();junk.hints={night:'yes',extra:1};assert.equal(restore(JSON.stringify(junk)).hints.night,false);
- assert.deepEqual(Object.keys(restore(JSON.stringify(junk)).hints),['night']);
+ assert.deepEqual(Object.keys(restore(JSON.stringify(junk)).hints).sort(),['calm','night']);
 });
 test('an old save without the field only hints a brand-new house',()=>{
  const fresh=createState();delete fresh.hints;assert.equal(restore(JSON.stringify(fresh)).hints.night,false);
@@ -27,3 +27,17 @@ test('first-night copy exists in English and Arabic and names the button',()=>{
  assert.match(strings.en.firstNightHint,new RegExp(strings.en.investigate));
  assert.match(strings.ar.firstNightHint,/[؀-ۿ]/);assert.ok(strings.ar.firstNightHint.includes(strings.ar.investigate));
 });
+
+test('day one gets one calm line between minute 1.5 and 2, once, after the player has cared',()=>{
+ const s=createState();s.cares=1;run(s,89);assert.equal(kinds(s).includes('calm'),false);
+ run(s,2);assert.equal(kinds(s).filter(k=>k==='calm').length,1);s.events.length=0;run(s,200);assert.equal(kinds(s).includes('calm'),false);
+});
+test('no calm line before any care, on later days, or for a save that is already past it',()=>{
+ const idle=createState();run(idle,95);assert.equal(kinds(idle).includes('calm'),false);assert.equal(idle.hints.calm,true);
+ const later=createState();later.day=3;later.cares=4;run(later,95);assert.equal(kinds(later).includes('calm'),false);
+ const old=createState();delete old.hints;old.cares=3;old.clock=100;assert.equal(restore(JSON.stringify(old)).hints.calm,true);
+ const fresh=createState();delete fresh.hints;assert.equal(restore(JSON.stringify(fresh)).hints.calm,false);
+ const junk=createState();junk.hints={night:false,calm:'yes'};assert.equal(restore(JSON.stringify(junk)).hints.calm,false);
+ assert.deepEqual(Object.keys(restore(JSON.stringify(junk)).hints).sort(),['calm','night']);
+});
+test('calm copy exists in English and Arabic',()=>{assert.ok(strings.en.calmDayOne);assert.match(strings.ar.calmDayOne,/لينا/)});
