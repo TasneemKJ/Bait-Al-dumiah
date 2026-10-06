@@ -1,0 +1,58 @@
+name: Bait hidden Preferences draw acceptance
+on:
+  push:
+    branches: ['qa/hidden-preview-fit-91d70f9-20261006']
+permissions:
+  contents: read
+jobs:
+  probe:
+    name: Runtime probe CPU ${{ matrix.cpu }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        cpu: [1, 4]
+    env:
+      SOURCE_SHA: 91d70f9554980e1d31806d7021c3d3c96db09485
+      SOURCE_TREE: 6b415136b71a2c339ace56dc5424c124f9050722
+      CPU_RATE: ${{ matrix.cpu }}
+      PYTHONUNBUFFERED: '1'
+    defaults:
+      run:
+        shell: bash
+        working-directory: source
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          path: harness
+          persist-credentials: false
+      - uses: actions/checkout@v7
+        with:
+          path: source
+          persist-credentials: false
+          ref: 91d70f9554980e1d31806d7021c3d3c96db09485
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Exact source and probe contracts
+        run: |
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          test "$(git rev-parse HEAD^{tree})" = "$SOURCE_TREE"
+          npm ci --ignore-scripts
+          npm run verify
+          python ../harness/scripts/test-probe.py
+          python -m py_compile ../harness/scripts/probe.py ../harness/scripts/report-probe.py
+          python -m pip install -r requirements.txt
+          python -m playwright install --with-deps chromium
+      - name: Measure real render, visibility and original load milestones
+        run: timeout --signal=INT --kill-after=30s 10m python -u ../harness/scripts/probe.py
+      - name: Preserve raw profiles and measurements without artifact quota dependency
+        if: always()
+        run: python ../harness/scripts/report-probe.py
+      - name: Preserve normal-speed original PNGs
+        if: always() && matrix.cpu == 1
+        run: python ../harness/scripts/emit-originals.py artifacts/render-probe
