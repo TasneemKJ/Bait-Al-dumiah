@@ -35,3 +35,5 @@
  .objective{top:52px}
  .time-tools{top:72px}
 }
+/* Arabic light-switch label ("خلّي الليل يجي") fits the 126px time card on one line at 360px wide. */
+html[lang=ar] .time-tools>button{white-space:nowrap;font-size:11px;gap:5px;max-width:100%}
