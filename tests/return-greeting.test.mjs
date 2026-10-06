@@ -18,3 +18,9 @@ test('residents wave one after another, after a short pause, never in the past',
  const times=waveSchedule(3,100);assert.equal(times.length,3);assert.ok(times[0]>100);
  assert.ok(times[1]>times[0]&&times[2]>times[1]);assert.deepEqual(waveSchedule(0,5),[]);
 });
+import {waveRoom} from '../src/return-greeting.js';
+test('the wave glance picks the busiest room, first resident wins a tie',()=>{
+ const s=createState();assert.equal(waveRoom(s),s.dolls[0].room);
+ s.dolls[1].room=s.dolls[2].room='studio';assert.equal(waveRoom(s),'studio');
+ assert.equal(waveRoom(null),null);assert.equal(waveRoom({dolls:[]}),null);
+});

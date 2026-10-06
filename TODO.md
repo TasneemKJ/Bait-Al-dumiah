@@ -28,7 +28,7 @@ Brainstorm, 20 ideas (IDEAL: problem, definition, options, act, look back; 5Ws: 
 17. Gift collection page for visitor gifts (replayability) - **shipped** (keepsake shelf with art)
 18. Shami proverb on the loading card (writing, Levantine) - **shipped**
 19. Minified three.js upgrade path (performance, upgrades) - later; #18 closed because 0.186 dropped .min builds
-20. Low-detail auto fallback when frames drop (performance) - later, after budgets are measured on CI
+20. Low-detail auto fallback when frames drop (performance) - built on branch claude/game-audit-qa-batch9 (CPU-time governor, tested); NO PR until a real-device check shows benefit and the one-time shader-recompile hitch is acceptable (SwiftShader here cannot measure either)
 
 ## Open
 - [ ] Arabic/RTL mobile screenshots and panels (household, journal, settings, night) reviewed.
