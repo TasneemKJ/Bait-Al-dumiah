@@ -25,7 +25,7 @@ import {chimeFraming} from './chime-camera.js';
 import {createRestoration} from './restoration.js';
 import {createCameraMove} from './camera-motion.js';
 import {createAtmosphere} from './atmosphere.js';
-import {lighting,detail,framing,fog as fogPolicy,practicalLight} from './visual-policy.js';
+import {lighting,detail,duskGlow,framing,fog as fogPolicy,practicalLight} from './visual-policy.js';
 
 export function createWorld(canvas,{onPick,onError}){
  const renderer=new T.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'});
@@ -192,11 +192,11 @@ export function createWorld(canvas,{onPick,onError}){
    // Exponential interpolation is frame-rate independent; reduced motion switches instantly.
    const night=isNight(state);nightMix=state.settings.reducedMotion?Number(night):T.MathUtils.damp(nightMix,Number(night),2.2,dt);
    const cue=courtyard.update(state,nightMix),look=lighting(nightMix),haze=fogPolicy(nightMix);hemi.intensity=look.ambient;key.intensity=look.key;fill.intensity=look.rim;renderer.toneMappingExposure=look.exposure;depthFog.density=haze.density;depthFog.color.setHex(haze.color);
-   hemi.color.set(0xe9e0d5).lerp(new T.Color(0x849bc9),nightMix);key.color.set(0xffe5c2).lerp(new T.Color(0xb8caff),nightMix);fill.color.set(0xb8cbd5).lerp(new T.Color(0x829bdb),nightMix);
+   hemi.color.set(0xe9e0d5).lerp(new T.Color(0x849bc9),nightMix);const dusk=duskGlow(state.clock);key.color.set(0xffe5c2).lerp(new T.Color(0xffa860),dusk*.75).lerp(new T.Color(0xb8caff),nightMix);key.intensity*=1+.12*dusk;fill.color.set(0xb8cbd5).lerp(new T.Color(0x829bdb),nightMix);
    // Each persistent room lamp keeps its own miniature-film colour and falloff;
    // the global night cue still owns overall lamp energy. Lamps are found by room tag.
    for(const l of house.lights){if(!l.isLight||!l.userData.room)continue;const p=practicalLight(l.userData.room,nightMix,look.lamps,cue.lamp,focusedRoom===l.userData.room);l.intensity=p.intensity;l.color.setHex(p.color);l.distance=p.distance}
-   house.windows.forEach(m=>{m.emissive.set(0x8baaca);m.emissiveIntensity=.14+nightMix*.44});details.update(nightMix);atmosphere.update(state,nightMix,quality);roomEffects.update(state,nightMix);restoration.update(state,nightMix);storyProps.update(state,nightMix);teaTable.update(state);sewingPlay.update(state);moonChimes.update(state,chimeSelection);roomFrame.show(working()?null:focusedRoom);preview.update(previewPose,state);
+   house.windows.forEach(m=>{m.emissive.set(0x8baaca).lerp(new T.Color(0xffc27d),dusk*(1-nightMix));m.emissiveIntensity=.14+nightMix*.44+dusk*.30});details.update(nightMix);atmosphere.update(state,nightMix,quality);roomEffects.update(state,nightMix);restoration.update(state,nightMix);storyProps.update(state,nightMix);teaTable.update(state);sewingPlay.update(state);moonChimes.update(state,chimeSelection);roomFrame.show(working()?null:focusedRoom);preview.update(previewPose,state);
    residents.update(state,dt,selected,Math.atan2(camera.position.x-controls.target.x,camera.position.z-controls.target.z));
    for(const doll of residents.dolls){const room=state.dolls.find(d=>d.id===doll.id)?.room;doll.root.visible=!(teaActive&&room==='kitchen'||stitchActive&&room==='studio'||chimeActive&&room==='bedroom')}
    if(focusedDoll){const room=state.dolls.find(d=>d.id===focusedDoll)?.room;if(room!==scene.userData.portraitRoom){scene.userData.portraitRoom=room;cameraMove.moveTo(focusPose(),reducedMotion)}}else scene.userData.portraitRoom=null;ghost.update(state.elapsed,night,state.settings.reducedMotion||state.paused,state.journal.length);
