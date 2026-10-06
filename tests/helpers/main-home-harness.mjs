@@ -4,7 +4,7 @@ import {DOLLS,SAVE_KEY,ACTIVITIES} from '../../src/content.js';
 import {createHomeSession} from '../../src/home-session.js';
 import {createHomeUI} from '../../src/home-ui.js';
 import {translate} from '../../src/i18n.js';
-import {returnGreeting,waveSchedule} from '../../src/return-greeting.js';
+import {returnGreeting,waveSchedule,waveRoom} from '../../src/return-greeting.js';
 import {homeDOM} from './home-dom.mjs';
 
 // Executes the actual main wiring. Only browser/renderer adapters are replaced;
@@ -21,7 +21,7 @@ export function bootHome({saved=null,preferences=null,readFails=false,writeFails
  class Audio{constructor(){this.enabled=false;this.paused=false}async enable(){audioEvents.push('enable');this.enabled=audioSucceeds;return audioSucceeds}setPaused(value){this.paused=value;audioEvents.push(['paused',value])}mute(){audioEvents.push('mute');this.enabled=false}tick(){audioEvents.push('tick')}effect(){audioEvents.push('effect')}stopVoices(){}chime(){} }
  const noop=()=>{},adapter=()=>({update:noop,cancel:noop,clear:noop,collapse:noop,cancelDrag:noop,layout:noop});
  const world={renderer:{info:{render:{},memory:{}}},getPortraits:()=>({}),setEnabled:noop,syncViewport:()=>{viewportSyncs++;return true},focusRoom(id){focuses.push(id);return true},clearObjectSelection:noop,render(state,dt){renders.push({elapsed:state.elapsed,dt})},project:()=>null,home:noop,welcomeBack:times=>welcomeEvents.push(times),setPresentation:noop,setTeaActive:noop,setStitchActive:noop,setChimeActive:noop,setPlacement:noop};
- const scope={sim,DOLLS,SAVE_KEY,ACTIVITIES,createHomeSession,createHomeUI,returnGreeting,waveSchedule,localStorage,document,window,location:{search:'?debug=1',reload(){reloadCount++}},matchMedia:()=>({matches:false}),performance:{now:()=>now},requestAnimationFrame:fn=>{nextFrame=fn},createWorld(canvas,callbacks){pick=callbacks.onPick;rendererError=callbacks.onError;return world},DollhouseAudio:Audio,
+ const scope={sim,DOLLS,SAVE_KEY,ACTIVITIES,createHomeSession,createHomeUI,returnGreeting,waveSchedule,waveRoom,localStorage,document,window,location:{search:'?debug=1',reload(){reloadCount++}},matchMedia:()=>({matches:false}),performance:{now:()=>now},requestAnimationFrame:fn=>{nextFrame=fn},createWorld(canvas,callbacks){pick=callbacks.onPick;rendererError=callbacks.onError;return world},DollhouseAudio:Audio,
   createUI(host,getState,handler){dispatch=handler;ui={selected:'lina',panel:null,placement:null,t:key=>translate(getState().settings.locale,key),n:String,setPortraits:noop,refresh:noop,tick:noop,toast:message=>notices.push(message),collapseTools:noop,open(){this.panel='household';handler('panel-state','household')},clearObject:noop};return ui},
   createResidentLabel:adapter,createRoomViews:adapter,createObjectControls:adapter,createStoryUI:adapter,createTeaUI:adapter,createStitchUI:adapter,createChimeUI:adapter,createPlayfieldLayout:(host,fit,resize)=>{resizeCallback=resize;return{measure:noop}},bindPlacementEscape:noop,objectInfo:()=>null,sceneObjectAction:()=>null};
  const source=readFileSync(new URL('../../src/main.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'');new Function(...Object.keys(scope),source)(...Object.values(scope));
