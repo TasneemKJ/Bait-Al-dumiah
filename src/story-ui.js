@@ -9,7 +9,7 @@ export function storyObjective(s,t,focusedRoom=null){
  const status=storyStatus(s);if(status.finished)return null;
  const prop=INTERACTIVE_PROPS.find(p=>p.id===status.next.object);
  const arrived=focusedRoom===prop.room;
- return {copy:t(`story-${status.chapter.id}-${status.step}-clue`),label:arrived?t('storyFindObject').replace('{object}',t('object-'+prop.id)):t('storyFindRoom').replace('{room}',t(prop.room+'Short')),ico:status.chapter.icon,action:'story-hint',value:prop.room,arrived};
+ return {copy:t(`story-${status.chapter.id}-${status.step}-clue`),label:arrived?t('storyFindObject').replace('{object}',t('object-'+prop.id)):t('storyFindRoom').replace('{room}',t(prop.room+'In')),ico:status.chapter.icon,action:'story-hint',value:prop.room,arrived};
 }
 export function storyMemoriesMarkup(s,t){
  const status=storyStatus(s);if(!status.completed.length)return '';

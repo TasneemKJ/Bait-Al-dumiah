@@ -11,7 +11,7 @@ export function createState(){
  return {version:1,elapsed:0,clock:0,day:1,buttons:36,unease:12,cares:0,
   dolls:DOLLS.map(d=>({id:d.id,room:d.room,hunger:d.hunger,energy:d.energy,comfort:d.comfort,lastCare:-10,action:'idle',actionUntil:0,bond:0,sew:0})),
   decor:[],nextId:1,wishes:[],journal:[],lastSecretDay:0,paused:false,
-  streak:0,lastFullDay:0,sewnToday:0,basket:0,earnedToday:0,achieved:[],milestones:[],events:[],door:0,gifts:[],lastGiftDay:0,dayTime:0,
+  streak:0,lastFullDay:0,sewnToday:0,basket:0,earnedToday:0,achieved:[],milestones:[],events:[],door:0,gifts:[],lastGiftDay:0,dayTime:0,hints:{night:false,calm:false},
   activities:{mastery:Object.fromEntries(ACTIVITIES.map(a=>[a.id,0])),completed:Object.fromEntries(ACTIVITIES.map(a=>[a.id,0])),lastReward:Object.fromEntries(ACTIVITIES.map(a=>[a.id,-ACTIVITY_COOLDOWN])),teaRecords:[null,null,null,null],stitchRecords:[null,null,null,null],active:null},
   restoration:Object.fromEntries(ROOMS.map(r=>[r.id,0])),
   story:{chapter:0,step:0,lastAction:null,lastActionAt:-10},
@@ -98,6 +98,10 @@ export function step(s,dt){
  dt=Math.min(dt,1);s.elapsed+=dt;s.clock+=dt;s.dayTime=Math.min(1e6,s.dayTime+dt);
  stepTea(s,dt);stepChimes(s,dt);const stitching=stitchActive(s);if(stitching)moveStitch(stitching,stitchSections(stitching),dt);
  if(s.clock>=240){s.clock-=240;newDay(s)}
+ // One gentle pointer the first time night falls, for a player who has not met the visitor yet.
+ if(isNight(s)&&!s.hints.night){s.hints.night=true;emit(s,{type:'first-night'})}
+ // Day one is front-loaded: after the opening burst, one calm line makes the quiet stretch feel intended.
+ if(!s.hints.calm&&s.day===1&&s.clock>=90){s.hints.calm=true;if(s.clock<120&&s.cares>0)emit(s,{type:'calm'})}
  const comfortProtection=Math.min(.65,s.decor.length*.035);
  for(const d of s.dolls){
   d.hunger=clamp(d.hunger-dt*.13);d.energy=clamp(d.energy-dt*.095);d.comfort=clamp(d.comfort-dt*.085*(1-comfortProtection)*(inFavoriteRoom(d)?.6:1));if(s.elapsed>d.actionUntil)d.action='idle';
@@ -395,6 +399,8 @@ function restoreValid(v){
  }
  const ids=list=>Array.isArray(list)?MILESTONES.filter(m=>list.includes(m.id)).map(m=>m.id):[];
  s.milestones=ids(v.milestones);s.achieved=ids([...ids(v.achieved),...s.milestones]);
+ // Veterans have already met the night: no first-night hint for a save with history.
+ s.hints={night:v.hints?.night===true||s.day>1||s.journal.length>0,calm:v.hints?.calm===true||s.day>1||s.clock>=90};
  if(v.settings&&typeof v.settings==='object'){s.settings.locale=v.settings.locale==='ar'?'ar':'en';s.settings.muted=v.settings.muted!==false;s.settings.reducedMotion=v.settings.reducedMotion===true;s.settings.largeText=v.settings.largeText===true;s.settings.quality=['auto','low','high'].includes(v.settings.quality)?v.settings.quality:'auto'}
  return s;
 }

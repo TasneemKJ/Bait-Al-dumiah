@@ -82,7 +82,7 @@ async function dispatch(action,value,origin='control'){
    last=performance.now();lastSave=last;canvas.focus({preventScroll:true});
    let entrySaved=false;
    if(!state.settings.muted&&!audio.enabled)void audio.enable().then(ok=>{if(!ok)ui.toast((entrySaved?'':ui.t('savingFailed')+' ')+ui.t('audioUnavailable'));audio.setPaused(state.paused)});
-   entrySaved=save();if(entrySaved){if(session.recovered)say(ui.t('saveRecovered'));else{const greeting=returnGreeting(state);if(greeting){say(ui.t(greeting.key).replace('{count}',ui.n(greeting.count)));if(!state.settings.reducedMotion)world?.welcomeBack(waveSchedule(DOLLS.length,state.elapsed))}}}break;
+   entrySaved=save();if(entrySaved){if(session.recovered)say(ui.t('saveRecovered'));else{const greeting=returnGreeting(state);if(greeting){say(ui.t(greeting.key).replace('{count}',ui.n(greeting.count)));if(!state.settings.reducedMotion)world?.welcomeBack(waveSchedule(DOLLS.length,state.elapsed));welcomeGlance()}}}break;
   }
   case 'home-reload':if(!session.entered&&session.entryIssue)location.reload();break;
   case 'home-language':if(!session.entered&&['en','ar'].includes(value)){state.settings.locale=value;refreshUI();saveSettings()}break;
@@ -275,6 +275,14 @@ async function dispatch(action,value,origin='control'){
    cancelWorkInput();world?.setTeaActive(false);world?.setStitchActive(false);world?.setChimeActive(false);notices.length=0;const settings={...state.settings};ui.close();ui.clearPlacement();ui.setActivityResult(null);state=sim.createState();state.settings=settings;manualPause=false;syncPause();dispatch('camera');world?.setPlacement(null);save();refreshUI();break;
   }
  }
+}
+// While the residents wave, glance at the busiest room for a moment, then return,
+// but only if the player has not touched anything and motion is allowed.
+function welcomeGlance(){
+ if(state.settings.reducedMotion)return;const room=waveRoom(state);if(!room)return;
+ let touched=false;const mark=()=>{touched=true};host.addEventListener('pointerdown',mark,{once:true,capture:true});host.addEventListener('keydown',mark,{once:true,capture:true});
+ setTimeout(()=>{if(touched||ui.panel||state.paused)return;dispatch('focus-room',room);
+  setTimeout(()=>{if(!touched&&host.dataset.focusRoom===room)dispatch('camera')},2600)},700);
 }
 ui=createUI(host,()=>state,dispatch);
 homeUI=createHomeUI(document.querySelector('#home'),()=>state,dispatch,{canContinue:session.canContinue,loadStatus:session.loadStatus});syncPause();

@@ -38,3 +38,5 @@
 
 /* Keep one accessible, measured fold owner from the stable Home feature. */
 .objective .clue-toggle{position:relative}
+/* Arabic light-switch label ("خلّي الليل يجي") fits the 126px time card on one line at 360px wide. */
+html[lang=ar] .time-tools>button{white-space:nowrap;font-size:11px;gap:5px;max-width:100%}

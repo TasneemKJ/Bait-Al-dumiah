@@ -60,3 +60,11 @@ export function nightSky(){
  const linear=hex=>[16,8,0].map(shift=>{const c=((hex>>shift)&255)/255;return c<=.04045?c/12.92:Math.pow((c+.055)/1.055,2.4)});
  return {bottom:linear(0x292940),top:linear(0x10162c),glow:linear(0x1b1830)};
 }
+
+// Golden hour: the last stretch of daylight before the clock turns to night
+// (clock 120) glows warm for about half a minute, then hands over to the night
+// look. Pure and bounded; 0 for the rest of the day.
+export function duskGlow(clock){
+ const c=Number.isFinite(clock)?clock:0,ramp=x=>{const t=clamp(x,0,1);return t*t*(3-2*t)};
+ return ramp((c-96)/14)*(1-ramp((c-118)/8));
+}

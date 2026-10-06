@@ -1,5 +1,6 @@
 import * as T from 'three';
 import {crescentGeometry} from './resident-effects.js';
+import {createLampPool} from './lamp-pool.js';
 import {drapedCurtain,valance,doily} from './fabric-shapes.js';
 import {ROOMS} from '../content.js';
 import {palette as P,box,ball,cylinder,ring,line,arch,mat,texture,texturedPlane,plant,lamp,cup,books,batch} from './primitives.js';
@@ -34,7 +35,7 @@ function kitchen(p){
  line(p,[-1.45,1.06,-1.32],[-1.45,1.36,-1.32],.02,P.gold);line(p,[-1.45,1.36,-1.32],[-1.27,1.36,-1.32],.02,P.gold);
  box(p,1.25,.47,-1.1,.86,.94,.78,0xe9d9c0,true);box(p,1.25,.44,-.68,.62,.50,.04,0x594e59,true);box(p,1.25,.98,-1.1,.89,.06,.81,P.cream);
  for(const x of [1.02,1.48])for(const z of [-1.32,-.91])ring(p,x,1.03,z,.12,.025,0x6a6368,true);
- ball(p,1.40,1.22,-1.13,.17,.18,.17,0xbc969f);cylinder(p,1.40,1.39,-1.13,.13,.035,P.gold);ring(p,1.40,1.38,-1.13,.14,.02,P.gold);line(p,[1.25,1.21,-1.13],[1.11,1.36,-1.13],.036,0xbc969f);
+ const steamAnchor=new T.Group();steamAnchor.name='kettle-steam-anchor';steamAnchor.position.set(1.40,1.42,-1.13);steamAnchor.userData.noBatch=true;p.add(steamAnchor);ball(p,1.40,1.22,-1.13,.17,.18,.17,0xbc969f);cylinder(p,1.40,1.39,-1.13,.13,.035,P.gold);ring(p,1.40,1.38,-1.13,.14,.02,P.gold);line(p,[1.25,1.21,-1.13],[1.11,1.36,-1.13],.036,0xbc969f);
  box(p,-.3,2.26,-1.35,1.65,.085,.50,P.wood);for(let i=0;i<4;i++){cylinder(p,-.88+i*.36,2.44,-1.32,.12,.3,[0xe2baa5,0xb09cbd,0xe3d6af,0x9db9ad][i]);cylinder(p,-.88+i*.36,2.60,-1.32,.13,.04,P.wood)}
  box(p,-.53,.70,.1,1.12,.10,.75,P.wood,true);for(const x of [-.94,-.12])for(const z of [-.15,.36])box(p,x,.34,z,.06,.70,.06,P.wood);
  box(p,-.53,.758,.1,.34,.014,.73,0xe3b6bc);
@@ -54,7 +55,7 @@ function parlor(p){
  for(const x of [-.64,1.5])for(const z of [-.88,-.24])cylinder(p,x,.12,z,.045,.24,P.gold);
  box(p,-.46,.85,-.77,.4,.37,.12,0xf1dec8,true).rotation.z=.2;box(p,1.25,.85,-.75,.40,.37,.12,0x91b8aa,true).rotation.z=-.2;
  const table=cylinder(p,.15,.47,.45,.53,.07,P.wood);table.scale.z=.7;for(let i=0;i<3;i++){const a=i*2.1;line(p,[.15+Math.cos(a)*.4,.04,.45+Math.sin(a)*.27],[.15+Math.cos(a)*.25,.45,.45+Math.sin(a)*.18],.035,P.wood)}cup(p,-.18,.51,.38);
- lamp(p,-1.67,0,-.83,1.65);
+ lamp(p,-1.67,0,-.83,1.65);createLampPool(p,-1.67,-.83,1.8,{y:.128,stat:true,name:'lamp-pool-static'});
  box(p,1.94,.82,-.85,.5,1.64,.54,P.wood);for(let i=0;i<3;i++){box(p,1.94,.18+i*.54,-.52,.44,.04,.56,P.cream);books(p,1.74,.2+i*.54,-.62)}
  box(p,.35,2.08,-1.51,.88,1.03,.09,P.gold,true);box(p,.35,2.08,-1.45,.75,.90,.025,0x73616f);ball(p,.35,2.18,-1.413,.18,.22,.008,0xd6b7a6);box(p,.35,1.86,-1.413,.4,.27,.008,0xa09fa4);for(const x of [.28,.42])ball(p,x,2.19,-1.396,.025,.032,.009,0x51434d);
 }
@@ -83,7 +84,7 @@ function bedroom(p){
 }
 export function makeFurniture(id){const g=new T.Group();
  if(id==='plant')plant(g,0,0,0,.8);
- if(id==='lamp')lamp(g,0,0,0,.9);
+ if(id==='lamp'){lamp(g,0,0,0,.9);const pool=createLampPool(g,0,0,1.15,{y:.03});g.userData.pool=pool}
  if(id==='rug')texturedPlane(g,0,.025,0,1.02,.74,texture('rug',['#d4a7b5','#866477']),true);
  if(id==='bear'){const tan=0xc19778;ball(g,0,.33,0,.2,.23,.17,tan);ball(g,0,.62,0,.23,.21,.18,tan);for(const x of [-.17,.17]){ball(g,x,.79,0,.08,.08,.06,tan);ball(g,x,.12,.04,.1,.10,.12,tan);ball(g,x*1.3,.35,.01,.09,.13,.10,tan)}ball(g,0,.56,.16,.10,.08,.045,P.cream);for(const x of [-.073,.073])ball(g,x,.65,.169,.024,.028,.016,P.ink);ball(g,0,.588,.203,.032,.023,.015,P.ink);box(g,0,.42,.164,.19,.06,.015,P.rose)}
  if(id==='musicbox'){box(g,0,.17,0,.55,.30,.44,0xbb94ab,true);box(g,0,.33,-.17,.54,.28,.05,P.gold,true).rotation.x=-.5;box(g,0,.336,0,.5,.04,.39,P.cream);cylinder(g,0,.39,0,.12,.07,P.gold);ball(g,0,.58,0,.08,.10,.08,P.cream);cylinder(g,0,.47,0,.14,.15,P.rose,1.6);line(g,[.29,.21,0],[.39,.21,0],.02,P.gold);ball(g,.40,.23,0,.03,.05,.03,P.cream)}

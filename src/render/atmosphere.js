@@ -1,18 +1,19 @@
 import * as T from 'three';
 import {softTexture} from './textiles.js';
-import {nightSky} from './visual-policy.js';
+import {nightSky,duskGlow} from './visual-policy.js';
 const vertex=`varying vec2 vUv; void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`;
-const fragment=`varying vec2 vUv; uniform float night; uniform vec3 nightBottom; uniform vec3 nightTop; uniform vec3 nightGlow; void main(){
+const fragment=`varying vec2 vUv; uniform float night; uniform float dusk; uniform vec3 nightBottom; uniform vec3 nightTop; uniform vec3 nightGlow; void main(){
  vec3 day=mix(vec3(.74,.64,.64),vec3(.94,.85,.73),smoothstep(0.,.7,vUv.y));
- vec3 dusk=mix(nightBottom,nightTop,vUv.y);
+ vec3 nightColor=mix(nightBottom,nightTop,vUv.y);
  float halo=exp(-length((vUv-vec2(.48,.46))*vec2(2.7,2.))*3.);
- vec3 c=mix(day,dusk,night)+halo*mix(vec3(.02),nightGlow,night);
+ vec3 c=mix(day,nightColor,night)+halo*mix(vec3(.02),nightGlow,night);
+ c+=vec3(.50,.26,.10)*dusk*smoothstep(.62,0.,vUv.y)*(1.-night);
  gl_FragColor=vec4(c,1.);
  #include <colorspace_fragment>
 }`;
 export function createAtmosphere(scene){
  const sky=nightSky();
- const backdrop=new T.Mesh(new T.PlaneGeometry(160,90),new T.ShaderMaterial({vertexShader:vertex,fragmentShader:fragment,uniforms:{night:{value:0},nightBottom:{value:new T.Vector3(...sky.bottom)},nightTop:{value:new T.Vector3(...sky.top)},nightGlow:{value:new T.Vector3(...sky.glow)}},depthWrite:false}));backdrop.position.set(0,18,-28);scene.add(backdrop);
+ const backdrop=new T.Mesh(new T.PlaneGeometry(160,90),new T.ShaderMaterial({vertexShader:vertex,fragmentShader:fragment,uniforms:{night:{value:0},dusk:{value:0},nightBottom:{value:new T.Vector3(...sky.bottom)},nightTop:{value:new T.Vector3(...sky.top)},nightGlow:{value:new T.Vector3(...sky.glow)}},depthWrite:false}));backdrop.position.set(0,18,-28);scene.add(backdrop);
  const soft=softTexture(),starPos=new Float32Array(140*3);
  for(let i=0;i<140;i++){starPos[i*3]=Math.sin(i*127.1)*26;starPos[i*3+1]=4+(i*2.71)%23;starPos[i*3+2]=-14-Math.cos(i*11.2)*3}
  const starGeometry=new T.BufferGeometry();starGeometry.setAttribute('position',new T.BufferAttribute(starPos,3));
@@ -27,7 +28,7 @@ export function createAtmosphere(scene){
  // A few night moths gather near the house; they are never full-screen flashes.
  const moths=[];for(let i=0;i<5;i++){const m=new T.Sprite(new T.SpriteMaterial({map:soft,color:0xf6d6a1,opacity:.75,transparent:true,depthWrite:false,blending:T.AdditiveBlending}));m.name='lantern-firefly';m.scale.set(.07,.07,1);scene.add(m);moths.push(m)}
  return {update(state,mix,level='high'){
-  backdrop.material.uniforms.night.value=mix;stars.material.opacity=mix*.78;moon.visible=mix>.05;moon.scale.setScalar(.9);
+  backdrop.material.uniforms.night.value=mix;backdrop.material.uniforms.dusk.value=duskGlow(state.clock);stars.material.opacity=mix*.78;moon.visible=mix>.05;moon.scale.setScalar(.9);
   const still=state.settings.reducedMotion||state.paused,t=state.elapsed;dust.visible=!state.settings.reducedMotion;
   if(!still){dust.rotation.y=t*.007;dust.position.y=Math.sin(t*.12)*.09}
   moths.forEach((m,i)=>{m.visible=mix>.5&&!state.settings.reducedMotion&&i<(level==='low'?3:5);if(!still){const a=t*.28+i*2.4;m.position.set((i%2?1:-1)*5.62+Math.cos(a)*.34,1.75+Math.sin(a*.73+i)*.22,1.30+Math.sin(a)*.34);m.material.opacity=.48+.22*(.5+.5*Math.sin(t*.55+i))}});

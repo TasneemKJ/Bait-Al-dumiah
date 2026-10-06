@@ -8,6 +8,7 @@ import {ROOMS,SLOTS,TEA_TABLE,STITCH_TABLE} from '../content.js';
 import {isNight,stitchStatus} from '../simulation.js';
 import {createTapGesture} from '../pointer-gesture.js';
 import {createHouse,makeFurniture} from './house.js';
+import {poolOpacity} from './lamp-pool.js';
 import {createDolls,createGhost} from './dolls.js';
 import {createCraftDetails,createGarden} from './ornaments.js';
 import {createKeepsakeDetails} from './keepsake-details.js';
@@ -26,7 +27,7 @@ import {createRestoration} from './restoration.js';
 import {createCameraMove} from './camera-motion.js';
 import {createRoomPresentation} from './room-presentation.js';
 import {createAtmosphere} from './atmosphere.js';
-import {lighting,detail,framing,fog as fogPolicy,practicalLight} from './visual-policy.js';
+import {lighting,detail,duskGlow,framing,fog as fogPolicy,practicalLight} from './visual-policy.js';
 
 export function createWorld(canvas,{onPick,onError}){
  const renderer=new T.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'});
@@ -184,7 +185,7 @@ export function createWorld(canvas,{onPick,onError}){
   setPresentation(value,viewport){if(!working())presentation.update(value,viewport)},
   focusRoom(id,immediate=false){if(working()||!ROOMS.some(r=>r.id===id))return false;focusedRoom=id;focusedDoll=null;cameraMove.moveTo(framing(canvas.clientWidth,canvas.clientHeight,id,presentation.value),reducedMotion||immediate);return true},
   focusDoll(id){const p=residents.position(id);if(working()||!p)return false;focusedDoll=id;focusedRoom=null;cameraMove.moveTo(focusPose(),reducedMotion);return true},
-  visualStatus(){return {portraitCount:portraitCache.size,quality,focusedRoom,focusedDoll,presentation:presentation.value,nightMix,cameraMoving:cameraMove.active,previewVisible:preview.root.visible,previewValid:preview.root.userData.valid??false,windowMaterials:house.windows.size,activeOwnedLights:[...decor.values()].filter(o=>o.userData.ownedLight?.intensity>0).length,restoredLights:restoration.lights.filter(l=>l.intensity>0).length,reactivePoses:Object.fromEntries([...decor].map(([id,o])=>[id,{turn:o.rotation.y,rock:o.rotation.z,scale:o.scale.x}])),courtyard:house.root.getObjectByName('levantine-courtyard')?.userData.nightCue,selectedObject:objects.selected,story:storyProps.status(),teaActive,tea:teaTable.status(),stitchActive,workCeilingVisible:house.workCeiling.visible,workArchVisible:courtyard.studioArch.visible,stitch:sewingPlay.status(),stitchGuides:stitchGuidePositions(),chimeActive,chimes:moonChimes.status()}},
+  visualStatus(){return {atmosphereFx:roomEffects.status(),portraitCount:portraitCache.size,quality,focusedRoom,focusedDoll,presentation:presentation.value,nightMix,cameraMoving:cameraMove.active,previewVisible:preview.root.visible,previewValid:preview.root.userData.valid??false,windowMaterials:house.windows.size,activeOwnedLights:[...decor.values()].filter(o=>o.userData.ownedLight?.intensity>0).length,restoredLights:restoration.lights.filter(l=>l.intensity>0).length,reactivePoses:Object.fromEntries([...decor].map(([id,o])=>[id,{turn:o.rotation.y,rock:o.rotation.z,scale:o.scale.x}])),courtyard:house.root.getObjectByName('levantine-courtyard')?.userData.nightCue,selectedObject:objects.selected,story:storyProps.status(),teaActive,tea:teaTable.status(),stitchActive,workCeilingVisible:house.workCeiling.visible,workArchVisible:courtyard.studioArch.visible,stitch:sewingPlay.status(),stitchGuides:stitchGuidePositions(),chimeActive,chimes:moonChimes.status()}},
   zoom(amount){if(working())return;cameraMove.cancel();camera.zoom=T.MathUtils.clamp(camera.zoom*amount,.8,3.5);camera.updateProjectionMatrix()},
   orbit(amount){if(working())return;cameraMove.cancel();const offset=camera.position.clone().sub(controls.target);offset.applyAxisAngle(new T.Vector3(0,1,0),amount);camera.position.copy(controls.target).add(offset);controls.update()},
   setEnabled(enabled){requestedEnabled=Boolean(enabled);controls.enabled=requestedEnabled&&!working();if(!enabled)cameraMove.cancel()},
@@ -196,7 +197,7 @@ export function createWorld(canvas,{onPick,onError}){
    const budget=detail(canvas.clientWidth,canvas.clientHeight,state.settings.quality,window.devicePixelRatio||1);
    if(quality!==budget.level){quality=budget.level;renderer.setPixelRatio(budget.pixelRatio);renderer.shadowMap.enabled=budget.shadows;resize()}
    for(const d of state.decor)if(!decor.has(d.id)){const obj=makeFurniture(d.item),room=ROOMS.find(r=>r.id===d.room),slot=SLOTS[d.slot];obj.position.set(room.x+slot.x,room.y+.13,slot.z);if(d.item==='lamp'){const light=new T.PointLight(0xffc07a,0,3.4,2);light.name='owned-keepsake-light';light.position.set(0,1.05,0);light.castShadow=false;obj.add(light);obj.userData.ownedLight=light}house.root.add(obj);decor.set(d.id,obj)}
-   for(const d of state.decor){const obj=decor.get(d.id),room=ROOMS.find(r=>r.id===d.room),slot=SLOTS[d.slot],recent=state.elapsed-(d.lastUse??-10)<5,phase=Math.max(0,state.elapsed-(d.lastUse??-10));obj.position.set(room.x+slot.x,room.y+.13,slot.z);obj.scale.setScalar(d.item==='plant'&&d.tendedDay===state.day?1.08:1);obj.rotation.y=(d.rotation??0)*Math.PI/2+(d.item==='musicbox'&&recent?(reducedMotion ? .14 : phase*2.4):0);obj.rotation.z=d.item==='mobile'&&recent?(reducedMotion ? .06 : Math.sin(phase*5)*.12):0;if(obj.userData.ownedLight)obj.userData.ownedLight.intensity=d.active?(.25+nightMix*2.15):0;obj.visible=d.id!==previewPose?.moveId}
+   for(const d of state.decor){const obj=decor.get(d.id),room=ROOMS.find(r=>r.id===d.room),slot=SLOTS[d.slot],recent=state.elapsed-(d.lastUse??-10)<5,phase=Math.max(0,state.elapsed-(d.lastUse??-10));obj.position.set(room.x+slot.x,room.y+.13,slot.z);obj.scale.setScalar(d.item==='plant'&&d.tendedDay===state.day?1.08:1);obj.rotation.y=(d.rotation??0)*Math.PI/2+(d.item==='musicbox'&&recent?(reducedMotion ? .14 : phase*2.4):0);obj.rotation.z=d.item==='mobile'&&recent?(reducedMotion ? .06 : Math.sin(phase*5)*.12):0;if(obj.userData.ownedLight){obj.userData.ownedLight.intensity=d.active?(.25+nightMix*2.15):0;if(obj.userData.pool)obj.userData.pool.material.opacity=poolOpacity(d.active?.2+nightMix*.8:0)}obj.visible=d.id!==previewPose?.moveId}
    objects.update(state,working());
    for(const [id,obj] of decor)if(!state.decor.some(d=>d.id===id)){obj.removeFromParent();obj.traverse(o=>{if(o.material?.map&&!o.material.userData.shared){o.material.map.dispose();o.material.dispose();o.geometry?.dispose()}});decor.delete(id)}
    slotTargets.forEach(o=>{o.visible=!state.decor.some(d=>d.id!==previewPose?.moveId&&d.room===o.userData.slot.room&&d.slot===o.userData.slot.slot)});
@@ -204,11 +205,11 @@ export function createWorld(canvas,{onPick,onError}){
    // Exponential interpolation is frame-rate independent; reduced motion switches instantly.
    const night=isNight(state);nightMix=state.settings.reducedMotion?Number(night):T.MathUtils.damp(nightMix,Number(night),2.2,dt);
    const cue=courtyard.update(state,nightMix),look=lighting(nightMix),haze=fogPolicy(nightMix);hemi.intensity=look.ambient;key.intensity=look.key;fill.intensity=look.rim;renderer.toneMappingExposure=look.exposure;depthFog.density=haze.density;depthFog.color.setHex(haze.color);
-   hemi.color.set(0xe9e0d5).lerp(new T.Color(0x849bc9),nightMix);key.color.set(0xffe5c2).lerp(new T.Color(0xb8caff),nightMix);fill.color.set(0xb8cbd5).lerp(new T.Color(0x829bdb),nightMix);
+   hemi.color.set(0xe9e0d5).lerp(new T.Color(0x849bc9),nightMix);const dusk=duskGlow(state.clock);key.color.set(0xffe5c2).lerp(new T.Color(0xffa860),dusk*.75).lerp(new T.Color(0xb8caff),nightMix);key.intensity*=1+.12*dusk;fill.color.set(0xb8cbd5).lerp(new T.Color(0x829bdb),nightMix);
    // Each persistent room lamp keeps its own miniature-film colour and falloff;
    // the global night cue still owns overall lamp energy. Lamps are found by room tag.
    for(const l of house.lights){if(!l.isLight||!l.userData.room)continue;const p=practicalLight(l.userData.room,nightMix,look.lamps,cue.lamp,focusedRoom===l.userData.room);l.intensity=p.intensity;l.color.setHex(p.color);l.distance=p.distance}
-   house.windows.forEach(m=>{m.emissive.set(0x8baaca);m.emissiveIntensity=.14+nightMix*.44});details.update(nightMix);atmosphere.update(state,nightMix,quality);roomEffects.update(state,nightMix);restoration.update(state,nightMix);storyProps.update(state,nightMix);teaTable.update(state);sewingPlay.update(state);moonChimes.update(state,chimeSelection);roomFrame.show(working()?null:focusedRoom);preview.update(previewPose,state);
+   house.windows.forEach(m=>{m.emissive.set(0x8baaca).lerp(new T.Color(0xffc27d),dusk*(1-nightMix));m.emissiveIntensity=.14+nightMix*.62+dusk*.30});details.update(nightMix);atmosphere.update(state,nightMix,quality);roomEffects.update(state,nightMix);restoration.update(state,nightMix);storyProps.update(state,nightMix);teaTable.update(state);sewingPlay.update(state);moonChimes.update(state,chimeSelection);roomFrame.show(working()?null:focusedRoom);preview.update(previewPose,state);
    residents.update(state,dt,selected,Math.atan2(camera.position.x-controls.target.x,camera.position.z-controls.target.z));
    for(const doll of residents.dolls){const room=state.dolls.find(d=>d.id===doll.id)?.room;doll.root.visible=!(teaActive&&room==='kitchen'||stitchActive&&room==='studio'||chimeActive&&room==='bedroom')}
    if(focusedDoll){const room=state.dolls.find(d=>d.id===focusedDoll)?.room;if(room!==scene.userData.portraitRoom){scene.userData.portraitRoom=room;cameraMove.moveTo(focusPose(),reducedMotion)}}else scene.userData.portraitRoom=null;ghost.update(state.elapsed,night,state.settings.reducedMotion||state.paused,state.journal.length);
