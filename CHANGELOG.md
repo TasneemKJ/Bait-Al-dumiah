@@ -2,6 +2,7 @@
 Each merged batch adds an entry and a `vX.Y.Z` tag.
 
 ## Unreleased
+- Self-teaching: after day 3 the wish ring returns at half strength, only in daylight and only after the player has gone 75 s without caring for anyone; any care puts it out, and it is steady under reduced motion.
 - Onboarding: the first time night falls (naturally or by the light button) a one-time line points at the visitor button; stored as the optional whitelisted `hints.night` flag, so existing saves with history never see it.
 - Retention: while the residents wave on a returning load, the camera glances at the busiest room for about 2.6 s and then returns; skipped under reduced motion, or if the player touched or pressed a key first.
 - Arabic: the light-switch label "خلّي الليل يجي" stays on one line in the narrow time card at 320-412px wide (it wrapped at 360 before).

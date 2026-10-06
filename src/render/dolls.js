@@ -7,7 +7,7 @@ import {createArm,levelCup,balanceWalk,gaze,express,carePose,greeting,nightCurio
 import {createApron,createOveralls,createFoot,createSock} from './doll-wardrobe.js';
 import {createHair,fabricBow} from './doll-hair.js';
 import {createSculptedHead,createPortraitEye,createBrow,closePortraitEye,createPortraitMouth,createNose,createEar,bisqueMaterial,createNeckJoint} from './doll-face.js';
-import {wishGlowActive,wishGlowOpacity} from '../wish-glow.js';
+import {wishGlowStrength,wishGlowOpacity} from '../wish-glow.js';
 import {createTeaSteam,createComfortHearts,createSleepCrescent} from './resident-effects.js';
 import {DOLLS,ROOMS} from '../content.js';
 import {palette as P,box,cylinder,ring,line,mat,cup,batch} from './primitives.js';
@@ -85,7 +85,7 @@ export function createDolls(parent){
    const previousX=v.root.position.x;
    v.root.position.x=state.settings.reducedMotion?r.x+base:T.MathUtils.damp(v.root.position.x,r.x+base+walk,3,dt);
    if(!state.paused){const speed=Math.abs(v.root.position.x-previousX)/Math.max(dt,.001);v.walkSpeed=speed;v.legs.forEach((leg,j)=>{const phase=Math.sin(t*3.2+i+j*Math.PI),strength=motion&&d.action==='idle'?Math.min(1,speed*15):0;leg.rotation.x=phase*.16*strength;leg.shin.rotation.x=Math.max(0,phase)*.22*strength;leg.position.y=.40+Math.max(0,phase)*.022*strength})}
-   {const on=wishGlowActive(state,d.id),o=wishGlowOpacity(on,t,!motion);v.wishGlow.visible=on;v.wishGlow.material.opacity=o}
+   {const k=wishGlowStrength(state,d.id),o=wishGlowOpacity(k,t,!motion);v.wishGlow.visible=k>0;v.wishGlow.material.opacity=o}
    v.halo.visible=selected===d.id;v.tea.visible=d.action==='tea';v.steam.update(t,d.action==='tea',!motion);v.comfortHearts.update(t,d.action==='soothe',!motion);v.sleepCrescent.update(t,d.action==='rest',!motion);v.sparkles.visible=d.action==='play';
    v.sparkles.rotation.y=motion?t*.7:0;
    v.body.position.y=motion?(d.action==='play'?Math.abs(Math.sin(t*4.6))*.065:0):0;

@@ -24,3 +24,5 @@ Soft porcelain and cream paper, rose, mint and gold accents, terracotta roof, wa
 
 ## Wish glow
 Days 1-3: a soft gold floor ring breathes under an idle resident whose wish is unspoken. It is wider and fainter than the selection halo, steady with reduced motion, and retires after day 3 or once the wish is granted.
+
+Later days (4+): the wish ring is half as strong, daylight only, and appears only after 75 s without any care; granting a wish or caring for anyone puts it out. It stays a whisper, not a nag.
