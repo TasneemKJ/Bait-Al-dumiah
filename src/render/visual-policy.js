@@ -29,8 +29,8 @@ export function practicalLight(roomId,mix,lamps,cue=1,focused=false){
  return {color:practical.color,distance:practical.distance,intensity:(energy*PRACTICAL_SHARE+practical.intensity)*gain*(focused?1.12:1)};
 }
 const PRACTICAL_SHARE=.22;
-export function detail(width,height,preference='auto',dpr=1){
- const level=preference==='high'?'high':preference==='low'?'low':Math.min(width,height)<700?'low':'high';
+export function detail(width,height,preference='auto',dpr=1,degraded=false){
+ const level=preference==='high'?'high':preference==='low'?'low':degraded||Math.min(width,height)<700?'low':'high';
  return {level,pixelRatio:clamp(dpr,1,level==='low'?1.25:1.75),shadows:level==='high'};
 }
 export function framing(width,height,roomId=null){
@@ -51,4 +51,22 @@ export function framing(width,height,roomId=null){
 export function nightSky(){
  const linear=hex=>[16,8,0].map(shift=>{const c=((hex>>shift)&255)/255;return c<=.04045?c/12.92:Math.pow((c+.055)/1.055,2.4)});
  return {bottom:linear(0x292940),top:linear(0x10162c),glow:linear(0x1b1830)};
+}
+
+// Automatic quality only: if the scene's own CPU cost per frame stays above the
+// threshold for a full window, drop to the lighter level once and stay there.
+// It measures CPU time of the render call (not presentation time), ignores
+// paused or hidden frames, never flaps back up, and is never saved.
+export function createQualityGovernor({threshold=24,window=90}={}){
+ const samples=[];let degraded=false;
+ return {
+  get degraded(){return degraded},
+  note(ms){
+   if(degraded||!Number.isFinite(ms)||ms<=0)return degraded;
+   samples.push(ms);if(samples.length>window)samples.shift();
+   if(samples.length===window){const sorted=[...samples].sort((a,b)=>a-b);if(sorted[window>>1]>threshold)degraded=true}
+   return degraded;
+  },
+  reset(){samples.length=0;degraded=false}
+ };
 }

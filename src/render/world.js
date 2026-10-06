@@ -25,7 +25,7 @@ import {chimeFraming} from './chime-camera.js';
 import {createRestoration} from './restoration.js';
 import {createCameraMove} from './camera-motion.js';
 import {createAtmosphere} from './atmosphere.js';
-import {lighting,detail,framing,fog as fogPolicy,practicalLight} from './visual-policy.js';
+import {lighting,detail,createQualityGovernor,framing,fog as fogPolicy,practicalLight} from './visual-policy.js';
 
 export function createWorld(canvas,{onPick,onError}){
  const renderer=new T.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'});
@@ -57,7 +57,7 @@ export function createWorld(canvas,{onPick,onError}){
   const disk=new T.Mesh(new T.CircleGeometry(.42,20),new T.MeshBasicMaterial({visible:false}));disk.rotation.x=-Math.PI/2;disk.position.copy(mesh.position);disk.userData.slot={room:room.id,slot:i};slotGroup.add(mesh,disk);slotTargets.push(disk);
  }
  slotGroup.visible=false;
- const ray=new T.Raycaster(),mouse=new T.Vector2();let placement=null,disposed=false,lost=false,quality='',nightMix=0;
+ const ray=new T.Raycaster(),mouse=new T.Vector2();const governor=createQualityGovernor();let placement=null,disposed=false,lost=false,quality='',nightMix=0;
  function objectAt(x,y){
   const rect=canvas.getBoundingClientRect();if(!Number.isFinite(x)||!Number.isFinite(y)||x<rect.left||x>rect.right||y<rect.top||y>rect.bottom||lost||working())return null;
   mouse.set((x-rect.left)/rect.width*2-1,-(y-rect.top)/rect.height*2+1);ray.setFromCamera(mouse,camera);
@@ -172,16 +172,17 @@ export function createWorld(canvas,{onPick,onError}){
   getPortraits(){return portraitCache.getAll()},
   focusRoom(id,immediate=false){if(working()||!ROOMS.some(r=>r.id===id))return false;focusedRoom=id;focusedDoll=null;cameraMove.moveTo(framing(canvas.clientWidth,canvas.clientHeight,id),reducedMotion||immediate);return true},
   focusDoll(id){const p=residents.position(id);if(working()||!p)return false;focusedDoll=id;focusedRoom=null;cameraMove.moveTo(focusPose(),reducedMotion);return true},
-  visualStatus(){return {portraitCount:portraitCache.size,quality,focusedRoom,focusedDoll,nightMix,cameraMoving:cameraMove.active,previewVisible:preview.root.visible,previewValid:preview.root.userData.valid??false,windowMaterials:house.windows.size,activeOwnedLights:[...decor.values()].filter(o=>o.userData.ownedLight?.intensity>0).length,restoredLights:restoration.lights.filter(l=>l.intensity>0).length,reactivePoses:Object.fromEntries([...decor].map(([id,o])=>[id,{turn:o.rotation.y,rock:o.rotation.z,scale:o.scale.x}])),courtyard:house.root.getObjectByName('levantine-courtyard')?.userData.nightCue,selectedObject:objects.selected,story:storyProps.status(),teaActive,tea:teaTable.status(),stitchActive,workCeilingVisible:house.workCeiling.visible,workArchVisible:courtyard.studioArch.visible,stitch:sewingPlay.status(),stitchGuides:stitchGuidePositions(),chimeActive,chimes:moonChimes.status()}},
+  visualStatus(){return {degraded:governor.degraded,portraitCount:portraitCache.size,quality,focusedRoom,focusedDoll,nightMix,cameraMoving:cameraMove.active,previewVisible:preview.root.visible,previewValid:preview.root.userData.valid??false,windowMaterials:house.windows.size,activeOwnedLights:[...decor.values()].filter(o=>o.userData.ownedLight?.intensity>0).length,restoredLights:restoration.lights.filter(l=>l.intensity>0).length,reactivePoses:Object.fromEntries([...decor].map(([id,o])=>[id,{turn:o.rotation.y,rock:o.rotation.z,scale:o.scale.x}])),courtyard:house.root.getObjectByName('levantine-courtyard')?.userData.nightCue,selectedObject:objects.selected,story:storyProps.status(),teaActive,tea:teaTable.status(),stitchActive,workCeilingVisible:house.workCeiling.visible,workArchVisible:courtyard.studioArch.visible,stitch:sewingPlay.status(),stitchGuides:stitchGuidePositions(),chimeActive,chimes:moonChimes.status()}},
   zoom(amount){if(working())return;cameraMove.cancel();camera.zoom=T.MathUtils.clamp(camera.zoom*amount,.8,3.5);camera.updateProjectionMatrix()},
   orbit(amount){if(working())return;cameraMove.cancel();const offset=camera.position.clone().sub(controls.target);offset.applyAxisAngle(new T.Vector3(0,1,0),amount);camera.position.copy(controls.target).add(offset);controls.update()},
   setEnabled(enabled){requestedEnabled=Boolean(enabled);controls.enabled=requestedEnabled&&!working();if(!enabled)cameraMove.cancel()},
   setPlacement(item){placement=item;slotGroup.visible=Boolean(item);if(!item){previewPose=null;preview.clear()}},
   setPreview(pose){previewPose=pose},
   project(id,height=1.0){const p=residents.position(id);if(!p)return null;p.y+=height;p.add(house.root.position);p.project(camera);return {x:(p.x+1)*canvas.clientWidth/2,y:(1-p.y)*canvas.clientHeight/2}},
+  noteFrame(ms,preference){return preference==='auto'&&(quality==='high'||governor.degraded)?governor.note(ms):false},
   render(state,dt,selected){
    if(disposed||lost)return;reducedMotion=state.settings.reducedMotion;setWorkActivity(state.activities.active?.id);stitchSections=stitchActive?(stitchStatus(state)?.sections??[]):[];if(!state.paused)cameraMove.tick(dt,reducedMotion);
-   const budget=detail(canvas.clientWidth,canvas.clientHeight,state.settings.quality,window.devicePixelRatio||1);
+   const budget=detail(canvas.clientWidth,canvas.clientHeight,state.settings.quality,window.devicePixelRatio||1,governor.degraded);
    if(quality!==budget.level){quality=budget.level;renderer.setPixelRatio(budget.pixelRatio);renderer.shadowMap.enabled=budget.shadows;resize()}
    for(const d of state.decor)if(!decor.has(d.id)){const obj=makeFurniture(d.item),room=ROOMS.find(r=>r.id===d.room),slot=SLOTS[d.slot];obj.position.set(room.x+slot.x,room.y+.13,slot.z);if(d.item==='lamp'){const light=new T.PointLight(0xffc07a,0,3.4,2);light.name='owned-keepsake-light';light.position.set(0,1.05,0);light.castShadow=false;obj.add(light);obj.userData.ownedLight=light}house.root.add(obj);decor.set(d.id,obj)}
    for(const d of state.decor){const obj=decor.get(d.id),room=ROOMS.find(r=>r.id===d.room),slot=SLOTS[d.slot],recent=state.elapsed-(d.lastUse??-10)<5,phase=Math.max(0,state.elapsed-(d.lastUse??-10));obj.position.set(room.x+slot.x,room.y+.13,slot.z);obj.scale.setScalar(d.item==='plant'&&d.tendedDay===state.day?1.08:1);obj.rotation.y=(d.rotation??0)*Math.PI/2+(d.item==='musicbox'&&recent?(reducedMotion ? .14 : phase*2.4):0);obj.rotation.z=d.item==='mobile'&&recent?(reducedMotion ? .06 : Math.sin(phase*5)*.12):0;if(obj.userData.ownedLight)obj.userData.ownedLight.intensity=d.active?(.25+nightMix*2.15):0;obj.visible=d.id!==previewPose?.moveId}

@@ -13,3 +13,22 @@ test('night sky is explicitly linear and keeps cream HUD text readable even at m
  for(const key of ['bottom','top']){const rgb=sky[key].map((v,i)=>v+sky.glow[i]);const y=rgb.reduce((n,v,i)=>n+v*[.2126,.7152,.0722][i],0);assert.ok(y<.075,'avoid a washed-out gray night sky');assert.ok((.8+.05)/(y+.05)>7,'cream HUD remains readable')}
 });
 test('night lighting preserves a gentle front light on porcelain faces',()=>{const {lighting}=policy();assert.ok(lighting(1).key>=.50);assert.ok(lighting(1).ambient>=.50)});
+
+test('quality governor lightens once after a sustained slow window and never flaps back',async()=>{
+ const {createQualityGovernor,detail}=await import('../src/render/visual-policy.js');
+ const g=createQualityGovernor({threshold:20,window:10});
+ for(let i=0;i<9;i++)assert.equal(g.note(40),false,'not before a full window');
+ assert.equal(g.note(40),true);assert.equal(g.degraded,true);
+ for(let i=0;i<50;i++)g.note(2);assert.equal(g.degraded,true,'stays lighter');
+ assert.equal(detail(1024,768,'auto',2,true).level,'low');assert.equal(detail(1024,768,'auto',2,false).level,'high');
+ assert.equal(detail(1024,768,'high',2,true).level,'high','an explicit choice is respected');
+});
+test('quality governor ignores one-off spikes, bad samples and healthy frames',async()=>{
+ const {createQualityGovernor}=await import('../src/render/visual-policy.js');
+ const g=createQualityGovernor({threshold:20,window:10});
+ for(let i=0;i<40;i++)g.note(i%10===0?90:6);for(const bad of [NaN,Infinity,-3,0,undefined])g.note(bad);
+ assert.equal(g.degraded,false);g.reset();assert.equal(g.degraded,false);
+});
+test('lightening copy exists in English and Arabic',async()=>{
+ const {strings}=await import('../src/i18n.js');assert.ok(strings.en.qualityLightened);assert.match(strings.ar.qualityLightened,/[؀-ۿ]/);
+});
