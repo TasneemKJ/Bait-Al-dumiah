@@ -2,6 +2,8 @@
 import json, os, subprocess, time, urllib.request
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from game_entry import enter_game
+from scene_gestures import scene_ready
 from chime_gestures import finish_chimes
 from tea_check import complete_tea, tea_ready, tea_status, tap_tea
 from stitch_gestures import NeedleDrag, finish_stitch, stitch_ready, stitch_status, tap_stitch, trace_stitch
@@ -24,6 +26,36 @@ def select_object(page,key,inspect=False):
  if not target.is_visible():page.locator('[data-object-toggle]').click()
  target.click()
  if inspect:page.locator('[data-scene-action="inspect"]').click()
+def check_whole_house_selection(page):
+ # Explicit navigation owns framing. Direct object selection must leave the
+ # original scene target still under the pointer, with actual canvas ownership.
+ page.locator('[data-action="camera"]:visible').click()
+ scene_ready(page)
+ point=next(o for o in page.evaluate('window.dollhouse.objects()') if o['key']=='prop:tea-set')
+ check('whole-house tea target starts exposed on canvas',page.evaluate('point=>document.elementFromPoint(point.x,point.y)?.id==="world"',point))
+ page.evaluate('''() => {
+  window.expansionScenePick=null;
+  window.addEventListener('pointerdown',event=>{
+   window.expansionScenePick={x:event.clientX,y:event.clientY,owner:event.target.id};
+  },{capture:true,once:true});
+ }''')
+ page.mouse.click(point['x'],point['y'])
+ scene_ready(page)
+ observed=page.evaluate('''point => {
+  const visual=window.dollhouse.visual();
+  return {point:window.dollhouse.objects().find(p=>p.key==='prop:tea-set'),
+   focusedRoom:visual.focusedRoom,selected:visual.selectedObject,
+   ribbon:Boolean(document.querySelector('.object-ribbon')?.getClientRects().length),
+   modal:Boolean(document.querySelector('dialog[open]')),paused:window.dollhouse.state().paused,
+   owner:document.elementFromPoint(point.x,point.y)?.id,event:window.expansionScenePick};
+ }''',point)
+ check('whole-house selection keeps its original view and nonmodal tea ribbon',observed['focusedRoom'] is None and observed['selected']=='prop:tea-set' and observed['ribbon'] and not observed['modal'] and not observed['paused'])
+ check('scene selection preserves the original tea coordinates',observed['point'] is not None and abs(observed['point']['x']-point['x'])<.25 and abs(observed['point']['y']-point['y'])<.25)
+ event=observed['event']
+ check('the first original-coordinate click is owned by the actual canvas',event is not None and event['owner']=='world' and abs(event['x']-point['x'])<.25 and abs(event['y']-point['y'])<.25)
+ check('selection paper leaves that unchanged tea target exposed',observed['owner']=='world')
+ return observed
+
 def expose_objects(page):
  page.wait_for_function('document.querySelector(".object-controls") && !document.querySelector(".object-controls").hidden')
  if page.locator('[data-object-toggle]').get_attribute('aria-expanded')!='true':page.locator('[data-object-toggle]').click()
@@ -38,7 +70,7 @@ try:
   page=browser.new_page(viewport={'width':1280,'height':900})
   page.add_init_script("const seeded=sessionStorage.getItem('expansion-fixture');if(seeded){localStorage.setItem('bait-al-dumiah.v1',seeded);sessionStorage.removeItem('expansion-fixture')}")
   errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
-  page.goto(BASE+'/?debug=1');page.wait_for_function('window.dollhouse && !document.querySelector("#loading")')
+  page.goto(BASE+'/?debug=1'); enter_game(page);page.wait_for_function('window.dollhouse && !document.querySelector("#loading")')
   check('WebGL scene starts',page.locator('.error-screen').count()==0)
   state=lambda:page.evaluate('window.dollhouse.state()')
   def ensure_night():
@@ -48,12 +80,7 @@ try:
     if state()['clock']>=120:return
     page.locator('[data-action="light"]').click()
    check('night entry is deterministic even across a natural clock transition',state()['clock']>=120)
-  points=page.evaluate('window.dollhouse.objects()');point=next(o for o in points if o['key']=='prop:tea-set');other=next(o for o in points if o['key']=='prop:moon-bed');before_distance=((point['x']-other['x'])**2+(point['y']-other['y'])**2)**.5
-  page.mouse.click(point['x'],point['y'])
-  page.wait_for_function('!window.dollhouse.visual().cameraMoving')
-  check('whole-house object pick focuses its room with a nonmodal scene ribbon',page.locator('.object-ribbon').is_visible() and not page.locator('dialog[open]').count() and not state()['paused'] and page.evaluate('window.dollhouse.visual().focusedRoom==="kitchen"'))
-  points=page.evaluate('window.dollhouse.objects()');near=next(o for o in points if o['key']=='prop:tea-set');other=next(o for o in points if o['key']=='prop:moon-bed');after_distance=((near['x']-other['x'])**2+(near['y']-other['y'])**2)**.5
-  check('object selection actually reframes the camera, beyond focus metadata',after_distance/before_distance>1.5)
+  (OUT/'00-whole-house-selection.json').write_text(json.dumps(check_whole_house_selection(page),indent=2))
   page.locator('[data-scene-action="close"]').click()
   page.locator('[data-room="kitchen"]').click();page.wait_for_function('!window.dollhouse.visual().cameraMoving')
   point=next(o for o in page.evaluate('window.dollhouse.objects()') if o['key']=='prop:tea-set')
@@ -77,18 +104,18 @@ try:
   tap_tea(page,'tray');page.wait_for_function('window.dollhouse.tea()===null')
   expose_objects(page)
   check('ritual camera and accessible objects agree after completion',page.locator('[data-object="prop:tea-set"]').is_visible() and page.locator('[data-room="kitchen"]').get_attribute('aria-pressed')=='true')
-  page.reload();page.wait_for_function('window.dollhouse && !document.querySelector("#loading")')
+  page.reload(); enter_game(page);page.wait_for_function('window.dollhouse && !document.querySelector("#loading")')
   check('mastery survives reload',state()['activities']['mastery']['tea']==1)
   # Seed an earned-state fixture to inspect restoration and all-tier rendering.
   page.evaluate('''() => {const s=window.dollhouse.state();s.buttons=1000;s.activities.mastery={tea:6,stitch:6,lullaby:6};sessionStorage.setItem('expansion-fixture',JSON.stringify(s));}''')
-  page.reload();page.wait_for_function('window.dollhouse && !document.querySelector("#loading")')
+  page.reload(); enter_game(page);page.wait_for_function('window.dollhouse && !document.querySelector("#loading")')
   open_panel(page,'activities')
   page.locator('[data-action="restore-room"][data-id="kitchen"]').click()
   check('restoration spends displayed cost and persists tier',state()['buttons']==955 and state()['restoration']['kitchen']==1)
   page.wait_for_function('!window.dollhouse.visual().cameraMoving')
   page.screenshot(path=str(OUT/'04-restored-kitchen.png'))
   page.evaluate('''() => {const s=window.dollhouse.state();s.restoration={kitchen:3,parlor:3,studio:3,bedroom:3};s.settings.reducedMotion=true;sessionStorage.setItem('expansion-fixture',JSON.stringify(s));}''')
-  page.reload();page.wait_for_function('window.dollhouse && !document.querySelector("#loading")')
+  page.reload(); enter_game(page);page.wait_for_function('window.dollhouse && !document.querySelector("#loading")')
   page.screenshot(path=str(OUT/'05-restored-house.png'))
   stats=page.evaluate('window.dollhouse.stats()')
   (OUT/'render-stats.json').write_text(json.dumps(stats,indent=2))
@@ -156,7 +183,7 @@ try:
   page.locator('[data-action="move-object"]').click();page.locator('#place-room').select_option('studio');page.locator('#place-slot').select_option('2');page.locator('[data-action="place-confirm"]').click()
   check('move preserves ownership, orientation and currency',state()['decor'][-1]['id']==decor['id'] and state()['decor'][-1]['room']=='studio' and state()['decor'][-1]['slot']==2 and state()['decor'][-1]['rotation']==1 and state()['buttons']==buttons)
   page.wait_for_function('!window.dollhouse.visual().cameraMoving');page.screenshot(path=str(OUT/'10-moved-keepsake.png'))
-  page.reload();page.wait_for_function('window.dollhouse && !document.querySelector("#loading")')
+  page.reload(); enter_game(page);page.wait_for_function('window.dollhouse && !document.querySelector("#loading")')
   check('manipulated object survives reload',state()['decor'][-1]['room']=='studio' and state()['decor'][-1]['rotation']==1)
   page.locator('[data-room="bedroom"]').click();page.wait_for_function('!window.dollhouse.visual().cameraMoving')
   select_object(page,'prop:moon-bed',inspect=True);page.locator('[data-action="begin-activity"][data-id="lullaby"]').click()
@@ -169,7 +196,7 @@ try:
    {id:3,item:'musicbox',room:'studio',slot:0,rotation:0,originRoom:'studio',active:false,tendedDay:0,lastUse:-10},
    {id:4,item:'mobile',room:'bedroom',slot:0,rotation:0,originRoom:'bedroom',active:false,tendedDay:0,lastUse:-10}
   ];s.nextId=5;sessionStorage.setItem('expansion-fixture',JSON.stringify(s));}''')
-  page.reload();page.wait_for_function('window.dollhouse && !document.querySelector("#loading")')
+  page.reload(); enter_game(page);page.wait_for_function('window.dollhouse && !document.querySelector("#loading")')
   baseline=state();progress=(baseline['buttons'],baseline['cares'],baseline['earnedToday'],baseline['activities']['mastery'].copy(),[(d['id'],d['bond']) for d in baseline['dolls']])
   page.locator('[data-room="kitchen"]').click();page.wait_for_function('!window.dollhouse.visual().cameraMoving')
   point=next(o for o in page.evaluate('window.dollhouse.objects()') if o['key']=='decor:1');page.mouse.click(point['x'],point['y'])
@@ -206,7 +233,7 @@ try:
   page.screenshot(path=str(OUT/'15-rocked-mobile-reduced-motion.png'))
   current=state();after=(current['buttons'],current['cares'],current['earnedToday'],current['activities']['mastery'].copy(),[(d['id'],d['bond']) for d in current['dolls']])
   check('free keepsake play grants no currency, care, mastery or bond',after==progress)
-  page.reload();page.wait_for_function('window.dollhouse && !document.querySelector("#loading")')
+  page.reload(); enter_game(page);page.wait_for_function('window.dollhouse && !document.querySelector("#loading")')
   check('reactive keepsake states survive a save reload',state()['decor'][0]['tendedDay']==state()['day'] and state()['decor'][1]['active'] and state()['decor'][2]['lastUse']>=0 and state()['decor'][3]['lastUse']>=0)
   check('no JavaScript page errors',not errors)
   browser.close()

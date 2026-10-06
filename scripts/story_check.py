@@ -6,6 +6,8 @@ submits synthetic rewards, calls simulation functions or bypasses hit testing.
 import json, os, subprocess, time, urllib.request
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from game_entry import enter_game
+from scene_gestures import scene_ready
 from tea_check import complete_tea, tea_ready, tea_status, tap_tea
 from stitch_gestures import finish_stitch, stitch_ready, stitch_status
 
@@ -37,7 +39,7 @@ def progress():
 
 def ready():
     page.wait_for_function('window.dollhouse && !document.querySelector("#loading")', timeout=60000)
-    page.wait_for_function('!window.dollhouse.visual().cameraMoving', timeout=60000)
+    scene_ready(page)
 
 
 def capture(name):
@@ -56,6 +58,7 @@ def room(name):
 
 
 def point(key):
+    scene_ready(page)
     p = next(p for p in page.evaluate('window.dollhouse.objects()') if p['key'] == key)
     check('scene target is reachable: ' + key, page.evaluate(
         'p => document.elementFromPoint(p.x,p.y)?.id === "world"', p))
@@ -96,6 +99,11 @@ def drag_to(key, touch=False):
     else:
         page.mouse.move(p['x'], p['y'], steps=12)
     check('real pointer drag shows the carried item', page.locator('.carry-ghost').is_visible())
+    current = next(v for v in page.evaluate('window.dollhouse.objects()') if v['key'] == key)
+    check('held drag keeps its destination fixed: ' + key,
+          abs(current['x']-p['x']) < .25 and abs(current['y']-p['y']) < .25)
+    check('held drag keeps its destination exposed: ' + key,
+          page.evaluate('p=>document.elementFromPoint(p.x,p.y)?.id === "world"', p))
     if touch:
         session.send('Input.dispatchTouchEvent', {'type':'touchEnd','touchPoints':[]})
         session.detach()
@@ -129,8 +137,11 @@ try:
     context = browser.new_context(viewport={'width': 1280, 'height': 900}, has_touch=True)
     page = context.new_page()
     page.set_default_timeout(20000)
+    # Software WebGL can delay navigation events after the new document boots.
+    # Keep navigation bounded by the same 60s budget as scene readiness.
+    page.set_default_navigation_timeout(60000)
     page.on('pageerror', lambda error: errors.append(str(error)))
-    page.goto(BASE+'/?debug=1')
+    page.goto(BASE+'/?debug=1'); enter_game(page)
     ready()
     initial = state()
     check('new player starts with no inventory, progress or open tools',
@@ -149,7 +160,7 @@ try:
     capture('02-curious-touch')
     tap_object('prop:mint-tin')
     check('second scene touch opens the tin and finds the red thread', progress() == 1 and page.locator('[data-held-item="red-thread"]').is_visible())
-    page.reload(wait_until='domcontentloaded')
+    page.reload(wait_until='domcontentloaded'); enter_game(page)
     ready()
     check('reload preserves a carried item and its next action', progress() == 1 and page.locator('[data-held-item="red-thread"]').is_visible())
     room('kitchen')
@@ -281,7 +292,7 @@ try:
     panel('journal')
     check('three completed story memories are available in Arabic', page.locator('.story-memories article').count() == 3 and 'الخيط' in page.locator('.story-memories').inner_text())
     page.locator('#sheet [data-action="close"]').click()
-    page.reload(wait_until='domcontentloaded')
+    page.reload(wait_until='domcontentloaded'); enter_game(page)
     ready()
     page.wait_for_function('window.dollhouse.visual().story.bearVisible && window.dollhouse.visual().story.musicRepaired && window.dollhouse.visual().story.guestVisible')
     check('all three visible outcomes and rewards survive reload', progress() == 11 and state()['buttons'] == initial['buttons'] + 48 and page.evaluate('window.dollhouse.visual().story.bearVisible && window.dollhouse.visual().story.musicRepaired && window.dollhouse.visual().story.guestVisible'))

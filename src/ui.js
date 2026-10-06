@@ -25,7 +25,7 @@ export function createUI(host,getState,dispatch){
   document.body.classList.toggle('reduced-motion',s.settings.reducedMotion);document.body.classList.toggle('large-text',s.settings.largeText);document.querySelector('#world').setAttribute('aria-label',t('canvasLabel'));
   host.innerHTML=`<header class="brand"><span class="brand-mark">${icon('home')}</span><div><p class="eyebrow">${t('brandArabic')}</p><h1>${t('title')}</h1><p class="tagline">${t('subtitle')}</p></div></header>
    <section class="house-status" aria-label="${t('allWishes')}"><div class="currency" title="${t('buttons')}">${icon('button')}<strong data-value="buttons"></strong><span>${t('buttons')}</span></div><div class="cozy">${icon('heart')}<strong data-value="cozy"></strong><span>${t('cozy')}</span></div></section>
-   <aside class="objective" data-expanded="${clueExpanded}" data-unread="false"><div class="objective-head"><span class="tiny-star">✦</span><span data-story-heading>${t('storyTitle')}</span><span class="wish-count" data-value="wishes"></span></div><p id="objective-copy"></p><div class="objective-row"><button type="button" class="objective-toggle" data-action="clue-toggle" aria-expanded="${clueExpanded}" aria-controls="objective-copy" aria-label="${t('clueToggle')}" title="${t('clueToggle')}">${icon('spark')}<span class="clue-dot" aria-hidden="true"></span></button><button id="objective-action" type="button" data-action="objective"></button></div></aside>
+   <aside class="objective" data-expanded="${clueExpanded}" data-unread="false"><div id="objective-detail" ${clueExpanded?'':'hidden'}><div class="objective-head"><span class="tiny-star">✦</span><span data-story-heading>${t('storyTitle')}</span><span class="wish-count" data-value="wishes"></span></div><p id="objective-copy"></p></div><div class="clue-edge"><button id="objective-action" type="button" data-action="objective"></button><button type="button" class="clue-toggle" data-action="toggle-clue" aria-expanded="${clueExpanded}" aria-controls="objective-detail" aria-label="${t(clueExpanded?'storyFoldClue':'storyReadClue')}">${icon('book')}<span class="clue-dot" aria-hidden="true"></span></button></div></aside>
    <div class="time-tools"><button type="button" data-action="light" id="light-button"></button><div class="clock"><span data-value="day"></span><span class="clock-dot">·</span><span data-value="time"></span></div></div>
    <div class="camera-tools" aria-label="${t('resetCamera')}">${button('zoom-in',t('zoomIn'),'plus',`class="icon-button" title="${t('zoomIn')}"`)}${button('zoom-out',t('zoomOut'),'minus',`class="icon-button" title="${t('zoomOut')}"`)}${button('camera',t('resetCamera'),'home',`class="icon-button" title="${t('resetCamera')}"`)}</div>
    <div class="visitor-hint" hidden><button type="button" data-action="discover">${icon('ghost')}<span>${t('investigate')}</span><span class="notification-dot"></span></button></div>
@@ -94,7 +94,7 @@ export function createUI(host,getState,dispatch){
  // One suggested next step: wishes, first keepsake, rewards to collect, then the night's whisper.
  function nextStep(){
   const s=getState(),wish=DOLLS.find(d=>!s.wishes.includes(d.id));
-  const story=storyObjective(s,t);if(story)return story;
+  const story=storyObjective(s,t,host.dataset.focusRoom);if(story)return story;
   if(wish){const action=wishFor(s,wish.id);return {copy:t(wishKey(wish.id,action)),label:t(action),ico:actionIcon[action],action:'care',value:{id:wish.id,action}}}
   if(!s.decor.length)return {copy:t('objectiveDecorate'),label:t('decorate'),ico:'leaf',action:'panel',value:'decorate'};
   const readyRoom=ROOMS.find(r=>{const next=restorationReady(s,r.id);return next.ready&&s.buttons>=next.cost});
@@ -119,7 +119,7 @@ export function createUI(host,getState,dispatch){
   const story=storyStatus(s),values={buttons:n(s.buttons),cozy:n(coziness(s))+'%',wishes:story.finished?`${n(s.wishes.length)} / ${n(3)}`:`${n(story.index+1)} / ${n(3)}`,day:t('day')+' '+n(s.day),time:t(isNight(s)?'evening':'morning')};
   const heading=host.querySelector('[data-story-heading]'),headingText=t(story.finished?'objectiveLabel':'story-'+story.chapter.id+'-title');if(heading&&heading.textContent!==headingText)heading.textContent=headingText;
   for(const [key,value] of Object.entries(values)){const el=host.querySelector(`[data-value="${key}"]`);if(el&&el.textContent!==value)el.textContent=value}
-  const {copy,label,ico}=nextStep();
+  const {copy,label,ico,arrived}=nextStep();host.querySelector('.objective').dataset.arrived=String(Boolean(arrived));
   const objective=host.querySelector('#objective-copy');if(objective.textContent!==copy)objective.textContent=copy;setClue(clueExpanded);
   const action=host.querySelector('#objective-action');const content=icon(ico)+`<span>${label}</span>`+icon('arrow');setMarkup(action,content);
   const light=host.querySelector('#light-button'),lightHtml=icon(isNight(s)?'sun':'moon')+`<span>${t(isNight(s)?'dawn':'night')}</span>`;setMarkup(light,lightHtml);
@@ -138,11 +138,11 @@ export function createUI(host,getState,dispatch){
  function refresh(){const wasPanel=panel;if(wasPanel){host.querySelector('#sheet')?.close()}build()}
  function setTools(expanded){toolsExpanded=expanded;host.querySelector('.dock').dataset.expanded=String(expanded);host.querySelector('[data-action="toggle-tools"]').setAttribute('aria-expanded',String(expanded));dispatch('tools-state',expanded)}
  // Phone portrait shows the clue as a compact chip; the copy opens on demand and a dot marks an unread clue.
- function setClue(expanded){const aside=host.querySelector('.objective'),copy=host.querySelector('#objective-copy')?.textContent??'';if(!aside)return;clueExpanded=expanded;if(expanded)readClue=copy;const value=String(expanded),unread=String(copy!==readClue);if(aside.dataset.expanded!==value)aside.dataset.expanded=value;if(aside.dataset.unread!==unread)aside.dataset.unread=unread;const toggle=aside.querySelector('.objective-toggle');if(toggle&&toggle.getAttribute('aria-expanded')!==value)toggle.setAttribute('aria-expanded',value)}
+ function setClue(expanded){const aside=host.querySelector('.objective'),copy=host.querySelector('#objective-copy')?.textContent??'';if(!aside)return;clueExpanded=expanded;if(expanded)readClue=copy;const value=String(expanded),unread=String(copy!==readClue);if(aside.dataset.expanded!==value)aside.dataset.expanded=value;if(aside.dataset.unread!==unread)aside.dataset.unread=unread;host.querySelector('#objective-detail').hidden=!expanded;const toggle=aside.querySelector('.clue-toggle');if(toggle&&toggle.getAttribute('aria-expanded')!==value)toggle.setAttribute('aria-expanded',value);toggle?.setAttribute('aria-label',t(expanded?'storyFoldClue':'storyReadClue'))}
  const click=event=>{
   const target=event.target.closest('[data-action]');if(!target||target.disabled)return;const action=target.dataset.action;
   if(action==='toggle-tools'){setTools(!toolsExpanded);return}
-  if(action==='clue-toggle'){setClue(!clueExpanded);return}
+  if(action==='toggle-clue'){setClue(!clueExpanded);return}
   if(action==='objective')setClue(false);
   if(action==='story-interact'){dispatch(action,target.dataset.object);return}
   if(action.startsWith('panel-'))return open(action.slice(6));

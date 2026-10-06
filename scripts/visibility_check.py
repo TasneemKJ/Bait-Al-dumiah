@@ -18,6 +18,7 @@ from importlib.metadata import version
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
+from game_entry import enter_game
 from tea_check import PotDrag, tea_ready, tea_status
 from stitch_gestures import NeedleDrag, stitch_ready, stitch_status
 
@@ -142,6 +143,7 @@ def run():
         page.on('console', lambda message: errors.append(message.text) if message.type == 'error' else None)
         page.goto(base + '/?debug=1')
         foreground()
+        enter_game(page)
         ready()
 
         # Retain the original phone check's Arabic, low-detail, reduced-motion UI.

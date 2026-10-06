@@ -39,6 +39,52 @@ Brainstorm, 20 ideas (IDEAL: problem, definition, options, act, look back; 5Ws: 
 ## Brainstorm (iteration 2026-10-05, 20 ideas)
 Chosen: nowrap counter (UI/UX, mobile), docs set (stability for later sessions). Others, not yet built: first-night greeting hint (onboarding), soft lullaby swell at dusk (audio), return-day greeting from dolls (retention), collection page for visitor gifts (replayability), save export (data safety), wider portrait framing (visuals), lower-poly fallback on weak phones (performance), larger text option (accessibility), gamepad rail for room tabs (controls), Levantine proverb on loading (writing), dust motes in sunbeams (atmosphere), tea steam particles (game feel), jasmine scent journal entry (authenticity), share card (release), error-boundary retry button (stability), nightly gift choice (loop), daily wish hint glow (self-teaching), pause-on-hidden toast (session), button-economy dashboard (balance), seed-varied dolls' wishes (replayability).
 
+## Active atmosphere slice — 2026-10-05
+- [x] Reproduce and fix inherited-key room lighting fallback (behavioral regression).
+- [ ] Distinct mint enamel and woven bear finish, within existing story-art budget.
+- [x] Material-specific, gesture-gated tin/cloth foley with source behavior tests.
+- [ ] Brief bear cloth response; deferred with material visual changes until browser access works.
+- [ ] Rendered desktop/phone, Arabic, reduced-motion and 4x CPU checks.
+- [ ] Review actual screenshots and listen to foley before release; draft publication may record the blocker.
+- [ ] Continue the unfinished forty-item roadmap in `docs/visual-40/2026-10-05-ultra-atmosphere.md`; numeric arrays do not count as passes.
+
+Twenty ideas and IDEAL/5Ws for this slice are recorded in the iteration ledger. Selected: enamel, woven bear, bounded touch response, tin/cloth foley, matte pollen batching, safe lighting lookup. Other ideas remain deferred or preserved invariants.
+
+
+## Reclaim the miniature — 2026-10-05
+- [x] Inspect original baseline phone/desktop pixels and record twenty IDEAL/5Ws ideas in `docs/superpowers/specs/2026-10-05-reclaim-the-miniature.md`.
+- [x] Reproduce the wasted camera reservation and redundant arrival clue before source changes.
+- [x] Fit focused rooms to the currently visible edge, preserving authored edge-prop bounds and independent ritual cameras.
+- [x] Fold the contextual clue and replace stacked portrait capsules with a restrained two-row navigation edge; preserve 44px fallback targets.
+- [x] Keep crowded selected-object feedback inside its existing ribbon, avoiding a second scene-covering card.
+- [x] Add observer lifecycle, bilingual context and framing regressions plus real-DOM capture assertions.
+- [ ] Run exact-commit real-DOM/full-game browser suites and inspect EN/AR day/night before/after originals, including 4× CPU and ritual returns. Visual acceptance remains pending.
+- [ ] Review material/contact-depth refinements as a separate later art slice.
+
+Selected ideas: camera composition, folded contextual guidance, material-led navigation and arrival self-teaching. The other sixteen ideas remain an explicit sequenced backlog in the spec; none is reported as implemented by this batch.
+
+## Stable scene selection correction
+- [x] Trace the native unchanged-coordinate second-touch miss and compare camera/paper alternatives.
+- [x] Add failing projection/gesture regressions, preserve direct scene poses and cache pending insets.
+- [x] Place portrait selection paper by measured clearance; classify top paper correctly and hold it during drag.
+- [x] Add unchanged-position native touch checks and strengthen actual held destination checks in the full story journey.
+- [ ] Verify exact corrected source through native same-position, bilingual short-phone and full physical journeys; inspect original images before merging.
+- [x] Reproduce and inspect the bilingual whole-house landscape ribbon overlap with unchanged-coordinate native input.
+- [x] Extend measured-clearance placement to short landscape, respecting intersecting controls and safe areas; add final-fit exposure regressions.
+- [ ] Obtain independent review and fresh exact-source focused native acceptance before full ritual journeys or merge.
+
+
+## Simple opening, first bounded slice
+- [x] Real cold-launch Home: Play/Continue plus Preferences; flat Sound/Language/Back.
+- [x] Test-first canonical time/save gate, once-only activation, saved preference handling, failed-read protection and visible audio failure.
+- [x] Keep native house, costs/rewards, physical rituals and stable selection/rotation source unchanged.
+- [ ] Independent frozen-source review, then exact-source native EN/AR small-phone/landscape/rotation/keyboard/touch/reload acceptance and original screenshot inspection.
+- [ ] Execute a real fresh-profile 120-second opening; source-clock tests are not native play evidence.
+- [ ] Replace gameplay chrome only after every command family has a tested world/context route, including care alternatives, restoration, placement, visitor, earned claims and advanced saves.
+- [ ] Simplify all remaining surfaces, not just Home: main play, Pause, utilities, focused actions/choices, rituals/results and recovery. No giant catalog hidden behind one button.
+
+The twenty current ideas and chosen/deferred boundary are recorded in the iteration ledger and `docs/superpowers/plans/2026-10-05-safe-home-entry.md`. No retention or rapid-tap claim is made.
+
 ## Brainstorm 3: visuals and atmosphere (2026-10-06)
 Chosen: **golden hour at dusk** (shipped). Shortlist, not built: (a) soft lamp light pools on the floor at night, (b) warm window glow seen from outside as lit panes, (c) dust motes lit inside sunbeams near windows by day, (d) paper-grain material overlay on cards, (e) steam over the kettle in the kitchen when Lina is idle, (f) slow cloud shadows across the backdrop, (g) soft vignette that tightens at night, (h) curtain sway on the open window at dusk. Rejected for cost or risk on phones: volumetric light shafts, real-time reflections.
 ## Decisions and parked items (2026-10-06)

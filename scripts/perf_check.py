@@ -7,6 +7,7 @@ for information only: a CPU profile shows the main thread about 96% idle, waitin
 import json,os,subprocess,time,urllib.request
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from game_entry import enter_game
 ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'artifacts';OUT.mkdir(exist_ok=True)
 PORT=os.environ.get('PORT','4177');BASE=os.environ.get('PLAY_URL',f'http://127.0.0.1:{PORT}')
 BUDGET={'dist_kb':2048,'ready_s':25,'triangles':400000,'calls':388,'frame_cpu_ms':33}
@@ -27,7 +28,7 @@ try:
   # Time each animation-frame callback: the game's CPU cost per frame, independent of how slowly SwiftShader presents.
   pg.add_init_script('''(()=>{const raf=window.requestAnimationFrame.bind(window);window.__frameCost=[];window.requestAnimationFrame=cb=>raf(ts=>{const t0=performance.now();try{cb(ts)}finally{window.__frameCost.push(performance.now()-t0)}})})()''')
   errors=[];pg.on('pageerror',lambda e:errors.append(str(e)))
-  t=time.time();pg.goto(BASE+'/?debug=1');pg.wait_for_function('window.dollhouse?.state && !document.querySelector("#loading")',timeout=180000);result['ready_s']=round(time.time()-t,2)
+  t=time.time();pg.goto(BASE+'/?debug=1');pg.wait_for_function('window.dollhouse?.state && !document.querySelector("#loading")',timeout=180000);enter_game(pg);result['ready_s']=round(time.time()-t,2)
   pg.wait_for_timeout(2000);pg.evaluate('window.__frameCost.length=0')
   metrics=lambda:{m['name']:m['value'] for m in cdp.send('Performance.getMetrics')['metrics']};m0=metrics()
   frames=pg.evaluate('''()=>new Promise(r=>{const out=[];let last=performance.now();const end=last+5000;function f(now){out.push(now-last);last=now;if(now<end)requestAnimationFrame(f);else r(out)}requestAnimationFrame(f)})''')

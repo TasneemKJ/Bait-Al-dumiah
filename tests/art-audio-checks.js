@@ -20,5 +20,17 @@ export async function runArtChecks(){
   check('Audio: paused frames do not schedule notes or knocks',p.index===before&&p.nodes.size===size);
   p.stopVoices();check('Audio: stopping releases all tracked voices',p.nodes.size===0);
  }
+ if(audio.playTinTouch&&audio.playClothTouch){
+  const signatures=[];
+  for(const [kind,play] of [['tin',audio.playTinTouch],['cloth',audio.playClothTouch]]){
+   const ctx=new OfflineAudioContext(1,22050,22050);play(ctx,ctx.destination,.1);
+   const data=(await ctx.startRendering()).getChannelData(0);let peak=0,power=0;
+   for(const v of data){peak=Math.max(peak,Math.abs(v));power+=v*v}
+   check(`Audio: ${kind} foley renders finite quiet sound`,data.every(Number.isFinite)&&peak>.002&&peak<.12&&power/data.length>.00000005);
+   check(`Audio: ${kind} foley begins after touch and settles within half a second`,data.slice(0,2200).every(v=>v===0)&&data.slice(11025).every(v=>Math.abs(v)<.00001));
+   signatures.push([...data.slice(2500,2510)]);
+  }
+  check('Audio: metal and cloth render different actual waveforms',JSON.stringify(signatures[0])!==JSON.stringify(signatures[1]));
+ }else check('Audio: material foley synthesis is available',false);
  return checks;
 }

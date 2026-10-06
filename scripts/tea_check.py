@@ -13,6 +13,8 @@ import time
 import urllib.request
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from game_entry import enter_game
+from scene_gestures import scene_ready
 from stitch_gestures import finish_stitch, stitch_ready, stitch_status
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -191,7 +193,7 @@ def run(scenario):
 
     def ready():
         page.wait_for_function('window.dollhouse && !document.querySelector("#loading")', timeout=60000)
-        page.wait_for_function('!window.dollhouse.visual().cameraMoving', timeout=60000)
+        scene_ready(page)
 
     def resize(viewport):
         # ResizeObserver and the work camera can still describe the old viewport
@@ -282,6 +284,7 @@ def run(scenario):
         ready()
 
     def object_point(key):
+        scene_ready(page)
         point = next(p for p in page.evaluate('window.dollhouse.objects()') if p['key'] == key)
         check('scene object remains physically reachable: ' + key, page.evaluate('p=>document.elementFromPoint(p.x,p.y)?.id==="world"', point))
         return point
@@ -384,7 +387,7 @@ def run(scenario):
         page.set_default_timeout(20000)
         page.on('pageerror', lambda e: errors.append(str(e)))
         page.on('console', lambda m: errors.append(m.text) if m.type == 'error' else None)
-        page.goto(base+'/?debug=1')
+        page.goto(base+'/?debug=1'); enter_game(page)
         ready()
         check(scenario + ' starts with fresh ritual and story progress', state()['activities']['mastery']['tea'] == 0 and state()['activities']['teaRecords'] == [None, None, None, None] and progress() == 0)
         if scenario == 'desktop':
@@ -492,7 +495,7 @@ def run(scenario):
             check('Desktop geometry sample observes the actual served table', working_visual['active'] and working_visual['served'])
             records = state()['activities']['teaRecords']
             exit_tea()
-            page.reload(wait_until='domcontentloaded')
+            page.reload(wait_until='domcontentloaded'); enter_game(page)
             ready()
             check('earned mastery and personal best survive reload', state()['activities']['mastery']['tea'] == 1 and state()['activities']['teaRecords'] == records and tea_status(page) is None)
         elif scenario == 'phone':
@@ -589,7 +592,7 @@ def run(scenario):
             targets_fit('320px guest')
             capture('10-small-phone-guest-empty')
             fill_tea_cup(page, tea_status(page)['cups'][0]['id'], touch=True, fill=.25)
-            page.reload(wait_until='domcontentloaded')
+            page.reload(wait_until='domcontentloaded'); enter_game(page)
             ready()
             check('reload discards an unfinished pour and restores the guest sprig', progress() == 9 and tea_status(page) is None and page.locator('[data-held-item="jasmine-sprig"]').is_visible())
             room('kitchen'); carry_to('prop:tea-set', touch=True)
@@ -599,7 +602,7 @@ def run(scenario):
             capture('11-small-phone-guest-served')
             heading_fit('320px Arabic guest')
             exit_tea()
-            page.reload(wait_until='domcontentloaded')
+            page.reload(wait_until='domcontentloaded'); enter_game(page)
             ready()
             check('reload after service restores the carried guest cup', progress() == 10 and page.locator('[data-held-item="guest-cup"]').is_visible())
             resize({'width': 667, 'height': 375})
@@ -648,7 +651,7 @@ def run(scenario):
             # Keep the served view for the genuine earned-day wait. Only then
             # leave/reload to verify the same earned progress and saved bests.
             new_earned_day()
-            page.reload(wait_until='domcontentloaded')
+            page.reload(wait_until='domcontentloaded'); enter_game(page)
             ready()
             check('earned mastery and all difficulty bests survive reload', state()['activities']['mastery']['tea'] == 2 and state()['activities']['teaRecords'] == records and tea_status(page) is None)
             enter()
@@ -699,7 +702,7 @@ def run(scenario):
             working_visual = page.evaluate('window.dollhouse.visual().tea')
             check('Advanced geometry sample observes the actual served three-cup table', working_visual['active'] and working_visual['served'])
             exit_tea()
-            page.reload(wait_until='domcontentloaded')
+            page.reload(wait_until='domcontentloaded'); enter_game(page)
             ready()
             check('bests for all three played difficulties survive a real reload', state()['activities']['teaRecords'] == advanced_records and all(record is not None for record in advanced_records[:3]))
         (out/'render-stats.json').write_text(json.dumps({'outside': outside_stats, 'workingHigh': working_high_stats, 'working': working_stats, 'tea': working_visual}, indent=2))

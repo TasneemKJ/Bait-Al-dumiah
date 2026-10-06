@@ -3,6 +3,12 @@
 import {strings} from './locale-data.js';
 export {strings,translate,number} from './locale-data.js';
 Object.assign(strings.en,{
+ homeEntryChanged:'Your saved house changed in another tab. Reload to open the latest save.',homeEntryUnreadable:'Your saved house could not be checked. Reload before continuing. Nothing was replaced.',
+ homePlay:'Play',homeContinue:'Continue',homePreferences:'Preferences',homeBack:'Back',homeSoundOn:'Sound on',homeSoundOff:'Sound off',
+ homeReadFailed:'Your saved house could not be read. This visit will not replace it.',
+ homeInvalidSave:'This save could not be opened. Play starts a fresh house.',
+
+ storyFindObject:'Find {object}',storyReadClue:'Unfold the clue',storyFoldClue:'Fold the clue',
  kitchenIn:'Kitchen',parlorIn:'Liwan',studioIn:'Studio',bedroomIn:'Bedroom',
  'object-moon-mobile':'Moon mobile',
  calmDayOne:'The house breathes out. Lina hums by the kettle, and nothing needs you for a little while.',
@@ -40,6 +46,12 @@ Object.assign(strings.en,{
  'activityRule-lullaby':'Watch and listen. Pull the hanging charms in reverse order; the little moon repeats the song.',
 });
 Object.assign(strings.ar,{
+ homeEntryChanged:'حفظ بيتك تغيّر بتبويب تاني. حمّل الصفحة من جديد لتفتح آخر حفظ.',homeEntryUnreadable:'ما قدرنا نتأكّد من حفظ بيتك. حمّل الصفحة من جديد قبل ما تكمّل. ما استبدلنا شي.',
+ homePlay:'العب',homeContinue:'كمّل',homePreferences:'تفضيلات',homeBack:'رجوع',homeSoundOn:'الصوت شغّال',homeSoundOff:'الصوت مطفّي',
+ homeReadFailed:'ما قدرنا نقرأ بيتك المحفوظ. هالزيارة ما رح تستبدله.',
+ homeInvalidSave:'ما قدرنا نفتح هالحفظ. اللعب بيفتح بيت جديد.',
+
+ storyFindObject:'دوّر على {object}',storyReadClue:'افتح الورقة',storyFoldClue:'اطوي الورقة',
  kitchenIn:'بالمطبخ',parlorIn:'بالليوان',studioIn:'بأوضة التطريز',bedroomIn:'بأوضة النوم',
  // Counts read as "label: n / total" so no number has to agree with a noun (two cups would need the dual).
  stitchProgress:'الأجزاء المخيّطة: {done} / {total}',teaProgress:'الفناجين الجاهزة: {ready} / {total}',

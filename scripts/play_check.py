@@ -2,6 +2,7 @@
 import json,os,subprocess,time,traceback,urllib.request
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from game_entry import enter_game
 ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'artifacts';OUT.mkdir(exist_ok=True)
 PORT=os.environ.get('PORT','4177')
 BASE=os.environ.get('PLAY_URL',f'http://127.0.0.1:{PORT}')
@@ -37,7 +38,7 @@ def open_settings(page):click(page,'panel-settings')
 def reload_game(page):
  # After a long software-WebGL session, teardown/re-init can exceed the 12s click deadline.
  # The game ships only local runtime assets, so app readiness is the meaningful persistence gate.
- page.reload(wait_until='domcontentloaded',timeout=60000)
+ page.reload(wait_until='domcontentloaded',timeout=60000); enter_game(page)
  page.wait_for_function('window.dollhouse?.state && !document.querySelector("#loading")',timeout=60000)
 try:
  with sync_playwright() as p:
@@ -48,7 +49,7 @@ try:
   page=ctx.new_page();page.set_default_timeout(12000)
   page.on('pageerror',lambda e:errors.append(str(e)))
   page.on('console',lambda m:errors.append(m.text) if m.type=='error' else None)
-  page.goto(BASE+'/?debug=1',wait_until='networkidle');page.wait_for_timeout(1500)
+  page.goto(BASE+'/?debug=1',wait_until='networkidle'); enter_game(page);page.wait_for_timeout(1500)
   capture(page,'desktop-day')
   check('3D house starts without fallback or JS error',not page.locator('.error-screen').count() and not errors)
   check('no loading overlay remains',not page.locator('#loading').count())

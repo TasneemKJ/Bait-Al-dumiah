@@ -47,3 +47,10 @@ test('no swell when the game opens at night, when muted, or when paused',()=>{
  const b=graph(),muted=new DollhouseAudio();muted.context=b.context;muted.master={};muted.enabled=false;muted.sawDay=true;muted.tick(true);assert.equal(muted.nodes.size,0);
  const c=graph(),paused=new DollhouseAudio();paused.context=c.context;paused.master={};paused.enabled=true;paused.paused=true;paused.tick(false);paused.tick(true);assert.equal(paused.nodes.size,0);
 });
+
+test('a day heard before Pause cannot produce a stale dusk swell on night resume',()=>{
+ const {context}=graph();context.suspend=context.resume=()=>Promise.resolve();const audio=new DollhouseAudio();audio.context=context;audio.master={};audio.enabled=true;audio.next=Infinity;audio.tick(false);audio.setPaused(true);audio.setPaused(false);audio.next=Infinity;audio.tick(true);assert.equal(audio.nodes.size,0,'resuming into night is not a heard day-to-night transition');audio.tick(false);audio.tick(true);assert.equal(audio.nodes.size,DUSK_SWELL.length,'a later real listened transition still plays once');
+});
+test('muting retires the observed daytime so re-enabling at night cannot replay dusk',()=>{
+ const {context}=graph();context.suspend=()=>Promise.resolve();const audio=new DollhouseAudio();audio.context=context;audio.master={};audio.enabled=true;audio.next=Infinity;audio.tick(false);audio.mute();audio.enabled=true;audio.tick(true);assert.equal(audio.nodes.size,0);audio.tick(false);audio.tick(true);assert.equal(audio.nodes.size,DUSK_SWELL.length);
+});

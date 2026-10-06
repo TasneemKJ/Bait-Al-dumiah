@@ -263,3 +263,83 @@ The active correction and its complete acceptance are finished at runtime commit
 The same existing hourly continuation, **Bait Development & Visuals** (6ac2d2615d3c8191b78c1f2e5266c934), was updated and confirmed enabled at 2026-10-05T00:56:34.253306+00:00. Its recurrence remains FREQ=HOURLY, with the existing schedule and Asia/Amman timezone preserved. No duplicate task was created. It now follows draft PR #12 / feat/scene-play-polish, the accepted runtime and the committed jasmine design, while requiring fresh live-head/PR/CI checks and respecting any later active-session reservation.
 
 Continue until the user asks to stop; then disable this task. The next implementation is the prepared eighth iteration, not an already completed feature. If a later live ledger shows it underway or complete, preserve that work and follow its current next step. Use exactly twenty ideas before each subsequent coherent iteration, genuine desktop/phone/keyboard play and original-image review, independent review for substantial changes, and an honest commit after each completed iteration. Ordinary design decisions remain delegated. Keep the Levantine identity, bilingual access, local assets, save v1, earned economy and existing production boundary. If PR #12 has been merged, start a fresh development branch from updated main.
+
+## 2026-10-05 — Tactile material atmosphere, safe source slice, rendered acceptance blocked
+
+Scope: the approved miniature-film direction, existing mint-tin → bear seam → Noor's bed story. No new story, economy, simulation state, saved field, menu, or remote asset.
+
+IDEAL: Identify the story landmarks' generic painted/wooden finishes; define a quieter material contrast and tactile response that reads without text; explore the twenty ideas below; act on enamel, cloth and gesture-gated foley plus safe room-light input; look back using real mesh/material tests, rendered captures, mobile checks and the unchanged budgets.
+
+5Ws: Who: casual phone players discovering the first story. What: recognize a cool enamel tin and soft mended companion, then feel a small response when touching them. When: taking thread and returning/replaying the earned bear. Where: kitchen shelf and Noor's moon bed. Why: physical, persistent consequences invite a return to the home without rewards or more chrome.
+
+Exactly twenty ideas for this coherent slice:
+1. Tin enamel separates from matte painted furniture (visuals; selected).
+2. Existing rolled brass rim catches a soft practical highlight (visuals; retain existing finish).
+3. Bear body and patch share woven textile relief rather than walnut grain (atmosphere; selected).
+4. A brief bear compression settles back onto its bed (game feel; selected).
+5. A small tin resonance replaces its generic reward melody (audio; selected).
+6. A filtered cloth rustle accompanies bear handling (audio; selected).
+7. Keep selection feedback inside the room instead of new UI (UI/UX; retain).
+8. Let the earned red seam teach the lasting consequence (self-teaching; retain).
+9. Match Arabic object wording to the same physical action (writing; no new copy needed).
+10. Freeze the tactile response without hiding earned objects (accessibility; selected).
+11. Preserve existing tap/select/act and drag destinations (controls; retain).
+12. Replay the bear without repeated payouts (loop/balance; retain and test).
+13. A later doll glance toward the earned bear (replayability; deferred).
+14. Tin cavity shading that exposes the thread before taking (visuals; deferred).
+15. Contact shade under the bear, if achievable within draw budget (depth; deferred).
+16. Matte jasmine pollen, sharing the flower's paint batch (performance; selected to fund enamel).
+17. Avoid allocating new lights or materials per update (performance; selected invariant).
+18. Reject prototype-key room IDs before light lookup (stability; selected defect fix).
+19. Verify old saves leave audio muted and outcomes earned (data safety; retain and test).
+20. Preserve a baseline and honest remaining-pass roadmap (release readiness; selected).
+
+Ruling: replace the unimplemented `houseRefinement40` array-count assertion with real renderer/material and input behavior assertions. The old contract accepted any forty numbers and had no consumer; its numeric shape was not a valid rendering requirement. The approved forty-item roadmap remains open; this slice does not claim forty iterations. Cost if wrong: none of the unrelated roadmap items gain implementation through this replacement, so they must remain explicit future work.
+
+Baseline: dependency setup required a writable npm cache (`/tmp/bait-npm-cache`). `npm test`: 245 tests, 244 pass, one existing missing `houseRefinement40` failure. `npm run build`: pass. Story tableaux: 19 visible mesh calls and 7,266 triangles. Source capture/QA paths are external to the repository. Initial cloud Chromium launch is blocked by sandbox socket permissions and an escalated runtime mount error; screenshot review is pending, not passed.
+
+TDD: the inherited `constructor` room ID produced undefined color/distance and NaN intensity in the new regression test. Restricting room keys to authored own string properties makes all nine lighting-policy tests pass. Material and foley tests are initially RED for absent enamel/cloth response and generic-note sound.
+
+
+Final scope ruling: the cloud browser cannot access localhost:4391 (`ERR_BLOCKED_BY_CLIENT`), while executor Chromium fails before launch because of sandbox socket/mount restrictions. Keep the reproduced safe-light fix and tested foley routing, but defer all enamel, cloth-mesh, compression, pollen and contact-shadow changes. The initially RED material test was a newly written candidate and is not included in this source-only batch because its associated visual implementation is explicitly deferred. No earlier valid material test was removed. Cost: this draft does not deliver a reviewed visual improvement yet.
+
+Actual passes in this batch: (1) safe lighting fallback, reproduced RED then GREEN; (2) material-specific audio dispatch/lifecycle, reproduced RED then GREEN. Five new real OfflineAudioContext waveform checks are authored in the existing browser art suite but cannot be executed here. They are not evidence of heard or rendered audio until that suite runs. The geometry/material/lighting composition remains unchanged, so the twenty-idea material shortlist and the remaining forty-roadmap are open work.
+
+Fresh source gate: `npm run verify` exits 0 with 248 tests passed, zero failures/cancellations/skips, and a successful self-contained static build. Baseline was 244/245 plus a successful build. `node --test tests/atmosphere-policy-refinement.test.mjs` passes 9/9; `node --test tests/story-foley.test.mjs tests/audio-lifecycle.test.mjs` passes 5/5. No browser, mobile/Arabic, reduced-motion render, 4x CPU, waveform render or listening result is claimed. Screenshot set: none, blocked before capture. Independent reviewer dispatch hit the session's global thread limit; parent review is still required before release.
+
+
+## 2026-10-05 — Reclaim the miniature
+Twenty IDEAL/5Ws ideas and scope: `specs/2026-10-05-reclaim-the-miniature.md`. Selected composition, folded clue, navigation edge and arrival self-teaching. Baseline originals at commit 5e1d9df were viewed before changing the foley-preserving 648e5f3 source.
+
+RED: all three new behavior regressions failed for missing behavior: no idle 360×640 zoom gain (1.172 remained 1.172), no recovered 390×844 vertical placement, and unchanged “Look in the Kitchen” arrival text. GREEN: presentation-aware framing and localized arrival labels pass those tests. Additional checks cover all room-edge corners, home reset, hidden-state measurements, no-op observer filtering and work-camera isolation. Independent source review caught and corrected a narrow-landscape tools collision, an inherited hidden book icon, a ritual-dock inset leak and repeated unrelated layout reads. Crowded selected responses now reuse their ribbon.
+
+This batch changes no simulation/save/economy, audio, mesh/material or budget policy. Fresh unit/build validation and the exact changed-file payload are retained with the implementation handoff. Real DOM/full-game checks, original screenshots, Arabic/night contrast and 4× CPU measurements remain required before any visual acceptance or release claim.
+
+## 2026-10-05 — Measured-house input synchronization correction
+
+The exact-source QA run on merged head `9fe9e8480da80d15a7bdffe2ef60b228c55f3ad6` reproduced the scene-input timing race without modifying the game. `cameraMoving === false` alone was insufficient: reduced-motion room navigation completed immediately, while the next animation frame still measured the dismissed story response and changed the room pose. In Arabic, the sewing target sampled at y430.86 moved to y485.26 before pointerdown; it stayed fixed throughout the carried gesture, whose stale destination missed. A later stable-target drop entered the real bear seam. English selection similarly sampled the pre-ribbon tin at y526.10 before the room moved it to y416.50, so the second touch selected a different object.
+
+The shared read-only scene-input helper now requires three agreeing rendered-frame observations of measured insets, viewport, focused/selected state and actual projected object coordinates before choosing a pointer destination. The tea, sewing and story journeys retain all existing gameplay assertions and genuine input. A separate regression covers first-attempt tin selection/activation, room-change carry/drop, target stability during the held gesture and safe ritual exit in English/Arabic, reduced/normal motion and 4× CPU fixtures. No runtime, camera policy, pick box, simulation rule, reward or save code changes.
+
+Evidence: diagnostic run `37358415900` retains the boundary traces and original renders. Its Arabic stale-coordinate drop was reproduced and recovered; its English diagnostic stopped after reselecting the correct object because the diagnostic's one-tap recovery was intentionally insufficient to activate a newly selected prop. That diagnostic is not recorded as passing acceptance. Local full `npm run verify` and Python compilation pass after the harness correction; exact-head complete physical journeys and the focused browser regression remain pending and must pass before release.
+
+The first corrected exact-source run (`37359689674`, product `301e0f7`) passed all four focused input fixtures, 65/65 physical tea checks, 99/99 physical sewing checks, 258 source tests, DOM contracts and 320 art checks. Tea and sewing original Arabic phone/night/landscape images were recovered with SHA-256 verification. The independent chime script exposed the same unguarded two-touch scene-entry assumption and now uses the shared scene helper before each touch. The story run passed tin activation but exceeded its separate 20-second navigation deadline while reloading; its failure observation showed the new house restored with the red thread intact. Navigation now has the same finite 60-second allowance as scene readiness and screenshots; no gameplay assertion or simulation timing changed. Final chime/story verification remains required.
+
+### 2026-10-05 — Stable scene selection correction (native acceptance pending)
+The settled/reprojected journeys did not certify ordinary repeated-touch usability. Native original coordinates showed tin y526.1→416.5 after selection, and the next unchanged-position touch selected the tea set. Keep that failure visible. The bounded correction preserves direct scene selection poses, caches insets during selection/gesture ownership, and uses measured portrait ribbon clearance. A blanket freeze was rejected because the360px held ribbon would cover the retained tea target. Twenty focused checks/ideas, alternatives and invariants are in `specs/2026-10-05-stable-scene-selection.md`.
+
+Real Three.js projection regressions failed under the extracted prior refit behavior and pass with selection/carry/pointer guards. New native tests never reproject between first and second touches; the full story script additionally checks that real held drops leave their original destination fixed and exposed. No authored target, state, save, reward or physical activity shortcut changed. Local source verification passes; current-source native checks and independent review remain required, with the PR held draft.
+
+Independent review of candidate3991a362 found one source blocker: a selected viewport rotation could retain stale portrait insets. The added deterministic regression failed at tin y332.7 vs the current landscape target y154.6, then passed after carrying measured viewport dimensions through the layout adapter to the presentation controller. Resize permits one current-layout refit and cancels held carry; selection-only callbacks stay blocked. The new native coverage includes selected rotation, portrait return and all four owner-required viewport sizes. Native candidate3991a362 is diagnostic only; do not treat it as final-source acceptance.
+
+A second independent review of candidate 66692f8 identified the actual rAF-before-ResizeObserver ordering: stale ribbon orientation could still consume the first viewport measurement. The boundary was mapped before changing it. Final coordination now lives in the layout measurement owner: synchronize canvas size, safely cancel held carry, place current paper, measure rectangles, then fit. Independent world/story ResizeObservers were removed, rather than adding delay/exception flags. Real-controller integration tests cover both callback orders, repeated rotations and duplicate notifications; real carry/simulation snapshot checks prove cancellation cannot consume, reward or send a drop. The final viewport fit is immediate even when paused. Earlier candidates remain diagnostic only; final-source native acceptance and independent review are still required.
+
+The focused native first wave on final-source16b8cb68 executed the whole-house landscape gate and found a real overlap in both locales: the stationary tin at y254.06 was covered by ribbon y253–315, which owned the second touch; story step0 remained. The original images were SHA-verified and viewed. Bounded follow-up extends measured-clearance placement to short landscape using the actual horizontal overlap of top controls and safe-area inset. It also checks paper placement synchronously after final viewport fit. Camera locks, coordinated resize ownership and input semantics are unchanged. New source cases preserve this failure, and native checks assert final fitted target exposure after rotation and explicit room navigation. The first wave's failing assertions and images remain acceptance evidence; current correction still requires independent source review and fresh native acceptance.
+
+
+## 2026-10-05 — Safe Home, incremental entry only
+IDEAL: identify dense immediate entry; define safe one-activation entry; explore the twenty ideas below; act on Home only; look back through test and exact-source native evidence. 5Ws: new and returning phone players; enter their miniature without sorting a dashboard; on cold launch; a distinct inactive Home; reduce initial comprehension burden without removing earned choices.
+
+Twenty ideas: 1. Two-action Home. 2. Safe Continue. 3. Native miniature as focal point. 4. One flat Preferences. 5. Named alternate language. 6. Saved sound intent plus gesture unlock. 7. Saved reduced motion respected. 8. No canonical Home time. 9. No Home economy. 10. Separate preference persistence. 11. Protected failed storage read. 12. Corrupt-save fallback. 13. One-time activation latch. 14. Keyboard focus handoff. 15. Inert gameplay during Home. 16. Portrait/landscape stage. 17. Bilingual safe-area targets. 18. No stacked tutorial. 19. Preserve earned rewards. 20. Honest incremental/native acceptance reporting.
+
+Selected: these bounded entry/lifecycle safeguards, preserving all gameplay commands and native house art. Deferred: world-led chrome removal, full command access map, sparse Pause/Home return routing, advanced world-state simplification. No retention improvement is claimed.

@@ -2,6 +2,8 @@
 import json,os,subprocess,time,traceback,urllib.request
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from game_entry import enter_game
+from scene_gestures import scene_ready
 from chime_gestures import wait_for_echo,pluck_chime
 ROOT=Path(__file__).resolve().parents[1]
 SCENARIO=os.environ.get('CHIME_SCENARIO','desktop')
@@ -130,10 +132,11 @@ def paint_probe():
 
 def start_from_scene():
  page.locator('[data-room=bedroom]').click()
- page.wait_for_function('!window.dollhouse.visual().cameraMoving',timeout=60000)
+ scene_ready(page)
  house_hud_fit('bedroom entry')
  capture('00-bedroom-mobile')
  for _ in range(2):
+  scene_ready(page)
   p=page.evaluate('window.dollhouse.objects().find(p=>p.key==="prop:moon-mobile")')
   if SCENARIO=='phone':page.touchscreen.tap(p['x'],p['y'])
   else:page.mouse.click(p['x'],p['y'])
@@ -158,7 +161,7 @@ try:
   if SCENARIO=='phone':
    # Authored old-save settings fixture only. No earned gameplay is seeded.
    page.add_init_script("localStorage.setItem('bait-al-dumiah.v1',JSON.stringify({version:1,settings:{locale:'ar',muted:true,reducedMotion:true,quality:'auto'}}))")
-  page.goto(BASE+'/?debug=1',wait_until='domcontentloaded',timeout=60000)
+  page.goto(BASE+'/?debug=1',wait_until='domcontentloaded',timeout=60000); enter_game(page)
   page.wait_for_function('window.dollhouse&&!document.querySelector("#loading")',timeout=90000)
   start_from_scene();capture('01-instrument');targets_fit(SCENARIO+' initial instrument')
   check('five separated physical targets are available',len(page.evaluate('window.dollhouse.chimeObjects()'))==5)
@@ -248,7 +251,7 @@ try:
   else:
    paint_probe()
   if SCENARIO=='desktop':
-   page.reload(wait_until='domcontentloaded',timeout=60000);page.wait_for_function('window.dollhouse&&!document.querySelector("#loading")',timeout=90000)
+   page.reload(wait_until='domcontentloaded',timeout=60000); enter_game(page);page.wait_for_function('window.dollhouse&&!document.querySelector("#loading")',timeout=90000)
    check('earned moon mastery survives a real HTTP reload',snapshot()['activities']['mastery']['lullaby']==1 and status() is None)
   check('journey has no JavaScript or console errors',not errors)
   (OUT/'checks.json').write_text(json.dumps({'checks':checks,'errors':errors,'stats':stats},indent=2));browser.close()

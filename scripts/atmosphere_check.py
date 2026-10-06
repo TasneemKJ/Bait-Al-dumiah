@@ -2,6 +2,7 @@
 import json, os, subprocess, time, urllib.request, wave, struct
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from game_entry import enter_game
 ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'artifacts/levantine';OUT.mkdir(parents=True,exist_ok=True)
 URL='http://127.0.0.1:4189';results=[];errors=[]
 server=subprocess.Popen(['node','scripts/serve.mjs','dist'],cwd=ROOT,env={**os.environ,'PORT':'4189'},stdout=subprocess.DEVNULL)
@@ -22,12 +23,12 @@ try:
   browser=p.chromium.launch(**options);page=browser.new_page(viewport={'width':1440,'height':1000});page.set_default_timeout(20000)
   page.on('pageerror',lambda e:errors.append(str(e)))
   page.on('console',lambda m:errors.append(m.text) if m.type=='error' else None)
-  page.goto(URL+'/?debug=1',wait_until='networkidle')
+  page.goto(URL+'/?debug=1',wait_until='networkidle'); enter_game(page)
   fixture=page.evaluate('''async()=>{const {createState}=await import('/src/simulation.js');const {SAVE_KEY}=await import('/src/content.js');const s=createState();s.elapsed=18;s.clock=145;s.settings.locale='ar';return {key:SAVE_KEY,value:JSON.stringify(s)};}''')
   # Seed the incoming document before main.js reads its save. Writing in the old
   # document loses to the legitimate pagehide autosave during page.reload().
   page.add_init_script('localStorage.setItem('+json.dumps(fixture['key'])+','+json.dumps(fixture['value'])+');')
-  page.reload(wait_until='networkidle')
+  page.reload(wait_until='networkidle'); enter_game(page)
   initial=page.evaluate('({state:dollhouse.state(),visual:dollhouse.visual(),hidden:document.hidden})')
   (OUT/'night-initial-state.json').write_text(json.dumps(initial,indent=2))
   check('the night fixture survives pagehide autosave and loads before the app',initial['state']['clock']>=120 and initial['state']['settings']['locale']=='ar')

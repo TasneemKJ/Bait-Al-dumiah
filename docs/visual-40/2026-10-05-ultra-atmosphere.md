@@ -5,7 +5,9 @@ Branch: `visuals/ultra-atmosphere-2026-10-05`
 
 **Identity lock:** Cute-creepy Levantine miniature home; high-end dollhouse film lighting; no jump scares or gore.
 
-Each numbered pass is a concrete visual refinement. They are implemented in eight five-pass batches so every batch can be reviewed and reverted independently without manufacturing forty meaningless commits.
+This is an unfinished forty-item roadmap, not a count of completed iterations. A numbered item is complete only after its real implementation and fresh verification evidence are recorded. Eight arrays of five numbers do not constitute forty improvements.
+
+Current 2026-10-05 slice: item 35 has a reproduced inherited-room-key regression and nine passing lighting-policy tests. Material work toward item 15 is deferred pending rendered baseline access; no mesh changes are shipped. The remaining roadmap items are not claimed complete by this batch.
 
 1. Increase cutaway depth between front rooms and back wall.
 2. Add slightly stronger room-to-room fog separation.

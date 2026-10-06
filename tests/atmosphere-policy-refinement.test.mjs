@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {framing,lighting,nightSky,fog} from '../src/render/visual-policy.js';
+import {framing,lighting,nightSky,fog,roomLighting} from '../src/render/visual-policy.js';
 import {nightFrame} from '../src/night-score.js';
 
 test('portrait whole-house framing keeps the miniature large enough to read',async()=>{
@@ -60,4 +60,24 @@ test('each tagged room lamp gets its own profile, scaled by the night cue and fo
  assert.ok(practicalLight('studio',1,lamps,1,true).intensity>studio.intensity);
  assert.equal(practicalLight('studio',1,lamps,0).intensity,0);
  for(const bad of [NaN,-5,Infinity])assert.ok(Number.isFinite(practicalLight('kitchen',1,bad,bad).intensity));
+});
+// The old eight-array/40-value placeholder had no renderer consumer and could
+// pass with arbitrary numbers. The forty-item roadmap remains unfinished;
+// this batch verifies the real safe-light contract rather than counting values.
+test('room practicals reject inherited and malformed room identifiers',()=>{
+ const warm=roomLighting('kitchen',1);
+ for(const id of ['missing','constructor','toString','__proto__',null,undefined,{},[]]){
+  assert.deepEqual(roomLighting(id,Infinity),warm,`unsafe room ${String(id)}`);
+ }
+});
+test('each actual room keeps a finite monotonic practical across the day',()=>{
+ for(const id of ['kitchen','parlor','studio','bedroom']){
+  let prior=0;const night=roomLighting(id,1);
+  for(const mix of [-10,0,.2,.5,.8,1,10]){
+   const p=roomLighting(id,mix);
+   assert.ok(Number.isFinite(p.intensity)&&p.intensity>=prior&&p.intensity<=3.2);
+   assert.equal(p.color,night.color);assert.equal(p.distance,night.distance);prior=p.intensity;
+  }
+  for(const bad of [NaN,Infinity,-Infinity,undefined,null,'night',{},[]])assert.deepEqual(roomLighting(id,bad),night);
+ }
 });
