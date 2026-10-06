@@ -5,6 +5,7 @@ export {strings,translate,number} from './locale-data.js';
 Object.assign(strings.en,{
  kitchenIn:'Kitchen',parlorIn:'Liwan',studioIn:'Studio',bedroomIn:'Bedroom',
  'object-moon-mobile':'Moon mobile',
+ calmDayOne:'The house breathes out. Lina hums by the kettle, and nothing needs you for a little while.',
  firstNightHint:'Night has fallen. Someone small is waiting by the door: touch “Greet the visitor”.',
  largeText:'Larger text',largeTextHelp:'Makes the cards and lists easier to read.',
  clueToggle:'Read the clue',
@@ -45,6 +46,7 @@ Object.assign(strings.ar,{
  activityCooldown:'المكافأة الجاية بتجهز بعد {x} من ثواني اللعب. فيك تتمرّن هلّق.',
  storyFindRoom:'شوف {room}',
  'object-moon-mobile':'زينة القمر',
+ calmDayOne:'البيت عم يرتاح. لينا بتدندن حدّ الإبريق، وما في شي مستعجل هلّق.',
  firstNightHint:'نزل الليل. في حدا صغير ناطر عالباب: اضغط «سلّم عالزائر».',
  largeText:'خطّ أكبر',largeTextHelp:'بيكبّر الكتابة بالبطاقات والقوائم لتصير أسهل للقراية.',
  clueToggle:'اقرا الدليل',
