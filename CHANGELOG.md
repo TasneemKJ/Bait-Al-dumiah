@@ -2,6 +2,7 @@
 Each merged batch adds an entry and a `vX.Y.Z` tag.
 
 ## Unreleased
+- Atmosphere: golden hour. For about half a minute before night the sky gains a warm horizon band, the key light turns amber and the windows glow warm; it hands over to the night look and is zero for the rest of the day.
 - Writing: one calm day-one line ("The house breathes out...") after the opening burst, once, only after the player has cared for someone; stored in the optional whitelisted `hints.calm`.
 - Arabic copy: counts read as "label: n / total" (no number before a plural noun), reward wording matches, and the clue button no longer joins a kashida to the article or says "in the sleeping"; a contract test scans digits, placeholders and these rules. Pacing: `scripts/pacing-curve.mjs` and `docs/audits/2026-10-06-pacing.md` publish the first measured curve.
 - Self-teaching: after day 3 the wish ring returns at half strength, only in daylight and only after the player has gone 75 s without caring for anyone; any care puts it out, and it is steady under reduced motion.

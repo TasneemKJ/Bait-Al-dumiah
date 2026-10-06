@@ -13,3 +13,12 @@ test('night sky is explicitly linear and keeps cream HUD text readable even at m
  for(const key of ['bottom','top']){const rgb=sky[key].map((v,i)=>v+sky.glow[i]);const y=rgb.reduce((n,v,i)=>n+v*[.2126,.7152,.0722][i],0);assert.ok(y<.075,'avoid a washed-out gray night sky');assert.ok((.8+.05)/(y+.05)>7,'cream HUD remains readable')}
 });
 test('night lighting preserves a gentle front light on porcelain faces',()=>{const {lighting}=policy();assert.ok(lighting(1).key>=.50);assert.ok(lighting(1).ambient>=.50)});
+
+test('golden hour is a bounded bump before night, zero for the rest of the day',async()=>{
+ const {duskGlow}=await import('../src/render/visual-policy.js');
+ for(const c of [0,30,60,90,95,126,130,180,239.9])assert.equal(duskGlow(c),0,'clock '+c);
+ const samples=[];for(let c=96;c<=126;c+=1)samples.push(duskGlow(c));
+ assert.ok(samples.every(v=>v>=0&&v<=1));assert.ok(Math.max(...samples)>.9,'reaches nearly full glow');
+ assert.ok(duskGlow(105)<duskGlow(112)&&duskGlow(112)>duskGlow(122),'rises then falls');
+ for(const bad of [NaN,undefined,-5,Infinity])assert.ok(Number.isFinite(duskGlow(bad)));
+});
