@@ -4,6 +4,7 @@ import {strings} from './locale-data.js';
 export {strings,translate,number} from './locale-data.js';
 Object.assign(strings.en,{
  'object-moon-mobile':'Moon mobile',
+ firstNightHint:'Night has fallen. Someone small is waiting by the door: touch “Greet the visitor”.',
  largeText:'Larger text',largeTextHelp:'Makes the cards and lists easier to read.',
  clueToggle:'Read the clue',
  returnBasket:'Welcome home. While you were away, the dolls sewed buttons into the basket: {count}.',returnMilestone:'Welcome home. Rewards waiting in the journal: {count}.',returnWishes:'Welcome home. Little wishes waiting today: {count}.',returnCalm:'Welcome home. The house kept your place, and the kettle is still warm.',
@@ -38,6 +39,7 @@ Object.assign(strings.en,{
 });
 Object.assign(strings.ar,{
  'object-moon-mobile':'زينة القمر',
+ firstNightHint:'نزل الليل. في حدا صغير ناطر عالباب: اضغط «سلّم عالزائر».',
  largeText:'خطّ أكبر',largeTextHelp:'بيكبّر الكتابة بالبطاقات والقوائم لتصير أسهل للقراية.',
  clueToggle:'اقرا الدليل',
  returnBasket:'أهلين رجعت. وانت غايب، الدمى خيّطوا أزرار بالسلة: {count}.',returnMilestone:'أهلين رجعت. هدايا ناطرتك بالدفتر: {count}.',returnWishes:'أهلين رجعت. أمنيات صغيرة ناطرة اليوم: {count}.',returnCalm:'أهلين رجعت. البيت حفظلك مطرحك، والإبريق لسا سخن.',
