@@ -1,0 +1,81 @@
+name: Bait pure integrated Home acceptance, split contexts
+on:
+  push:
+    branches: ['qa/bait-home-integrated-cf21591-20261006']
+permissions:
+  contents: read
+jobs:
+  acceptance:
+    name: Home ${{ matrix.mode }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - mode: behavior-4x
+            minutes: 25
+          - mode: visual-1x
+            minutes: 20
+    defaults:
+      run:
+        working-directory: source
+        shell: bash
+    env:
+      SOURCE_SHA: cf2159197cfe3d2da64b070eb59721ca41b8f6d0
+      SOURCE_TREE: 2b25016ab7a15165529a52c0e9f580757cb5b4cd
+      SOURCE_DIGEST: 41005ec6223f3e8f85e90f06bf47cd601d4849b42a181e811f92418ae59d5914
+      HOME_ACCEPTANCE_MODE: ${{ matrix.mode }}
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          path: harness
+          persist-credentials: false
+      - uses: actions/checkout@v7
+        with:
+          ref: cf2159197cfe3d2da64b070eb59721ca41b8f6d0
+          path: source
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Verify exact reviewed pure integration and executable harness contracts
+        run: |
+          python ../harness/scripts/verify-home-source.py ../harness/source-manifest.json
+          npm ci --ignore-scripts
+          npm run verify
+          python -m py_compile scripts/game_entry.py ../harness/scripts/*.py ../harness/decode-originals.py
+          python ../harness/scripts/test-home-init-contract.py ../harness/scripts/review-home-entry.py
+          python ../harness/scripts/test-home-getter-restore.py ../harness/scripts/review-home-entry.py
+          python ../harness/scripts/test-home-context-contract.py ../harness/scripts/review-home-entry.py
+          python ../harness/scripts/test-home-evidence-contract.py
+          python ../harness/scripts/test-home-save-route-contract.py
+          python -m pip install -r requirements.txt
+          python -m playwright install --with-deps chromium
+      - name: Native Home evidence in a dedicated labeled context
+        run: |
+          mkdir -p artifacts/home-native-wave
+          set +e
+          timeout --signal=INT --kill-after=45s ${{ matrix.minutes }}m python -u ../harness/scripts/review-home-entry.py 2>&1 | tee artifacts/home-native-wave/${{ matrix.mode }}.log
+          status=${PIPESTATUS[0]}
+          set -e
+          printf 'COMMAND_EXIT %s\n' "$status"
+          exit "$status"
+      - name: Separate behavioral summaries and normal-speed original pixels
+        if: always()
+        run: python ../harness/scripts/report-home-evidence.py
+      - name: Prepare bounded failure evidence
+        if: failure()
+        run: python scripts/trim-artifacts.py home-integrated-${{ matrix.mode }}
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: home-integrated-${{ matrix.mode }}-failure
+          path: source/failure-evidence
+          retention-days: 1
+          if-no-files-found: ignore
