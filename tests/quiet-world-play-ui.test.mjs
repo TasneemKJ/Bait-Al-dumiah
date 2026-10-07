@@ -19,7 +19,7 @@ test('the first playable phone row contains the folded story clue and the house 
 });
 test('the complete house keeps its existing controls and options',()=>{
  for(const name of ['household','activities','decorate','journal','settings'])assert.ok(html.includes("'"+name+"'")||html.includes(name),'keeps '+name);
- assert.match(html,/data-action="toggle-tools"/);
- assert.match(html,/data-action="pause"/);
+ assert.match(html,/button\('toggle-tools'/);
+ assert.match(html,/button\('pause'/);
  assert.match(html,/data-action="light"/);
 });
