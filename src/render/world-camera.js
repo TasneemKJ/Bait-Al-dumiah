@@ -17,8 +17,11 @@ export function cameraApi(w){
   orbit(amount){if(working())return;cameraMove.cancel();const offset=camera.position.clone().sub(controls.target);
   offset.applyAxisAngle(new T.Vector3(0,1,0),amount);
   camera.position.copy(controls.target).add(offset);controls.update()},
+  // Disabling input never freezes an authored room glide: a carry or sheet that starts mid-glide
+  // would otherwise strand the camera between rooms, away from where the player aimed.
+  // Direct camera input (controls 'start', zoom, orbit) still cancels the glide.
   setEnabled(enabled){st.requestedEnabled=Boolean(enabled);
-  controls.enabled=st.requestedEnabled&&!working();if(!enabled)cameraMove.cancel()},
+  controls.enabled=st.requestedEnabled&&!working()},
   project(id,height=1.0){const p=residents.position(id);if(!p)return null;p.y+=height;
   p.add(house.root.position);p.project(camera);
   return {x:(p.x+1)*canvas.clientWidth/2,y:(1-p.y)*canvas.clientHeight/2}},

@@ -10,7 +10,7 @@ function interactStory(app,key){
  if(app.ui.panel)app.ui.close();
  const result=sim.interactStory(app.state,key);
  if(!result.ok){app.storyUI?.respond(result.reason);return}
- if(['tea','stitch','lullaby'].includes(result.startedActivity)){app.enterWork(result.startedActivity);return}
+ if(result.startedActivity){app.enterWork(result.startedActivity);return}
  const o=objectInfo(app.state,key);if(o){app.world?.focusRoom(o.room,true);
  app.host.dataset.focusRoom=o.room;app.host.dataset.focusDoll=''}
  // A successful handoff changes the destination. Reveal its clue instead of
@@ -63,9 +63,9 @@ app.world?.setEnabled(!app.panelOpen&&!app.manualPause&&!app.fatal);return;},
      'musicbox':'care');app.save()}else app.storyUI?.respond(result.reason);return;
   },
 'use-object':(app,value,origin)=>{
-   const item=app.state.decor.find(d=>d.id===value),result=sim.useDecor(app.state,value);
-   if(result.ok){if(app.ui.panel)app.ui.close();app.dispatch('focus-room',item.room);
-   app.audio.effect(item.item==='musicbox'?'musicbox':item.item==='mobile'?'mobile':'care');
+   const result=sim.useDecor(app.state,value);
+   if(result.ok){if(app.ui.panel)app.ui.close();app.dispatch('focus-room',result.room);
+   app.audio.effect(result.item==='musicbox'?'musicbox':result.item==='mobile'?'mobile':'care');
    app.storyUI?.respond('keepsake-'+(result.effect==='water'?'watered':result.effect==='light'?
      'lit':result.effect==='dim'?'dimmed':result.effect==='wind'?
      'wound':'rocked'));app.save();app.storyUI?.update()}else app.storyUI?.respond(result.reason);return;

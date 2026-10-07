@@ -34,7 +34,10 @@ def main():
    page.locator('[data-scene-action="activate"]').click();page.wait_for_timeout(800)
    assert state(page)['story']['lastAction']=='prop:mint-tin','activating the tin advances the story'
    assert page.locator('.held-item').count()==1,'the red thread is carried'
-   page.locator('[data-room=studio]').click();page.wait_for_timeout(1200)
+   page.locator('[data-room=studio]').click()
+   # Software WebGL can run at about one frame a second, so the room glide may outlast any fixed wait:
+   # aim only once the camera has settled.
+   page.wait_for_function('window.dollhouse.visual()?.cameraMoving===false',timeout=60000)
    target=[o for o in page.evaluate('window.dollhouse.objects()') if o['key']=='prop:sewing-machine'][0]
    token=page.locator('.held-item').bounding_box()
    page.mouse.move(token['x']+token['width']/2,token['y']+token['height']/2);page.mouse.down()

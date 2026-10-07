@@ -2,6 +2,11 @@
 import * as sim from './simulation.js';
 import {ACTIVITY_ROOM} from './content.js';
 
+// A ritual surface asks the simulation to replay; it never inspects the run's phase itself.
+function replayWork(app,id){
+ if(app.fatal)return;const result=sim.replayActivity(app.state,id);if(!result.ok)return;
+ app.cancelWorkInput();if(result.restarted)app.enterWork(id);else app.updateWorkUI();
+}
 export const activitiesCommands={
 'recall-ready':(app,value,origin)=>{if(sim.startRecall(app.state).ok)app.ui.setActivityResult(null);return;},
 'activity-hint':(app,value,origin)=>{if(sim.toggleActivityHint(app.state).ok)app.ui.setActivityResult(null);return;},
@@ -22,13 +27,8 @@ export const activitiesCommands={
    const result=sim.serveTea(app.state);app.teaUI?.respond(result.ok?null:result.reason);
    if(result.ok){app.audio.effect('place');app.save();app.ui.tick();app.storyUI?.update()}app.teaUI?.update(0);return;
   },
-'tea-replay':(app,value,origin)=>{
-   if(app.state.paused||app.fatal||app.state.activities.active?.id!=='tea'||
-     app.state.activities.active.phase!=='served')return;
-   app.cancelWorkInput();sim.endActivity(app.state);app.updateWorkUI();
-   if(sim.beginActivity(app.state,'tea').ok)app.enterWork('tea');return;
-  },
-'tea-exit':(app,value,origin)=>{if(app.state.activities.active?.id==='tea')app.leaveWork();return;},
+'tea-replay':app=>replayWork(app,'tea'),
+'tea-exit':app=>app.leaveWork('tea'),
 'stitch-control':(app,value,origin)=>{if(!app.fatal&&!app.panelOpen)sim.controlStitch(app.state,value);return;},
 'stitch-release':(app,value,origin)=>{sim.releaseStitch(app.state);return;},
 'stitch-unpick':(app,value,origin)=>{
@@ -39,13 +39,8 @@ export const activitiesCommands={
    const result=sim.finishStitch(app.state);app.stitchUI?.respond(result.ok?null:result.reason);
    if(result.ok){app.audio.effect('place');app.save();app.ui.tick();app.storyUI?.update()}app.updateWorkUI();return;
   },
-'stitch-replay':(app,value,origin)=>{
-   if(app.state.paused||app.fatal||app.state.activities.active?.id!=='stitch'||
-     app.state.activities.active.phase!=='finished')return;
-   app.cancelWorkInput();sim.endActivity(app.state);app.updateWorkUI();
-   if(sim.beginActivity(app.state,'stitch').ok)app.enterWork('stitch');return;
-  },
-'stitch-exit':(app,value,origin)=>{if(app.state.activities.active?.id==='stitch')app.leaveWork();return;},
+'stitch-replay':app=>replayWork(app,'stitch'),
+'stitch-exit':app=>app.leaveWork('stitch'),
 'chime-grab':(app,value,origin)=>{if(!app.fatal&&!app.panelOpen)sim.grabChime(app.state,value);return;},
 'chime-pull':(app,value,origin)=>{if(!app.fatal&&!app.panelOpen)sim.pullChime(app.state,value);return;},
 'chime-cancel':(app,value,origin)=>{sim.cancelChime(app.state);return;},
@@ -53,15 +48,8 @@ export const activitiesCommands={
 'chime-release':(app,value,origin)=>{
    const result=sim.releaseChime(app.state);if(result.complete){app.save();app.ui.tick()}app.updateWorkUI();return;
   },
-'chime-replay':(app,value,origin)=>{
-   if(app.state.paused||app.fatal||app.state.activities.active?.id!=='lullaby')return;
-   app.cancelWorkInput();
-   if(app.state.activities.active.phase==='finished'){sim.endActivity(app.state);app.updateWorkUI();
-   if(sim.beginActivity(app.state,'lullaby').ok)app.enterWork('lullaby')}
-   else{sim.replayChimes(app.state);app.updateWorkUI()}
-   return;
-  },
-'chime-exit':(app,value,origin)=>{if(app.state.activities.active?.id==='lullaby')app.leaveWork();return;},
+'chime-replay':app=>replayWork(app,'lullaby'),
+'chime-exit':app=>app.leaveWork('lullaby'),
 'activity-input':(app,value,origin)=>{
    const result=sim.activityInput(app.state,value);
    if(result.ok){if(!result.mistake)app.audio.effect(result.complete?'place':'care');

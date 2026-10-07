@@ -2,9 +2,10 @@
 // owns state and rendering; this module turns browser events into commands.
 import {bindAll} from './event-bindings.js';
 
-export function bindTeaInput(ctx){
- const {root,active,blocked,stop,releaseCapture,invoke,cancel,respond,clearFeedback,update,gesture,
-   keyboard,canvas,dispatch,pick,aimAt,setInputMode,setLost,parts}=ctx;
+// Pointer handlers: hold the pot to pour, tap a cup to empty it, tap the tray to serve or leave.
+function teaPointer(ctx){
+ const {root,active,blocked,stop,releaseCapture,invoke,cancel,clearFeedback,update,gesture,
+   keyboard,canvas,dispatch,pick,aimAt,setInputMode}=ctx;
  function pointerdown(e){
   const tea=active();if(!tea||blocked())return;stop(e);
   if(gesture.pointerId!==null)return;
@@ -40,10 +41,14 @@ export function bindTeaInput(ctx){
   update(0);
  }
  function pointercancel(e){if(e.pointerId===gesture.pointerId)cancel()}
- function consumeClick(e){if(active()&&!blocked())stop(e)}
- function contextmenu(e){if(active()){stop(e);cancel()}}
- const unrelated=target=>Boolean(target?.closest?.('input,select,textarea,button,dialog,'+
+ return {pointerdown,pointermove,pointerup,pointercancel};
+}
+
+const unrelated=target=>Boolean(target?.closest?.('input,select,textarea,button,dialog,'+
   '[contenteditable="true"],[contenteditable=""],[role="textbox"]'));
+// Keyboard handlers: arrows aim, Space pours, E empties, Enter serves and Escape leaves.
+function teaKeys(ctx){
+ const {root,active,blocked,stop,invoke,cancel,respond,clearFeedback,update,gesture,keyboard,setInputMode}=ctx;
  function keydown(e){
   const tea=active();if(!tea||blocked()||e.defaultPrevented)return;
   if(unrelated(e.target)&&!(e.key==='Escape'&&root.contains(e.target)))return;
@@ -65,6 +70,14 @@ export function bindTeaInput(ctx){
   if(tea&&!blocked()&&tea.phase==='pour'&&gesture.pointerId===null)invoke('tea-control',
     keyboard.controls(0,tea.aim));else cancel();
  }
+ return {keydown,keyup};
+}
+
+export function bindTeaInput(ctx){
+ const {active,stop,invoke,cancel,update,keyboard,canvas,setLost,parts}=ctx;
+ const {pointerdown,pointermove,pointerup,pointercancel}=teaPointer(ctx),{keydown,keyup}=teaKeys(ctx);
+ function consumeClick(e){if(active()&&!ctx.blocked())stop(e)}
+ function contextmenu(e){if(active()){stop(e);cancel()}}
  function exit(){cancel();invoke('tea-exit');update(0)}
  function visibility(){if(document.hidden)cancel()}
  function contextLost(){setLost();cancel()}

@@ -1,10 +1,12 @@
 import * as T from 'three';
 import {ROOMS,TEA_TABLE,STITCH_TABLE} from '../content.js';
+import {PHYSICAL_ACTIVITIES} from '../simulation.js';
 import {CHIME_LAYOUT} from './moon-chimes.js';
 
 // Screen-space picking and projection for the three physical rituals (tea, sewing,
 // chimes). The world owns which ritual is active; this module only answers where
 // things are on screen and what a touch landed on.
+
 // Picking and screen projection for the moon chimes.
 function chimePicking({canvas,camera,ray,moonChimes,isActive,workRay,projectWorkPoint}){
  function chimeAt(x,y){
@@ -36,42 +38,17 @@ function chimePicking({canvas,camera,ray,moonChimes,isActive,workRay,projectWork
  return {chimeAt,chimePositions,chimePullSpan};
 }
 
-export function createWorkPicking({canvas,camera,house,ray,mouse,teaTable,sewingPlay,
-  moonChimes,isActive,isLost,sections}){
- function workRay(x,y,id){
-  const active=['tea','stitch','lullaby'].includes(id)&&isActive(id),rect=canvas.getBoundingClientRect();
-  if(!active||isLost()||!Number.isFinite(x)||!Number.isFinite(y)||x<rect.left||
-    x>rect.right||y<rect.top||y>rect.bottom)return false;
-  mouse.set((x-rect.left)/rect.width*2-1,-(y-rect.top)/rect.height*2+1);
-  camera.updateMatrixWorld();ray.setFromCamera(mouse,camera);return true;
- }
- function teaRay(x,y){return workRay(x,y,'tea')}
- function teaAt(x,y){
-  if(!teaRay(x,y)||!teaTable.root.visible)return null;teaTable.root.updateWorldMatrix(true,true);
-  const targets=teaTable.targets.filter(target=>{for(let p=target;p;p=p.parent)if(!p.visible)return false;return true});
-  return ray.intersectObjects(targets,false)[0]?.object.userData.tea??null;
- }
- const teaPlane=new T.Plane(new T.Vector3(0,1,0),-(house.root.position.y+TEA_TABLE.y+.48)),teaPoint=new T.Vector3();
- function teaAimAt(x,y){
-  if(!teaRay(x,y)||!ray.ray.intersectPlane(teaPlane,teaPoint))return null;
-  // The grabbed body is offset from the spout. Keep this coordinate unbounded
-  // so delta gestures can reach the edge cups; simulation aim is clamped later.
-  const room=ROOMS.find(r=>r.id===TEA_TABLE.room);return (teaPoint.x-room.x-TEA_TABLE.x)/TEA_TABLE.aimSpan;
- }
- function projectWorkPoint(point){const p=new T.Vector3(...point).project(camera);
- return {x:(p.x+1)*canvas.clientWidth/2,y:(1-p.y)*canvas.clientHeight/2}}
- function teaPositions(){
-  if(!isActive('tea'))return [];camera.updateMatrixWorld();teaTable.root.updateWorldMatrix(true,true);
-  return teaTable.points().map(point=>({key:point.key,...projectWorkPoint(point.world)}));
- }
+// Targets whose whole ancestry is visible: a hidden part never catches a touch.
+const visibleTargets=targets=>targets.filter(target=>{for(let p=target;p;p=p.parent)if(!p.visible)return false;
+ return true});
+// Picking and screen projection for the sewing cloth, needle and spool.
+function stitchPicking({camera,house,ray,sewingPlay,isActive,isLost,sections,workRay,projectWorkPoint}){
  const stitchRoom=ROOMS.find(room=>room.id===STITCH_TABLE.room);
  const stitchPlane=new T.Plane(new T.Vector3(0,1,0),
    -(house.root.position.y+stitchRoom.y+STITCH_TABLE.y)),stitchPoint=new T.Vector3();
  function stitchAt(x,y){
   if(!workRay(x,y,'stitch')||!sewingPlay.root.visible)return null;sewingPlay.root.updateWorldMatrix(true,true);
-  const targets=sewingPlay.targets.filter(target=>{
-    for(let p=target;p;p=p.parent)if(!p.visible)return false;return true});
-  return ray.intersectObjects(targets,false)[0]?.object.userData.stitch??null;
+  return ray.intersectObjects(visibleTargets(sewingPlay.targets),false)[0]?.object.userData.stitch??null;
  }
  function stitchPointAt(x,y){
   if(!workRay(x,y,'stitch')||!ray.ray.intersectPlane(stitchPlane,stitchPoint))return null;
@@ -94,6 +71,38 @@ export function createWorkPicking({canvas,camera,house,ray,mouse,teaTable,sewing
   if(!isActive('stitch')||isLost())return [];
   return sections().map(section=>section.map(([x,y])=>projectStitch(x,y)));
  }
+ return {stitchAt,stitchPointAt,stitchPositions,projectStitch,stitchGuidePositions};
+}
+
+export function createWorkPicking({canvas,camera,house,ray,mouse,teaTable,sewingPlay,
+  moonChimes,isActive,isLost,sections}){
+ function workRay(x,y,id){
+  const active=PHYSICAL_ACTIVITIES.includes(id)&&isActive(id),rect=canvas.getBoundingClientRect();
+  if(!active||isLost()||!Number.isFinite(x)||!Number.isFinite(y)||x<rect.left||
+    x>rect.right||y<rect.top||y>rect.bottom)return false;
+  mouse.set((x-rect.left)/rect.width*2-1,-(y-rect.top)/rect.height*2+1);
+  camera.updateMatrixWorld();ray.setFromCamera(mouse,camera);return true;
+ }
+ function teaRay(x,y){return workRay(x,y,'tea')}
+ function teaAt(x,y){
+  if(!teaRay(x,y)||!teaTable.root.visible)return null;teaTable.root.updateWorldMatrix(true,true);
+  return ray.intersectObjects(visibleTargets(teaTable.targets),false)[0]?.object.userData.tea??null;
+ }
+ const teaPlane=new T.Plane(new T.Vector3(0,1,0),-(house.root.position.y+TEA_TABLE.y+.48)),teaPoint=new T.Vector3();
+ function teaAimAt(x,y){
+  if(!teaRay(x,y)||!ray.ray.intersectPlane(teaPlane,teaPoint))return null;
+  // The grabbed body is offset from the spout. Keep this coordinate unbounded
+  // so delta gestures can reach the edge cups; simulation aim is clamped later.
+  const room=ROOMS.find(r=>r.id===TEA_TABLE.room);return (teaPoint.x-room.x-TEA_TABLE.x)/TEA_TABLE.aimSpan;
+ }
+ function projectWorkPoint(point){const p=new T.Vector3(...point).project(camera);
+ return {x:(p.x+1)*canvas.clientWidth/2,y:(1-p.y)*canvas.clientHeight/2}}
+ function teaPositions(){
+  if(!isActive('tea'))return [];camera.updateMatrixWorld();teaTable.root.updateWorldMatrix(true,true);
+  return teaTable.points().map(point=>({key:point.key,...projectWorkPoint(point.world)}));
+ }
+ const {stitchAt,stitchPointAt,stitchPositions,projectStitch,stitchGuidePositions}=stitchPicking({camera,house,
+   ray,sewingPlay,isActive,isLost,sections,workRay,projectWorkPoint});
  const {chimeAt,chimePositions,chimePullSpan}=chimePicking({canvas,camera,ray,moonChimes,
    isActive,workRay,projectWorkPoint});
  return {teaAt,teaAimAt,teaPositions,stitchAt,stitchPointAt,stitchPositions,

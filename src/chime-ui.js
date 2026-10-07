@@ -3,6 +3,7 @@ import {translate,number} from './i18n.js';
 import {createChimeGesture} from './chime-input.js';
 import {bindChimeInput} from './chime-input-bindings.js';
 import {mountChimeSurface,renderChimeStrip,pointOnCanvas} from './chime-view.js';
+import {releasePointer} from './canvas-aria.js';
 const stop=e=>{e.preventDefault();e.stopImmediatePropagation()};
 const text=(el,value)=>{if(el.textContent!==value)el.textContent=value};
 
@@ -17,7 +18,7 @@ export function createChimeUI(host,canvas,getState,dispatch,{pick,pullSpan}){
    t=k=>translate(state().settings.locale,k),n=v=>number(state().settings.locale,v);
  const blocked=()=>state().paused||document.hidden||lost||Boolean(host.querySelector('dialog[open],.error-screen'));
  const inside=e=>pointOnCanvas(canvas,e);
- const releaseCapture=id=>{if(id!==null){try{if(canvas.hasPointerCapture(id))canvas.releasePointerCapture(id)}catch{}}};
+ const releaseCapture=id=>releasePointer(canvas,id);
  function cancel(){
   const id=gesture.pointerId;gesture.cancel();mode.keyboard=false;releaseCapture(id);
   if(active()?.held!==null&&active())dispatch('chime-cancel');
