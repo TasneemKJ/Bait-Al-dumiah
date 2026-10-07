@@ -1,8 +1,8 @@
 import {ACTIVITIES,ROOMS,ACTIVITY_THRESHOLDS,ACTIVITY_COOLDOWN,ACTIVITY_DAILY_CAP} from './content.js';
-import {activityLevel,activityRewardReady,restorationReady} from './simulation.js';
+import {activityLevel,activityReward,activityRewardReady,restorationReady} from './simulation.js';
 import {icon} from './icons.js';
 
-function rewardNote(s,a,t,n){const ready=activityRewardReady(s,a.id),capped=s.activities.completed[a.id]>=ACTIVITY_DAILY_CAP;return ready?'+'+n(7+activityLevel(s,a.id)*2)+' '+t('buttons'):capped?t('activityCap'):t('activityCooldown').replace('{x}',n(Math.max(0,Math.ceil(ACTIVITY_COOLDOWN-(s.elapsed-s.activities.lastReward[a.id])))))}
+function rewardNote(s,a,t,n){const ready=activityRewardReady(s,a.id),capped=s.activities.completed[a.id]>=ACTIVITY_DAILY_CAP;return ready?'+'+n(activityReward(s,a.id))+' '+t('buttons'):capped?t('activityCap'):t('activityCooldown').replace('{x}',n(Math.max(0,Math.ceil(ACTIVITY_COOLDOWN-(s.elapsed-s.activities.lastReward[a.id])))))}
 export function updateActivityStatus(host,s,t,n){
  for(const a of ACTIVITIES){
   const note=host.querySelector(`[data-activity-note="${a.id}"]`),start=host.querySelector(`.ritual-card [data-id="${a.id}"]`),ready=activityRewardReady(s,a.id);
@@ -10,7 +10,7 @@ export function updateActivityStatus(host,s,t,n){
   if(start){start.classList.toggle('primary',ready);start.querySelector('span').textContent=t(ready?'activityStart':'practiceLabel')}
  }
  const earning=host.querySelector('.ritual-earning'),id=s.activities.active?.id;
- if(earning&&id)earning.textContent=activityRewardReady(s,id)?'+'+n(7+activityLevel(s,id)*2)+' '+t('buttons'):t('practiceLabel');
+ if(earning&&id)earning.textContent=activityRewardReady(s,id)?'+'+n(activityReward(s,id))+' '+t('buttons'):t('practiceLabel');
 }
 
 export function activityMarkup(s,t,n,button,result){

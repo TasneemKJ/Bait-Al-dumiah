@@ -70,211 +70,214 @@ function announce(event){
  if(event.type==='sewn')say(t('sewnHint'));
 }
 function showError(kind){fatal=true;syncPause();save();homeUI?.hide();document.querySelector('#loading')?.remove();if(ui?.panel)ui.close();const error=document.createElement('section');error.className='error-screen';error.setAttribute('role','alert');const h=document.createElement('h2'),p=document.createElement('p'),b=document.createElement('button');h.textContent=ui.t(kind==='context'?'contextTitle':'webglTitle');p.textContent=ui.t(kind==='context'?'contextHelp':'webglHelp');b.textContent=ui.t('reload');b.addEventListener('click',()=>location.reload());error.append(h,p,b);document.querySelector('#app').append(error)}
-async function dispatch(action,value,origin='control'){
- if(!session.entered&&!['home-play','home-reload','home-sound','home-language','sound'].includes(action))return;
- switch(action){
-  case 'home-play':{
-   if(fatal||!world)break;
-   if(!session.enter()){if(!session.entered&&session.entryIssue)homeUI.requireReload(session.entryIssue==='changed'?'homeEntryChanged':'homeEntryUnreadable');break;}
+// Command table: one handler per action name. A handler returns early where the
+// former switch used break.
+const handlers={
+'home-play':(value,origin)=>{
+   if(fatal||!world)return;
+   if(!session.enter()){if(!session.entered&&session.entryIssue)homeUI.requireReload(session.entryIssue==='changed'?'homeEntryChanged':'homeEntryUnreadable');return;}
    homeUI.hide();document.querySelector('#app').dataset.screen='play';host.hidden=false;host.inert=false;canvas.inert=false;canvas.removeAttribute('aria-hidden');canvas.setAttribute('tabindex','0');
    syncPause();world.syncViewport();world.setEnabled(!state.paused);refreshUI();playfieldLayout.measure();
    if(!session.canContinue)dispatch('focus-room','kitchen');
    last=performance.now();lastSave=last;canvas.focus({preventScroll:true});
    let entrySaved=false;
    if(!state.settings.muted&&!audio.enabled)void audio.enable().then(ok=>{if(!ok)ui.toast((entrySaved?'':ui.t('savingFailed')+' ')+ui.t('audioUnavailable'));audio.setPaused(state.paused)});
-   entrySaved=save();if(entrySaved){if(session.recovered)say(ui.t('saveRecovered'));else{const greeting=returnGreeting(state);if(greeting){say(ui.t(greeting.key).replace('{count}',ui.n(greeting.count)));if(!state.settings.reducedMotion)world?.welcomeBack(waveSchedule(DOLLS.length,state.elapsed));welcomeGlance()}}}break;
-  }
-  case 'home-reload':if(!session.entered&&session.entryIssue)location.reload();break;
-  case 'home-language':if(!session.entered&&['en','ar'].includes(value)){state.settings.locale=value;refreshUI();saveSettings()}break;
-  case 'home-sound':if(!session.entered)await dispatch('sound');break;
-  case 'tools-state':if(value){storyUI?.clear();world?.clearObjectSelection();objectControls?.collapse()}break;
-  case 'panel-state':
+   entrySaved=save();if(entrySaved){if(session.recovered)say(ui.t('saveRecovered'));else{const greeting=returnGreeting(state);if(greeting){say(ui.t(greeting.key).replace('{count}',ui.n(greeting.count)));if(!state.settings.reducedMotion)world?.welcomeBack(waveSchedule(DOLLS.length,state.elapsed));welcomeGlance()}}}return;
+  },
+'home-reload':(value,origin)=>{if(!session.entered&&session.entryIssue)location.reload();return;},
+'home-language':(value,origin)=>{if(!session.entered&&['en','ar'].includes(value)){state.settings.locale=value;refreshUI();saveSettings()}return;},
+'home-sound':async (value,origin)=>{if(!session.entered)await dispatch('sound');return;},
+'tools-state':(value,origin)=>{if(value){storyUI?.clear();world?.clearObjectSelection();objectControls?.collapse()}return;},
+'panel-state':(value,origin)=>{
    // Dismissing a sequence also leaves it. Physical work remains in its scene
    // when the optional catalog closes during entry or a paused modal closes.
    if(panelOpen==='activities'&&value!=='activities'&&!physicalActivity())sim.endActivity(state);
-   if(value)cancelWorkInput();panelOpen=value||false;syncPause();storyUI?.clear();world?.setEnabled(!panelOpen&&!manualPause&&!carrying&&!fatal);world?.clearObjectSelection();if(!value)ui.clearObject();objectControls?.update();updateWorkUI();if(value==='household'&&world){try{ui.setPortraits(world.getPortraits())}catch(error){console.warn('Resident portrait unavailable:',error)}}break;
-  case 'select-object':{
-   const o=objectInfo(state,value);if(!o||fatal||manualPause||panelOpen||ui.placement)break;
+   if(value)cancelWorkInput();panelOpen=value||false;syncPause();storyUI?.clear();world?.setEnabled(!panelOpen&&!manualPause&&!carrying&&!fatal);world?.clearObjectSelection();if(!value)ui.clearObject();objectControls?.update();updateWorkUI();if(value==='household'&&world){try{ui.setPortraits(world.getPortraits())}catch(error){console.warn('Resident portrait unavailable:',error)}}return;},
+'select-object':(value,origin)=>{
+   const o=objectInfo(state,value);if(!o||fatal||manualPause||panelOpen||ui.placement)return;
    ui.collapseTools();
    // A scene touch selects where the player touched. Only discovery controls
    // request a new room view; selection must not relocate its second tap.
    if(origin!=='scene'){world?.focusRoom(o.room,true);host.dataset.focusRoom=o.room;host.dataset.focusDoll=''}
-   if(storyUI?.select(value)){world?.selectObject(value);roomViews.update();objectControls?.update()}break;
-  }
-  case 'activate-object':{
-   if(fatal||manualPause||panelOpen||ui.placement)break;
-   const action=sceneObjectAction(state,value);if(action&&!action.disabled)dispatch(action.action,action.value);break;
-  }
-  case 'inspect-object':{
-   const o=objectInfo(state,value);if(!o||fatal||manualPause)break;
-   ui.openObject(value);world?.focusRoom(o.room,true);host.dataset.focusRoom=o.room;host.dataset.focusDoll='';roomViews.update();break;
-  }
-  case 'deselect-object':storyUI?.clear(true);world?.clearObjectSelection();break;
-  case 'story-hint':{
-   const story=sim.storyStatus(state);if(story.finished||fatal||manualPause||physicalActivity())break;
-   const o=objectInfo(state,'prop:'+story.next.object);if(o){if(ui.panel)ui.close();dispatch('focus-room',o.room)}break;
-  }
-  case 'story-interact':{
-   if(fatal||manualPause)break;
+   if(storyUI?.select(value)){world?.selectObject(value);roomViews.update();objectControls?.update()}return;
+  },
+'activate-object':(value,origin)=>{
+   if(fatal||manualPause||panelOpen||ui.placement)return;
+   const action=sceneObjectAction(state,value);if(action&&!action.disabled)dispatch(action.action,action.value);return;
+  },
+'inspect-object':(value,origin)=>{
+   const o=objectInfo(state,value);if(!o||fatal||manualPause)return;
+   ui.openObject(value);world?.focusRoom(o.room,true);host.dataset.focusRoom=o.room;host.dataset.focusDoll='';roomViews.update();return;
+  },
+'deselect-object':(value,origin)=>{storyUI?.clear(true);world?.clearObjectSelection();return;},
+'story-hint':(value,origin)=>{
+   const story=sim.storyStatus(state);if(story.finished||fatal||manualPause||physicalActivity())return;
+   const o=objectInfo(state,'prop:'+story.next.object);if(o){if(ui.panel)ui.close();dispatch('focus-room',o.room)}return;
+  },
+'story-interact':(value,origin)=>{
+   if(fatal||manualPause)return;
    // Optional detail sheets are paused; close first so the same command boundary applies.
    if(ui.panel)ui.close();
    const result=sim.interactStory(state,value);
    if(result.ok){
-    if(['tea','stitch','lullaby'].includes(result.startedActivity)){enterWork(result.startedActivity);break}
+    if(['tea','stitch','lullaby'].includes(result.startedActivity)){enterWork(result.startedActivity);return}
     const o=objectInfo(state,value);if(o){world?.focusRoom(o.room,true);host.dataset.focusRoom=o.room;host.dataset.focusDoll=''}
     // A successful handoff changes the destination. Reveal its clue instead of
     // leaving a now-invalid source action as the largest control on a phone.
     storyUI?.clear();world?.clearObjectSelection();
     storyUI?.respond(result.message,result.chapterComplete,result.reward);audio.effect(['mint-tin','moon-bed'].includes(result.effect)?result.effect:result.chapterComplete?'secret':result.effect==='music-cabinet'?'musicbox':'care');save();ui.tick();roomViews.update();objectControls?.update();
-   }else storyUI?.respond(result.reason);break;
-  }
-  case 'carry-start':carrying=true;world?.setEnabled(false);break;
-  case 'carry-end':carrying=false;world?.setEnabled(!panelOpen&&!manualPause&&!fatal);break;
-  case 'drop-story-item':{
-   if(fatal||manualPause||panelOpen||!sim.storyStatus(state).held)break;
-   const key=world?.objectAt(value.x,value.y);if(key)dispatch('story-interact',key);else storyUI?.respond('storyDropMiss');break;
-  }
-  case 'play-story-keepsake':{
-   if(fatal||manualPause)break;if(ui.panel)ui.close();
+   }else storyUI?.respond(result.reason);return;
+  },
+'carry-start':(value,origin)=>{carrying=true;world?.setEnabled(false);return;},
+'carry-end':(value,origin)=>{carrying=false;world?.setEnabled(!panelOpen&&!manualPause&&!fatal);return;},
+'drop-story-item':(value,origin)=>{
+   if(fatal||manualPause||panelOpen||!sim.storyStatus(state).held)return;
+   const key=world?.objectAt(value.x,value.y);if(key)dispatch('story-interact',key);else storyUI?.respond('storyDropMiss');return;
+  },
+'play-story-keepsake':(value,origin)=>{
+   if(fatal||manualPause)return;if(ui.panel)ui.close();
    const result=sim.playStoryKeepsake(state,value);
-   if(result.ok){storyUI?.respond(result.message);audio.effect(result.effect==='moon-bed'?'moon-bed':result.effect==='music-cabinet'?'musicbox':'care');save()}else storyUI?.respond(result.reason);break;
-  }
-  case 'use-object':{
+   if(result.ok){storyUI?.respond(result.message);audio.effect(result.effect==='moon-bed'?'moon-bed':result.effect==='music-cabinet'?'musicbox':'care');save()}else storyUI?.respond(result.reason);return;
+  },
+'use-object':(value,origin)=>{
    const item=state.decor.find(d=>d.id===value),result=sim.useDecor(state,value);
-   if(result.ok){if(ui.panel)ui.close();dispatch('focus-room',item.room);audio.effect(item.item==='musicbox'?'musicbox':item.item==='mobile'?'mobile':'care');storyUI?.respond('keepsake-'+(result.effect==='water'?'watered':result.effect==='light'?'lit':result.effect==='dim'?'dimmed':result.effect==='wind'?'wound':'rocked'));save();storyUI?.update()}else storyUI?.respond(result.reason);break;
-  }
-  case 'rotate-object':if(notify(sim.rotateDecor(state,value),'objectRotated'))ui.refresh();break;
-  case 'move-object':ui.beginMove(value);break;
-  case 'pack-object':if(notify(sim.remove(state,value),'packed')){ui.close();objectControls?.update()}break;
-  case 'relocate-object':{if(notify(sim.moveDecor(state,value.id,value.room,value.slot),'objectMoved')){ui.clearPlacement();world?.setPlacement(null);dispatch('focus-room',value.room);save()}break}
-  case 'recall-ready':if(sim.startRecall(state).ok)ui.setActivityResult(null);break;
-  case 'activity-hint':if(sim.toggleActivityHint(state).ok)ui.setActivityResult(null);break;
-  case 'begin-activity':{
-   if(manualPause||fatal){say(ui.t('pausedActivity'));break}if(ui.panel)ui.close();
-   const result=sim.beginActivity(state,value);if(result.ok){ui.setActivityResult(null);if(physicalActivity())enterWork(value);else{ui.open('activities');dispatch('focus-room',ACTIVITY_ROOM[value]);save()}}else say(ui.t(result.reason));break;
-  }
-  case 'tea-control':if(!fatal&&!panelOpen)sim.controlTea(state,value);break;
-  case 'tea-release':sim.releaseTea(state);break;
-  case 'tea-empty':{
-   const result=sim.emptyTeaCup(state,value);teaUI?.respond(result.ok?null:result.reason);if(result.ok)audio.effect('care');teaUI?.update(0);break;
-  }
-  case 'tea-serve':{
+   if(result.ok){if(ui.panel)ui.close();dispatch('focus-room',item.room);audio.effect(item.item==='musicbox'?'musicbox':item.item==='mobile'?'mobile':'care');storyUI?.respond('keepsake-'+(result.effect==='water'?'watered':result.effect==='light'?'lit':result.effect==='dim'?'dimmed':result.effect==='wind'?'wound':'rocked'));save();storyUI?.update()}else storyUI?.respond(result.reason);return;
+  },
+'rotate-object':(value,origin)=>{if(notify(sim.rotateDecor(state,value),'objectRotated'))ui.refresh();return;},
+'move-object':(value,origin)=>{ui.beginMove(value);return;},
+'pack-object':(value,origin)=>{if(notify(sim.remove(state,value),'packed')){ui.close();objectControls?.update()}return;},
+'relocate-object':(value,origin)=>{if(notify(sim.moveDecor(state,value.id,value.room,value.slot),'objectMoved')){ui.clearPlacement();world?.setPlacement(null);dispatch('focus-room',value.room);save()}return},
+'recall-ready':(value,origin)=>{if(sim.startRecall(state).ok)ui.setActivityResult(null);return;},
+'activity-hint':(value,origin)=>{if(sim.toggleActivityHint(state).ok)ui.setActivityResult(null);return;},
+'begin-activity':(value,origin)=>{
+   if(manualPause||fatal){say(ui.t('pausedActivity'));return}if(ui.panel)ui.close();
+   const result=sim.beginActivity(state,value);if(result.ok){ui.setActivityResult(null);if(physicalActivity())enterWork(value);else{ui.open('activities');dispatch('focus-room',ACTIVITY_ROOM[value]);save()}}else say(ui.t(result.reason));return;
+  },
+'tea-control':(value,origin)=>{if(!fatal&&!panelOpen)sim.controlTea(state,value);return;},
+'tea-release':(value,origin)=>{sim.releaseTea(state);return;},
+'tea-empty':(value,origin)=>{
+   const result=sim.emptyTeaCup(state,value);teaUI?.respond(result.ok?null:result.reason);if(result.ok)audio.effect('care');teaUI?.update(0);return;
+  },
+'tea-serve':(value,origin)=>{
    const result=sim.serveTea(state);teaUI?.respond(result.ok?null:result.reason);
-   if(result.ok){audio.effect('place');save();ui.tick();storyUI?.update()}teaUI?.update(0);break;
-  }
-  case 'tea-replay':{
-   if(state.paused||fatal||state.activities.active?.id!=='tea'||state.activities.active.phase!=='served')break;
-   cancelWorkInput();sim.endActivity(state);updateWorkUI();if(sim.beginActivity(state,'tea').ok)enterWork('tea');break;
-  }
-  case 'tea-exit':if(state.activities.active?.id==='tea')leaveWork();break;
-  case 'stitch-control':if(!fatal&&!panelOpen)sim.controlStitch(state,value);break;
-  case 'stitch-release':sim.releaseStitch(state);break;
-  case 'stitch-unpick':{
-   const result=sim.unpickStitch(state);stitchUI?.respond(result.ok?null:result.reason);if(result.ok)audio.effect('care');updateWorkUI();break;
-  }
-  case 'stitch-finish':{
+   if(result.ok){audio.effect('place');save();ui.tick();storyUI?.update()}teaUI?.update(0);return;
+  },
+'tea-replay':(value,origin)=>{
+   if(state.paused||fatal||state.activities.active?.id!=='tea'||state.activities.active.phase!=='served')return;
+   cancelWorkInput();sim.endActivity(state);updateWorkUI();if(sim.beginActivity(state,'tea').ok)enterWork('tea');return;
+  },
+'tea-exit':(value,origin)=>{if(state.activities.active?.id==='tea')leaveWork();return;},
+'stitch-control':(value,origin)=>{if(!fatal&&!panelOpen)sim.controlStitch(state,value);return;},
+'stitch-release':(value,origin)=>{sim.releaseStitch(state);return;},
+'stitch-unpick':(value,origin)=>{
+   const result=sim.unpickStitch(state);stitchUI?.respond(result.ok?null:result.reason);if(result.ok)audio.effect('care');updateWorkUI();return;
+  },
+'stitch-finish':(value,origin)=>{
    const result=sim.finishStitch(state);stitchUI?.respond(result.ok?null:result.reason);
-   if(result.ok){audio.effect('place');save();ui.tick();storyUI?.update()}updateWorkUI();break;
-  }
-  case 'stitch-replay':{
-   if(state.paused||fatal||state.activities.active?.id!=='stitch'||state.activities.active.phase!=='finished')break;
-   cancelWorkInput();sim.endActivity(state);updateWorkUI();if(sim.beginActivity(state,'stitch').ok)enterWork('stitch');break;
-  }
-  case 'stitch-exit':if(state.activities.active?.id==='stitch')leaveWork();break;
-  case 'chime-grab':if(!fatal&&!panelOpen)sim.grabChime(state,value);break;
-  case 'chime-pull':if(!fatal&&!panelOpen)sim.pullChime(state,value);break;
-  case 'chime-cancel':sim.cancelChime(state);break;
-  case 'chime-focus':world?.setChimeSelection(value);break;
-  case 'chime-release':{
-   const result=sim.releaseChime(state);if(result.complete){save();ui.tick()}updateWorkUI();break;
-  }
-  case 'chime-replay':{
-   if(state.paused||fatal||state.activities.active?.id!=='lullaby')break;
+   if(result.ok){audio.effect('place');save();ui.tick();storyUI?.update()}updateWorkUI();return;
+  },
+'stitch-replay':(value,origin)=>{
+   if(state.paused||fatal||state.activities.active?.id!=='stitch'||state.activities.active.phase!=='finished')return;
+   cancelWorkInput();sim.endActivity(state);updateWorkUI();if(sim.beginActivity(state,'stitch').ok)enterWork('stitch');return;
+  },
+'stitch-exit':(value,origin)=>{if(state.activities.active?.id==='stitch')leaveWork();return;},
+'chime-grab':(value,origin)=>{if(!fatal&&!panelOpen)sim.grabChime(state,value);return;},
+'chime-pull':(value,origin)=>{if(!fatal&&!panelOpen)sim.pullChime(state,value);return;},
+'chime-cancel':(value,origin)=>{sim.cancelChime(state);return;},
+'chime-focus':(value,origin)=>{world?.setChimeSelection(value);return;},
+'chime-release':(value,origin)=>{
+   const result=sim.releaseChime(state);if(result.complete){save();ui.tick()}updateWorkUI();return;
+  },
+'chime-replay':(value,origin)=>{
+   if(state.paused||fatal||state.activities.active?.id!=='lullaby')return;
    cancelWorkInput();
    if(state.activities.active.phase==='finished'){sim.endActivity(state);updateWorkUI();if(sim.beginActivity(state,'lullaby').ok)enterWork('lullaby')}
    else{sim.replayChimes(state);updateWorkUI()}
-   break;
-  }
-  case 'chime-exit':if(state.activities.active?.id==='lullaby')leaveWork();break;
-  case 'activity-input':{
-   const result=sim.activityInput(state,value);if(result.ok){if(!result.mistake)audio.effect(result.complete?'place':'care');ui.setActivityResult(result);save();ui.tick()}else say(ui.t(result.reason));break;
-  }
-  case 'end-activity':if(physicalActivity())leaveWork();else{sim.endActivity(state);ui.setActivityResult(null);ui.close();save()}break;
-  case 'restore-room':{
-   const result=sim.restoreRoom(state,value);if(result.ok){ui.close();world?.focusRoom(value);host.dataset.focusRoom=value;host.dataset.focusDoll='';audio.effect('secret');say(ui.t('restoreSuccess'));save();refreshUI()}else say(ui.t(result.reason));break;
-  }
-  case 'select':break;
-  case 'care':{
+   return;
+  },
+'chime-exit':(value,origin)=>{if(state.activities.active?.id==='lullaby')leaveWork();return;},
+'activity-input':(value,origin)=>{
+   const result=sim.activityInput(state,value);if(result.ok){if(!result.mistake)audio.effect(result.complete?'place':'care');ui.setActivityResult(result);save();ui.tick()}else say(ui.t(result.reason));return;
+  },
+'end-activity':(value,origin)=>{if(physicalActivity())leaveWork();else{sim.endActivity(state);ui.setActivityResult(null);ui.close();save()}return;},
+'restore-room':(value,origin)=>{
+   const result=sim.restoreRoom(state,value);if(result.ok){ui.close();world?.focusRoom(value);host.dataset.focusRoom=value;host.dataset.focusDoll='';audio.effect('secret');say(ui.t('restoreSuccess'));save();refreshUI()}else say(ui.t(result.reason));return;
+  },
+'select':(value,origin)=>{return;},
+'care':(value,origin)=>{
    const result=sim.care(state,value.id,value.action);
-   if(result.ok){ui.close();say(ui.t(value.action+'Success')+(result.reward?` +${ui.n(result.reward)} ${ui.t('reward')}`:''));audio.effect('care');save();ui.tick()}else say(ui.t(result.reason));break;
-  }
-  case 'objective':{
+   if(result.ok){ui.close();say(ui.t(value.action+'Success')+(result.reward?` +${ui.n(result.reward)} ${ui.t('reward')}`:''));audio.effect('care');save();ui.tick()}else say(ui.t(result.reason));return;
+  },
+'objective':(value,origin)=>{
    const next=ui.objective();
    // Land on the section the suggestion is about, not the top of a long sheet.
-   if(next.action==='panel'){ui.open(next.value);if(next.focus)host.querySelector('#sheet '+next.focus)?.scrollIntoView({block:'center'})}else dispatch(next.action,next.value);break;
-  }
-  case 'claim':{
+   if(next.action==='panel'){ui.open(next.value);if(next.focus)host.querySelector('#sheet '+next.focus)?.scrollIntoView({block:'center'})}else dispatch(next.action,next.value);return;
+  },
+'claim':(value,origin)=>{
    const result=sim.claim(state,value);
-   if(result.ok){say(ui.t('milestoneCollected')+` +${ui.n(result.reward)} ${ui.t('buttons')}`);audio.effect('place');save();ui.tick()}else say(ui.t(result.reason));break;
-  }
-  case 'mend-door':{
+   if(result.ok){say(ui.t('milestoneCollected')+` +${ui.n(result.reward)} ${ui.t('buttons')}`);audio.effect('place');save();ui.tick()}else say(ui.t(result.reason));return;
+  },
+'mend-door':(value,origin)=>{
    const result=sim.mendDoor(state);
-   if(result.ok){say(ui.t(sim.doorOpen(state)?'doorOpenedNote':'doorStepDone'));audio.effect('secret');save();ui.tick()}else say(result.needs?ui.t('needs_'+result.needs):ui.t(result.reason));break;
-  }
-  case 'gift':{
+   if(result.ok){say(ui.t(sim.doorOpen(state)?'doorOpenedNote':'doorStepDone'));audio.effect('secret');save();ui.tick()}else say(result.needs?ui.t('needs_'+result.needs):ui.t(result.reason));return;
+  },
+'gift':(value,origin)=>{
    const result=sim.leaveGift(state);
-   if(result.ok){say(`${ui.t('giftReceived')} ${ui.t('gift-'+result.gift+'Title')}`);audio.effect('secret');save();ui.tick();if(!ui.panel)ui.open('journal')}else say(ui.t(result.reason));break;
-  }
-  case 'collect-basket':{
+   if(result.ok){say(`${ui.t('giftReceived')} ${ui.t('gift-'+result.gift+'Title')}`);audio.effect('secret');save();ui.tick();if(!ui.panel)ui.open('journal')}else say(ui.t(result.reason));return;
+  },
+'collect-basket':(value,origin)=>{
    const result=sim.collectBasket(state);
-   if(result.ok){say(ui.t('basketCollected')+` +${ui.n(result.reward)}`);audio.effect('place');save();ui.tick()}else say(ui.t(result.reason));break;
-  }
-  case 'placement':world?.setPlacement(value);break;
-  case 'placement-preview':world?.setPreview(value);break;
-  case 'placement-cancel':world?.setPlacement(null);break;
-  case 'place':{
+   if(result.ok){say(ui.t('basketCollected')+` +${ui.n(result.reward)}`);audio.effect('place');save();ui.tick()}else say(ui.t(result.reason));return;
+  },
+'placement':(value,origin)=>{world?.setPlacement(value);return;},
+'placement-preview':(value,origin)=>{world?.setPreview(value);return;},
+'placement-cancel':(value,origin)=>{world?.setPlacement(null);return;},
+'place':(value,origin)=>{
    const result=sim.place(state,value.item,value.room,value.slot);
-   if(notify(result,'placed')){ui.clearPlacement();world?.setPlacement(null);audio.effect('place');for(const id of result.loved)say(ui.t(id)+' · '+ui.t('lovedPlaced'))}break;
-  }
-  case 'remove':notify(sim.remove(state,value),'packed');break;
-  case 'move':{const result=sim.moveDoll(state,value.id,value.room);if(notify(result,result.favorite?'favoriteMoved':'placed'))ui.close();break}
-  case 'light':{
-   if(ui.panel)ui.close();sim.changeLight(state);save();refreshUI();if(sim.isNight(state))say(ui.t('nightHint'));break;
-  }
-  case 'discover':{
-   const result=sim.discover(state);if(result.ok){save();audio.effect('secret');ui.open('journal');say(ui.t('newSecret'))}else say(ui.t(result.reason)+(result.needed?` ${ui.t('shyNeed')} ${ui.n(result.needed)}%`:''));break;
-  }
-  case 'camera':storyUI?.clear();world?.clearObjectSelection();world?.home();host.dataset.focusRoom='';host.dataset.focusDoll='';roomViews.update();objectControls?.update();break;
-  case 'focus-doll':if(state.dolls.some(d=>d.id===value)){ui.close();if(world?.focusDoll(value)){host.dataset.focusDoll=value;host.dataset.focusRoom='';roomViews.update()}}break;
-  case 'focus-room':if(world?.focusRoom(value)){if(objectInfo(state,storyUI?.selected)?.room!==value){storyUI?.clear();world?.clearObjectSelection()}host.dataset.focusRoom=value;host.dataset.focusDoll='';ui.tick();roomViews.update();objectControls?.update()}break;
-  case 'zoom-in':world?.zoom(1.2);break;
-  case 'zoom-out':world?.zoom(1/1.2);break;
-  case 'pause':cancelWorkInput();manualPause=!manualPause;storyUI?.clear();world?.clearObjectSelection();syncPause();world?.setEnabled(!panelOpen&&!manualPause);refreshUI();break;
-  case 'sound':{
-   let unavailable=false;if(state.settings.muted){if(await audio.enable()){state.settings.muted=false;audio.setPaused(state.paused)}else unavailable=true}else{state.settings.muted=true;audio.mute()}refreshUI();saveSettings();if(unavailable){if(session.entered)ui.toast(ui.t('audioUnavailable'));else homeUI?.notify(ui.t('audioUnavailable'))}break;
-  }
-  case 'setting':{
+   if(notify(result,'placed')){ui.clearPlacement();world?.setPlacement(null);audio.effect('place');for(const id of result.loved)say(ui.t(id)+' · '+ui.t('lovedPlaced'))}return;
+  },
+'remove':(value,origin)=>{notify(sim.remove(state,value),'packed');return;},
+'move':(value,origin)=>{const result=sim.moveDoll(state,value.id,value.room);if(notify(result,result.favorite?'favoriteMoved':'placed'))ui.close();return},
+'light':(value,origin)=>{
+   if(ui.panel)ui.close();sim.changeLight(state);save();refreshUI();if(sim.isNight(state))say(ui.t('nightHint'));return;
+  },
+'discover':(value,origin)=>{
+   const result=sim.discover(state);if(result.ok){save();audio.effect('secret');ui.open('journal');say(ui.t('newSecret'))}else say(ui.t(result.reason)+(result.needed?` ${ui.t('shyNeed')} ${ui.n(result.needed)}%`:''));return;
+  },
+'camera':(value,origin)=>{storyUI?.clear();world?.clearObjectSelection();world?.home();host.dataset.focusRoom='';host.dataset.focusDoll='';roomViews.update();objectControls?.update();return;},
+'focus-doll':(value,origin)=>{if(state.dolls.some(d=>d.id===value)){ui.close();if(world?.focusDoll(value)){host.dataset.focusDoll=value;host.dataset.focusRoom='';roomViews.update()}}return;},
+'focus-room':(value,origin)=>{if(world?.focusRoom(value)){if(objectInfo(state,storyUI?.selected)?.room!==value){storyUI?.clear();world?.clearObjectSelection()}host.dataset.focusRoom=value;host.dataset.focusDoll='';ui.tick();roomViews.update();objectControls?.update()}return;},
+'zoom-in':(value,origin)=>{world?.zoom(1.2);return;},
+'zoom-out':(value,origin)=>{world?.zoom(1/1.2);return;},
+'pause':(value,origin)=>{cancelWorkInput();manualPause=!manualPause;storyUI?.clear();world?.clearObjectSelection();syncPause();world?.setEnabled(!panelOpen&&!manualPause);refreshUI();return;},
+'sound':async (value,origin)=>{
+   let unavailable=false;if(state.settings.muted){if(await audio.enable()){state.settings.muted=false;audio.setPaused(state.paused)}else unavailable=true}else{state.settings.muted=true;audio.mute()}refreshUI();saveSettings();if(unavailable){if(session.entered)ui.toast(ui.t('audioUnavailable'));else homeUI?.notify(ui.t('audioUnavailable'))}return;
+  },
+'setting':(value,origin)=>{
    if(value.key==='locale'&&['en','ar'].includes(value.value))state.settings.locale=value.value;
    if(value.key==='quality'&&['auto','low','high'].includes(value.value))state.settings.quality=value.value;
    if(value.key==='motion')state.settings.reducedMotion=Boolean(value.value);
    if(value.key==='largeText')state.settings.largeText=Boolean(value.value);
-   refreshUI();saveSettings();break;
-  }
-  case 'save-export':{
+   refreshUI();saveSettings();return;
+  },
+'save-export':(value,origin)=>{
    try{const blob=new Blob([JSON.stringify(state)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`bait-al-dumiah-day-${state.day}.json`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);say(ui.t('saveExported'))}catch{say(ui.t('saveExportFailed'))}
-   break;
-  }
-  case 'save-import':{
-   const file=value;if(!file||file.size>512000){say(ui.t('saveImportFailed'));break}
+   return;
+  },
+'save-import':(value,origin)=>{
+   const file=value;if(!file||file.size>512000){say(ui.t('saveImportFailed'));return}
    file.text().then(text=>{const result=sim.readSave(text);if(!result.ok||result.empty){say(ui.t('saveImportFailed'));return}
     cancelWorkInput();world?.setTeaActive(false);world?.setStitchActive(false);world?.setChimeActive(false);notices.length=0;ui.close();ui.clearPlacement();ui.setActivityResult(null);
     result.state.settings.muted=state.settings.muted;state=result.state;manualPause=false;syncPause();dispatch('camera');world?.setPlacement(null);save();refreshUI();say(ui.t('saveImported'))}).catch(()=>say(ui.t('saveImportFailed')));
-   break;
-  }
-  case 'reset-yes':{
-   cancelWorkInput();world?.setTeaActive(false);world?.setStitchActive(false);world?.setChimeActive(false);notices.length=0;const settings={...state.settings};ui.close();ui.clearPlacement();ui.setActivityResult(null);state=sim.createState();state.settings=settings;manualPause=false;syncPause();dispatch('camera');world?.setPlacement(null);save();refreshUI();break;
-  }
- }
+   return;
+  },
+'reset-yes':(value,origin)=>{
+   cancelWorkInput();world?.setTeaActive(false);world?.setStitchActive(false);world?.setChimeActive(false);notices.length=0;const settings={...state.settings};ui.close();ui.clearPlacement();ui.setActivityResult(null);state=sim.createState();state.settings=settings;manualPause=false;syncPause();dispatch('camera');world?.setPlacement(null);save();refreshUI();return;
+  },
+};
+async function dispatch(action,value,origin='control'){
+ if(!session.entered&&!['home-play','home-reload','home-sound','home-language','sound'].includes(action))return;
+ return handlers[action]?.(value,origin);
 }
 // While the residents wave, glance at the busiest room for a moment, then return,
 // but only if the player has not touched anything and motion is allowed.

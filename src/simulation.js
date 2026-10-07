@@ -179,6 +179,7 @@ export function leaveGift(s){
 }
 const activityDef=id=>ACTIVITIES.find(a=>a.id===id);
 export const activityLevel=(s,id)=>activityDef(id)?ACTIVITY_THRESHOLDS.reduce((level,min,i)=>s.activities.mastery[id]>=min?i:level,0):0;
+export const activityReward=(s,id)=>7+activityLevel(s,id)*2;
 export function activityPattern(s,id){
  const a=activityDef(id);if(!a)return [];
  const level=activityLevel(s,id),seed=a.seed+s.activities.mastery[id]*3;
@@ -211,11 +212,11 @@ export function activityInput(s,choice){
 }
 // Sequence and physical rituals share one economic boundary.
 function completeActivity(s,id){
- const a=activityDef(id),before=activityLevel(s,id),rewarded=activityRewardReady(s,id);
+ const a=activityDef(id),before=activityLevel(s,id),rewarded=activityRewardReady(s,id),base=activityReward(s,id);
  let reward=0,bonus=0;
  if(rewarded){
   s.activities.completed[id]++;s.activities.lastReward[id]=s.elapsed;s.activities.mastery[id]=Math.min(999,s.activities.mastery[id]+1);
-  reward=7+before*2;bonus=activityLevel(s,id)>before?10*(before+1):0;earn(s,reward+bonus);
+  reward=base;bonus=activityLevel(s,id)>before?10*(before+1):0;earn(s,reward+bonus);
   const d=s.dolls.find(d=>d.id===a.resident);growBond(s,d,3);d.comfort=clamp(d.comfort+8);s.unease=clamp(s.unease-3);
  }
  checkMilestones(s);
