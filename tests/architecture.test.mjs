@@ -5,29 +5,31 @@ import {dirname,join,relative,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 // Layers, lowest first. A module may import its own layer or a lower one, never a higher one.
+//   shared      listener helper with no globals, usable from any layer
 //   data        copy, content tables, i18n lookup, icon markup strings (pure functions, no DOM access)
 //   simulation  state and rules plus the pure helpers it shares with the layers above (no DOM, no Three.js)
 //   render      Three.js world; reads state through simulation queries
 //   ui          DOM shell, panels, rituals, audio
 //   main        composition root
-const LAYERS=['data','simulation','render','ui','main'];
+const LAYERS=['shared','data','simulation','render','ui','main'];
 const LAYER_OF={
- 'content.js':'data','locale-data.js':'data','i18n.js':'data','icons.js':'data',
+ 'event-bindings.js':'shared','content.js':'data','locale-data.js':'data','i18n.js':'data','icons.js':'data',
  'simulation.js':'simulation','home-session.js':'simulation','return-greeting.js':'simulation',
  'stitch-path.js':'simulation','sim-util.js':'simulation','sim-state.js':'simulation','save-codec.js':'simulation','lullaby-score.js':'simulation','night-score.js':'simulation',
  'tea-input.js':'simulation','stitch-input.js':'simulation','chime-input.js':'simulation',
  'carry-gesture.js':'simulation','pointer-gesture.js':'simulation','wish-glow.js':'simulation',
  'resident-portraits.js':'simulation',
  'ui.js':'ui','activities-ui.js':'ui','chime-ui.js':'ui','home-ui.js':'ui','object-ui.js':'ui',
- 'stitch-ui.js':'ui','stitch-view.js':'ui','canvas-aria.js':'ui','objective-ui.js':'ui','shell-markup.js':'ui','save-transfer.js':'ui','panels-ui.js':'ui','stitch-input-bindings.js':'ui','tea-input-bindings.js':'ui','tea-view.js':'ui','story-ui.js':'ui','tea-ui.js':'ui','audio.js':'ui','gift-art.js':'ui',
+ 'stitch-ui.js':'ui','stitch-view.js':'ui','canvas-aria.js':'ui','chime-input-bindings.js':'ui','chime-view.js':'ui','objective-ui.js':'ui','shell-markup.js':'ui','hud-sync.js':'ui','ui-events.js':'ui','save-transfer.js':'ui','panels-ui.js':'ui','stitch-input-bindings.js':'ui','tea-input-bindings.js':'ui','tea-view.js':'ui','story-ui.js':'ui','tea-ui.js':'ui','audio.js':'ui','gift-art.js':'ui',
  'object-controls.js':'ui','room-views.js':'ui','resident-label.js':'ui','placement-keys.js':'ui','playfield-layout.js':'ui',
+ 'app-feedback.js':'ui','app-view.js':'ui','app-commands.js':'ui','app-loop.js':'ui',
  'main.js':'main',
 };
 const MAX_LINES=500;
 // Long lines hide size: the code here is dense, so bytes, line width and function length are capped too.
 const MAX_BYTES=40000;
 const MAX_LINE_CHARS=200;
-const MAX_FUNCTION_LINES=160;
+const MAX_FUNCTION_LINES=80;
 // Modules allowed past the cap, each with the reason.
 const SIZE_EXCEPTIONS={
  'locale-data.js':'bilingual copy table, data only',
@@ -91,14 +93,24 @@ test('modules stay under the size cap unless listed',()=>{
  }
 });
 
+// Exceptions may only shrink: the listed width must stay within 20 characters of the real longest line.
+const WIDTH_EXCEPTIONS={
+ 'locale-data.js':452,
+};
+
 test('modules stay under the byte and line-width caps unless listed',()=>{
  const heavy=modules.filter(m=>Buffer.byteLength(m.text)>MAX_BYTES&&!(m.rel in BYTE_EXCEPTIONS)).map(m=>`${m.rel}: ${Buffer.byteLength(m.text)} bytes`);
  assert.deepEqual(heavy,[],`split the module or list it in BYTE_EXCEPTIONS (cap ${MAX_BYTES})`);
- const wide=modules.filter(m=>!(m.rel in BYTE_EXCEPTIONS)&&m.text.split('\n').some(l=>l.length>MAX_LINE_CHARS)).map(m=>m.rel);
+ const longest=m=>Math.max(...m.text.split('\n').map(l=>l.length));
+ const wide=modules.filter(m=>longest(m)>(WIDTH_EXCEPTIONS[m.rel]??MAX_LINE_CHARS)).map(m=>`${m.rel}: ${longest(m)} characters`);
  assert.deepEqual(wide,[],`break up lines over ${MAX_LINE_CHARS} characters`);
  for(const rel of Object.keys(BYTE_EXCEPTIONS)){
   const m=modules.find(x=>x.rel===rel);
   assert.ok(m&&Buffer.byteLength(m.text)>MAX_BYTES,`${rel} no longer needs its byte exception`);
+ }
+ for(const [rel,allowed] of Object.entries(WIDTH_EXCEPTIONS)){
+  const actual=longest(modules.find(x=>x.rel===rel));
+  assert.ok(actual>MAX_LINE_CHARS&&allowed-actual<20,`${rel}: lower its width exception to ${actual}`);
  }
 });
 

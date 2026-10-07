@@ -26,10 +26,7 @@ const petalGeometry=new T.CircleGeometry(1,8);
 function petals(parent,x,y,z,size=.035){for(let i=0;i<5;i++){const a=i*Math.PI*2/5,petal=new T.Mesh(petalGeometry,mat(P.cream));
 petal.position.set(x+Math.cos(a)*size*.58,y+Math.sin(a)*size*.58,z);petal.scale.set(size*.46,size*.46,1);parent.add(petal)}ball(parent,x,y,z+.008,.012,.012,.009,P.gold)}
 
-export function createStoryProps(parent){
- const root=new T.Group();root.name='hidden-house-stories';root.userData.noBatch=true;parent.add(root);
- const staticArt=new T.Group();staticArt.name='story-static-furnishings';root.add(staticArt);
- function staticParts(landmark){finish(landmark);root.updateWorldMatrix(true,true);for(const mesh of [...landmark.children])staticArt.attach(mesh)}
+function buildTin(root,staticParts){
  const tin=anchor(root,'story-mint-tin','kitchen',[-.30,1.04,-1.04]);
  cylinder(tin,0,.115,0,.18,.23,P.mint);ring(tin,0,.232,0,.181,.012,P.gold,true);
  cylinder(tin,0,.236,0,.159,.008,P.ink);box(tin,0,.125,.178,.16,.10,.012,P.cream);
@@ -38,7 +35,10 @@ export function createStoryProps(parent){
  staticParts(tin);
  const tinLid=group(tin,'story-mint-tin-lid');tinLid.position.set(0,.25,-.155);
  cylinder(tinLid,0,0,.155,.19,.035,P.mint);ring(tinLid,0,.019,.155,.185,.009,P.gold,true);finish(tinLid);
+ return {tinLid};
+}
 
+function buildCabinet(root,staticParts){
  const cabinet=anchor(root,'story-music-cabinet','parlor',[1.66,.13,.25]);
  for(const x of [-.29,.29])for(const z of [-.15,.15])box(cabinet,x,.075,z,.08,.15,.08,P.wood);
  box(cabinet,0,.14,0,.75,.10,.50,P.wood);box(cabinet,0,.90,-.20,.72,.09,.08,P.wood);
@@ -56,7 +56,10 @@ export function createStoryProps(parent){
  const dancer=group(cabinet,'story-music-dancer');dancer.position.set(0,.67,.01);
  cylinder(dancer,0,.013,0,.07,.025,P.gold);cylinder(dancer,0,.075,0,.055,.10,P.gold,1.8);ball(dancer,0,.154,0,.035,.04,.035,P.gold);
  line(dancer,[-.08,.12,0],[.08,.12,0],.011,P.gold);finish(dancer);
+ return {door,mechanism,dancer};
+}
 
+function buildJasmine(root,staticParts){
  const jasmine=anchor(root,'story-jasmine-window','parlor',[-.90,1.03,-1.43]);
  box(jasmine,0,.025,0,.62,.07,.34,P.wood);cylinder(jasmine,0,.145,0,.18,.24,P.rose,.73);
  line(jasmine,[0,.26,0],[-.02,.86,-.015],.012,P.mint);
@@ -64,13 +67,19 @@ export function createStoryProps(parent){
  const leaf=ball(jasmine,sign*.12,y+.035,.018,.065,.023,.025,P.mint);leaf.rotation.z=sign*.5}
  staticParts(jasmine);
  const blooms=group(jasmine,'story-jasmine-blooms');for(const [x,y] of [[-.02,.86],[-.13,.48],[.13,.68]])petals(blooms,x,y,.04);finish(blooms);
+ return {blooms};
+}
 
+function buildBasin(root,staticParts){
  const basin=anchor(root,'story-basin-details','kitchen',[-1.27,1.08,-1.06]);
  const water=new T.Mesh(new T.CircleGeometry(.185,20),new T.MeshStandardMaterial({color:0x568f89,roughness:.22,metalness:.12,transparent:true,
    opacity:.80,depthWrite:false}));water.name='story-basin-water';water.rotation.x=-Math.PI/2;water.scale.y=.68;basin.add(water);
  const ripple=new T.Mesh(new T.RingGeometry(.055,.062,24),new T.MeshBasicMaterial({color:0xf4dfb8,side:T.DoubleSide,transparent:true,opacity:0,
    depthWrite:false}));ripple.name='story-basin-ripple';ripple.rotation.x=-Math.PI/2;ripple.position.y=.003;basin.add(ripple);
+ return {water,ripple};
+}
 
+function buildBear(root,staticParts){
  const bear=anchor(root,'story-mended-bear','bedroom',[.09,.875,-1.03]);bear.rotation.y=-.22;
  ball(bear,0,.16,0,.115,.15,.085,P.wood);ball(bear,0,.35,0,.14,.12,.095,P.wood);
  for(const x of [-.10,.10]){ball(bear,x,.435,0,.052,.052,.034,P.wood);ball(bear,x,.045,.035,.063,.046,.063,P.wood);ball(bear,x*1.40,.19,.01,.038,.075,.04,P.wood)}
@@ -81,7 +90,10 @@ export function createStoryProps(parent){
  // Completed mending leaves actual red thread on the saved household bear.
  for(let i=0;i<3;i++){const stitch=box(bear,.011+i*.027,.208,.096,.009,.022,.006,0xb44946);stitch.name='story-earned-red-stitch-'+i;stitch.rotation.z=i%2?.45:-.45}
  for(let i=0;i<4;i++){const stitch=box(bear,-.068+i*.044,.257,.096,.009,.027,.006,0xb44946);stitch.name='story-earned-red-seam-'+i;stitch.rotation.z=i%2?.45:-.45}finish(bear);
+ return {bear};
+}
 
+function buildDoorstep(root,staticParts){
  const doorstep=anchor(root,'story-doorstep','parlor',[.2,.13,1.95]);
  // Thin threshold; the original placement slots remain available.
  box(doorstep,0,.024,0,.86,.048,.35,P.wood);box(doorstep,0,.052,0,.72,.010,.30,P.rose);
@@ -99,6 +111,16 @@ export function createStoryProps(parent){
  const guest=group(tea,'story-shy-guest');guest.position.set(.48,.06,.26);
  const cloth=new T.Mesh(new T.LatheGeometry([new T.Vector2(0,.39),new T.Vector2(.065,.38),new T.Vector2(.10,.31),new T.Vector2(.115,.19),new T.Vector2(.15,0)],16),mat(P.cream));guest.add(cloth);
  for(const x of [-.044,.044])ball(guest,x,.245,.105,.016,.022,.008,P.ink);finish(guest);
+ return {tea,guest,glow,shade};
+}
+
+export function createStoryProps(parent){
+ const root=new T.Group();root.name='hidden-house-stories';root.userData.noBatch=true;parent.add(root);
+ const staticArt=new T.Group();staticArt.name='story-static-furnishings';root.add(staticArt);
+ const staticParts=landmark=>{finish(landmark);root.updateWorldMatrix(true,true);for(const mesh of [...landmark.children])staticArt.attach(mesh)};
+ const {tinLid}=buildTin(root,staticParts),{door,mechanism,dancer}=buildCabinet(root,staticParts),{blooms}=buildJasmine(root,staticParts);
+ const {water,ripple}=buildBasin(root,staticParts),{bear}=buildBear(root,staticParts);
+ const {tea,guest,glow,shade}=buildDoorstep(root,staticParts);
  finish(staticArt);
  const all=[tinLid,door,mechanism,dancer,blooms,bear,tea,guest];all.forEach(g=>g.userData.noBatch=true);
  let snapshot={tinOpen:false,cabinetOpen:false,bearVisible:false,musicRepaired:false,jasmineBloomed:false,guestVisible:false};

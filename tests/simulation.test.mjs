@@ -41,3 +41,15 @@ test('malformed saves safely start fresh',()=>{for(const x of ['bad','null','[]'
 test('save sanitization rejects fake furniture, duplicate slots and invalid ids',()=>{const s=fresh();s.decor=[{id:1,item:'plant',room:'kitchen',slot:0},{id:2,item:'plant',room:'kitchen',slot:0},{id:3,item:'bad',room:'kitchen',slot:1}];s.buttons=-999;s.dolls[0].hunger=999;const r=sim.restore(JSON.stringify(s));assert.equal(r.buttons,0);assert.equal(r.dolls[0].hunger,100);assert.equal(r.decor.length,1)});
 test('save sanitization whitelists locales and never trusts authored prose',()=>{const s=fresh();s.settings.locale='<script>';s.dolls[0].name='<img>';s.journal=['bad','music-box','music-box'];const r=sim.restore(JSON.stringify(s));assert.equal(r.settings.locale,'en');assert.equal(r.dolls[0].name,undefined);assert.deepEqual(r.journal,['music-box'])});
 test('save sanitization normalizes duplicate furniture ids for safe refund',()=>{const s=fresh();s.decor=[{id:1,item:'plant',room:'kitchen',slot:0},{id:1,item:'lamp',room:'parlor',slot:0}];const r=sim.restore(JSON.stringify(s));assert.equal(new Set(r.decor.map(x=>x.id)).size,2)});
+
+import {daySweepDegrees,activityReward,teaPercent,stitchCoordinate,stitchSectionProgress,beginActivity,stitchStatus} from '../src/simulation.js';
+test('display queries: clock sweep, activity reward, percents and stitch section progress',()=>{
+ const s=fresh();
+ assert.equal(daySweepDegrees({clock:0}),0);assert.equal(daySweepDegrees({clock:120}),180);
+ assert.equal(daySweepDegrees({clock:999}),360);assert.equal(daySweepDegrees({clock:-5}),0);assert.equal(daySweepDegrees({clock:NaN}),0);
+ assert.equal(activityReward(s,'tea'),7);s.activities.mastery.tea=999;assert.ok(activityReward(s,'tea')>7);
+ assert.equal(teaPercent(.456),46);assert.equal(teaPercent(-1),0);assert.equal(stitchCoordinate(-.5),-50);assert.equal(stitchCoordinate(1),100);
+ const house=fresh();assert.equal(beginActivity(house,'stitch').ok,true);
+ const progress=stitchSectionProgress(stitchStatus(house));
+ assert.deepEqual(progress,{section:1,percent:0});
+});

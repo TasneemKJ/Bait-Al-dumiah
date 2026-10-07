@@ -1,10 +1,10 @@
-import {stitchStatus,stitchSectionProgress} from './simulation.js';
+import {stitchStatus,stitchSectionProgress,stitchCoordinate as coordinate} from './simulation.js';
 import {translate} from './i18n.js';
 import {icon} from './icons.js';
 import {captureCanvas} from './canvas-aria.js';
 import {bindStitchInput} from './stitch-input-bindings.js';
 import {createStitchGesture,createStitchKeyboard} from './stitch-input.js';
-import {stitchView,mountStitchSurface,coordinate,point} from './stitch-view.js';
+import {stitchView,mountStitchSurface,point} from './stitch-view.js';
 export {stitchView};
 
 export function createStitchUI(host,canvas,getState,dispatch,{pick,pointAt}){

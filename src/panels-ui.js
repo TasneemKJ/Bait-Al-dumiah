@@ -1,5 +1,5 @@
 import {storyMemoriesMarkup} from './story-ui.js';
-import {DOLLS,ROOMS,CATALOG,SECRETS,ACTIONS,MILESTONES,DOOR_STEPS,GIFT_COST,VISITOR_GIFTS} from './content.js';
+import {DOLLS,ROOMS,CATALOG,SECRETS,ACTIONS,MILESTONES,DOOR_STEPS,GIFT_COST,VISITOR_GIFTS,BASKET_MAX,SEW_DAILY} from './content.js';
 import {isNight,coziness,wishFor,wishReward,bondLevel,nextBond,isContent,contentThreshold,delighted,inFavoriteRoom,currentStreak,secretCozyNeeded,
   doorOpen,nextDoorStep,doorReady} from './simulation.js';
 import {giftArt} from './gift-art.js';
@@ -107,4 +107,17 @@ export function settingsMarkup(s,{t,button,resetConfirm}){
     data-field="save-import"><span>${t('saveImport')}</span></label></div></div><div class="reset-section">${resetConfirm?
     `<p>${t('resetConfirm')}</p><div class="row">${button('reset-yes',t('resetYes'),null,'class="danger"')}${button('reset-no',
     t('resetNo'))}</div>`:button('reset-prompt',t('reset'),null,'class="text-button"')}</div>`;
+}
+
+// The placement bar: which keepsake, where it goes and the confirm button.
+export function placementMarkup(s,{t,n,button,placement,moveId,room,slot}){
+ const entry=CATALOG.find(c=>c.id===placement);
+ return `<div class="placement-head">${icon(entry.icon)}<div><strong>${t(placement)} · ${moveId!==null?
+   t('moveObject'):n(entry.price)+' '+t('buttons')}</strong><p>${t('placeHint')}</p></div>${button('placement-cancel',t('cancel'),'close',
+   'class="icon-button"')}</div><div class="placement-fields"><label class="sr-only" for="place-room">${t('room')}</label><select id="place-room"
+   data-field="place-room">${ROOMS.map(r=>`<option value="${r.id}" ${r.id===room?
+   'selected':''}>${t(r.id)}</option>`).join('')}</select><label class="sr-only" for="place-slot">${t('placeTitle')}</label><select id="place-slot"
+   data-field="place-slot">${['leftSpot','middleSpot','rightSpot'].map((v,i)=>`<option value="${i}" ${slot===i?
+   'selected':''} ${s.decor.some(d=>d.id!==moveId&&d.room===room&&d.slot===i)?
+   'disabled':''}>${t(v)}</option>`).join('')}</select>${button('place-confirm',t('placeConfirm'),'plus','class="primary"')}</div>`;
 }

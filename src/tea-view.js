@@ -1,9 +1,8 @@
-import {restorationReady} from './simulation.js';
+import {restorationReady,teaPercent as percent} from './simulation.js';
 import {translate,number} from './i18n.js';
 import {icon} from './icons.js';
 
 const fill=(text,values)=>text.replace(/\{(\w+)\}/g,(_,key)=>values[key]??'');
-export const percent=value=>Math.round(Math.max(0,value)*100);
 
 // A read-only description of the same visible cups. Percentages support a
 // keyboard player; no answer, score or ready flag is submitted by this UI.

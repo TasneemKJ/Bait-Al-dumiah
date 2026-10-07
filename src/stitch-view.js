@@ -1,9 +1,8 @@
-import {restorationReady,stitchSectionProgress} from './simulation.js';
+import {restorationReady,stitchSectionProgress,stitchCoordinate as coordinate} from './simulation.js';
 import {translate,number} from './i18n.js';
 import {icon} from './icons.js';
 
 const fill=(text,values)=>text.replace(/\{(\w+)\}/g,(_,key)=>values[key]??'');
-export const coordinate=value=>Math.round(value*100);
 export const point=value=>Number.isFinite(value?.x)&&Number.isFinite(value?.y);
 
 // This describes accepted work and actual needle/guide positions. The only

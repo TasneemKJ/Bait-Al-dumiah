@@ -1,10 +1,10 @@
-import {teaStatus} from './simulation.js';
+import {teaStatus,teaPercent as percent} from './simulation.js';
 import {translate} from './i18n.js';
 import {icon} from './icons.js';
 import {captureCanvas} from './canvas-aria.js';
 import {bindTeaInput} from './tea-input-bindings.js';
 import {createTeaGesture,createTeaKeyboard} from './tea-input.js';
-import {teaView,mountTeaSurface,percent} from './tea-view.js';
+import {teaView,mountTeaSurface} from './tea-view.js';
 export {teaView};
 
 export function createTeaUI(host,canvas,getState,dispatch,{pick,aimAt}){

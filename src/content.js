@@ -49,6 +49,7 @@ export const ACTIVITIES=[
  {id:'stitch',resident:'sami',room:'studio',icon:'button',choices:['button','leaf','moon','heart'],seed:2},
  {id:'lullaby',resident:'noor',room:'bedroom',icon:'music',choices:['moon','music','spark','heart'],seed:3},
 ];
+export const ACTIVITY_ROOM=Object.fromEntries(ACTIVITIES.map(a=>[a.id,a.room]));
 export const ACTIVITY_THRESHOLDS=[0,2,5,9],ACTIVITY_DAILY_CAP=2,ACTIVITY_COOLDOWN=20;
 // Shared table geometry; simulation alone judges stream landing and fill targets.
 export const TEA_TABLE={room:'kitchen',x:-.53,y:.779,z:.10,aimSpan:.45,cupZ:.14,cupRadius:.112,cupOuterRadius:.14,cupHeight:.24};

@@ -26,6 +26,46 @@ function borderShade(p){
  const texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;
  const o=new T.Mesh(new T.PlaneGeometry(4.68,2.93),new T.MeshBasicMaterial({map:texture,transparent:true,depthWrite:false}));o.position.set(0,1.61,-1.49);o.userData.noBatch=true;p.add(o);
 }
+function dressKitchen(g,room,halo){
+  vase(g,.30,1.04,-1.13,0xc48488);
+  box(g,.60,1.93,-1.44,.48,.57,.04,P.gold);box(g,.60,1.93,-1.40,.39,.48,.02,0xebe1c7);rose(g,.60,1.96,-1.38,1.4);line(g,[.60,1.78,-1.38],[.60,1.94,-1.38],.012,0x7a956f);
+  for(let i=0;i<5;i++){const x=.02+i*.20;line(g,[x,2.9,-1.41],[x,2.71,-1.40],.007,P.gold);for(let j=0;j<4;j++)ball(g,x+Math.sin(j)*.035,2.67-j*.04,-1.38,.055,.045,.025,0x749277)}
+  const runner=craftMaterial(0x9bac99);box(g,-.53,.765,.1,.38,.01,.75,runner);for(let i=0;i<9;i++)line(g,[-.69+i*.04,.759,.49],[-.69+i*.04,.69,.49],.005,P.cream);
+  cylinder(g,2.03,.23,-.05,.23,.37,0xb29570,.85);for(let i=0;i<6;i++){const a=i*1.04;ball(g,2.03+Math.cos(a)*.13,.43,-.05+Math.sin(a)*.11,.075,.07,.07,i%2?0xd3a44d:0x99865c)}
+}
+
+function dressParlor(g,room,halo,bulb){
+  const x=-1.32;
+  box(g,x,.62,-1.33,.91,1.12,.28,0xf0d5b6,true);arch(g,x,.15,-1.16,.61,.86,0x493d48,.02);box(g,x,1.22,-1.30,1.05,.12,.4,P.cream,true);
+  for(let i=0;i<3;i++)line(g,[x-.23,.23+i*.07,-1.1],[x+.23,.25+i*.05,-1.1],.028,0x79624d);
+  halo(room.x+x,.44,-.96,1.1,.19);
+  ring(g,x,1.93,-1.43,.31,.048,P.gold);const mirror=cylinder(g,x,1.93,-1.45,.285,.016,0xa9b4b2);mirror.rotation.x=Math.PI/2;
+  vase(g,x+.35,1.29,-1.26,0x9eaba1);cylinder(g,x-.29,1.40,-1.29,.048,.27,0xf3d9b6);ball(g,x-.29,1.58,-1.29,.023,.051,.023,bulb);
+  const throwMat=craftMaterial(0x78998c);box(g,1.20,.70,-.56,.53,.023,.76,throwMat,true);box(g,1.20,.50,-.16,.53,.40,.035,throwMat,true);
+  for(let i=0;i<8;i++)line(g,[.98+i*.062,.32,-.13],[.98+i*.062,.25,-.13],.009,0xe2d2b3);
+  for(let j=0;j<3;j++)for(let i=0;i<6;i++)ball(g,-.53+i*.37,.79+j*.16,-.911,.018,.018,.015,P.gold);
+}
+
+function dressStudio(g,room,halo){
+  for(let i=0;i<7;i++){const x=-.35+i*.22;line(g,[x,2.78,-1.47],[x,2.70-Math.sin(i)*.07,-1.45],.006,P.gold);
+  const flag=box(g,x,2.57-Math.sin(i)*.07,-1.42,.15,.23,.018,[0xc894a6,0x94b0a4,0xd6bb8f][i%3]);flag.rotation.z=(i-3)*.03}
+  box(g,-1.62,.29,-.37,.50,.40,.40,0xb59a81,true);ring(g,-1.62,.5,-.37,.2,.023,P.cream,true);
+  for(let i=0;i<3;i++)ball(g,-1.74+i*.12,.53,-.37,.094,.084,.09,[0xbd829e,0xa2b7ad,0xe2c392][i]);
+  vase(g,1.54,.75,-.66,0xc391a8);
+  for(let i=0;i<6;i++)box(g,-.96+i*.06,.855,-.48,.044,.008,.10,[0xc48b9c,0xc49b76,0x859f97][i%3]);
+}
+
+function dressBedroom(g,room,halo){
+  const quilt=craftMaterial(0xa17f9e);box(g,-.48,.865,-.04,1.72,.032,1.09,quilt,true);
+  for(let j=0;j<4;j++)for(let i=0;i<6;i++){const x=-1.17+i*.275,z=-.44+j*.27;ball(g,x,.889,z,.017,.009,.017,P.cream);}
+  for(const x of [-1.43,.47]){cylinder(g,x,.95,.67,.035,1.48,P.wood);ball(g,x,1.71,.67,.082,.10,.082,P.gold);rose(g,x,1.56,.70,1)}
+  for(let i=0;i<6;i++)rose(g,-1.12+i*.26,1.28+Math.sin(i*.6)*.16,-1.30,.75);
+  const pillow=craftMaterial(0xe9c9bb);box(g,-.86,.94,-1.08,.56,.13,.37,pillow,true).rotation.z=.08;
+  for(const x of [-.96,-.72])ball(g,x,.99,-.88,.015,.015,.015,P.gold);
+}
+
+const ROOM_DRESSING={kitchen:dressKitchen,parlor:dressParlor,studio:dressStudio,bedroom:dressBedroom};
+
 export function createCraftDetails(parent){
  const root=new T.Group();parent.add(root);const fixtures=[],halos=[];const glow=softTexture();
  const porcelain=mat(0xf4d7ac,{roughness:.42});
@@ -50,40 +90,7 @@ export function createCraftDetails(parent){
   // Contact shadows remain available even in battery-friendly shadowless mode.
   const shadow=new T.Mesh(new T.PlaneGeometry(3.7,2.75),new T.MeshBasicMaterial({map:glow,color:0x422535,transparent:true,opacity:.17,
     depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.set(0,.118,-.10);shadow.userData.noBatch=true;g.add(shadow);
-  if(room.id==='kitchen'){
-   vase(g,.30,1.04,-1.13,0xc48488);
-   box(g,.60,1.93,-1.44,.48,.57,.04,P.gold);box(g,.60,1.93,-1.40,.39,.48,.02,0xebe1c7);rose(g,.60,1.96,-1.38,1.4);line(g,[.60,1.78,-1.38],[.60,1.94,-1.38],.012,0x7a956f);
-   for(let i=0;i<5;i++){const x=.02+i*.20;line(g,[x,2.9,-1.41],[x,2.71,-1.40],.007,P.gold);for(let j=0;j<4;j++)ball(g,x+Math.sin(j)*.035,2.67-j*.04,-1.38,.055,.045,.025,0x749277)}
-   const runner=craftMaterial(0x9bac99);box(g,-.53,.765,.1,.38,.01,.75,runner);for(let i=0;i<9;i++)line(g,[-.69+i*.04,.759,.49],[-.69+i*.04,.69,.49],.005,P.cream);
-   cylinder(g,2.03,.23,-.05,.23,.37,0xb29570,.85);for(let i=0;i<6;i++){const a=i*1.04;ball(g,2.03+Math.cos(a)*.13,.43,-.05+Math.sin(a)*.11,.075,.07,.07,i%2?0xd3a44d:0x99865c)}
-  }
-  if(room.id==='parlor'){
-   const x=-1.32;
-   box(g,x,.62,-1.33,.91,1.12,.28,0xf0d5b6,true);arch(g,x,.15,-1.16,.61,.86,0x493d48,.02);box(g,x,1.22,-1.30,1.05,.12,.4,P.cream,true);
-   for(let i=0;i<3;i++)line(g,[x-.23,.23+i*.07,-1.1],[x+.23,.25+i*.05,-1.1],.028,0x79624d);
-   halo(room.x+x,.44,-.96,1.1,.19);
-   ring(g,x,1.93,-1.43,.31,.048,P.gold);const mirror=cylinder(g,x,1.93,-1.45,.285,.016,0xa9b4b2);mirror.rotation.x=Math.PI/2;
-   vase(g,x+.35,1.29,-1.26,0x9eaba1);cylinder(g,x-.29,1.40,-1.29,.048,.27,0xf3d9b6);ball(g,x-.29,1.58,-1.29,.023,.051,.023,bulb);
-   const throwMat=craftMaterial(0x78998c);box(g,1.20,.70,-.56,.53,.023,.76,throwMat,true);box(g,1.20,.50,-.16,.53,.40,.035,throwMat,true);
-   for(let i=0;i<8;i++)line(g,[.98+i*.062,.32,-.13],[.98+i*.062,.25,-.13],.009,0xe2d2b3);
-   for(let j=0;j<3;j++)for(let i=0;i<6;i++)ball(g,-.53+i*.37,.79+j*.16,-.911,.018,.018,.015,P.gold);
-  }
-  if(room.id==='studio'){
-   for(let i=0;i<7;i++){const x=-.35+i*.22;line(g,[x,2.78,-1.47],[x,2.70-Math.sin(i)*.07,-1.45],.006,P.gold);
-   const flag=box(g,x,2.57-Math.sin(i)*.07,-1.42,.15,.23,.018,[0xc894a6,0x94b0a4,0xd6bb8f][i%3]);flag.rotation.z=(i-3)*.03}
-   box(g,-1.62,.29,-.37,.50,.40,.40,0xb59a81,true);ring(g,-1.62,.5,-.37,.2,.023,P.cream,true);
-   for(let i=0;i<3;i++)ball(g,-1.74+i*.12,.53,-.37,.094,.084,.09,[0xbd829e,0xa2b7ad,0xe2c392][i]);
-   vase(g,1.54,.75,-.66,0xc391a8);
-   for(let i=0;i<6;i++)box(g,-.96+i*.06,.855,-.48,.044,.008,.10,[0xc48b9c,0xc49b76,0x859f97][i%3]);
-  }
-  if(room.id==='bedroom'){
-   const quilt=craftMaterial(0xa17f9e);box(g,-.48,.865,-.04,1.72,.032,1.09,quilt,true);
-   for(let j=0;j<4;j++)for(let i=0;i<6;i++){const x=-1.17+i*.275,z=-.44+j*.27;ball(g,x,.889,z,.017,.009,.017,P.cream);}
-   for(const x of [-1.43,.47]){cylinder(g,x,.95,.67,.035,1.48,P.wood);ball(g,x,1.71,.67,.082,.10,.082,P.gold);rose(g,x,1.56,.70,1)}
-   for(let i=0;i<6;i++)rose(g,-1.12+i*.26,1.28+Math.sin(i*.6)*.16,-1.30,.75);
-   const pillow=craftMaterial(0xe9c9bb);box(g,-.86,.94,-1.08,.56,.13,.37,pillow,true).rotation.z=.08;
-   for(const x of [-.96,-.72])ball(g,x,.99,-.88,.015,.015,.015,P.gold);
-  }
+  ROOM_DRESSING[room.id]?.(g,room,halo,bulb);
  }
  // Carved scalloped eaves and corbels: the silhouette reads as a handmade miniature.
  for(const sign of [-1,1]){

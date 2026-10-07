@@ -40,6 +40,47 @@ export function ribbonPlacement({width,height,y,rect,upper=[],bottom,safeTop=0})
 
 // A held item and a small scene ribbon. Neither pauses nor obscures the room.
 // Physical input uses the same simulation command as keyboard activation.
+// Places the selection paper above or below the touched object, clear of the other HUD cards.
+function layoutRibbon(root,host,pointOf){
+ const ribbon=root.querySelector('.object-ribbon');
+ if(!ribbon)return;
+ const bounds=host.getBoundingClientRect(),portrait=bounds.width<=680&&bounds.height>bounds.width,landscape=bounds.height<=560&&bounds.width>bounds.height;
+ if(!portrait&&!landscape){if(root.dataset.ribbonEdge!=='bottom')root.dataset.ribbonEdge='bottom';return}
+ const point=pointOf(),paper=ribbon.getBoundingClientRect();
+ const roomEdge=host.querySelector('.room-views')?.getBoundingClientRect();
+ const upper=[...host.querySelectorAll('.brand,.house-status,.time-tools,.objective,.visitor-hint')].flatMap(node=>{
+  if(!node.getClientRects().length)return [];const style=getComputedStyle(node);
+  if(style.visibility==='hidden'||style.display==='none')return [];
+  const r=node.getBoundingClientRect();return [{left:r.left-bounds.left,right:r.right-bounds.left,bottom:r.bottom-bounds.top}];
+ });
+ // Portrait paper clears navigation and the held token. Short landscape
+ // keeps its authored 75px lower edge; side controls do not fill the center.
+ const bottom=landscape?bounds.height-75:(roomEdge?.top??bounds.bottom-112)-bounds.top-14-(root.querySelector('.held-item')?64:0);
+ const safeTop=parseFloat(getComputedStyle(host).getPropertyValue('--ribbon-safe-top'))||0;
+ const {edge,top}=ribbonPlacement({width:bounds.width,height:bounds.height,y:point?.y,
+  rect:{left:paper.left-bounds.left,right:paper.right-bounds.left,height:paper.height},upper,bottom,safeTop});
+ if(root.style.getPropertyValue('--ribbon-top')!==top+'px')root.style.setProperty('--ribbon-top',top+'px');
+ if(root.dataset.ribbonEdge!==edge)root.dataset.ribbonEdge=edge;
+}
+
+// The held item token, the selection paper and the scene response.
+function storyMarkup(s,{t,held,object,action,feedback}){
+ const label=action?t(action.label).replace('{item}',t('held-'+action.item)):'';
+ const response=feedback?`<p class="scene-response ${feedback.complete?'chapter-finished':''}" role="status">${feedback.complete?
+   icon('check'):''}<span>${t(feedback.message)}</span>${feedback.reward?`<small>+${number(s.settings.locale,feedback.reward)} ${icon('button')}</small>`:''}</p>`:'';
+ return `${held?
+   `<button type="button" class="held-item" data-scene-action="held" data-held-item="${held.id}"
+   aria-label="${t('held-'+held.id)}. ${t('storyDragHint')}" title="${t('storyDragHint')}"><span
+   class="held-art">${icon(held.icon)}</span><span><small>${t('storyInHand')}</small><strong>${t('held-'+held.id)}</strong><em>${t('storyDragShort')}</em></span></button>`:''}
+  ${object?`<div class="object-ribbon" aria-label="${t('selectedObject')}"><span class="ribbon-emblem"
+    aria-hidden="true">${icon(object.icon)}</span><div class="ribbon-copy"><small>${t(object.room+'Short')}</small><h2>${t(object.title)}</h2><p
+    ${feedback?'class="ribbon-feedback" role="status"':''}>${feedback?t(feedback.message):t('storyTouchAgain').replace('{action}',
+    label)}</p></div><button type="button" class="scene-primary" data-scene-action="activate" ${action?.disabled?'disabled':''}>${icon(action?.icon??
+    'spark')}<span>${label}</span></button><button type="button" class="icon-button scene-inspect" data-scene-action="inspect"
+    aria-label="${t('storyInspect')}">${icon('plus')}</button><button type="button" class="icon-button" data-scene-action="close" aria-label="${t('close')}">${icon('close')}</button></div>`:''}
+  ${object?'':response}`;
+}
+
 export function createStoryUI(host,getState,dispatch,project=()=>null){
  const root=document.createElement('section');root.className='story-playfield';
  const ghost=document.createElement('div');ghost.className='carry-ghost';ghost.hidden=true;ghost.setAttribute('aria-hidden','true');
@@ -48,25 +89,7 @@ export function createStoryUI(host,getState,dispatch,project=()=>null){
  const current=()=>objectInfo(getState(),selected);
  function placeRibbon(){
   if(dragPointer!==null)return; // Never move paper or a drop target mid-gesture.
-  const ribbon=root.querySelector('.object-ribbon');
-  if(!ribbon)return;
-  const bounds=host.getBoundingClientRect(),portrait=bounds.width<=680&&bounds.height>bounds.width,landscape=bounds.height<=560&&bounds.width>bounds.height;
-  if(!portrait&&!landscape){if(root.dataset.ribbonEdge!=='bottom')root.dataset.ribbonEdge='bottom';return}
-  const point=project(selected),paper=ribbon.getBoundingClientRect();
-  const roomEdge=host.querySelector('.room-views')?.getBoundingClientRect();
-  const upper=[...host.querySelectorAll('.brand,.house-status,.time-tools,.objective,.visitor-hint')].flatMap(node=>{
-   if(!node.getClientRects().length)return [];const style=getComputedStyle(node);
-   if(style.visibility==='hidden'||style.display==='none')return [];
-   const r=node.getBoundingClientRect();return [{left:r.left-bounds.left,right:r.right-bounds.left,bottom:r.bottom-bounds.top}];
-  });
-  // Portrait paper clears navigation and the held token. Short landscape
-  // keeps its authored 75px lower edge; side controls do not fill the center.
-  const bottom=landscape?bounds.height-75:(roomEdge?.top??bounds.bottom-112)-bounds.top-14-(root.querySelector('.held-item')?64:0);
-  const safeTop=parseFloat(getComputedStyle(host).getPropertyValue('--ribbon-safe-top'))||0;
-  const {edge,top}=ribbonPlacement({width:bounds.width,height:bounds.height,y:point?.y,
-   rect:{left:paper.left-bounds.left,right:paper.right-bounds.left,height:paper.height},upper,bottom,safeTop});
-  if(root.style.getPropertyValue('--ribbon-top')!==top+'px')root.style.setProperty('--ribbon-top',top+'px');
-  if(root.dataset.ribbonEdge!==edge)root.dataset.ribbonEdge=edge;
+  layoutRibbon(root,host,()=>project(selected));
  }
  function cancelDrag(){
   gesture.cancel();ghost.hidden=true;root.classList.remove('carrying');
@@ -88,20 +111,7 @@ export function createStoryUI(host,getState,dispatch,project=()=>null){
   if(dragPointer!==null)cancelDrag();
   const focused=root.contains(document.activeElement)?document.activeElement.dataset.sceneAction:null;
   signature=next;
-  const label=action?t(action.label).replace('{item}',t('held-'+action.item)):'';
-  const response=feedback?`<p class="scene-response ${feedback.complete?'chapter-finished':''}" role="status">${feedback.complete?
-    icon('check'):''}<span>${t(feedback.message)}</span>${feedback.reward?`<small>+${number(s.settings.locale,feedback.reward)} ${icon('button')}</small>`:''}</p>`:'';
-  root.innerHTML=`${held?
-    `<button type="button" class="held-item" data-scene-action="held" data-held-item="${held.id}"
-    aria-label="${t('held-'+held.id)}. ${t('storyDragHint')}" title="${t('storyDragHint')}"><span
-    class="held-art">${icon(held.icon)}</span><span><small>${t('storyInHand')}</small><strong>${t('held-'+held.id)}</strong><em>${t('storyDragShort')}</em></span></button>`:''}
-   ${object?`<div class="object-ribbon" aria-label="${t('selectedObject')}"><span class="ribbon-emblem"
-     aria-hidden="true">${icon(object.icon)}</span><div class="ribbon-copy"><small>${t(object.room+'Short')}</small><h2>${t(object.title)}</h2><p
-     ${feedback?'class="ribbon-feedback" role="status"':''}>${feedback?t(feedback.message):t('storyTouchAgain').replace('{action}',
-     label)}</p></div><button type="button" class="scene-primary" data-scene-action="activate" ${action?.disabled?'disabled':''}>${icon(action?.icon??
-     'spark')}<span>${label}</span></button><button type="button" class="icon-button scene-inspect" data-scene-action="inspect"
-     aria-label="${t('storyInspect')}">${icon('plus')}</button><button type="button" class="icon-button" data-scene-action="close" aria-label="${t('close')}">${icon('close')}</button></div>`:''}
-   ${object?'':response}`;
+  root.innerHTML=storyMarkup(s,{t,held,object,action,feedback});
   placeRibbon();
   if(focused)root.querySelector(`[data-scene-action="${focused}"]`)?.focus({preventScroll:true});
  }

@@ -250,6 +250,8 @@ function stepTea(s,dt){
  if(!cup){a.spills+=volume;return}
  const added=Math.min(volume,Math.max(0,1.2-cup.fill));cup.fill+=added;a.spills+=volume-added;
 }
+// Whole-number percent of a cup's fill or target (0-1 scale), for readouts.
+export const teaPercent=value=>Math.round(Math.max(0,value)*100);
 export function teaStatus(s){
  const a=teaActive(s);if(!a)return null;
  return {...a,result:a.result?structuredClone(a.result):null,flow:teaFlow(s,a),aimedCup:teaHit(a)?.id??null,best:a.mode==='ritual'?
@@ -296,6 +298,8 @@ function createStitch(s,mode){
  return {id:'stitch',mode,phase:'sew',level,patternId,section:0,distance:0,needle,target:{...needle},
    pressed:false,loose:false,travel:0,alignmentTravel:0,repairs:0,capture:null,result:null};
 }
+// Whole-number percent of the cloth for a needle or guide coordinate (-1..1 scale), for readouts.
+export const stitchCoordinate=value=>Math.round(value*100);
 export function stitchStatus(s){
  const a=stitchActive(s);if(!a)return null;const sections=stitchSections(a),e=stitchEdge(a,sections);
  return {...structuredClone(a),sections:structuredClone(sections),completedSections:Math.min(a.section,sections.length),acceptedTrail:acceptedTrail(a,
