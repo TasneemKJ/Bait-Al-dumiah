@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-const css=read('src/accessibility.css'),markup=read('src/ui.js')+read('src/story-ui.js');
+const css=read('src/accessibility.css'),markup=read('src/ui.js')+read('src/shell-markup.js')+read('src/panels-ui.js')+read('src/story-ui.js');
 
 test('large text reaches the HUD cards and story paper through classes that exist',()=>{
  const rule=css.match(/\.large-text :is\(([^)]*)\)\{zoom:1\.15\}/);assert.ok(rule,'zoom rule present');
