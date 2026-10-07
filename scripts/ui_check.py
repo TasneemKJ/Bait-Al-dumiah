@@ -34,9 +34,9 @@ with sync_playwright() as p:
   const map=document.createElement('script');map.type='importmap';map.textContent=JSON.stringify({imports});document.head.append(map);
   const {createState}=await import('fixture/simulation.js');const {createUI}=await import('fixture/ui.js');
   window.fixtureState=createState();window.fixtureUI=createUI(document.querySelector('#ui'),()=>fixtureState,(action,value)=>{window.lastAction={action,value};if(action==='panel-state'){fixtureState.paused=Boolean(value&&value!=='activities');window.fixtureStory?.clear();window.fixtureObjects?.update()}if(action==='inspect-object')fixtureUI.openObject(value)});
-  try {const {createRoomViews}=await import('fixture/render/room-views.js');window.fixtureViews=createRoomViews(document.querySelector('#ui'),()=>fixtureState,id=>{window.lastAction={action:'focus-room',value:id}})} catch {}
+  try {const {createRoomViews}=await import('fixture/room-views.js');window.fixtureViews=createRoomViews(document.querySelector('#ui'),()=>fixtureState,id=>{window.lastAction={action:'focus-room',value:id}})} catch {}
   const {createStoryUI}=await import('fixture/story-ui.js');window.fixtureStory=createStoryUI(document.querySelector('#ui'),()=>fixtureState,(action,value)=>{window.lastAction={action,value};if(action==='inspect-object')fixtureUI.openObject(value)});
-  const {createObjectControls}=await import('fixture/render/object-controls.js');window.fixtureObjects=createObjectControls(document.querySelector('#ui'),()=>fixtureState,key=>{window.lastAction={action:'select-object',value:key};fixtureStory.select(key);fixtureObjects.collapse?.()});
+  const {createObjectControls}=await import('fixture/object-controls.js');window.fixtureObjects=createObjectControls(document.querySelector('#ui'),()=>fixtureState,key=>{window.lastAction={action:'select-object',value:key};fixtureStory.select(key);fixtureObjects.collapse?.()});
  }''',modules)
  page.evaluate("fixtureUI.open('settings');fixtureUI.refresh();fixtureUI.close();fixtureUI.tick()")
  actual=page.locator('.dock [data-action="pause"]').get_attribute('aria-pressed')

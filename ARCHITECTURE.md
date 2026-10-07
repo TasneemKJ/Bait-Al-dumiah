@@ -6,7 +6,7 @@ Static site, no bundler at runtime: `scripts/build.mjs` copies `index.html`, `sr
 - `src/content.js`, `src/locale-data.js`, `src/i18n.js`: data and bilingual copy (`SAVE_KEY` lives in content.js).
 - `src/simulation.js`: all state and rules (`createState`, `step`, `care`, `place`, rituals, story, `restore`). Pure data, no DOM, no WebGL. Helper pure modules: `stitch-path.js`, `lullaby-score.js`, `night-score.js`, input adapters (`tea-input.js`, `stitch-input.js`, `chime-input.js`, `carry-gesture.js`).
 - `src/render/`: Three.js world (`world.js`, `house.js`, dolls, props, cameras, `visual-policy.js` for lighting, detail and framing). Reads state, never mutates it.
-- `src/ui.js` and `*-ui.js`: DOM shell, panels, ribbons, ritual overlays. Styles in `src/*.css`.
+- `src/ui.js`, `*-ui.js`, `object-controls.js`, `room-views.js`, `resident-label.js`: DOM shell, panels, ribbons, ritual overlays. Styles in `src/*.css`.
 - `src/home-session.js`: cold-entry and safe persistence boundary; `src/home-ui.js`/`home.css`: inactive Home and flat preferences.
 - `src/main.js`: runs the gated loop and wires everything; `?debug=1` exposes `window.dollhouse`.
 

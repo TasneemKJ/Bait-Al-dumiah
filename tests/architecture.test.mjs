@@ -5,7 +5,7 @@ import {dirname,join,relative,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 // Layers, lowest first. A module may import its own layer or a lower one, never a higher one.
-//   data        copy, content tables, icon markup
+//   data        copy, content tables, i18n lookup, icon markup strings (pure functions, no DOM access)
 //   simulation  state and rules plus the pure helpers it shares with the layers above (no DOM, no Three.js)
 //   render      Three.js world; reads state through simulation queries
 //   ui          DOM shell, panels, rituals, audio
@@ -20,7 +20,7 @@ const LAYER_OF={
  'resident-portraits.js':'simulation',
  'ui.js':'ui','activities-ui.js':'ui','chime-ui.js':'ui','home-ui.js':'ui','object-ui.js':'ui',
  'stitch-ui.js':'ui','story-ui.js':'ui','tea-ui.js':'ui','audio.js':'ui','gift-art.js':'ui',
- 'placement-keys.js':'ui','playfield-layout.js':'ui',
+ 'object-controls.js':'ui','room-views.js':'ui','resident-label.js':'ui','placement-keys.js':'ui','playfield-layout.js':'ui',
  'main.js':'main',
 };
 const MAX_LINES=500;

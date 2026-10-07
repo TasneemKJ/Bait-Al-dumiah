@@ -1,6 +1,6 @@
-import {ROOMS} from '../content.js';
-import {icon} from '../icons.js';
-import {translate} from '../i18n.js';
+import {ROOMS} from './content.js';
+import {icon} from './icons.js';
+import {translate} from './i18n.js';
 // A small independent DOM surface. Reattach after the existing HUD rebuilds;
 // preserve button identity and keyboard focus during normal simulation ticks.
 export function createRoomViews(host,getState,onFocus){

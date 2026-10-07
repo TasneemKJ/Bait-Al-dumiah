@@ -1,4 +1,4 @@
-import {translate} from '../i18n.js';
+import {translate} from './i18n.js';
 
 export function createResidentLabel(host){
  const node=document.createElement('span');node.className='resident-name';node.setAttribute('aria-hidden','true');node.style.pointerEvents='none';node.hidden=true;host.append(node);

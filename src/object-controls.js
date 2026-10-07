@@ -1,6 +1,6 @@
-import {INTERACTIVE_PROPS,CATALOG} from '../content.js';
-import {translate} from '../i18n.js';
-import {icon} from '../icons.js';
+import {INTERACTIVE_PROPS,CATALOG} from './content.js';
+import {translate} from './i18n.js';
+import {icon} from './icons.js';
 // Optional keyboard discovery. The room itself remains the primary play surface.
 export function createObjectControls(host,getState,onSelect){
  const nav=document.createElement('nav');nav.className='object-controls';

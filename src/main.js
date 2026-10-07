@@ -6,14 +6,14 @@ import {createPlayfieldLayout} from './playfield-layout.js';
 import {createTeaUI} from './tea-ui.js';
 import {createStitchUI} from './stitch-ui.js';
 import {createChimeUI} from './chime-ui.js';
-import {createObjectControls} from './render/object-controls.js';
+import {createObjectControls} from './object-controls.js';
 import {bindPlacementEscape} from './placement-keys.js';
 import {DOLLS,ACTIVITIES} from './content.js';
 import * as sim from './simulation.js';
 import {createWorld} from './render/world.js';
 import {createUI} from './ui.js';
-import {createResidentLabel} from './render/resident-label.js';
-import {createRoomViews} from './render/room-views.js';
+import {createResidentLabel} from './resident-label.js';
+import {createRoomViews} from './room-views.js';
 import {DollhouseAudio} from './audio.js';
 import {returnGreeting,waveSchedule,waveRoom} from './return-greeting.js';
 
