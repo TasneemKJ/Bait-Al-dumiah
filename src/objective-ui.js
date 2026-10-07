@@ -1,9 +1,8 @@
 import {DOLLS,ROOMS,SECRETS,GIFT_COST} from './content.js';
 import {isNight,coziness,wishFor,unclaimed,secretCozyNeeded,doorOpen,nextDoorStep,doorReady,restorationReady} from './simulation.js';
 import {storyObjective} from './story-ui.js';
-import {wishKey} from './panels-ui.js';
+import {wishKey,actionIcon} from './panels-ui.js';
 
-const actionIcon={tea:'tea',play:'play',rest:'rest',soothe:'heart'};
 // One suggested next step: wishes, first keepsake, rewards to collect, then the night's whisper.
 export function nextStep(s,t,n,focusRoom){
  const wish=DOLLS.find(d=>!s.wishes.includes(d.id));
