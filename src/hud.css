@@ -40,3 +40,21 @@
 .objective .clue-toggle{position:relative}
 /* Arabic light-switch label ("خلّي الليل يجي") fits the 126px time card on one line at 360px wide. */
 html[lang=ar] .time-tools>button{white-space:nowrap;font-size:11px;gap:5px;max-width:100%}
+
+/* Inactive Home owns the title. Keep its accessible heading in play without
+   rendering a second brand card over the miniature. */
+#ui .brand{
+ position:absolute;width:1px;height:1px;padding:0;margin:0;
+ overflow:hidden;clip-path:inset(50%);white-space:nowrap;
+ pointer-events:none;
+}
+#ui .house-status{top:max(16px,env(safe-area-inset-top))}
+@media(max-width:680px) and (orientation:portrait){
+ /* A folded paper clue is the only leading-edge instrument while caring
+    for dolls; the literal house and objects remain the interface. */
+ #ui .objective{top:max(14px,env(safe-area-inset-top))}
+ #ui .time-tools{top:max(70px,calc(env(safe-area-inset-top) + 58px))}
+}
+@media(forced-colors:active){
+ #ui .objective:focus-within{outline:1px solid Highlight}
+}
