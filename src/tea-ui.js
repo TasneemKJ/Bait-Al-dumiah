@@ -1,5 +1,7 @@
-import {teaStatus,teaPercent as percent} from './simulation.js';
+import {teaStatus} from './simulation.js';
+import {teaPercent as percent} from './readouts.js';
 import {translate} from './i18n.js';
+import {setText,setAttribute} from './dom-sync.js';
 import {captureCanvas} from './canvas-aria.js';
 import {bindTeaInput} from './tea-input-bindings.js';
 import {createTeaGesture,createTeaKeyboard} from './tea-input.js';
@@ -17,10 +19,10 @@ export function createTeaUI(host,canvas,getState,dispatch,{pick,aimAt}){
  const blocked=()=>getState().paused||document.hidden||lost||
    Boolean(host.querySelector('dialog[open],.error-screen'))||host.querySelector('.placement')?.hidden===false;
  const stop=e=>{e.preventDefault();e.stopImmediatePropagation()};
- const setText=(element,value)=>{if(element.textContent!==value)element.textContent=value};
- const setAttribute=(element,name,value)=>{if(element.getAttribute(name)!==value)element.setAttribute(name,value)};
- function releaseCapture(id){if(id!==null){try{if(canvas.hasPointerCapture(id))canvas.releasePointerCapture(id)}catch{}}}
- function invoke(action,value){const result=dispatch(action,value);if(result?.ok===false&&result.reason)respond(result.reason);return result}
+ function releaseCapture(id){if(id!==null){try{
+   if(canvas.hasPointerCapture(id))canvas.releasePointerCapture(id)}catch{}}}
+ function invoke(action,value){const result=dispatch(action,value);
+ if(result?.ok===false&&result.reason)respond(result.reason);return result}
  function cancel(){
   const id=gesture.pointerId,hadKeys=keyboard.active,tea=active();
   gesture.cancel();keyboard.cancel();root.classList.remove('tea-holding');releaseCapture(id);
@@ -37,12 +39,14 @@ export function createTeaUI(host,canvas,getState,dispatch,{pick,aimAt}){
   if(!hasTea){if(session){cancel();session=null;previousPhase=null;restoreCanvas();clearFeedback();
   parts.announcement.textContent=''}root.hidden=true;return}
   const nextSession=getState().activities.active,newSession=session!==nextSession;
-  if(newSession){cancel();session=nextSession;clearFeedback();announcementSignature='';viewSignature='';announcementAge=Infinity}
+  if(newSession){cancel();session=nextSession;clearFeedback();announcementSignature='';
+  viewSignature='';announcementAge=Infinity}
   const unavailable=blocked();root.hidden=unavailable;
   if(unavailable){cancel();return}
   if(newSession)canvas.focus({preventScroll:true});
   if(previousPhase!==tea.phase){cancel();previousPhase=tea.phase}
-  if(keyboard.active&&gesture.pointerId===null&&tea.phase==='pour'&&dt>0){invoke('tea-control',keyboard.controls(dt,tea.aim));tea=active()}
+  if(keyboard.active&&gesture.pointerId===null&&tea.phase==='pour'&&
+    dt>0){invoke('tea-control',keyboard.controls(dt,tea.aim));tea=active()}
   if(!tea)return;
   const seconds=Number.isFinite(dt)?Math.max(0,Math.min(dt,.25)):0;feedbackAge+=seconds;announcementAge+=seconds;
   if(feedbackAge>4)clearFeedback();
@@ -53,10 +57,12 @@ export function createTeaUI(host,canvas,getState,dispatch,{pick,aimAt}){
   setAttribute(canvas,'aria-label',t('teaCanvasLabel'));
   setAttribute(canvas,'role','application');
   setAttribute(canvas,'aria-keyshortcuts','ArrowLeft ArrowRight Space E Enter Escape');
-  setAttribute(canvas,'aria-describedby',[originalDescription,'tea-work-instructions','tea-work-status','tea-cup-readout'].filter(Boolean).join(' '));
+  setAttribute(canvas,'aria-describedby',[originalDescription,'tea-work-instructions',
+    'tea-work-status','tea-cup-readout'].filter(Boolean).join(' '));
   // Input still advances every frame. Rebuild number formatting and visible
   // text only when something a player can read has actually changed.
-  const nextView=JSON.stringify([s.settings.locale,tea.phase,tea.mode,inputMode,tea.aimedCup,tea.ready,tea.cups.map(c=>[c.id,percent(c.fill),
+  const nextView=JSON.stringify([s.settings.locale,tea.phase,tea.mode,inputMode,
+    tea.aimedCup,tea.ready,tea.cups.map(c=>[c.id,percent(c.fill),
     percent(c.target),c.ready,c.overfilled]),tea.result,tea.best,s.activities.mastery.tea,s.restoration,feedback]);
   if(nextView!==viewSignature){
    const view=cachedView=teaView(s,tea,{inputMode,reason:feedback});viewSignature=nextView;
@@ -74,7 +80,8 @@ export function createTeaUI(host,canvas,getState,dispatch,{pick,aimAt}){
    announcementSignature=signature;announcementAge=0;
   }
  }
- const unbindInput=bindTeaInput({root,active,blocked,stop,releaseCapture,invoke,cancel,respond,clearFeedback,update,gesture,keyboard,canvas,dispatch,
+ const unbindInput=bindTeaInput({root,active,blocked,stop,releaseCapture,invoke,cancel,
+   respond,clearFeedback,update,gesture,keyboard,canvas,dispatch,
    pick,aimAt,setInputMode:mode=>{inputMode=mode},setLost:()=>{lost=true},parts});
  update(0);
  return {update,cancel,respond,dispose(){if(disposed)return;cancel();disposed=true;unbindInput();

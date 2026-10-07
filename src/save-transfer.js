@@ -2,7 +2,8 @@
 export const MAX_IMPORT_BYTES=512000;
 
 export function downloadSave(state){
- const blob=new Blob([JSON.stringify(state)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ const blob=new Blob([JSON.stringify(state)],{type:'application/json'}),
+   url=URL.createObjectURL(blob),a=document.createElement('a');
  a.href=url;a.download=`bait-al-dumiah-day-${state.day}.json`;
  document.body.append(a);a.click();a.remove();
  setTimeout(()=>URL.revokeObjectURL(url),1000);

@@ -4,7 +4,8 @@ export const TEA_INPUT=Object.freeze({
  dragThreshold:8,tiltDeadzone:8,tiltDistance:80,keyboardAimSpeed:.9,keyboardTilt:.64,
 });
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
-const validPointer=e=>Number.isInteger(e.pointerId)&&e.pointerId>=0&&Number.isFinite(e.clientX)&&Number.isFinite(e.clientY);
+const validPointer=e=>Number.isInteger(e.pointerId)&&e.pointerId>=0&&
+  Number.isFinite(e.clientX)&&Number.isFinite(e.clientY);
 const validTarget=target=>target==='pot'||target==='tray'||/^cup:[0-2]$/.test(target??'');
 
 export function createTeaGesture(){
@@ -13,10 +14,12 @@ export function createTeaGesture(){
   get pointerId(){return pointer?.id??null},
   get target(){return pointer?.target??null},
   down(e,target,tea,projectedAim){
-   if(pointer||!validPointer(e)||e.isPrimary===false||(e.button!==undefined&&e.button!==0)||!validTarget(target))return false;
+   if(pointer||!validPointer(e)||e.isPrimary===false||(e.button!==undefined&&
+     e.button!==0)||!validTarget(target))return false;
    if(!tea||!['pour','served'].includes(tea.phase)||!Number.isFinite(tea.aim)||tea.aim< -1||tea.aim>1)return false;
    if(target==='pot'&&tea.phase==='pour'&&!Number.isFinite(projectedAim))return false;
-   pointer={id:e.pointerId,x:e.clientX,y:e.clientY,target,phase:tea.phase,aim:tea.aim,originAim:projectedAim,moved:false};
+   pointer={id:e.pointerId,x:e.clientX,y:e.clientY,target,phase:tea.phase,aim:tea.aim,
+     originAim:projectedAim,moved:false};
    return true;
   },
   move(e,projectedAim){
@@ -32,7 +35,8 @@ export function createTeaGesture(){
    if(!pointer||e.pointerId!==pointer.id)return null;
    const p=pointer;pointer=null;
    if(p.target==='pot'&&p.phase==='pour')return {type:'release'};
-   if(!validPointer(e)||p.moved||Math.hypot(e.clientX-p.x,e.clientY-p.y)>TEA_INPUT.dragThreshold||target!==p.target)return null;
+   if(!validPointer(e)||p.moved||Math.hypot(e.clientX-p.x,
+     e.clientY-p.y)>TEA_INPUT.dragThreshold||target!==p.target)return null;
    return {type:'tap',target:p.target};
   },
   cancel(){const hadPointer=pointer!==null;pointer=null;return hadPointer},
@@ -59,7 +63,8 @@ export function createTeaKeyboard(){
    const seconds=Number.isFinite(dt)?clamp(dt,0,.1):0;
    const direction=Number(held.has('ArrowRight'))-Number(held.has('ArrowLeft'));
    const pressed=held.has('Space');
-   return {aim:clamp(aim+direction*seconds*TEA_INPUT.keyboardAimSpeed,-1,1),tilt:pressed?TEA_INPUT.keyboardTilt:0,pressed};
+   return {aim:clamp(aim+direction*seconds*TEA_INPUT.keyboardAimSpeed,-1,1),tilt:pressed?
+     TEA_INPUT.keyboardTilt:0,pressed};
   },
   cancel(){held.clear()},
  };

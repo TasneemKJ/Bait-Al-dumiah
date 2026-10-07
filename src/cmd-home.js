@@ -6,7 +6,8 @@ import {returnGreeting,waveSchedule,waveRoom} from './return-greeting.js';
 function showPlayShell(app){
  app.homeUI.hide();document.querySelector('#app').dataset.screen='play';app.host.hidden=false;app.host.inert=false;
  app.canvas.inert=false;app.canvas.removeAttribute('aria-hidden');app.canvas.setAttribute('tabindex','0');
- app.syncPause();app.world.syncViewport();app.world.setEnabled(!app.state.paused);app.refreshUI();app.playfieldLayout.measure();
+ app.syncPause();app.world.syncViewport();app.world.setEnabled(!app.state.paused);
+ app.refreshUI();app.playfieldLayout.measure();
 }
 function greetReturningPlayer(app){
  const greeting=returnGreeting(app.state);if(!greeting)return;
@@ -17,7 +18,8 @@ function greetReturningPlayer(app){
 function enterPlay(app){
  if(app.fatal||!app.world)return;
  if(!app.session.enter()){if(!app.session.entered&&
-   app.session.entryIssue)app.homeUI.requireReload(app.session.entryIssue==='changed'?'homeEntryChanged':'homeEntryUnreadable');return}
+   app.session.entryIssue)app.homeUI.requireReload(app.session.entryIssue==='changed'?
+     'homeEntryChanged':'homeEntryUnreadable');return}
  showPlayShell(app);
  if(!app.session.canContinue)app.dispatch('focus-room','kitchen');
  app.last=performance.now();app.lastSave=app.last;app.canvas.focus({preventScroll:true});
@@ -30,7 +32,8 @@ function enterPlay(app){
 function welcomeGlance(app){
  if(app.state.settings.reducedMotion)return;const room=waveRoom(app.state);if(!room)return;
  let touched=false;const mark=()=>{touched=true};
- app.host.addEventListener('pointerdown',mark,{once:true,capture:true});app.host.addEventListener('keydown',mark,{once:true,capture:true});
+ app.host.addEventListener('pointerdown',mark,{once:true,capture:true});
+ app.host.addEventListener('keydown',mark,{once:true,capture:true});
  setTimeout(()=>{if(touched||app.ui.panel||app.state.paused)return;app.dispatch('focus-room',room);
   setTimeout(()=>{if(!touched&&app.host.dataset.focusRoom===room)app.dispatch('camera')},2600)},700);
 }
@@ -42,8 +45,10 @@ export const homeCommands={
 'home-sound':async (app,value,origin)=>{if(!app.session.entered)await app.dispatch('sound');return;},
 'sound':async (app,value,origin)=>{
    let unavailable=false;if(app.state.settings.muted){if(await app.audio.enable()){app.state.settings.muted=false;
-   app.audio.setPaused(app.state.paused)}else unavailable=true}else{app.state.settings.muted=true;app.audio.mute()}app.refreshUI();app.saveSettings();
-   if(unavailable){if(app.session.entered)app.ui.toast(app.ui.t('audioUnavailable'));else app.homeUI?.notify(app.ui.t('audioUnavailable'))}return;
+   app.audio.setPaused(app.state.paused)}else unavailable=true}else{
+     app.state.settings.muted=true;app.audio.mute()}app.refreshUI();app.saveSettings();
+   if(unavailable){if(app.session.entered)app.ui.toast(app.ui.t('audioUnavailable'));
+   else app.homeUI?.notify(app.ui.t('audioUnavailable'))}return;
   },
 'setting':(app,value,origin)=>{
    if(value.key==='locale'&&['en','ar'].includes(value.value))app.state.settings.locale=value.value;

@@ -21,7 +21,8 @@ const session=createHomeSession({storage,reducedMotion:matchMedia('(prefers-redu
 // The one shared context: services and DOM roots are fixed, the rest is filled in as the pieces are built.
 const app={
   session,audio:new DollhouseAudio(),canvas:document.querySelector('#world'),host:document.querySelector('#ui'),
-  state:session.state,world:null,ui:null,homeUI:null,objectControls:null,storyUI:null,teaUI:null,stitchUI:null,chimeUI:null,
+  state:session.state,world:null,ui:null,homeUI:null,objectControls:null,storyUI:null,
+    teaUI:null,stitchUI:null,chimeUI:null,
   roomViews:null,residentLabel:null,playfieldLayout:null,
   manualPause:false,panelOpen:false,fatal:false,saveWarning:false,carrying:false,lastChimeTone:null,
 };
@@ -33,13 +34,15 @@ function pickFromScene(data){
   if(data.object)dispatch(storyUI?.selected===data.object?'activate-object':'select-object',data.object,'scene');
   if(data.doll)ui.open('household',data.doll);
   if(data.ghost)dispatch('discover');
-  if(data.slot&&ui.placement)dispatch(ui.moveId!==null?'relocate-object':'place',{id:ui.moveId,item:ui.placement,...data.slot});
+  if(data.slot&&ui.placement)dispatch(ui.moveId!==null?'relocate-object':'place',
+    {id:ui.moveId,item:ui.placement,...data.slot});
 }
 
 function buildViews(){
   const {session,canvas,host,dispatch}=app,getState=()=>app.state;
   app.ui=createUI(host,getState,dispatch);
-  app.homeUI=createHomeUI(document.querySelector('#home'),getState,dispatch,{canContinue:session.canContinue,loadStatus:session.loadStatus});
+  app.homeUI=createHomeUI(document.querySelector('#home'),getState,dispatch,
+    {canContinue:session.canContinue,loadStatus:session.loadStatus});
   app.syncPause();
   app.residentLabel=createResidentLabel(host);
   app.roomViews=createRoomViews(host,getState,id=>dispatch('focus-room',id));
@@ -50,9 +53,12 @@ function buildViews(){
   const world=()=>app.world;
   app.objectControls=createObjectControls(host,getState,key=>dispatch('select-object',key));
   app.storyUI=createStoryUI(host,getState,dispatch,key=>world()?.objectPositions().find(point=>point.key===key));
-  app.teaUI=createTeaUI(host,canvas,getState,dispatch,{pick:(x,y)=>world()?.teaAt(x,y),aimAt:(x,y)=>world()?.teaAimAt(x,y)});
-  app.stitchUI=createStitchUI(host,canvas,getState,dispatch,{pick:(x,y)=>world()?.stitchAt(x,y),pointAt:(x,y)=>world()?.stitchPointAt(x,y)});
-  app.chimeUI=createChimeUI(host,canvas,getState,dispatch,{pick:(x,y)=>world()?.chimeAt(x,y),pullSpan:()=>world()?.chimePullSpan()??0});
+  app.teaUI=createTeaUI(host,canvas,getState,dispatch,{pick:(x,y)=>world()?.teaAt(x,y),
+    aimAt:(x,y)=>world()?.teaAimAt(x,y)});
+  app.stitchUI=createStitchUI(host,canvas,getState,dispatch,{pick:(x,
+    y)=>world()?.stitchAt(x,y),pointAt:(x,y)=>world()?.stitchPointAt(x,y)});
+  app.chimeUI=createChimeUI(host,canvas,getState,dispatch,{pick:(x,y)=>world()?.chimeAt(x,
+    y),pullSpan:()=>world()?.chimePullSpan()??0});
   app.playfieldLayout=createPlayfieldLayout(host,(value,viewport)=>{
     if(session.entered){world()?.setPresentation(value,viewport);app.storyUI?.layout()}
   },()=>{

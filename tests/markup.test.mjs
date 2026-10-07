@@ -24,8 +24,9 @@ test('the shell offers every sheet from the dock in both languages and never pri
 
 test('the shell reports whether the dock and the clue card are open',()=>{
  const s=createState(),v=view(s);
- const closed=shellMarkup(s,{...v,clueExpanded:false,toolsExpanded:false});
- const open=shellMarkup(s,{...v,clueExpanded:true,toolsExpanded:true});
+ const flat=text=>text.replace(/\s+/g,' ');
+ const closed=flat(shellMarkup(s,{...v,clueExpanded:false,toolsExpanded:false}));
+ const open=flat(shellMarkup(s,{...v,clueExpanded:true,toolsExpanded:true}));
  assert.match(closed,/class="dock" data-expanded="false"/);assert.match(open,/class="dock" data-expanded="true"/);
  assert.match(closed,/<aside class="objective" data-expanded="false"/);assert.match(open,/<aside class="objective" data-expanded="true"/);
  assert.match(closed,/<div id="objective-detail" hidden>/);assert.doesNotMatch(open,/<div id="objective-detail" hidden>/);

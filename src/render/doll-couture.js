@@ -21,20 +21,23 @@ export function closeSurfaceSeam(g, columns, rows) {
  for(let j=0;j<=rows;j++){
   const start=j*(columns+1),end=start+columns;
   if(a.fromBufferAttribute(p,start).distanceTo(b.fromBufferAttribute(p,end))<1e-5){
-   a.fromBufferAttribute(n,start).add(b.fromBufferAttribute(n,end)).normalize();n.setXYZ(start,a.x,a.y,a.z);n.setXYZ(end,a.x,a.y,a.z);
+   a.fromBufferAttribute(n,start).add(b.fromBufferAttribute(n,end)).normalize();
+   n.setXYZ(start,a.x,a.y,a.z);n.setXYZ(end,a.x,a.y,a.z);
   }
  }
  return g;
 }
 export function bellRadius(y,id='lina') {
  const t=T.MathUtils.clamp((y-.337)/.398,0,1),noor=id==='noor';
- return (noor?.132:.131)+(noor?.149:.164)*Math.pow(Math.cos(t*Math.PI/2),noor?1.52:1.35)-.033*Math.exp(-Math.pow(t/.065,2));
+ return (noor?.132:.131)+(noor?.149:.164)*Math.pow(Math.cos(t*Math.PI/2),noor?
+   1.52:1.35)-.033*Math.exp(-Math.pow(t/.065,2));
 }
 const dresses=new Map();
 export function gatheredDressGeometry(id='lina') {
  if(dresses.has(id))return dresses.get(id);
  const g=closeSurfaceSeam(gridSurface(64,24,(u,v)=>{
-  const a=u*Math.PI*2,y=.337+v*.398,r=bellRadius(y,id),fold=(id==='noor'?.006:.008)*Math.sin(a*(id==='noor'?12:10)+.12)*(1-v*.75);
+  const a=u*Math.PI*2,y=.337+v*.398,r=bellRadius(y,id),
+    fold=(id==='noor'?.006:.008)*Math.sin(a*(id==='noor'?12:10)+.12)*(1-v*.75);
   return [Math.cos(a)*(r+fold),y-.75,Math.sin(a)*(r+fold)*.86];
  }),64,24);dresses.set(id,g);return g;
 }
@@ -42,11 +45,13 @@ export function gatheredDressGeometry(id='lina') {
 // A broad lock with an elliptical section and tapered tip, rather than a tube
 // laid across a hemisphere. Geometry retains shared UVs for subtle hair grain.
 export function sweptLock(points,width,depth) {
- const path=new T.CatmullRomCurve3(points.map(p=>new T.Vector3(...p))),center=new T.Vector3(),tangent=new T.Vector3(),side=new T.Vector3();
+ const path=new T.CatmullRomCurve3(points.map(p=>new T.Vector3(...p))),
+   center=new T.Vector3(),tangent=new T.Vector3(),side=new T.Vector3();
  return closeSurfaceSeam(gridSurface(12,24,(u,v)=>{
   path.getPoint(v,center);path.getTangent(v,tangent);side.set(-tangent.y,tangent.x,0).normalize();
   const a=u*Math.PI*2,taper=(.20+.80*Math.pow(Math.sin(Math.PI*v),.65))*(1-.72*v),rib=1+.018*Math.cos(a*6);
-  return [center.x+side.x*Math.cos(a)*width*taper,center.y+side.y*Math.cos(a)*width*taper,center.z+Math.sin(a)*depth*taper*rib*.62];
+  return [center.x+side.x*Math.cos(a)*width*taper,center.y+side.y*Math.cos(a)*width*taper,
+    center.z+Math.sin(a)*depth*taper*rib*.62];
  },true),12,24);
 }
 
@@ -54,14 +59,17 @@ const fabrics=new Map();
 export function dollFabric(id) {
  if(fabrics.has(id))return fabrics.get(id);
  const image=document.createElement('canvas');image.width=image.height=256;const c=image.getContext('2d');
- const palette={lina:['#b7657c','#e6a8b5'],noor:['#628e85','#94b9a8'],sami:['#67617f','#a49aba']}[id]||['#a38298','#d8b9bd'];
+ const palette={lina:['#b7657c','#e6a8b5'],noor:['#628e85','#94b9a8'],sami:['#67617f',
+   '#a49aba']}[id]||['#a38298','#d8b9bd'];
  c.fillStyle=palette[0];c.fillRect(0,0,256,256);
  if(id==='lina'){
   c.fillStyle=palette[1];c.globalAlpha=.25;for(let i=0;i<256;i+=32){c.fillRect(i,0,14,256);c.fillRect(0,i,256,14)}
-  c.globalAlpha=.6;c.fillStyle='#f5dcc4';for(let y=24;y<256;y+=64)for(let x=24;x<256;x+=64){c.beginPath();c.arc(x,y,1.6,0,Math.PI*2);c.fill()}
+  c.globalAlpha=.6;c.fillStyle='#f5dcc4';
+  for(let y=24;y<256;y+=64)for(let x=24;x<256;x+=64){c.beginPath();c.arc(x,y,1.6,0,Math.PI*2);c.fill()}
  }else if(id==='noor'){
   c.strokeStyle=palette[1];c.lineWidth=1.1;c.globalAlpha=.32;
-  for(let x=3;x<256;x+=8)for(let y=-4;y<256;y+=10){c.beginPath();c.moveTo(x,y);c.lineTo(x+3,y+5);c.lineTo(x,y+10);c.stroke()}
+  for(let x=3;x<256;x+=8)for(let y=-4;y<256;y+=10){c.beginPath();c.moveTo(x,y);
+  c.lineTo(x+3,y+5);c.lineTo(x,y+10);c.stroke()}
  }else{
   c.strokeStyle=palette[1];c.globalAlpha=.33;c.lineWidth=2;
   for(let x=0;x<256;x+=8){c.beginPath();c.moveTo(x,0);c.lineTo(x,256);c.stroke()}
@@ -80,7 +88,8 @@ export function dollFabric(id) {
  for(let i=1;i<256;i+=4){c.beginPath();c.moveTo(i,0);c.lineTo(i,256);c.moveTo(0,i);c.lineTo(256,i);c.stroke()}
  const map=new T.CanvasTexture(image);map.colorSpace=T.SRGBColorSpace;map.anisotropy=4;
  if(id==='sami')map.userData.pattern='sami-woven-bib-band';
- const m=new T.MeshStandardMaterial({map,roughness:.88,bumpMap:surfaceFinish('fabric'),roughnessMap:surfaceFinish('fabric'),bumpScale:.002,
+ const m=new T.MeshStandardMaterial({map,roughness:.88,bumpMap:surfaceFinish('fabric'),
+   roughnessMap:surfaceFinish('fabric'),bumpScale:.002,
    side:T.DoubleSide});m.userData.shared=true;fabrics.set(id,m);return m;
 }
 
@@ -95,14 +104,17 @@ export function bodiceGeometry(){
 
 let sleeve=null;
 export function sleeveGeometry(){
- if(!sleeve)sleeve=closeSurfaceSeam(gridSurface(32,16,(u,v)=>{const a=u*Math.PI*2,r=.0385+.013*Math.sin(v*Math.PI)-.0185*Math.pow(v,6),
-   fold=1+.020*Math.cos(a*12)*Math.sin(v*Math.PI);return [Math.cos(a)*r*fold,-.112+.124*v,Math.sin(a)*r*fold*.91]}),32,16);
+ if(!sleeve)sleeve=closeSurfaceSeam(gridSurface(32,16,(u,v)=>{const a=u*Math.PI*2,
+   r=.0385+.013*Math.sin(v*Math.PI)-.0185*Math.pow(v,6),
+   fold=1+.020*Math.cos(a*12)*Math.sin(v*Math.PI);
+   return [Math.cos(a)*r*fold,-.112+.124*v,Math.sin(a)*r*fold*.91]}),32,16);
  return sleeve;
 }
 
 let forearm=null;
 export function forearmGeometry(){
- if(!forearm)forearm=closeSurfaceSeam(gridSurface(24,14,(u,v)=>{const a=u*Math.PI*2,r=.029+.010*Math.pow(Math.sin(v*Math.PI),.7)+.003*v;
+ if(!forearm)forearm=closeSurfaceSeam(gridSurface(24,14,(u,v)=>{const a=u*Math.PI*2,
+   r=.029+.010*Math.pow(Math.sin(v*Math.PI),.7)+.003*v;
  return [Math.cos(a)*r,-.117+.128*v,Math.sin(a)*r*.93+.006*Math.sin(v*Math.PI)]}),24,14);
  return forearm;
 }
@@ -130,7 +142,8 @@ export function shirtFabric(id){
  c.moveTo(i,0);c.lineTo(i,128);c.moveTo(0,i);c.lineTo(128,i);c.stroke()}
  if(id==='sami'){c.fillStyle='rgba(140,109,87,.15)';for(let y=5;y<128;y+=18)c.fillRect(0,y,128,2)}
  const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;
- const m=new T.MeshStandardMaterial({map,roughness:.91,bumpMap:surfaceFinish('fabric'),roughnessMap:surfaceFinish('fabric'),bumpScale:.0015,
+ const m=new T.MeshStandardMaterial({map,roughness:.91,bumpMap:surfaceFinish('fabric'),
+   roughnessMap:surfaceFinish('fabric'),bumpScale:.0015,
    side:T.DoubleSide});m.userData.shared=true;shirts.set(id,m);return m;
 }
 
@@ -159,7 +172,8 @@ export function shoulderStrapGeometry(sign){
  const g=gridSurface(4,28,(u,v)=>{
   const x=sign*(.086+.003*Math.sin(v*Math.PI))+(u-.5)*.027,z=.156-.30*v,edge=.095;
   const surface=bodiceTop(x,T.MathUtils.clamp(z,-edge,edge))+.007;
-  const y=z>edge?T.MathUtils.lerp(.757,surface,(.156-z)/(.156-edge)):z<-edge?T.MathUtils.lerp(surface,.714,(-z-edge)/(.144-edge)):surface;
+  const y=z>edge?T.MathUtils.lerp(.757,surface,(.156-z)/(.156-edge)):z<-edge?
+    T.MathUtils.lerp(surface,.714,(-z-edge)/(.144-edge)):surface;
   return [x,y,z];
  },true);shoulderStraps.set(sign,g);return g;
 }

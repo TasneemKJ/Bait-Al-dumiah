@@ -1,4 +1,4 @@
-import {DOLLS,ROOMS,CATALOG,SLOTS,SECRETS,ACTIONS,BOND_LEVELS,SECRET_COZY,MILESTONES,SEW_SECONDS,SEW_DAILY,
+import {DOLLS,ROOMS,CATALOG,SLOTS,SECRETS,ACTIONS,MILESTONES,SEW_SECONDS,SEW_DAILY,
   BASKET_MAX,DOOR_STEPS,GIFT_COST,VISITOR_GIFTS,WISH_REFRESH_SECONDS,ACTIVITIES,ACTIVITY_THRESHOLDS,
   ACTIVITY_DAILY_CAP,ACTIVITY_COOLDOWN,RESTORATION_COSTS,RESTORATION_MASTERY,INTERACTIVE_PROPS,STORY_CHAPTERS,
   TEA_TABLE,STITCH_PATTERNS} from './content.js';
@@ -6,29 +6,13 @@ import {requiredLength,stitchEdge,acceptedTrail,moveStitch} from './stitch-path.
 import {clamp,integer,has,fail} from './sim-util.js';
 import {createState} from './sim-state.js';
 export {createState};
+export * from './sim-queries.js';
+import {isNight,wishFor,bondLevel,wishReward,currentStreak,fullRooms,inFavoriteRoom,isContent,
+  secretCozyNeeded,coziness} from './sim-queries.js';
 export {SAVE_VERSION,migrate,readSave,restore} from './save-codec.js';
 const earn=(s,amount)=>{s.buttons=Math.min(9999,s.buttons+amount);s.earnedToday=Math.min(99999,s.earnedToday+amount)};
 // Events are transient notices for the presentation layer; they are never restored from a save.
 const emit=(s,event)=>{if(s.events.length<24)s.events.push(event)};
-export const isNight=s=>s.clock>=120;
-// Share of the day gone by as a 0-360 degree sweep for the clock face; a corrupt clock reads as dawn.
-export const daySweepDegrees=s=>Number.isFinite(s.clock)?Math.max(0,Math.min(240,s.clock))*1.5:0;
-export const hour=s=>(8+s.clock/10)%24;
-// Day one keeps each resident's authored wish; later days rotate through their personal wish list.
-export function wishFor(s,id){const i=DOLLS.findIndex(d=>d.id===id);if(i<0)return null;const pool=DOLLS[i].wishes,day=Math.max(1,s.day)-1;
-return pool[(day*(i+1)+Math.floor(day/pool.length))%pool.length]}
-export const bondLevel=bond=>BOND_LEVELS.reduce((level,min,i)=>bond>=min?i:level,0);
-export const nextBond=bond=>BOND_LEVELS.find(min=>min>bond)??null;
-export const wishReward=d=>8+2*bondLevel(d.bond);
-export const currentStreak=s=>s.lastFullDay>=s.day-1?s.streak:0;
-export const fullRooms=s=>ROOMS.filter(r=>s.decor.filter(d=>d.room===r.id).length>=SLOTS.length).length;
-export const inFavoriteRoom=d=>DOLLS.find(x=>x.id===d.id)?.favRoom===d.room;
-export const delighted=(s,d)=>{const fav=DOLLS.find(x=>x.id===d.id)?.favItem;return s.decor.some(k=>k.room===d.room&&k.item===fav)};
-export const contentThreshold=(s,d)=>delighted(s,d)?45:55;
-export const isContent=(s,d)=>['hunger','energy','comfort'].every(k=>d[k]>=contentThreshold(s,d));
-export const secretCozyNeeded=s=>SECRET_COZY[s.journal.length]??0;
-export function coziness(s){return Math.round(clamp(28+s.decor.reduce((v,
-  d)=>v+(CATALOG.find(i=>i.id===d.item)?.cozy??0),0)+s.dolls.reduce((v,d)=>v+d.comfort,0)/15+fullRooms(s)*4))}
 const milestoneMet={
  'first-care':s=>s.cares>=1,
  'first-keepsake':s=>s.decor.length>=1,
@@ -56,10 +40,12 @@ export function claim(s,id){
  if(s.milestones.includes(id))return fail('claimed');
  s.milestones.push(id);earn(s,m.reward);return {ok:true,reward:m.reward};
 }
-export function collectBasket(s){if(s.basket<1)return fail('emptyBasket');const reward=s.basket;s.basket=0;earn(s,reward);return {ok:true,reward}}
+export function collectBasket(s){if(s.basket<1)return fail('emptyBasket');
+const reward=s.basket;s.basket=0;earn(s,reward);return {ok:true,reward}}
 function growBond(s,d,amount){
  const before=bondLevel(d.bond);d.bond=clamp(d.bond+amount);const after=bondLevel(d.bond);
- for(let level=before+1;level<=after;level++){const reward=5*level;earn(s,reward);emit(s,{type:'bond',id:d.id,level,reward})}
+ for(let level=before+1;level<=after;level++){const reward=5*level;earn(s,reward);
+ emit(s,{type:'bond',id:d.id,level,reward})}
 }
 export function care(s,id,action){
  const d=s.dolls.find(x=>x.id===id), a=Object.hasOwn(ACTIONS,action)?ACTIONS[action]:null;
@@ -77,7 +63,8 @@ export function care(s,id,action){
  let bonus=0;
  if(reward){
   s.wishes.push(id);earn(s,reward);
-  if(s.wishes.length===DOLLS.length){s.streak=s.lastFullDay===s.day-1?Math.min(999,s.streak+1):1;s.lastFullDay=s.day;bonus=4+2*Math.min(s.streak,5);
+  if(s.wishes.length===DOLLS.length){s.streak=s.lastFullDay===s.day-1?Math.min(999,
+    s.streak+1):1;s.lastFullDay=s.day;bonus=4+2*Math.min(s.streak,5);
   earn(s,bonus);emit(s,{type:'full-house',streak:s.streak,reward:bonus})}
  }
  const brave=action==='soothe'&&isNight(s)?2:0;
@@ -93,9 +80,11 @@ function newDay(s){
  emit(s,{type:'dawn',day:s.day,wishes,fresh,earned:s.earnedToday,streak:currentStreak(s)});s.earnedToday=0;
 }
 export function step(s,dt){
- if(s.paused){if(s.activities.active?.id==='stitch')releaseStitch(s);cancelChime(s);return}if(!Number.isFinite(dt)||dt<=0)return;
+ if(s.paused){if(s.activities.active?.id==='stitch')releaseStitch(s);cancelChime(s);
+ return}if(!Number.isFinite(dt)||dt<=0)return;
  dt=Math.min(dt,1);s.elapsed+=dt;s.clock+=dt;s.dayTime=Math.min(1e6,s.dayTime+dt);
- stepTea(s,dt);stepChimes(s,dt);const stitching=stitchActive(s);if(stitching)moveStitch(stitching,stitchSections(stitching),dt);
+ stepTea(s,dt);stepChimes(s,dt);const stitching=stitchActive(s);
+ if(stitching)moveStitch(stitching,stitchSections(stitching),dt);
  if(s.clock>=240){s.clock-=240;newDay(s)}
  // One gentle pointer the first time night falls, for a player who has not met the visitor yet.
  if(isNight(s)&&!s.hints.night){s.hints.night=true;emit(s,{type:'first-night'})}
@@ -104,7 +93,8 @@ export function step(s,dt){
  const comfortProtection=Math.min(.65,s.decor.length*.035);
  for(const d of s.dolls){
   d.hunger=clamp(d.hunger-dt*.13);d.energy=clamp(d.energy-dt*.095);
-  d.comfort=clamp(d.comfort-dt*.085*(1-comfortProtection)*(inFavoriteRoom(d)?.6:1));if(s.elapsed>d.actionUntil)d.action='idle';
+  d.comfort=clamp(d.comfort-dt*.085*(1-comfortProtection)*(inFavoriteRoom(d)?.6:1));
+  if(s.elapsed>d.actionUntil)d.action='idle';
   // Content residents sew a few buttons into the basket each day; nothing is taken from unhappy ones.
   if(isContent(s,d)&&s.sewnToday<SEW_DAILY&&s.basket<BASKET_MAX){d.sew+=dt;if(d.sew>=SEW_SECONDS){d.sew=0;
   s.sewnToday++;s.basket++;if(s.basket===1)emit(s,{type:'sewn',id:d.id})}}
@@ -118,7 +108,8 @@ export function place(s,item,room,slot){
  if(!entry||!has(ROOMS,room)||!Number.isInteger(slot)||slot<0||slot>=SLOTS.length)return fail('invalid');
  if(s.decor.some(d=>d.room===room&&d.slot===slot))return fail('occupied');
  if(s.buttons<entry.price)return fail('funds');
- s.buttons-=entry.price;s.decor.push({id:s.nextId++,item,room,slot,rotation:0,originRoom:room,active:false,tendedDay:0,lastUse:-10});
+ s.buttons-=entry.price;
+ s.decor.push({id:s.nextId++,item,room,slot,rotation:0,originRoom:room,active:false,tendedDay:0,lastUse:-10});
  for(const d of s.dolls)if(d.room===room)d.comfort=clamp(d.comfort+entry.cozy);
  const loved=s.dolls.filter(d=>d.room===room&&DOLLS.find(x=>x.id===d.id).favItem===item).map(d=>d.id);
  checkMilestones(s);
@@ -145,7 +136,8 @@ export function useDecor(s,id){
   item.tendedDay=s.day;item.lastUse=s.elapsed;return {ok:true,id,effect:'water'};
  }
  item.tendedDay=s.day;item.lastUse=s.elapsed;
- if(item.item==='lamp'){item.active=!item.active;return {ok:true,id,effect:item.active?'light':'dim',active:item.active}}
+ if(item.item==='lamp'){item.active=!item.active;
+ return {ok:true,id,effect:item.active?'light':'dim',active:item.active}}
  return {ok:true,id,effect:item.item==='musicbox'?'wind':'rock'};
 }
 export function moveDoll(s,id,room){const doll=s.dolls.find(d=>d.id===id);
@@ -160,7 +152,8 @@ export function discover(s){
  checkMilestones(s);
  return {ok:true,secret,reward:5};
 }
-const doorNeeds={'sami-dear':s=>bondLevel(s.dolls.find(d=>d.id==='sami').bond)>=3,'all-whispers':s=>s.journal.length>=SECRETS.length};
+const doorNeeds={'sami-dear':s=>bondLevel(s.dolls.find(d=>d.id==='sami').bond)>=3,
+  'all-whispers':s=>s.journal.length>=SECRETS.length};
 export const doorOpen=s=>s.door>=DOOR_STEPS.length;
 export const nextDoorStep=s=>DOOR_STEPS[s.door]??null;
 export const doorReady=(s,step=nextDoorStep(s))=>Boolean(step)&&(!step.needs||doorNeeds[step.needs](s));
@@ -184,7 +177,8 @@ export function leaveGift(s){
  return {ok:true,gift,cost:GIFT_COST};
 }
 const activityDef=id=>ACTIVITIES.find(a=>a.id===id);
-export const activityLevel=(s,id)=>activityDef(id)?ACTIVITY_THRESHOLDS.reduce((level,min,i)=>s.activities.mastery[id]>=min?i:level,0):0;
+export const activityLevel=(s,id)=>activityDef(id)?ACTIVITY_THRESHOLDS.reduce((level,min,
+  i)=>s.activities.mastery[id]>=min?i:level,0):0;
 export const activityReward=(s,id)=>7+activityLevel(s,id)*2;
 export function activityPattern(s,id){
  const a=activityDef(id);if(!a)return [];
@@ -198,9 +192,11 @@ export function beginActivity(s,id){
  if(s.activities.active)return fail('activityBusy');
  if(id==='tea'){s.activities.active=createTea(s,'ritual');return {ok:true}}
  if(id==='stitch'){s.activities.active=createStitch(s,'ritual');return {ok:true}}
- if(id==='lullaby'){s.activities.active={id,phase:'listen',pattern:activityPattern(s,id),cursor:0,listenTime:0,round:0,held:null,pull:0,mistakes:0,
+ if(id==='lullaby'){s.activities.active={id,phase:'listen',pattern:activityPattern(s,id),
+   cursor:0,listenTime:0,round:0,held:null,pull:0,mistakes:0,
    lastTone:null,lastPluck:-10,toneSerial:0,result:null};return {ok:true}}
- s.activities.active={id,cursor:0,pattern:activityPattern(s,id),phase:id==='stitch'?'study':'play',hint:false};return {ok:true};
+ s.activities.active={id,cursor:0,pattern:activityPattern(s,id),phase:id==='stitch'?
+   'study':'play',hint:false};return {ok:true};
 }
 export function endActivity(s){releaseTea(s);releaseStitch(s);cancelChime(s);s.activities.active=null;return {ok:true}}
 export function startRecall(s){const a=s.activities.active;if(s.paused)return fail('pausedActivity');
@@ -226,7 +222,8 @@ function completeActivity(s,id){
  const a=activityDef(id),before=activityLevel(s,id),rewarded=activityRewardReady(s,id),base=activityReward(s,id);
  let reward=0,bonus=0;
  if(rewarded){
-  s.activities.completed[id]++;s.activities.lastReward[id]=s.elapsed;s.activities.mastery[id]=Math.min(999,s.activities.mastery[id]+1);
+  s.activities.completed[id]++;s.activities.lastReward[id]=s.elapsed;
+  s.activities.mastery[id]=Math.min(999,s.activities.mastery[id]+1);
   reward=base;bonus=activityLevel(s,id)>before?10*(before+1):0;earn(s,reward+bonus);
   const d=s.dolls.find(d=>d.id===a.resident);growBond(s,d,3);d.comfort=clamp(d.comfort+8);s.unease=clamp(s.unease-3);
  }
@@ -250,11 +247,10 @@ function stepTea(s,dt){
  if(!cup){a.spills+=volume;return}
  const added=Math.min(volume,Math.max(0,1.2-cup.fill));cup.fill+=added;a.spills+=volume-added;
 }
-// Whole-number percent of a cup's fill or target (0-1 scale), for readouts.
-export const teaPercent=value=>Math.round(Math.max(0,value)*100);
 export function teaStatus(s){
  const a=teaActive(s);if(!a)return null;
- return {...a,result:a.result?structuredClone(a.result):null,flow:teaFlow(s,a),aimedCup:teaHit(a)?.id??null,best:a.mode==='ritual'?
+ return {...a,result:a.result?structuredClone(a.result):null,flow:teaFlow(s,a),
+   aimedCup:teaHit(a)?.id??null,best:a.mode==='ritual'?
    s.activities.teaRecords[a.level]:null,cups:a.cups.map(c=>({...c,ready:cupReady(c),
      overfilled:c.fill>c.target+TEA_TOLERANCE+1e-9})),ready:a.phase==='pour'&&!a.pressed&&a.cups.every(cupReady)};
 }
@@ -264,7 +260,8 @@ function teaCommand(s){
 }
 export function controlTea(s,input){
  const blocked=teaCommand(s);if(blocked)return blocked;
- if(!input||typeof input!=='object'||Array.isArray(input)||Object.keys(input).some(k=>!['aim','tilt','pressed'].includes(k))||
+ if(!input||typeof input!=='object'||Array.isArray(input)||
+   Object.keys(input).some(k=>!['aim','tilt','pressed'].includes(k))||
    !Number.isFinite(input.aim)||input.aim< -1||input.aim>1||!Number.isFinite(input.tilt)||input.tilt<0||
      input.tilt>1||typeof input.pressed!=='boolean')return fail('invalid');
  const a=teaActive(s);a.aim=input.aim;a.tilt=input.tilt;a.pressed=input.pressed;return {ok:true};
@@ -273,43 +270,50 @@ export function releaseTea(s){
  const a=teaActive(s);if(!a)return fail('teaNotActive');a.pressed=false;a.tilt=0;return {ok:true};
 }
 export function emptyTeaCup(s,id){
- const blocked=teaCommand(s);if(blocked)return blocked;const a=teaActive(s),cup=Number.isInteger(id)?a.cups.find(c=>c.id===id):null;
- if(!cup)return fail('invalid');if(a.pressed)return fail('teaHeld');if(cup.fill<=cup.target+TEA_TOLERANCE+1e-9)return fail('teaNotOverfilled');
+ const blocked=teaCommand(s);if(blocked)return blocked;
+ const a=teaActive(s),cup=Number.isInteger(id)?a.cups.find(c=>c.id===id):null;
+ if(!cup)return fail('invalid');if(a.pressed)return fail('teaHeld');
+ if(cup.fill<=cup.target+TEA_TOLERANCE+1e-9)return fail('teaNotOverfilled');
  a.spills+=cup.fill;cup.fill=0;return {ok:true};
 }
 export function serveTea(s){
  const blocked=teaCommand(s);if(blocked)return blocked;const a=teaActive(s);
  if(a.pressed)return fail('teaHeld');if(!a.cups.every(cupReady))return fail('teaNotReady');
- if(a.mode==='guest'){const story=storyStatus(s);if(story.chapter?.id!=='guest-tea'||story.step!==2)return fail('storyNotHere')}
+ if(a.mode==='guest'){const story=storyStatus(s);
+ if(story.chapter?.id!=='guest-tea'||story.step!==2)return fail('storyNotHere')}
  const accuracy=a.cups.reduce((sum,c)=>sum+Math.max(0,1-Math.abs(c.fill-c.target)/TEA_TOLERANCE),0)/a.cups.length;
- const useful=a.cups.reduce((sum,c)=>sum+Math.min(c.fill,c.target),0),score=integer(Math.round(100*accuracy*Math.min(1,useful/a.poured)),0,100);
+ const useful=a.cups.reduce((sum,c)=>sum+Math.min(c.fill,c.target),0),
+   score=integer(Math.round(100*accuracy*Math.min(1,useful/a.poured)),0,100);
  let result;
  if(a.mode==='guest')result={ok:true,complete:true,id:'tea',mode:'guest',reward:0,bonus:0,level:a.level,
    practice:true,score,storyResult:advanceStory(s,storyStatus(s))};
- else{result={...completeActivity(s,'tea'),mode:'ritual',score};s.activities.teaRecords[a.level]=Math.max(s.activities.teaRecords[a.level]??0,score)}
+ else{result={...completeActivity(s,'tea'),mode:'ritual',score};
+ s.activities.teaRecords[a.level]=Math.max(s.activities.teaRecords[a.level]??0,score)}
  a.pressed=false;a.tilt=0;a.phase='served';a.result=result;return structuredClone(result);
 }
 
 const stitchActive=s=>s.activities.active?.id==='stitch'?s.activities.active:null;
 const stitchSections=a=>STITCH_PATTERNS.find(p=>p.id===a.patternId).sections;
 function createStitch(s,mode){
- const level=mode==='mend'?0:activityLevel(s,'stitch'),patternId=mode==='mend'?'bear-seam':['leaf','diamond','jasmine','heart'][level];
+ const level=mode==='mend'?0:activityLevel(s,'stitch'),patternId=mode==='mend'?
+   'bear-seam':['leaf','diamond','jasmine','heart'][level];
  const p=STITCH_PATTERNS.find(p=>p.id===patternId).sections[0][0],needle={x:p[0],y:p[1]};
  return {id:'stitch',mode,phase:'sew',level,patternId,section:0,distance:0,needle,target:{...needle},
    pressed:false,loose:false,travel:0,alignmentTravel:0,repairs:0,capture:null,result:null};
 }
-// Whole-number percent of the cloth for a needle or guide coordinate (-1..1 scale), for readouts.
-export const stitchCoordinate=value=>Math.round(value*100);
 export function stitchStatus(s){
  const a=stitchActive(s);if(!a)return null;const sections=stitchSections(a),e=stitchEdge(a,sections);
- return {...structuredClone(a),sections:structuredClone(sections),completedSections:Math.min(a.section,sections.length),acceptedTrail:acceptedTrail(a,
-   sections),nextGuidePoint:e?{...e.end}:null,requiredLength:requiredLength(sections),best:a.mode==='ritual'?s.activities.stitchRecords[a.level]:null,
+ return {...structuredClone(a),sections:structuredClone(sections),
+   completedSections:Math.min(a.section,sections.length),acceptedTrail:acceptedTrail(a,
+   sections),nextGuidePoint:e?{...e.end}:null,requiredLength:requiredLength(sections),
+     best:a.mode==='ritual'?s.activities.stitchRecords[a.level]:null,
    ready:a.phase==='sew'&&a.section===sections.length&&!a.pressed&&!a.loose&&!a.capture};
 }
 // Where the needle is in the current section, for readouts: 1-based section and rounded percent.
 export function stitchSectionProgress(stitch){
  const total=stitch.sections.length,covered=stitch.completedSections>=total;
- const length=stitch.sections[stitch.section]?.reduce((sum,p,i,points)=>i?sum+Math.hypot(p[0]-points[i-1][0],p[1]-points[i-1][1]):sum,0)??0;
+ const length=stitch.sections[stitch.section]?.reduce((sum,p,i,points)=>i?
+   sum+Math.hypot(p[0]-points[i-1][0],p[1]-points[i-1][1]):sum,0)??0;
  const fraction=length?Math.max(0,Math.min(1,stitch.distance/length)):0;
  return {section:Math.min(total,stitch.section+1),percent:covered?100:Math.round(fraction*100)};
 }
@@ -319,31 +323,39 @@ function stitchCommand(s){
 }
 export function controlStitch(s,input){
  const blocked=stitchCommand(s);if(blocked)return blocked;
- if(!input||typeof input!=='object'||Array.isArray(input)||Object.keys(input).some(k=>!['x','y','pressed'].includes(k))||!Number.isFinite(input.x)||
-   input.x< -1||input.x>1||!Number.isFinite(input.y)||input.y< -1||input.y>1||typeof input.pressed!=='boolean')return fail('invalid');
+ if(!input||typeof input!=='object'||Array.isArray(input)||
+   Object.keys(input).some(k=>!['x','y','pressed'].includes(k))||!Number.isFinite(input.x)||
+   input.x< -1||input.x>1||!Number.isFinite(input.y)||input.y< -1||input.y>1||
+     typeof input.pressed!=='boolean')return fail('invalid');
  const a=stitchActive(s);a.target={x:input.x,y:input.y};a.pressed=input.pressed;
  if(!input.pressed)a.capture=null;return {ok:true};
 }
 export function releaseStitch(s){
- const a=stitchActive(s);if(!a)return fail('stitchNotActive');a.pressed=false;a.capture=null;a.target={...a.needle};return {ok:true};
+ const a=stitchActive(s);if(!a)return fail('stitchNotActive');a.pressed=false;
+ a.capture=null;a.target={...a.needle};return {ok:true};
 }
 export function unpickStitch(s){
  const blocked=stitchCommand(s);if(blocked)return blocked;const a=stitchActive(s);
- if(a.pressed)return fail('stitchHeld');if(a.section>=stitchSections(a).length||(!a.loose&&a.distance<=0))return fail('stitchNoRepair');
+ if(a.pressed)return fail('stitchHeld');
+ if(a.section>=stitchSections(a).length||(!a.loose&&a.distance<=0))return fail('stitchNoRepair');
  const p=stitchSections(a)[a.section][0];a.distance=0;a.loose=false;a.capture=null;a.needle={x:p[0],y:p[1]};
  a.target={...a.needle};a.repairs++;return {ok:true};
 }
 export function finishStitch(s){
  const blocked=stitchCommand(s);if(blocked)return blocked;const a=stitchActive(s),sections=stitchSections(a);
- if(a.pressed)return fail('stitchHeld');if(a.loose||a.capture||a.section!==sections.length)return fail('stitchNotReady');
- if(a.mode==='mend'){const story=storyStatus(s);if(story.chapter?.id!=='mended-friend'||story.step!==1)return fail('storyNotHere')}
- const score=integer(Math.round(100*(a.travel>0?a.alignmentTravel/a.travel:0)*Math.min(1,requiredLength(sections)/Math.max(a.travel,1e-9))),0,100);
+ if(a.pressed)return fail('stitchHeld');
+ if(a.loose||a.capture||a.section!==sections.length)return fail('stitchNotReady');
+ if(a.mode==='mend'){const story=storyStatus(s);
+ if(story.chapter?.id!=='mended-friend'||story.step!==1)return fail('storyNotHere')}
+ const score=integer(Math.round(100*(a.travel>0?a.alignmentTravel/a.travel:0)*Math.min(1,
+   requiredLength(sections)/Math.max(a.travel,1e-9))),0,100);
  let result;
  if(a.mode==='mend')result={ok:true,complete:true,id:'stitch',mode:'mend',reward:0,bonus:0,level:a.level,
    practice:true,score,storyResult:advanceStory(s,storyStatus(s))};
  else{result={...completeActivity(s,'stitch'),mode:'ritual',score};
  s.activities.stitchRecords[a.level]=Math.max(s.activities.stitchRecords[a.level]??0,score)}
- a.phase='finished';a.capture=null;a.pressed=false;a.target={...a.needle};a.result=structuredClone(result);return structuredClone(result);
+ a.phase='finished';a.capture=null;a.pressed=false;a.target={...a.needle};
+ a.result=structuredClone(result);return structuredClone(result);
 }
 
 export function restorationReady(s,room){
@@ -363,7 +375,8 @@ export function storyStatus(s){
  const index=s.story.chapter,chapter=STORY_CHAPTERS[index]??null,step=chapter?s.story.step:0;
  const completed=STORY_CHAPTERS.slice(0,index).map(c=>c.id);
  const progress=STORY_CHAPTERS.slice(0,index).reduce((sum,c)=>sum+c.steps.length,0)+step;
- return {chapter,index,step,next:chapter?.steps[step]??null,held:chapter&&step>0?chapter.steps[step-1].gives:null,completed,finished:chapter===null,
+ return {chapter,index,step,next:chapter?.steps[step]??null,held:chapter&&step>0?
+   chapter.steps[step-1].gives:null,completed,finished:chapter===null,
    progress,totalSteps:STORY_CHAPTERS.reduce((sum,c)=>sum+c.steps.length,0)};
 }
 export function interactStory(s,key){
@@ -420,7 +433,8 @@ export function chimeStatus(s){
 }
 function chimeBlocked(s,phase='echo'){
  if(s.paused)return fail('pausedActivity');const a=chimeActive(s);
- if(!a)return fail('chimeNotActive');if(a.phase!==phase)return fail(a.phase==='finished'?'chimeFinished':'chimeListening');return null;
+ if(!a)return fail('chimeNotActive');
+ if(a.phase!==phase)return fail(a.phase==='finished'?'chimeFinished':'chimeListening');return null;
 }
 export function grabChime(s,id){
  const blocked=chimeBlocked(s);if(blocked)return blocked;

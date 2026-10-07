@@ -25,7 +25,8 @@ export function paintedFace(id) {
  const canvas = document.createElement('canvas'); canvas.width = canvas.height = 512;
  const c = canvas.getContext('2d');
  c.fillStyle = {lina:'#f1cfb7',noor:'#eed1ba',sami:'#e9c5aa'}[id]||'#f1cfb7'; c.fillRect(0, 0, 512, 512);
- const wash=c.createLinearGradient(0,80,0,440);wash.addColorStop(0,'rgba(255,240,225,.10)');wash.addColorStop(.5,'rgba(255,240,225,0)');
+ const wash=c.createLinearGradient(0,80,0,440);
+ wash.addColorStop(0,'rgba(255,240,225,.10)');wash.addColorStop(.5,'rgba(255,240,225,0)');
  wash.addColorStop(1,'rgba(212,145,119,.07)');c.fillStyle=wash;c.fillRect(0,0,512,512);
  // Feathered blush remains baked into the ceramic, not separate cheek spheres.
  for (const x of [76, 180]) {
@@ -138,9 +139,11 @@ export function closePortraitEye(eye, value) {
 export function createPortraitMouth(parent, id='lina') {
  const root = new T.Group(); root.name = 'porcelain-lips'; root.userData.noBatch = true;
  root.position.set(0, -.105, faceSurface(id,0,-.105)+.006); parent.add(root);
- const smile=faceStroke(root, 'painted-smile', [[-.027,.003,0],[-.014,-.006,.002],[0,-.009,.003],[.014,-.006,.002],[.027,.003,0]], .0027, 0xa96658);
+ const smile=faceStroke(root, 'painted-smile', [[-.027,.003,0],[-.014,-.006,.002],[0,
+   -.009,.003],[.014,-.006,.002],[.027,.003,0]], .0027, 0xa96658);
  const width={lina:1,noor:.92,sami:1.06}[id]||1,p=smile.geometry.attributes.position;
- for(let i=0;i<p.count;i++){const x=p.getX(i);p.setX(i,x*width);p.setY(i,p.getY(i)+(id==='lina'?x*.045:id==='noor'?-x*.035:0));}
+ for(let i=0;i<p.count;i++){const x=p.getX(i);p.setX(i,x*width);
+ p.setY(i,p.getY(i)+(id==='lina'?x*.045:id==='noor'?-x*.035:0));}
  smile.geometry.computeVertexNormals();
  return root;
 }
@@ -154,7 +157,8 @@ export function createNose(parent, material, id='lina') {
 const earGeometry = new T.SphereGeometry(1, 12, 10);
 export function createEar(parent, sign, material, id='lina') {
  const root = new T.Group(); root.name = 'porcelain-ear'; root.userData.noBatch = true;
- root.position.set(sign*((profiles[id]||profiles.lina)[0]+.009), -.039, .010); root.rotation.y = sign * .45; parent.add(root);
+ root.position.set(sign*((profiles[id]||profiles.lina)[0]+.009), -.039, .010);
+ root.rotation.y = sign * .45; parent.add(root);
  const lobe = new T.Mesh(earGeometry, material); lobe.scale.set(.028, .039, .024); root.add(lobe);
  const inset = new T.Mesh(earGeometry, mat(0xe4b39a, {roughness: .78})); inset.name = 'ear-recess';
  inset.position.set(0, .006, .021); inset.scale.set(.012, .023, .003); root.add(inset); return root;

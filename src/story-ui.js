@@ -10,12 +10,15 @@ export function storyObjective(s,t,focusedRoom=null){
  const prop=INTERACTIVE_PROPS.find(p=>p.id===status.next.object);
  const arrived=focusedRoom===prop.room;
  return {copy:t(`story-${status.chapter.id}-${status.step}-clue`),label:arrived?t('storyFindObject').replace('{object}',
-   t('object-'+prop.id)):t('storyFindRoom').replace('{room}',t(prop.room+'In')),ico:status.chapter.icon,action:'story-hint',value:prop.room,arrived};
+   t('object-'+prop.id)):t('storyFindRoom').replace('{room}',t(prop.room+'In')),
+     ico:status.chapter.icon,action:'story-hint',value:prop.room,arrived};
 }
 export function storyMemoriesMarkup(s,t){
  const status=storyStatus(s);if(!status.completed.length)return '';
- return `<section class="story-memories"><h3 class="section-heading">${t('storyMemories')}</h3>${status.completed.map(id=>`<article><span
-   aria-hidden="true">✦</span><div><h4>${t('story-'+id+'-title')}</h4><p>${t('story-'+id+'-memory')}</p></div></article>`).join('')}</section>`;
+ return `<section class="story-memories"><h3
+   class="section-heading">${t('storyMemories')}</h3>${status.completed.map(id=>`<article><span
+   aria-hidden="true">✦</span><div><h4>${t('story-'+id+'-title')}</h4><p
+     >${t('story-'+id+'-memory')}</p></div></article>`).join('')}</section>`;
 }
 
 // Pick the edge with the greater clear distance from the actual selected
@@ -52,11 +55,13 @@ function layoutRibbon(root,host,pointOf){
  const upper=[...host.querySelectorAll('.brand,.house-status,.time-tools,.objective,.visitor-hint')].flatMap(node=>{
   if(!node.getClientRects().length)return [];const style=getComputedStyle(node);
   if(style.visibility==='hidden'||style.display==='none')return [];
-  const r=node.getBoundingClientRect();return [{left:r.left-bounds.left,right:r.right-bounds.left,bottom:r.bottom-bounds.top}];
+  const r=node.getBoundingClientRect();
+  return [{left:r.left-bounds.left,right:r.right-bounds.left,bottom:r.bottom-bounds.top}];
  });
  // Portrait paper clears navigation and the held token. Short landscape
  // keeps its authored 75px lower edge; side controls do not fill the center.
- const bottom=landscape?bounds.height-75:(roomEdge?.top??bounds.bottom-112)-bounds.top-14-(root.querySelector('.held-item')?64:0);
+ const bottom=landscape?bounds.height-75:(roomEdge?.top??
+   bounds.bottom-112)-bounds.top-14-(root.querySelector('.held-item')?64:0);
  const safeTop=parseFloat(getComputedStyle(host).getPropertyValue('--ribbon-safe-top'))||0;
  const {edge,top}=ribbonPlacement({width:bounds.width,height:bounds.height,y:point?.y,
   rect:{left:paper.left-bounds.left,right:paper.right-bounds.left,height:paper.height},upper,bottom,safeTop});
@@ -67,7 +72,8 @@ function layoutRibbon(root,host,pointOf){
 // The held item token, the selection paper and the scene response.
 function storyMarkup(s,{t,held,object,action,feedback}){
  const label=action?t(action.label).replace('{item}',t('held-'+action.item)):'';
- const response=feedback?`<p class="scene-response ${feedback.complete?'chapter-finished':''}" role="status">${feedback.complete?
+ const response=feedback?`<p class="scene-response ${feedback.complete?
+   'chapter-finished':''}" role="status">${feedback.complete?
    icon('check'):''}<span>${t(feedback.message)}</span>${feedback.reward?
      `<small>+${number(s.settings.locale,feedback.reward)} ${icon('button')}</small>`:''}</p>`:'';
  return `${held?
@@ -76,10 +82,14 @@ function storyMarkup(s,{t,held,object,action,feedback}){
    class="held-art">${icon(held.icon)}</span><span><small>${t('storyInHand')}</small><strong
      >${t('held-'+held.id)}</strong><em>${t('storyDragShort')}</em></span></button>`:''}
   ${object?`<div class="object-ribbon" aria-label="${t('selectedObject')}"><span class="ribbon-emblem"
-    aria-hidden="true">${icon(object.icon)}</span><div class="ribbon-copy"><small>${t(object.room+'Short')}</small><h2>${t(object.title)}</h2><p
-    ${feedback?'class="ribbon-feedback" role="status"':''}>${feedback?t(feedback.message):t('storyTouchAgain').replace('{action}',
-    label)}</p></div><button type="button" class="scene-primary" data-scene-action="activate" ${action?.disabled?'disabled':''}>${icon(action?.icon??
-    'spark')}<span>${label}</span></button><button type="button" class="icon-button scene-inspect" data-scene-action="inspect"
+    aria-hidden="true">${icon(object.icon)}</span><div
+      class="ribbon-copy"><small>${t(object.room+'Short')}</small><h2>${t(object.title)}</h2><p
+    ${feedback?'class="ribbon-feedback" role="status"':''}>${feedback?
+      t(feedback.message):t('storyTouchAgain').replace('{action}',
+    label)}</p></div><button type="button" class="scene-primary"
+      data-scene-action="activate" ${action?.disabled?'disabled':''}>${icon(action?.icon??
+    'spark')}<span>${label}</span></button><button type="button"
+      class="icon-button scene-inspect" data-scene-action="inspect"
     aria-label="${t('storyInspect')}">${icon('plus')}</button><button type="button" class="icon-button"
       data-scene-action="close" aria-label="${t('close')}">${icon('close')}</button></div>`:''}
   ${object?'':response}`;
@@ -87,8 +97,10 @@ function storyMarkup(s,{t,held,object,action,feedback}){
 
 export function createStoryUI(host,getState,dispatch,project=()=>null){
  const root=document.createElement('section');root.className='story-playfield';
- const ghost=document.createElement('div');ghost.className='carry-ghost';ghost.hidden=true;ghost.setAttribute('aria-hidden','true');
- const gesture=createCarryGesture();let selected=null,signature='',feedback=null,previousFocus=null,dragPointer=null,dragToken=null,skipClick=false;
+ const ghost=document.createElement('div');ghost.className='carry-ghost';
+ ghost.hidden=true;ghost.setAttribute('aria-hidden','true');
+ const gesture=createCarryGesture();
+ let selected=null,signature='',feedback=null,previousFocus=null,dragPointer=null,dragToken=null,skipClick=false;
  const t=key=>translate(getState().settings.locale,key);
  const current=()=>objectInfo(getState(),selected);
  function placeRibbon(){
@@ -103,7 +115,8 @@ export function createStoryUI(host,getState,dispatch,project=()=>null){
  }
  function update(){
   if(!root.isConnected)host.append(root);if(!ghost.isConnected)host.append(ghost);
-  const s=getState(),status=storyStatus(s),hidden=Boolean(host.querySelector('dialog[open],.error-screen'))||s.paused||['tea','stitch',
+  const s=getState(),status=storyStatus(s),
+    hidden=Boolean(host.querySelector('dialog[open],.error-screen'))||s.paused||['tea','stitch',
     'lullaby'].includes(s.activities.active?.id)||host.querySelector('.placement')?.hidden===false;
   root.hidden=hidden;if(hidden)cancelDrag();
   if(selected&&!current())selected=null;
@@ -147,10 +160,13 @@ export function createStoryUI(host,getState,dispatch,project=()=>null){
  update();
  return {
   get selected(){return selected},
-  select(key){if(!objectInfo(getState(),key))return false;if(key!==selected)previousFocus=document.activeElement;selected=key;feedback=null;update();
-  if(previousFocus?.matches('[data-object]'))root.querySelector('[data-scene-action="activate"]')?.focus({preventScroll:true});return true},
+  select(key){if(!objectInfo(getState(),key))return false;
+  if(key!==selected)previousFocus=document.activeElement;selected=key;feedback=null;update();
+  if(previousFocus?.matches('[data-object]'))root.querySelector('[data-scene-action="activate"]')?.focus({
+    preventScroll:true});return true},
   clear(restoreFocus=false){cancelDrag();selected=null;feedback=null;update();
-  if(restoreFocus){const origin=previousFocus?.matches('[data-object]')?host.querySelector('[data-object-toggle]'):previousFocus;
+  if(restoreFocus){const origin=previousFocus?.matches('[data-object]')?
+    host.querySelector('[data-object-toggle]'):previousFocus;
   if(origin?.isConnected&&origin.getClientRects().length)origin.focus({preventScroll:true});
   else document.querySelector('#world')?.focus({preventScroll:true})}},
   respond(message,complete=false,reward=0){feedback={message,complete,reward};update()},

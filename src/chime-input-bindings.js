@@ -1,7 +1,8 @@
 import {bindAll} from './event-bindings.js';
 // Pointer, keyboard and lifecycle input for the chime surface; the surface owns state and rendering.
 export function bindChimeInput(ctx){
- const {canvas,gesture,mode,parts,active,blocked,stop,inside,pick,pullSpan,dispatch,cancel,update,releaseCapture,setLost}=ctx;
+ const {canvas,gesture,mode,parts,active,blocked,stop,inside,pick,pullSpan,dispatch,
+   cancel,update,releaseCapture,setLost}=ctx;
  function down(e){
   const a=active();if(!a||blocked())return;stop(e);if(gesture.pointerId!==null||mode.keyboard||!inside(e))return;
   const target=pick(e.clientX,e.clientY);if(target!=='moon'&&a.phase!=='echo')return;
@@ -17,7 +18,8 @@ export function bindChimeInput(ctx){
   if(e.pointerId!==gesture.pointerId)return;
   if(e.pointerType==='mouse'&&e.buttons===0){cancel();return}
   if(!inside(e)){cancel();return}
-  const control=gesture.move(e);if(control&&control.target!=='moon'){dispatch('chime-pull',control.pull);canvas.style.cursor='grabbing'}
+  const control=gesture.move(e);
+  if(control&&control.target!=='moon'){dispatch('chime-pull',control.pull);canvas.style.cursor='grabbing'}
  }
  function up(e){
   if(!active())return;stop(e);if(e.pointerId!==gesture.pointerId)return;
@@ -37,7 +39,8 @@ export function bindChimeInput(ctx){
   if(gesture.pointerId!==null)return;mode.input='keyboard';
   if(e.key==='r'||e.key==='R'){if(!e.repeat){cancel();dispatch('chime-replay')}return}
   if(e.key==='ArrowLeft'||e.key==='ArrowRight'){
-   if(!mode.keyboard){mode.selection=(mode.selection+(e.key==='ArrowLeft'?3:1))%4;dispatch('chime-focus',mode.selection)}
+   if(!mode.keyboard){mode.selection=(mode.selection+(e.key==='ArrowLeft'?3:1))%4;
+   dispatch('chime-focus',mode.selection)}
   }else if(!e.repeat&&!mode.keyboard&&a.phase==='echo'){mode.keyboard=true;
   dispatch('chime-focus',mode.selection);dispatch('chime-grab',mode.selection)}
   update(0);

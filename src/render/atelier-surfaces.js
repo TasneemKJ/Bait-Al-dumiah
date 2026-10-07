@@ -68,7 +68,8 @@ export function ceramicColor(color){
  // Delicate painted bands belong near a vessel's rim and foot, not a busy field.
  for(const y of [27,34,221,228]){
   c.lineWidth=y===27||y===228?1.6:.7;c.strokeStyle=y===27||y===228?'#77817c':'#b8a07b';
-  c.globalAlpha=.68;c.beginPath();for(let x=0;x<=256;x+=2){const yy=y+.35*Math.sin(x/256*TAU*3);x?c.lineTo(x,yy):c.moveTo(x,yy)}c.stroke();
+  c.globalAlpha=.68;c.beginPath();
+  for(let x=0;x<=256;x+=2){const yy=y+.35*Math.sin(x/256*TAU*3);x?c.lineTo(x,yy):c.moveTo(x,yy)}c.stroke();
  }
  for(const cx of [68,196]){
   c.globalAlpha=.63;c.strokeStyle='#637e75';c.lineWidth=1;c.beginPath();
@@ -78,7 +79,8 @@ export function ceramicColor(color){
    c.fillStyle='#6c857a';c.beginPath();c.ellipse(x,y,5.4,2.1,i%2?-.65:.65,0,TAU);c.fill();
   }
   c.globalAlpha=.9;c.fillStyle='#fff1d5';
-  for(let i=0;i<5;i++){const a=i*TAU/5;c.beginPath();c.ellipse(cx+4+Math.sin(a)*3,103+Math.cos(a)*3,1.5,3,-a,0,TAU);c.fill()}
+  for(let i=0;i<5;i++){const a=i*TAU/5;c.beginPath();
+  c.ellipse(cx+4+Math.sin(a)*3,103+Math.cos(a)*3,1.5,3,-a,0,TAU);c.fill()}
   c.fillStyle='#bba26b';c.beginPath();c.arc(cx+4,103,1.4,0,TAU);c.fill();
  }
  c.globalAlpha=1;const map=new T.CanvasTexture(canvas);map.name='atelier-ceramic-pigment-'+key;

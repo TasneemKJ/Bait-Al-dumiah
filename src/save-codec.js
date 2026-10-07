@@ -9,7 +9,8 @@ const MIGRATIONS={};
 export function migrate(v,migrations=MIGRATIONS,target=SAVE_VERSION){
  if(!v||typeof v!=='object'||Array.isArray(v)||!Number.isInteger(v.version)||v.version<1||v.version>target)return null;
  let out=v;
- while(out.version<target){const step=migrations[out.version];if(typeof step!=='function')return null;const next=step(structuredClone(out));
+ while(out.version<target){const step=migrations[out.version];
+ if(typeof step!=='function')return null;const next=step(structuredClone(out));
  if(!next||typeof next!=='object'||next.version!==out.version+1)return null;out=next}
  return out;
 }
@@ -32,9 +33,11 @@ function restoreValid(v){
  for(const k of ['hunger','energy','comfort','bond'])if(Number.isFinite(a[k]))d[k]=clamp(a[k]);
  if(has(ROOMS,a.room))d.room=a.room;d.lastCare=-10;d.action='idle';d.actionUntil=0}
  const occupied=new Set();
- if(Array.isArray(v.decor))for(const d of v.decor.slice(0,100)){if(!d||!has(CATALOG,d.item)||!has(ROOMS,d.room)||!Number.isInteger(d.slot)||d.slot<0||
+ if(Array.isArray(v.decor))for(const d of v.decor.slice(0,100)){if(!d||!has(CATALOG,
+   d.item)||!has(ROOMS,d.room)||!Number.isInteger(d.slot)||d.slot<0||
    d.slot>=SLOTS.length)continue;const key=`${d.room}:${d.slot}`;if(occupied.has(key))continue;occupied.add(key);
- s.decor.push({id:s.nextId++,item:d.item,room:d.room,slot:d.slot,rotation:Number.isInteger(d.rotation)&&d.rotation>=0&&d.rotation<4?d.rotation:0,
+ s.decor.push({id:s.nextId++,item:d.item,room:d.room,slot:d.slot,
+   rotation:Number.isInteger(d.rotation)&&d.rotation>=0&&d.rotation<4?d.rotation:0,
    originRoom:has(ROOMS,d.originRoom)?d.originRoom:d.room,active:d.active===true,
      tendedDay:integer(d.tendedDay,0,s.day),lastUse:Number.isFinite(d.lastUse)?clamp(d.lastUse,-10,s.elapsed):-10})}
  s.wishes=Array.isArray(v.wishes)?DOLLS.filter(d=>v.wishes.includes(d.id)).map(d=>d.id):[];
@@ -44,7 +47,8 @@ function restoreValid(v){
  s.sewnToday=integer(v.sewnToday,0,SEW_DAILY);s.earnedToday=integer(v.earnedToday,0,99999);
  s.basket=integer(v.basket,0,BASKET_MAX);
  s.dayTime=clamp(v.dayTime,0,1e6);s.door=integer(v.door,0,DOOR_STEPS.length);
- s.gifts=Array.isArray(v.gifts)?VISITOR_GIFTS.filter(g=>v.gifts.includes(g)):[];s.lastGiftDay=integer(v.lastGiftDay,0,s.day);
+ s.gifts=Array.isArray(v.gifts)?VISITOR_GIFTS.filter(g=>v.gifts.includes(g)):[];
+ s.lastGiftDay=integer(v.lastGiftDay,0,s.day);
  for(const a of ACTIVITIES){s.activities.mastery[a.id]=integer(v.activities?.mastery?.[a.id],0,999);
  s.activities.completed[a.id]=integer(v.activities?.completed?.[a.id],0,ACTIVITY_DAILY_CAP);
  s.activities.lastReward[a.id]=Number.isFinite(v.activities?.lastReward?.[a.id])?
@@ -64,7 +68,8 @@ function restoreValid(v){
  s.milestones=ids(v.milestones);s.achieved=ids([...ids(v.achieved),...s.milestones]);
  // Veterans have already met the night: no first-night hint for a save with history.
  s.hints={night:v.hints?.night===true||s.day>1||s.journal.length>0,calm:v.hints?.calm===true||s.day>1||s.clock>=90};
- if(v.settings&&typeof v.settings==='object'){s.settings.locale=v.settings.locale==='ar'?'ar':'en';s.settings.muted=v.settings.muted!==false;
+ if(v.settings&&typeof v.settings==='object'){s.settings.locale=v.settings.locale==='ar'?
+   'ar':'en';s.settings.muted=v.settings.muted!==false;
  s.settings.reducedMotion=v.settings.reducedMotion===true;s.settings.largeText=v.settings.largeText===true;
  s.settings.quality=['auto','low','high'].includes(v.settings.quality)?v.settings.quality:'auto'}
  return s;

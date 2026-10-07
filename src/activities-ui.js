@@ -1,49 +1,63 @@
 import {ACTIVITIES,ROOMS,ACTIVITY_THRESHOLDS,ACTIVITY_COOLDOWN,ACTIVITY_DAILY_CAP} from './content.js';
-import {activityLevel,activityReward,activityRewardReady,restorationReady} from './simulation.js';
+import {activityLevel,activityReward,activityRewardReady,restorationReady,canAfford} from './simulation.js';
 import {icon} from './icons.js';
 
-function rewardNote(s,a,t,n){const ready=activityRewardReady(s,a.id),capped=s.activities.completed[a.id]>=ACTIVITY_DAILY_CAP;
-return ready?'+'+n(activityReward(s,a.id))+' '+t('buttons'):capped?t('activityCap'):t('activityCooldown').replace('{x}',n(Math.max(0,
+function rewardNote(s,a,t,n){const ready=activityRewardReady(s,a.id),
+  capped=s.activities.completed[a.id]>=ACTIVITY_DAILY_CAP;
+return ready?'+'+n(activityReward(s,a.id))+' '+t('buttons'):capped?
+  t('activityCap'):t('activityCooldown').replace('{x}',n(Math.max(0,
   Math.ceil(ACTIVITY_COOLDOWN-(s.elapsed-s.activities.lastReward[a.id])))))}
 export function updateActivityStatus(host,s,t,n){
  for(const a of ACTIVITIES){
   const note=host.querySelector(`[data-activity-note="${a.id}"]`),
     start=host.querySelector(`.ritual-card [data-id="${a.id}"]`),ready=activityRewardReady(s,a.id);
   if(note)note.textContent=rewardNote(s,a,t,n);
-  if(start){start.classList.toggle('primary',ready);start.querySelector('span').textContent=t(ready?'activityStart':'practiceLabel')}
+  if(start){start.classList.toggle('primary',ready);
+  start.querySelector('span').textContent=t(ready?'activityStart':'practiceLabel')}
  }
  const earning=host.querySelector('.ritual-earning'),id=s.activities.active?.id;
- if(earning&&id)earning.textContent=activityRewardReady(s,id)?'+'+n(activityReward(s,id))+' '+t('buttons'):t('practiceLabel');
+ if(earning&&id)earning.textContent=activityRewardReady(s,id)?'+'+n(activityReward(s,
+   id))+' '+t('buttons'):t('practiceLabel');
 }
 
 export function activityMarkup(s,t,n,button,result){
  const active=s.activities.active;
  // All three rituals own real scene surfaces, including from this catalog.
  if(['tea','stitch','lullaby'].includes(active?.id))return '';
- const outcome=result?.complete?`<div class="ritual-result" role="status">${icon('check')}<h3>${t('activityFinished')}</h3><p>${result.practice?
+ const outcome=result?.complete?
+   `<div class="ritual-result" role="status">${icon('check')}<h3>${t('activityFinished')}</h3><p>${result.practice?
    t('activityPractice'):t('activityReward')+' +'+n(result.reward+result.bonus)+' '+t('buttons')}</p
      >${button('begin-activity',t('activityAgain'),'play',
    `data-id="${result.id}" class="primary"`)}</div>`:'';
  return `<h2 id="sheet-title">${t('activities')}</h2><p class="sheet-intro">${t('activitiesIntro')}</p>${outcome}
   <div class="ritual-catalog">${ACTIVITIES.map(a=>{
-   const points=s.activities.mastery[a.id],level=activityLevel(s,a.id),next=ACTIVITY_THRESHOLDS[level+1],ready=activityRewardReady(s,a.id);
+   const points=s.activities.mastery[a.id],level=activityLevel(s,a.id),
+     next=ACTIVITY_THRESHOLDS[level+1],ready=activityRewardReady(s,a.id);
    const note=rewardNote(s,a,t,n);
    return `<article class="ritual-card"><div
-     class="ritual-title">${icon(a.icon)}<div><h3>${t('activity-'+a.id)}</h3><small>${t(a.resident)} · ${t(a.room)}</small></div><span
+     class="ritual-title">${icon(a.icon)}<div><h3>${t('activity-'+a.id)}</h3><small
+       >${t(a.resident)} · ${t(a.room)}</small></div><span
      class="ritual-level">${n(level+1)}</span></div><p>${t('activity-'+a.id+'Intro')}</p><div
-     class="ritual-mastery"><label>${t('masteryLabel')} <strong>${n(points)}${next?' / '+n(next):''}</strong></label><meter min="0" max="${next??
-     Math.max(9,points)}" value="${points}" aria-label="${t('masteryLabel')} · ${t('activity-'+a.id)}"></meter></div><p class="ritual-reward-note"
+     class="ritual-mastery"><label>${t('masteryLabel')} <strong>${n(points)}${next?
+       ' / '+n(next):''}</strong></label><meter min="0" max="${next??
+     Math.max(9,points)}" value="${points}"
+       aria-label="${t('masteryLabel')} · ${t('activity-'+a.id)}"></meter></div><p class="ritual-reward-note"
      data-activity-note="${a.id}">${note}</p>${button('begin-activity',t(ready?
        'activityStart':'practiceLabel'),a.icon,`data-id="${a.id}" class="${ready?'primary':''}"`)}</article>`;
   }).join('')}</div>
-  <h3 class="section-heading" id="restoration-title">${t('restoreTitle')} <small>${n(Object.values(s.restoration).reduce((a,b)=>a+b,
+  <h3 class="section-heading"
+    id="restoration-title">${t('restoreTitle')} <small>${n(Object.values(s.restoration).reduce((a,b)=>a+b,
     0))}/${n(12)}</small></h3><p class="sheet-intro">${t('restoreIntro')}</p>
   <div class="restoration-catalog">${ROOMS.map(r=>{const next=restorationReady(s,r.id);
-  return `<article class="restoration-card"><div class="ritual-title">${icon('home')}<h3>${t(r.id)}</h3><small>${n(next.tier)}/3</small></div><ol
+  return `<article class="restoration-card"><div
+    class="ritual-title">${icon('home')}<h3>${t(r.id)}</h3><small>${n(next.tier)}/3</small></div><ol
     class="restoration-stages">${[1,2,3].map(i=>`<li class="${i<=next.tier?'done':''}">${icon(i<=next.tier?
     'check':'spark')}<span>${t('restore-'+r.id+'-'+i)}</span></li>`).join('')}</ol>${next.complete?
     `<p class="restoration-complete">${t('restorationDone')}</p>`:`<p
-    >${t('activity-'+next.activity)} · ${t('masteryLabel')} ${n(s.activities.mastery[next.activity])}/${n(next.required)}</p>${button('restore-room',
+    >${t('activity-'+next.activity)} · ${t('masteryLabel')}
+    ${n(s.activities.mastery[next.activity])}/${n(next.required)}</p
+      >${button('restore-room',
     t('restoreAction')+' · '+n(next.cost)+' '+t('buttons'),'home',
-      `data-id="${r.id}" class="primary" ${next.ready&&s.buttons>=next.cost?'':'disabled'}`)}`}</article>`}).join('')}</div>`;
+      `data-id="${r.id}" class="primary" ${next.ready&&canAfford(s,next.cost)?
+        '':'disabled'}`)}`}</article>`}).join('')}</div>`;
 }

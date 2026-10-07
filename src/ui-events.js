@@ -22,7 +22,8 @@ export function createUIEvents(host,ctx){
   'reset-no':()=>ctx.askReset(false),
  };
  for(const action of IDS)routes[action]=el=>dispatch(action,el.dataset.id);
- for(const action of NUMBERS)routes[action]=el=>{dispatch(action,Number(el.dataset.id));if(action==='remove')ctx.renderPanel()};
+ for(const action of NUMBERS)routes[action]=el=>{dispatch(action,Number(el.dataset.id));
+ if(action==='remove')ctx.renderPanel()};
  for(const action of COLLECT)routes[action]=el=>{dispatch(action,el.dataset.id);if(ctx.panelOpen())ctx.renderPanel()};
  const click=event=>{
   const target=event.target.closest('[data-action]');

@@ -1,5 +1,7 @@
 // Pointer, keyboard and lifecycle input for the tea work surface. The surface
 // owns state and rendering; this module turns browser events into commands.
+import {bindAll} from './event-bindings.js';
+
 export function bindTeaInput(ctx){
  const {root,active,blocked,stop,releaseCapture,invoke,cancel,respond,clearFeedback,update,gesture,
    keyboard,canvas,dispatch,pick,aimAt,setInputMode,setLost,parts}=ctx;
@@ -16,7 +18,8 @@ export function bindTeaInput(ctx){
  }
  function pointermove(e){
   const tea=active();if(!tea)return;if(blocked()){cancel();return}stop(e);
-  if(gesture.pointerId===null){const target=pick(e.clientX,e.clientY);canvas.style.cursor=target==='pot'?'grab':target?'pointer':'default';return}
+  if(gesture.pointerId===null){const target=pick(e.clientX,e.clientY);
+  canvas.style.cursor=target==='pot'?'grab':target?'pointer':'default';return}
   if(e.pointerId!==gesture.pointerId)return;
   if(e.pointerType==='mouse'&&e.buttons===0){cancel();return}
   const projected=aimAt(e.clientX,e.clientY);
@@ -27,7 +30,8 @@ export function bindTeaInput(ctx){
  function pointerup(e){
   const tea=active();if(!tea)return;stop(e);if(e.pointerId!==gesture.pointerId)return;
   if(blocked()){cancel();return}
-  const id=gesture.pointerId,result=gesture.up(e,pick(e.clientX,e.clientY));releaseCapture(id);root.classList.remove('tea-holding');
+  const id=gesture.pointerId,result=gesture.up(e,pick(e.clientX,e.clientY));
+  releaseCapture(id);root.classList.remove('tea-holding');
   if(result?.type==='release'){invoke('tea-release');update(0);return}
   if(result?.type!=='tap')return;
   if(result.target==='pot'&&tea.phase==='served')invoke('tea-replay');
@@ -58,17 +62,21 @@ export function bindTeaInput(ctx){
  function keyup(e){
   if(!keyboard.up(e))return;stop(e);
   const tea=active();
-  if(tea&&!blocked()&&tea.phase==='pour'&&gesture.pointerId===null)invoke('tea-control',keyboard.controls(0,tea.aim));else cancel();
+  if(tea&&!blocked()&&tea.phase==='pour'&&gesture.pointerId===null)invoke('tea-control',
+    keyboard.controls(0,tea.aim));else cancel();
  }
  function exit(){cancel();invoke('tea-exit');update(0)}
  function visibility(){if(document.hidden)cancel()}
  function contextLost(){setLost();cancel()}
  function focusout(){if(keyboard.active)cancel()}
- const bindings=[[canvas,'pointerdown',pointerdown,true],[canvas,'pointermove',pointermove,true],[canvas,'pointerup',pointerup,true],[canvas,
-   'pointercancel',pointercancel,true],[canvas,'lostpointercapture',pointercancel,true],[canvas,'click',consumeClick,true],[canvas,'contextmenu',
-   contextmenu,true],[canvas,'webglcontextlost',contextLost,false],[canvas,'focusout',focusout,false],[window,'keydown',keydown,true],[window,'keyup',
-   keyup,true],[window,'blur',cancel,false],[window,'resize',cancel,false],[window,'orientationchange',
-     cancel,false],[document,'visibilitychange',visibility,false],[parts.exit,'click',exit,false]];
- for(const [target,event,handler,capture] of bindings)target.addEventListener(event,handler,{capture});
- return ()=>{for(const [target,event,handler,capture] of bindings)target.removeEventListener(event,handler,{capture})};
+ return bindAll([
+  [canvas,'pointerdown',pointerdown,true],[canvas,'pointermove',pointermove,true],
+  [canvas,'pointerup',pointerup,true],[canvas,'pointercancel',pointercancel,true],[canvas,
+    'lostpointercapture',pointercancel,true],
+  [canvas,'click',consumeClick,true],[canvas,'contextmenu',contextmenu,true],
+  [canvas,'webglcontextlost',contextLost,false],[canvas,'focusout',focusout,false],
+  [window,'keydown',keydown,true],[window,'keyup',keyup,true],[window,'blur',cancel,false],
+  [window,'resize',cancel,false],[window,'orientationchange',cancel,false],
+  [document,'visibilitychange',visibility,false],[parts.exit,'click',exit,false],
+ ]);
 }

@@ -9,9 +9,12 @@ const text=(el,value)=>{if(el.textContent!==value)el.textContent=value};
 // The only visible button is Exit. All notes and replay live in the 3D room.
 export function createChimeUI(host,canvas,getState,dispatch,{pick,pullSpan}){
  const {root,parts}=mountChimeSurface(host);
- const original=Object.fromEntries(['role','aria-label','aria-describedby','aria-keyshortcuts'].map(k=>[k,canvas.getAttribute(k)]));
- const gesture=createChimeGesture(),mode={keyboard:false,selection:0,input:'pointer'};let session=null,signature='',disposed=false,lost=false;
- const state=()=>getState(),active=()=>chimeStatus(state()),t=k=>translate(state().settings.locale,k),n=v=>number(state().settings.locale,v);
+ const original=Object.fromEntries(['role','aria-label','aria-describedby',
+   'aria-keyshortcuts'].map(k=>[k,canvas.getAttribute(k)]));
+ const gesture=createChimeGesture(),mode={keyboard:false,selection:0,input:'pointer'};
+ let session=null,signature='',disposed=false,lost=false;
+ const state=()=>getState(),active=()=>chimeStatus(state()),
+   t=k=>translate(state().settings.locale,k),n=v=>number(state().settings.locale,v);
  const blocked=()=>state().paused||document.hidden||lost||Boolean(host.querySelector('dialog[open],.error-screen'));
  const inside=e=>pointOnCanvas(canvas,e);
  const releaseCapture=id=>{if(id!==null){try{if(canvas.hasPointerCapture(id))canvas.releasePointerCapture(id)}catch{}}};
@@ -27,7 +30,8 @@ export function createChimeUI(host,canvas,getState,dispatch,{pick,pullSpan}){
   if(disposed)return;if(!root.isConnected)host.append(root);
   let a=active();host.dataset.chimeActive=String(Boolean(a));
   if(!a){if(session){cancel();restoreCanvas();session=null;signature=''}root.hidden=true;return}
-  if(session!==state().activities.active){cancel();session=state().activities.active;mode.selection=0;signature='';a=active()}
+  if(session!==state().activities.active){cancel();session=state().activities.active;
+  mode.selection=0;signature='';a=active()}
   root.hidden=blocked();if(root.hidden){cancel();return}
   if(mode.keyboard&&a.phase==='echo'&&a.held!==null){dispatch('chime-pull',Math.min(1,a.pull+Math.max(0,
     Math.min(.1,Number.isFinite(dt)?dt:0))*1.4));a=active()}
@@ -37,10 +41,12 @@ export function createChimeUI(host,canvas,getState,dispatch,{pick,pullSpan}){
   canvas.setAttribute('aria-describedby','chime-instructions chime-status chime-readout chime-demonstration');
   const {status,full,selected}=renderChimeStrip(parts,a,{t,n,input:mode.input,selection:mode.selection});
   const next=JSON.stringify([state().settings.locale,a.phase,a.cursor,a.mistakes,a.round,mode.input,mode.selection]);
-  if(next!==signature){text(parts.announcement,status+' '+full+(mode.input==='keyboard'?' '+selected:''));signature=next}
+  if(next!==signature){text(parts.announcement,status+' '+full+(mode.input==='keyboard'?
+    ' '+selected:''));signature=next}
  }
  const unbind=bindChimeInput({canvas,gesture,mode,parts,active,blocked,stop,inside,pick,pullSpan,
    dispatch,cancel,update,releaseCapture,setLost:()=>{lost=true}});
  update(0);
- return {update,cancel,dispose(){if(disposed)return;cancel();disposed=true; unbind();restoreCanvas();host.dataset.chimeActive='false';root.remove()}};
+ return {update,cancel,dispose(){if(disposed)return;cancel();disposed=true; unbind();
+ restoreCanvas();host.dataset.chimeActive='false';root.remove()}};
 }

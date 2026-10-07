@@ -5,7 +5,8 @@ const validIds=new Set(['lina','noor','sami']);
 export function createPortraitScene(doll){
  if(!doll?.body||!validIds.has(doll.id))throw new TypeError('Unknown portrait resident');
  const scene=new T.Scene();scene.background=new T.Color(0xeadccc);
- const model=doll.body.clone(true);model.position.set(0,0,0);model.rotation.set(0,0,0);model.scale.set(1,1,1);scene.add(model);
+ const model=doll.body.clone(true);model.position.set(0,0,0);model.rotation.set(0,0,0);
+ model.scale.set(1,1,1);scene.add(model);
  const head=model.getObjectByName('doll-head');if(head)head.rotation.set(0,0,0);
  model.traverse(o=>{
   if(o.name==='held-tea')o.visible=false;
@@ -23,7 +24,8 @@ export function createPortraitScene(doll){
 }
 const srgb=x=>Math.round(255*(x<=.0031308?12.92*x:1.055*Math.pow(x,1/2.4)-.055));
 export function portraitPixels(pixels,size){
- const canvas=document.createElement('canvas');canvas.width=canvas.height=size;const ctx=canvas.getContext('2d'),image=ctx.createImageData(size,size);
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=size;
+ const ctx=canvas.getContext('2d'),image=ctx.createImageData(size,size);
  // Offscreen Three r180 targets are linear; Canvas2D PNGs require sRGB and top-down rows.
  for(let y=0;y<size;y++)for(let x=0;x<size;x++){const source=((size-1-y)*size+x)*4,dest=(y*size+x)*4;
  for(let c=0;c<3;c++)image.data[dest+c]=srgb(pixels[source+c]/255);image.data[dest+3]=pixels[source+3]}
@@ -31,22 +33,27 @@ export function portraitPixels(pixels,size){
 }
 export function renderPortrait(renderer,doll,size=192){
  size=Number.isFinite(size)?Math.max(64,Math.min(256,Math.floor(size))):192;
- const {scene,camera}=createPortraitScene(doll),target=new T.WebGLRenderTarget(size,size,{depthBuffer:true,stencilBuffer:false});
- const previous={target:renderer.getRenderTarget(),viewport:renderer.getViewport(new T.Vector4()),scissor:renderer.getScissor(new T.Vector4()),
+ const {scene,camera}=createPortraitScene(doll),target=new T.WebGLRenderTarget(size,size,
+   {depthBuffer:true,stencilBuffer:false});
+ const previous={target:renderer.getRenderTarget(),
+   viewport:renderer.getViewport(new T.Vector4()),scissor:renderer.getScissor(new T.Vector4()),
    test:renderer.getScissorTest(),clear:renderer.getClearColor(new T.Color()),
      alpha:renderer.getClearAlpha(),auto:renderer.autoClear,shadow:renderer.shadowMap.enabled};
  try{
   renderer.setRenderTarget(target);renderer.setScissorTest(false);renderer.autoClear=true;
   renderer.shadowMap.enabled=false;renderer.render(scene,camera);
-  const pixels=new Uint8Array(size*size*4);renderer.readRenderTargetPixels(target,0,0,size,size,pixels);return portraitPixels(pixels,size);
+  const pixels=new Uint8Array(size*size*4);
+  renderer.readRenderTargetPixels(target,0,0,size,size,pixels);return portraitPixels(pixels,size);
  }finally{
-  renderer.setRenderTarget(previous.target);renderer.setViewport(previous.viewport);renderer.setScissor(previous.scissor);
+  renderer.setRenderTarget(previous.target);renderer.setViewport(previous.viewport);
+  renderer.setScissor(previous.scissor);
   renderer.setScissorTest(previous.test);renderer.setClearColor(previous.clear,previous.alpha);
   renderer.autoClear=previous.auto;renderer.shadowMap.enabled=previous.shadow;
   target.dispose();scene.clear();
  }
 }
-export function renderPortraits(renderer,residents){return Object.fromEntries(residents.dolls.map(doll=>[doll.id,renderPortrait(renderer,doll)]))}
+export function renderPortraits(renderer,
+  residents){return Object.fromEntries(residents.dolls.map(doll=>[doll.id,renderPortrait(renderer,doll)]))}
 
 export function createPortraitCache(residents,capture){
  let images=null,disposed=false;
@@ -57,7 +64,8 @@ export function createPortraitCache(residents,capture){
    if(images)return images;
    const result=Object.create(null);
    for(const doll of residents.dolls){try{const url=capture(doll);
-   if(portraitMarkup(doll.id,url))result[doll.id]=url}catch(error){console.warn('Portrait capture skipped:',doll.id,error)}}
+   if(portraitMarkup(doll.id,
+     url))result[doll.id]=url}catch(error){console.warn('Portrait capture skipped:',doll.id,error)}}
    images=Object.freeze(result);return images;
   },
   dispose(){disposed=true;images=Object.freeze(Object.create(null))}

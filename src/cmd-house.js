@@ -6,14 +6,16 @@ export const houseCommands={
 'care':(app,value,origin)=>{
    const result=sim.care(app.state,value.id,value.action);
    if(result.ok){app.ui.close();
-   app.say(app.ui.t(value.action+'Success')+(result.reward?` +${app.ui.n(result.reward)} ${app.ui.t('reward')}`:''));app.audio.effect('care');
+   app.say(app.ui.t(value.action+'Success')+(result.reward?
+     ` +${app.ui.n(result.reward)} ${app.ui.t('reward')}`:''));app.audio.effect('care');
    app.save();app.ui.tick()}else app.say(app.ui.t(result.reason));return;
   },
 'objective':(app,value,origin)=>{
    const next=app.ui.objective();
    // Land on the section the suggestion is about, not the top of a long sheet.
    if(next.action==='panel'){app.ui.open(next.value);
-   if(next.focus)app.host.querySelector('#sheet '+next.focus)?.scrollIntoView({block:'center'})}else app.dispatch(next.action,next.value);return;
+   if(next.focus)app.host.querySelector('#sheet '+next.focus)?.scrollIntoView({
+     block:'center'})}else app.dispatch(next.action,next.value);return;
   },
 'claim':(app,value,origin)=>{
    const result=sim.claim(app.state,value);
@@ -22,12 +24,14 @@ export const houseCommands={
   },
 'mend-door':(app,value,origin)=>{
    const result=sim.mendDoor(app.state);
-   if(result.ok){app.say(app.ui.t(sim.doorOpen(app.state)?'doorOpenedNote':'doorStepDone'));app.audio.effect('secret');app.save();
+   if(result.ok){app.say(app.ui.t(sim.doorOpen(app.state)?
+     'doorOpenedNote':'doorStepDone'));app.audio.effect('secret');app.save();
    app.ui.tick()}else app.say(result.needs?app.ui.t('needs_'+result.needs):app.ui.t(result.reason));return;
   },
 'gift':(app,value,origin)=>{
    const result=sim.leaveGift(app.state);
-   if(result.ok){app.say(`${app.ui.t('giftReceived')} ${app.ui.t('gift-'+result.gift+'Title')}`);app.audio.effect('secret');
+   if(result.ok){app.say(`${app.ui.t('giftReceived')} ${app.ui.t('gift-'+result.gift+'Title')}`);
+   app.audio.effect('secret');
    app.save();app.ui.tick();if(!app.ui.panel)app.ui.open('journal')}else app.say(app.ui.t(result.reason));return;
   },
 'collect-basket':(app,value,origin)=>{

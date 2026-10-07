@@ -18,7 +18,8 @@ function samePreferenceBase(left,right){
  if(left===right)return true;
  if(typeof left!=='string'||typeof right!=='string')return false;
  try{const a=JSON.parse(left),b=JSON.parse(right);if(!a||!b||Array.isArray(a)||Array.isArray(b))return false;
-  return ['locale','muted','reducedMotion','quality'].every(key=>Object.hasOwn(a,key)&&a[key]===b[key])&&(a.largeText??false)===(b.largeText??false);
+  return ['locale','muted','reducedMotion','quality'].every(key=>Object.hasOwn(a,key)&&
+    a[key]===b[key])&&(a.largeText??false)===(b.largeText??false);
  }catch{return false}
 }
 export function createHomeSession({storage,reducedMotion=false}={}){
@@ -43,14 +44,16 @@ export function createHomeSession({storage,reducedMotion=false}={}){
  try{const saved=JSON.parse(storage.getItem(HOME_PREFERENCES_KEY));
  if(saved&&samePreferenceBase(saved._base,preferenceBase))Object.assign(state.settings,preferences(saved))}catch{}
  return {
-  state,canContinue:valid,loadStatus,get recovered(){return recovered},get entryIssue(){return entryIssue},get entered(){return entered},
+  state,canContinue:valid,loadStatus,get recovered(){return recovered},
+    get entryIssue(){return entryIssue},get entered(){return entered},
   enter(){if(entered||!checkIdentity())return false;entered=true;return true},
   advance(current,dt){if(entered)step(current,dt)},
   save(current){
    // A failed read does not prove no save exists. Never overwrite it with a
    // fresh fallback, even if storage later becomes writable in this visit.
    if(!entered||!checkIdentity())return false;
-   try{if(backupPending){storage.setItem(SAVE_KEY+'.backup',raw);backupPending=false;recovered=true}const encoded=JSON.stringify(current);
+   try{if(backupPending){storage.setItem(SAVE_KEY+'.backup',raw);backupPending=false;
+   recovered=true}const encoded=JSON.stringify(current);
    storage.setItem(SAVE_KEY,encoded);expectedRaw=encoded;return true}catch{return false}
   },
   savePreferences(settings){try{storage.setItem(HOME_PREFERENCES_KEY,

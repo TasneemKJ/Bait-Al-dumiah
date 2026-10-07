@@ -10,6 +10,7 @@ export function createKettleSteam(parent){
  const root=new T.Group();root.name='kettle-steam';parent.add(root);
  const puffs=Array.from({length:PUFFS},()=>{const m=new T.Sprite(new T.SpriteMaterial({map:softTexture(),
    color:0xa9b4c4,transparent:true,opacity:0,depthWrite:false}));root.add(m);return m});
- return {root,update(time,active,still){root.visible=active;if(!active)return;puffs.forEach((p,i)=>{const l=puffLook(puffPhase(time,i,still));
+ return {root,update(time,active,still){root.visible=active;if(!active)return;
+ puffs.forEach((p,i)=>{const l=puffLook(puffPhase(time,i,still));
  p.material.opacity=l.opacity;p.scale.set(l.size,l.size,1);p.position.set(l.drift,l.rise,.05)})}};
 }

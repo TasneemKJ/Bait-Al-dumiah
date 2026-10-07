@@ -7,8 +7,10 @@ export const activitiesCommands={
 'activity-hint':(app,value,origin)=>{if(sim.toggleActivityHint(app.state).ok)app.ui.setActivityResult(null);return;},
 'begin-activity':(app,value,origin)=>{
    if(app.manualPause||app.fatal){app.say(app.ui.t('pausedActivity'));return}if(app.ui.panel)app.ui.close();
-   const result=sim.beginActivity(app.state,value);if(result.ok){app.ui.setActivityResult(null);if(app.physicalActivity())app.enterWork(value);
-   else{app.ui.open('activities');app.dispatch('focus-room',ACTIVITY_ROOM[value]);app.save()}}else app.say(app.ui.t(result.reason));return;
+   const result=sim.beginActivity(app.state,value);
+   if(result.ok){app.ui.setActivityResult(null);if(app.physicalActivity())app.enterWork(value);
+   else{app.ui.open('activities');app.dispatch('focus-room',ACTIVITY_ROOM[value]);
+   app.save()}}else app.say(app.ui.t(result.reason));return;
   },
 'tea-control':(app,value,origin)=>{if(!app.fatal&&!app.panelOpen)sim.controlTea(app.state,value);return;},
 'tea-release':(app,value,origin)=>{sim.releaseTea(app.state);return;},
@@ -21,8 +23,10 @@ export const activitiesCommands={
    if(result.ok){app.audio.effect('place');app.save();app.ui.tick();app.storyUI?.update()}app.teaUI?.update(0);return;
   },
 'tea-replay':(app,value,origin)=>{
-   if(app.state.paused||app.fatal||app.state.activities.active?.id!=='tea'||app.state.activities.active.phase!=='served')return;
-   app.cancelWorkInput();sim.endActivity(app.state);app.updateWorkUI();if(sim.beginActivity(app.state,'tea').ok)app.enterWork('tea');return;
+   if(app.state.paused||app.fatal||app.state.activities.active?.id!=='tea'||
+     app.state.activities.active.phase!=='served')return;
+   app.cancelWorkInput();sim.endActivity(app.state);app.updateWorkUI();
+   if(sim.beginActivity(app.state,'tea').ok)app.enterWork('tea');return;
   },
 'tea-exit':(app,value,origin)=>{if(app.state.activities.active?.id==='tea')app.leaveWork();return;},
 'stitch-control':(app,value,origin)=>{if(!app.fatal&&!app.panelOpen)sim.controlStitch(app.state,value);return;},
@@ -36,8 +40,10 @@ export const activitiesCommands={
    if(result.ok){app.audio.effect('place');app.save();app.ui.tick();app.storyUI?.update()}app.updateWorkUI();return;
   },
 'stitch-replay':(app,value,origin)=>{
-   if(app.state.paused||app.fatal||app.state.activities.active?.id!=='stitch'||app.state.activities.active.phase!=='finished')return;
-   app.cancelWorkInput();sim.endActivity(app.state);app.updateWorkUI();if(sim.beginActivity(app.state,'stitch').ok)app.enterWork('stitch');return;
+   if(app.state.paused||app.fatal||app.state.activities.active?.id!=='stitch'||
+     app.state.activities.active.phase!=='finished')return;
+   app.cancelWorkInput();sim.endActivity(app.state);app.updateWorkUI();
+   if(sim.beginActivity(app.state,'stitch').ok)app.enterWork('stitch');return;
   },
 'stitch-exit':(app,value,origin)=>{if(app.state.activities.active?.id==='stitch')app.leaveWork();return;},
 'chime-grab':(app,value,origin)=>{if(!app.fatal&&!app.panelOpen)sim.grabChime(app.state,value);return;},
@@ -57,7 +63,8 @@ export const activitiesCommands={
   },
 'chime-exit':(app,value,origin)=>{if(app.state.activities.active?.id==='lullaby')app.leaveWork();return;},
 'activity-input':(app,value,origin)=>{
-   const result=sim.activityInput(app.state,value);if(result.ok){if(!result.mistake)app.audio.effect(result.complete?'place':'care');
+   const result=sim.activityInput(app.state,value);
+   if(result.ok){if(!result.mistake)app.audio.effect(result.complete?'place':'care');
    app.ui.setActivityResult(result);app.save();app.ui.tick()}else app.say(app.ui.t(result.reason));return;
   },
 'end-activity':(app,value,origin)=>{if(app.physicalActivity())app.leaveWork();
@@ -65,6 +72,7 @@ else{sim.endActivity(app.state);app.ui.setActivityResult(null);app.ui.close();ap
 'restore-room':(app,value,origin)=>{
    const result=sim.restoreRoom(app.state,value);if(result.ok){app.ui.close();
    app.world?.focusRoom(value);app.host.dataset.focusRoom=value;app.host.dataset.focusDoll='';
-   app.audio.effect('secret');app.say(app.ui.t('restoreSuccess'));app.save();app.refreshUI()}else app.say(app.ui.t(result.reason));return;
+   app.audio.effect('secret');app.say(app.ui.t('restoreSuccess'));app.save();
+   app.refreshUI()}else app.say(app.ui.t(result.reason));return;
   },
 };

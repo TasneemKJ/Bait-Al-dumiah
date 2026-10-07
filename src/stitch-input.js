@@ -4,7 +4,8 @@ export const STITCH_INPUT=Object.freeze({dragThreshold:8,keyboardSpeed:.9});
 const clamp=value=>Math.max(-1,Math.min(1,value));
 const point=value=>Number.isFinite(value?.x)&&Number.isFinite(value?.y);
 const bounded=value=>point(value)&&Math.abs(value.x)<=1&&Math.abs(value.y)<=1;
-const validPointer=e=>Number.isInteger(e.pointerId)&&e.pointerId>=0&&Number.isFinite(e.clientX)&&Number.isFinite(e.clientY);
+const validPointer=e=>Number.isInteger(e.pointerId)&&e.pointerId>=0&&
+  Number.isFinite(e.clientX)&&Number.isFinite(e.clientY);
 const targets=new Set(['needle','spool','cloth']);
 
 export function createStitchGesture(){
@@ -14,7 +15,8 @@ export function createStitchGesture(){
   get target(){return pointer?.target??null},
   get phase(){return pointer?.phase??null},
   down(e,target,stitch,projected){
-   if(pointer||!validPointer(e)||e.isPrimary===false||(e.button!==undefined&&e.button!==0)||!targets.has(target))return false;
+   if(pointer||!validPointer(e)||e.isPrimary===false||(e.button!==undefined&&
+     e.button!==0)||!targets.has(target))return false;
    if(!stitch||!['sew','finished'].includes(stitch.phase)||!bounded(stitch.needle))return false;
    if(target==='needle'&&stitch.phase==='sew'&&!point(projected))return false;
    pointer={id:e.pointerId,x:e.clientX,y:e.clientY,target,phase:stitch.phase,
@@ -34,7 +36,8 @@ export function createStitchGesture(){
    if(!pointer||e.pointerId!==pointer.id)return null;
    const p=pointer;pointer=null;
    if(p.target==='needle'&&p.phase==='sew')return {type:'release'};
-   if(!validPointer(e)||p.moved||Math.hypot(e.clientX-p.x,e.clientY-p.y)>STITCH_INPUT.dragThreshold||target!==p.target)return null;
+   if(!validPointer(e)||p.moved||Math.hypot(e.clientX-p.x,
+     e.clientY-p.y)>STITCH_INPUT.dragThreshold||target!==p.target)return null;
    return {type:'tap',target:p.target};
   },
   cancel(){const hadPointer=pointer!==null;pointer=null;return hadPointer},

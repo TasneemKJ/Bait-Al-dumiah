@@ -1,17 +1,21 @@
 import {nextStep} from './objective-ui.js';
-import {daySweepDegrees,isNight,coziness,unclaimed,storyStatus} from './simulation.js';
+import {daySweepDegrees} from './readouts.js';
+import {isNight,coziness,unclaimed,storyStatus,hasBasket,visitorWaiting} from './simulation.js';
 import {updateActivityStatus} from './activities-ui.js';
 import {icon} from './icons.js';
 
 // HTML serialization expands self-closing SVG tags; compare authored content.
 const authoredMarkup=new WeakMap();
-function setMarkup(node,markup){if(authoredMarkup.get(node)!==markup){node.innerHTML=markup;authoredMarkup.set(node,markup)}}
+function setMarkup(node,
+  markup){if(authoredMarkup.get(node)!==markup){node.innerHTML=markup;authoredMarkup.set(node,markup)}}
 
 // Language, direction, title, theme colour and accessibility classes follow the saved settings.
 export function applyDocumentState(s,t){
  document.documentElement.lang=s.settings.locale;document.documentElement.dir=s.settings.locale==='ar'?'rtl':'ltr';
- document.title=t('title')+' · '+t('subtitle');document.querySelector('meta[name="theme-color"]').content=isNight(s)?'#302638':'#f1e7dd';
- document.body.classList.toggle('reduced-motion',s.settings.reducedMotion);document.body.classList.toggle('large-text',s.settings.largeText);
+ document.title=t('title')+' · '+t('subtitle');
+ document.querySelector('meta[name="theme-color"]').content=isNight(s)?'#302638':'#f1e7dd';
+ document.body.classList.toggle('reduced-motion',s.settings.reducedMotion);
+ document.body.classList.toggle('large-text',s.settings.largeText);
  document.querySelector('#world').setAttribute('aria-label',t('canvasLabel'));
 }
 
@@ -21,18 +25,22 @@ export function syncHud(host,s,{t,n,panel,placement,selected}){
  if(panel==='activities')updateActivityStatus(host,s,t,n);
  host.style.setProperty('--day-progress',daySweepDegrees(s)+'deg');
  const story=storyStatus(s),values={buttons:n(s.buttons),cozy:n(coziness(s))+'%',wishes:story.finished?
-   `${n(s.wishes.length)} / ${n(3)}`:`${n(story.index+1)} / ${n(3)}`,day:t('day')+' '+n(s.day),time:t(isNight(s)?'evening':'morning')};
- const heading=host.querySelector('[data-story-heading]'),headingText=t(story.finished?'objectiveLabel':'story-'+story.chapter.id+'-title');
+   `${n(s.wishes.length)} / ${n(3)}`:`${n(story.index+1)} / ${n(3)}`,
+     day:t('day')+' '+n(s.day),time:t(isNight(s)?'evening':'morning')};
+ const heading=host.querySelector('[data-story-heading]'),headingText=t(story.finished?
+   'objectiveLabel':'story-'+story.chapter.id+'-title');
  if(heading&&heading.textContent!==headingText)heading.textContent=headingText;
  for(const [key,value] of Object.entries(values)){const el=host.querySelector(`[data-value="${key}"]`);
  if(el&&el.textContent!==value)el.textContent=value}
- const {copy,label,ico,arrived}=nextStep(s,t,n,host.dataset.focusRoom);host.querySelector('.objective').dataset.arrived=String(Boolean(arrived));
+ const {copy,label,ico,arrived}=nextStep(s,t,n,host.dataset.focusRoom);
+ host.querySelector('.objective').dataset.arrived=String(Boolean(arrived));
  const objective=host.querySelector('#objective-copy');if(objective.textContent!==copy)objective.textContent=copy;
- const action=host.querySelector('#objective-action');const content=icon(ico)+`<span>${label}</span>`+icon('arrow');setMarkup(action,content);
+ const action=host.querySelector('#objective-action');
+ const content=icon(ico)+`<span>${label}</span>`+icon('arrow');setMarkup(action,content);
  const light=host.querySelector('#light-button'),lightHtml=icon(isNight(s)?
    'sun':'moon')+`<span>${t(isNight(s)?'dawn':'night')}</span>`;setMarkup(light,lightHtml);
- host.querySelector('.visitor-hint').hidden=!isNight(s)||s.lastSecretDay===s.day||s.journal.length===6||Boolean(placement);
- host.querySelector('.dock [data-action="panel-household"]')?.classList.toggle('has-news',s.basket>0);
+ host.querySelector('.visitor-hint').hidden=!visitorWaiting(s)||Boolean(placement);
+ host.querySelector('.dock [data-action="panel-household"]')?.classList.toggle('has-news',hasBasket(s));
  host.querySelector('.dock [data-action="panel-journal"]')?.classList.toggle('has-news',unclaimed(s).length>0);
  host.querySelector('.pause-overlay').hidden=!s.paused||Boolean(panel);
  const pauseButton=host.querySelector('.dock [data-action="pause"]'),pauseLabel=t(s.paused?'resume':'pause');
@@ -41,7 +49,8 @@ export function syncHud(host,s,{t,n,panel,placement,selected}){
   pauseButton.innerHTML=icon(s.paused?'resume':'pause')+`<span>${pauseLabel}</span>`;
  }
 
- for(const el of host.querySelectorAll('[data-need]')){const d=s.dolls.find(v=>v.id===selected);if(d){el.value=d[el.dataset.need];
+ for(const el of host.querySelectorAll('[data-need]')){
+   const d=s.dolls.find(v=>v.id===selected);if(d){el.value=d[el.dataset.need];
  host.querySelector(`[data-need-text="${el.dataset.need}"]`).textContent=n(d[el.dataset.need])}}
 }
 
@@ -81,7 +90,8 @@ export function createToaster(host){
 // After a ritual answer the sheet re-renders; keep focus on the control the player was using.
 export function focusActivityControl(host,result,choice){
  host.querySelector(result?.complete?'.ritual-result button':choice!==undefined?
-   `#sheet [data-choice="${choice}"]`:'#sheet [data-action="recall-ready"], #sheet [data-choice], #sheet [data-action="begin-activity"]')?.focus();
+   `#sheet [data-choice="${choice}"]`:'#sheet [data-action="recall-ready"], #sheet [data-choice], '+
+     '#sheet [data-action="begin-activity"]')?.focus();
 }
 
 // The sheet dialog closes on Escape and on a click on its backdrop.
@@ -107,4 +117,16 @@ export function restoreFocus(host,origin,ritualActive){
  const fallback=ritualActive?document.querySelector('#world'):host.querySelector('[data-action="toggle-tools"]');
  const target=origin?.isConnected&&origin.getClientRects().length?origin:fallback;
  target?.focus({preventScroll:true});
+}
+
+// Opens or folds the dock of sheet shortcuts and keeps its toggle's aria state in step.
+export function setDock(host,expanded){
+ host.querySelector('.dock').dataset.expanded=String(expanded);
+ host.querySelector('[data-action="toggle-tools"]').setAttribute('aria-expanded',String(expanded));
+}
+
+// A status line at the top of a sheet, so a message stays visible behind the dialog.
+export function prependNotice(root,message){
+ const note=document.createElement('p');note.className='panel-notice';
+ note.setAttribute('role','status');note.textContent=message;root.prepend(note);
 }

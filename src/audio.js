@@ -14,9 +14,12 @@ function voice(context,destination,frequency,start,length,volume,type,cutoff,att
  gain.gain.exponentialRampToValueAtTime(.00001,when+duration);gain.gain.setValueAtTime(0,when+duration+.02);
  osc.connect(filter);overtone.connect(partial);partial.connect(filter);filter.connect(gain);gain.connect(destination);
  let remaining=2,closed=false;
- const record={done:null,kind:type,stop(){if(closed)return;for(const o of [osc,overtone])try{o.stop()}catch{};cleanup()}};
- function cleanup(){if(closed)return;closed=true;for(const node of [osc,overtone,partial,filter,gain])node.disconnect();record.done?.()}
- for(const source of [osc,overtone]){source.onended=()=>{if(--remaining===0)cleanup()};source.start(when);source.stop(when+duration+.03)}
+ const record={done:null,kind:type,stop(){if(closed)return;
+ for(const o of [osc,overtone])try{o.stop()}catch{};cleanup()}};
+ function cleanup(){if(closed)return;closed=true;
+ for(const node of [osc,overtone,partial,filter,gain])node.disconnect();record.done?.()}
+ for(const source of [osc,overtone]){source.onended=()=>{if(--remaining===0)cleanup()};
+ source.start(when);source.stop(when+duration+.03)}
  return record;
 }
 export function playPluck(context,destination,frequency,start,length=1.7,volume=.055){
@@ -31,7 +34,8 @@ export function playTinTouch(context,destination,start){
 }
 export function playClothTouch(context,destination,start){
  const when=Math.max(context.currentTime+.001,Number.isFinite(start)?start:context.currentTime),duration=.28;
- const buffer=context.createBuffer(1,Math.ceil(context.sampleRate*duration),context.sampleRate),data=buffer.getChannelData(0);
+ const buffer=context.createBuffer(1,Math.ceil(context.sampleRate*duration),
+   context.sampleRate),data=buffer.getChannelData(0);
  // Deterministic, original broadband friction; no fetched samples or randomness
  // shared with gameplay. Filtering removes the brittle top of white noise.
  let seed=71;for(let i=0;i<data.length;i++){seed=(Math.imul(seed,1664525)+1013904223)>>>0;data[i]=(seed/4294967296)*2-1}
@@ -48,7 +52,8 @@ export function playClothTouch(context,destination,start){
 // A soft D-minor chord that rises once as dusk turns to night: D3, A3, D4.
 export const DUSK_SWELL=[146.832,220,293.665];
 export class DollhouseAudio{
- constructor(){this.context=null;this.master=null;this.enabled=false;this.paused=false;this.next=0;this.index=0;this.night=false;this.nodes=new Set();
+ constructor(){this.context=null;this.master=null;this.enabled=false;this.paused=false;
+ this.next=0;this.index=0;this.night=false;this.nodes=new Set();
  this.nextKnock=Infinity;this.sawDay=false;this.disposed=false;this.enableGeneration=0}
  async enable(){
   if(this.disposed)return false;
@@ -72,7 +77,8 @@ export class DollhouseAudio{
  setPaused(paused){
   if(this.paused===paused)return;this.paused=paused;if(!this.context)return;
   if(paused){this.sawDay=false;this.stopVoices();this.context.suspend().catch(()=>{})}
-  else if(this.enabled){this.next=this.context.currentTime+.15;this.nextKnock=this.context.currentTime+18;this.context.resume().catch(()=>{})}
+  else if(this.enabled){this.next=this.context.currentTime+.15;
+  this.nextKnock=this.context.currentTime+18;this.context.resume().catch(()=>{})}
  }
  tone(frequency,start,length,volume=.04,type='sine',attack){
   if(!this.context||!this.enabled||this.paused)return;
@@ -87,7 +93,8 @@ export class DollhouseAudio{
   if(!this.context||!this.enabled||this.paused||this.disposed)return;
   const now=this.context.currentTime;
   if(!night)this.sawDay=true;
-  if(this.night!==night){this.night=night;this.nextKnock=night?now+18:Infinity;if(night&&this.sawDay){this.sawDay=false;this.duskSwell()}}
+  if(this.night!==night){this.night=night;this.nextKnock=night?now+18:Infinity;
+  if(night&&this.sawDay){this.sawDay=false;this.duskSwell()}}
   // One current beat only: an idle tab or resumed context never replays backlog.
   if(now>=this.next){
    const beat=lullabyBeat(this.index,night);
@@ -110,7 +117,8 @@ export class DollhouseAudio{
   if(!this.enabled||!this.context||this.paused||this.disposed)return;
   if(kind==='mint-tin')return this.track(playTinTouch(this.context,this.master,this.context.currentTime));
   if(kind==='moon-bed')return this.track(playClothTouch(this.context,this.master,this.context.currentTime));
-  const t=this.context.currentTime,notes=kind==='secret'?[293.665,311.127,392]:kind==='place'?[392,493.883]:kind==='musicbox'?[523.251,659.255,
+  const t=this.context.currentTime,notes=kind==='secret'?[293.665,311.127,
+    392]:kind==='place'?[392,493.883]:kind==='musicbox'?[523.251,659.255,
     783.991,659.255]:kind==='mobile'?[392,493.883,587.33]:[440,523.251];
   notes.forEach((f,i)=>this.tone(f,t+i*.16,1.2,.035));
  }

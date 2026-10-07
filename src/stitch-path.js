@@ -10,7 +10,8 @@ export function stitchEdge(a,sections){
  let offset=0;
  for(let edge=0;edge<section.length-1;edge++){
   const start=point(section[edge]),end=point(section[edge+1]),size=length(start,end);
-  if(a.distance<offset+size-EPS||edge===section.length-2)return {section:a.section,edge,start,end,size,offset,last:edge===section.length-2,
+  if(a.distance<offset+size-EPS||edge===section.length-2)return {section:a.section,edge,
+    start,end,size,offset,last:edge===section.length-2,
     front:Math.max(0,Math.min(size,a.distance-offset)),ux:(end.x-start.x)/size,uy:(end.y-start.y)/size};
   offset+=size;
  }
@@ -79,11 +80,13 @@ export function moveStitch(a,sections,dt){
  let budget=STITCH_SPEED*dt;
  if(!a.pressed){
   const distance=length(a.needle,a.target);if(distance<=EPS)return;
-  const f=Math.min(1,budget/distance);a.needle={x:a.needle.x+(a.target.x-a.needle.x)*f,y:a.needle.y+(a.target.y-a.needle.y)*f};return;
+  const f=Math.min(1,budget/distance);
+  a.needle={x:a.needle.x+(a.target.x-a.needle.x)*f,y:a.needle.y+(a.target.y-a.needle.y)*f};return;
  }
  while(budget>EPS&&a.section<sections.length){
   const e=stitchEdge(a,sections);
-  const assisted=!!a.capture,destination=assisted?a.capture.point:a.target,from={...a.needle},distance=length(from,destination);
+  const assisted=!!a.capture,destination=assisted?a.capture.point:a.target,
+    from={...a.needle},distance=length(from,destination);
   if(distance<=EPS){a.capture=null;break}
   let traveled=Math.min(budget,.02,distance),to={x:from.x+(destination.x-from.x)*traveled/distance,
     y:from.y+(destination.y-from.y)*traveled/distance},arm=false;
@@ -104,8 +107,10 @@ export function moveStitch(a,sections,dt){
   a.needle=to;budget-=traveled;
   if(a.section>=sections.length){a.capture=null;break}
   if(assisted&&length(to,destination)<=EPS)a.capture=null;
-  if(arm&&!a.loose&&a.section===sectionBefore&&a.distance>before+EPS&&e.offset+e.size-a.distance<=STITCH_VERTEX_RADIUS+EPS){
-   a.capture={section:e.section,edge:e.edge,point:{...e.end},alignmentWeight:Math.max(0,1-Math.abs(signed(to,e))/STITCH_CORRIDOR)};
+  if(arm&&!a.loose&&a.section===sectionBefore&&a.distance>before+EPS&&
+    e.offset+e.size-a.distance<=STITCH_VERTEX_RADIUS+EPS){
+   a.capture={section:e.section,edge:e.edge,point:{...e.end},alignmentWeight:Math.max(0,
+     1-Math.abs(signed(to,e))/STITCH_CORRIDOR)};
   }
  }
 }

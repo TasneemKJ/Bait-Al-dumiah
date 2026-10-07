@@ -40,11 +40,13 @@ export function paintLevantineLinen(c,id,layer='color'){
   if(!data){
    segment(c,x,y,false,.26,'rgba(255,227,184,.32)',-.30);
    segment(c,x,y,true,.28,'rgba(255,240,204,.46)',-.28);
-   c.fillStyle='rgba(72,46,36,.16)';for(const a of [-1,1]){c.beginPath();c.arc(x+a*1.95,y+a*1.95,.28,0,Math.PI*2);c.fill()}
+   c.fillStyle='rgba(72,46,36,.16)';for(const a of [-1,1]){c.beginPath();
+   c.arc(x+a*1.95,y+a*1.95,.28,0,Math.PI*2);c.fill()}
   }
  });
  c.strokeStyle=height?'#aaaaaa':rough?'#bfbfbf':'#bb9b64';c.lineWidth=.8;c.setLineDash([2,3]);
- c.beginPath();c.moveTo(12,0);c.lineTo(12,352);c.quadraticCurveTo(128,374,244,352);c.lineTo(244,0);c.stroke();c.restore();
+ c.beginPath();c.moveTo(12,0);c.lineTo(12,352);c.quadraticCurveTo(128,374,244,352);
+ c.lineTo(244,0);c.stroke();c.restore();
 }
 export function embroideryFinish(id){
  if(atlasCache.has(id))return atlasCache.get(id);
