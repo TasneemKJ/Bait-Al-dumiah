@@ -9,5 +9,6 @@ export function stitchFraming(width,height){
  const aspect=w/h,usable=Math.max(140,h-top-bottom),span=Math.max(1.85/aspect,1.32*h/usable),zoom=1.8;
  const upY=14/Math.hypot(12,14),offset=((top+usable/2)/h-.5)*span/upY;
  const room=ROOMS.find(r=>r.id===STITCH_TABLE.room);
- return {height:span*zoom,zoom,aspect,eyeOffset:[0,12,14],target:[room.x+STITCH_TABLE.x,room.y+.26+STITCH_TABLE.y+.26+offset,STITCH_TABLE.z],safeArea:{top,bottom}};
+ return {height:span*zoom,zoom,aspect,eyeOffset:[0,12,14],target:[room.x+STITCH_TABLE.x,
+   room.y+.26+STITCH_TABLE.y+.26+offset,STITCH_TABLE.z],safeArea:{top,bottom}};
 }

@@ -8,11 +8,13 @@ import {softTexture} from './textiles.js';
 // Small painted parts share vertex colour; walnut and brass retain their finish.
 const painted=new T.MeshStandardMaterial({vertexColors:true,roughness:.72});
 const bead=new T.SphereGeometry(1,10,7);
-function ball(parent,x,y,z,rx,ry,rz,color){const mesh=new T.Mesh(bead,mat(color));mesh.position.set(x,y,z);mesh.scale.set(rx,ry,rz);parent.add(mesh);return mesh}
+function ball(parent,x,y,z,rx,ry,rz,color){const mesh=new T.Mesh(bead,mat(color));
+mesh.position.set(x,y,z);mesh.scale.set(rx,ry,rz);parent.add(mesh);return mesh}
 function finish(group){
  group.traverse(o=>{
   if(!o.isMesh)return;o.castShadow=false;o.receiveShadow=true;
-  if(o.material.transparent||o.material.isMeshBasicMaterial||o.material===painted||o.material.map||o.material.metalness>.3||o.material.emissive?.getHex())return;
+  if(o.material.transparent||o.material.isMeshBasicMaterial||o.material===painted||o.material.map||
+    o.material.metalness>.3||o.material.emissive?.getHex())return;
   const geometry=o.geometry.clone(),count=geometry.attributes.position.count,color=o.material.color,data=new Float32Array(count*3);
   for(let i=0;i<count;i++)data.set([color.r,color.g,color.b],i*3);
   geometry.setAttribute('color',new T.BufferAttribute(data,3));o.geometry=geometry;o.material=painted;
@@ -24,7 +26,8 @@ g.position.set(room.x+position[0],room.y+position[1],position[2]);g.userData.noB
 function group(parent,name){const g=new T.Group();g.name=name;g.userData.noBatch=true;parent.add(g);return g}
 const petalGeometry=new T.CircleGeometry(1,8);
 function petals(parent,x,y,z,size=.035){for(let i=0;i<5;i++){const a=i*Math.PI*2/5,petal=new T.Mesh(petalGeometry,mat(P.cream));
-petal.position.set(x+Math.cos(a)*size*.58,y+Math.sin(a)*size*.58,z);petal.scale.set(size*.46,size*.46,1);parent.add(petal)}ball(parent,x,y,z+.008,.012,.012,.009,P.gold)}
+petal.position.set(x+Math.cos(a)*size*.58,y+Math.sin(a)*size*.58,z);petal.scale.set(size*.46,size*.46,1);
+parent.add(petal)}ball(parent,x,y,z+.008,.012,.012,.009,P.gold)}
 
 function buildTin(root,staticParts){
  const tin=anchor(root,'story-mint-tin','kitchen',[-.30,1.04,-1.04]);
@@ -82,14 +85,17 @@ function buildBasin(root,staticParts){
 function buildBear(root,staticParts){
  const bear=anchor(root,'story-mended-bear','bedroom',[.09,.875,-1.03]);bear.rotation.y=-.22;
  ball(bear,0,.16,0,.115,.15,.085,P.wood);ball(bear,0,.35,0,.14,.12,.095,P.wood);
- for(const x of [-.10,.10]){ball(bear,x,.435,0,.052,.052,.034,P.wood);ball(bear,x,.045,.035,.063,.046,.063,P.wood);ball(bear,x*1.40,.19,.01,.038,.075,.04,P.wood)}
+ for(const x of [-.10,.10]){ball(bear,x,.435,0,.052,.052,.034,P.wood);
+ ball(bear,x,.045,.035,.063,.046,.063,P.wood);ball(bear,x*1.40,.19,.01,.038,.075,.04,P.wood)}
  ball(bear,0,.31,.085,.062,.041,.025,P.cream);
  for(const x of [-.043,.043])ball(bear,x,.37,.088,.011,.013,.009,P.ink);
  ball(bear,0,.324,.109,.015,.011,.008,P.ink);
  const earnedPatch=box(bear,.038,.17,.086,.080,.085,.012,P.cream);earnedPatch.name='story-earned-bear-patch';
  // Completed mending leaves actual red thread on the saved household bear.
- for(let i=0;i<3;i++){const stitch=box(bear,.011+i*.027,.208,.096,.009,.022,.006,0xb44946);stitch.name='story-earned-red-stitch-'+i;stitch.rotation.z=i%2?.45:-.45}
- for(let i=0;i<4;i++){const stitch=box(bear,-.068+i*.044,.257,.096,.009,.027,.006,0xb44946);stitch.name='story-earned-red-seam-'+i;stitch.rotation.z=i%2?.45:-.45}finish(bear);
+ for(let i=0;i<3;i++){const stitch=box(bear,.011+i*.027,.208,.096,.009,.022,.006,0xb44946);
+ stitch.name='story-earned-red-stitch-'+i;stitch.rotation.z=i%2?.45:-.45}
+ for(let i=0;i<4;i++){const stitch=box(bear,-.068+i*.044,.257,.096,.009,.027,.006,0xb44946);
+ stitch.name='story-earned-red-seam-'+i;stitch.rotation.z=i%2?.45:-.45}finish(bear);
  return {bear};
 }
 
@@ -107,9 +113,11 @@ function buildDoorstep(root,staticParts){
  for(const x of [-.30,.30])for(const z of [.24,.34]){const foot=ball(tea,x,.006,z,.031,.004,.052,P.ink);foot.rotation.y=x<0?-.15:.15}
  finish(tea);
  const glow=new T.Mesh(new T.PlaneGeometry(1.15,.90),new T.MeshBasicMaterial({map:softTexture(),color:0xf8c385,transparent:true,opacity:.25,
-   depthWrite:false,blending:T.AdditiveBlending}));glow.name='story-welcome-light';glow.rotation.x=-Math.PI/2;glow.position.set(.1,.005,.15);tea.add(glow);
+   depthWrite:false,blending:T.AdditiveBlending}));glow.name='story-welcome-light';
+   glow.rotation.x=-Math.PI/2;glow.position.set(.1,.005,.15);tea.add(glow);
  const guest=group(tea,'story-shy-guest');guest.position.set(.48,.06,.26);
- const cloth=new T.Mesh(new T.LatheGeometry([new T.Vector2(0,.39),new T.Vector2(.065,.38),new T.Vector2(.10,.31),new T.Vector2(.115,.19),new T.Vector2(.15,0)],16),mat(P.cream));guest.add(cloth);
+ const cloth=new T.Mesh(new T.LatheGeometry([new T.Vector2(0,.39),new T.Vector2(.065,.38),
+   new T.Vector2(.10,.31),new T.Vector2(.115,.19),new T.Vector2(.15,0)],16),mat(P.cream));guest.add(cloth);
  for(const x of [-.044,.044])ball(guest,x,.245,.105,.016,.022,.008,P.ink);finish(guest);
  return {tea,guest,glow,shade};
 }
@@ -131,7 +139,8 @@ export function createStoryProps(parent){
   // motion changes poses, never the age of a deliberate story interaction.
   if(visualTime===null||!state.paused)visualTime=state.elapsed;
   snapshot={tinOpen:story.index>0||story.step>=1,cabinetOpen:story.index>1||story.index===1&&story.step>=2,
-    bearVisible:story.completed.includes('mended-friend'),musicRepaired:story.completed.includes('lost-song'),jasmineBloomed:story.index>2||story.index===2&&story.step>=2,guestVisible:story.finished};
+    bearVisible:story.completed.includes('mended-friend'),
+      musicRepaired:story.completed.includes('lost-song'),jasmineBloomed:story.index>2||story.index===2&&story.step>=2,guestVisible:story.finished};
   // Fold nearly flat beside the case; a shallow swing would enter the owned
   // right-hand keepsake slot even though the cabinet body itself is clear.
   door.rotation.y=snapshot.cabinetOpen?-3.05:0;
@@ -147,7 +156,8 @@ export function createStoryProps(parent){
    const greeting=active&&state.story?.lastAction==='prop:doorstep'?Math.sin(phase/2.2*Math.PI)*.12:0;
    guest.rotation.z=still?0:Math.sin(visualTime*.8)*.028+greeting;guest.position.y=.06+(still?0:Math.sin(visualTime*.7)*.012);
   }
-  ripple.visible=active&&state.story?.lastAction==='prop:wash-basin';ripple.scale.setScalar(.8+phase*.8);ripple.material.opacity=Math.max(0,.4*(1-phase/2.2));
+  ripple.visible=active&&state.story?.lastAction==='prop:wash-basin';ripple.scale.setScalar(.8+phase*.8);
+  ripple.material.opacity=Math.max(0,.4*(1-phase/2.2));
   water.material.opacity=.78+.04*mix;glow.material.opacity=.16+.19*mix;shade.material.emissiveIntensity=.38+.65*mix;
   // Story input leaves a physical response as well as the lasting earned pose.
   const response=active?Math.sin(phase/2.2*Math.PI)*.04:0;

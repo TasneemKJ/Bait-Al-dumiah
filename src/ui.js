@@ -21,8 +21,10 @@ export function createUI(host,getState,dispatch){
   const sheet=wireSheet(host,close);
   if(panel){renderPanel();sheet.showModal()}renderPlacement();tick();
  }
- function open(name,id){if(placement){placement=null;moveId=null;renderPlacement();dispatch('placement-cancel')}panel=name;resetConfirm=false;if(id)selected=id;previousFocus=focusOrigin(host);
-  toolsExpanded=false;host.querySelector('.dock').dataset.expanded='false';host.querySelector('[data-action="toggle-tools"]').setAttribute('aria-expanded','false');
+ function open(name,id){if(placement){placement=null;moveId=null;renderPlacement();
+ dispatch('placement-cancel')}panel=name;resetConfirm=false;if(id)selected=id;previousFocus=focusOrigin(host);
+  toolsExpanded=false;host.querySelector('.dock').dataset.expanded='false';
+  host.querySelector('[data-action="toggle-tools"]').setAttribute('aria-expanded','false');
   renderPanel();host.querySelector('#sheet').showModal();dispatch('panel-state',name);host.querySelector('#sheet [data-action="close"]').focus()}
  function close(){const sheet=host.querySelector('#sheet');sheet?.close();panel=null;renderedPanel=null;resetConfirm=false;
  dispatch('panel-state',null);
@@ -38,7 +40,8 @@ export function createUI(host,getState,dispatch){
   if(panel==='decorate')root.innerHTML=decorateMarkup(s,{t,n,button});
   if(panel==='journal')root.innerHTML=journalMarkup(s,{t,n,button});
   if(panel==='settings')root.innerHTML=settingsMarkup(s,{t,button,resetConfirm});
-  if(notice){const note=document.createElement('p');note.className='panel-notice';note.setAttribute('role','status');note.textContent=notice;root.prepend(note)}
+  if(notice){const note=document.createElement('p');note.className='panel-notice';
+  note.setAttribute('role','status');note.textContent=notice;root.prepend(note)}
  }
  function renderPlacement(){
   const root=host.querySelector('.placement');if(!root)return;root.hidden=!placement;if(!placement)return;

@@ -114,7 +114,8 @@ export function createPortraitEye(parent, sign, id) {
  iris.position.set(0, -.003, .002); aperture.add(iris); eye.iris = iris;
  eye.closedLid = faceStroke(eye, 'closed-bisque-lid', [[-.027,0,.005],[0,-.007,.007],[.027,0,.005]], .0022, 0x795447);
  eye.closedLid.visible = false;
- eye.upperLid=faceStroke(eye,'painted-upper-lid',[[-.030,.012,.005],[-.016,.024,.006],[0,.028,.006],[.017,.023,.006],[.030,.011,.005]],.00125,0x70574f);
+ eye.upperLid=faceStroke(eye,'painted-upper-lid',[[-.030,.012,.005],[-.016,.024,.006],[0,.028,.006],
+   [.017,.023,.006],[.030,.011,.005]],.00125,0x70574f);
  eye.upperLid.userData.noBatch=true;return eye;
 }
 export function faceStroke(parent, name, points, radius, color) {
@@ -145,7 +146,8 @@ export function createPortraitMouth(parent, id='lina') {
 }
 let noseGeometry = null;
 export function createNose(parent, material, id='lina') {
- if (!noseGeometry) noseGeometry=gridSurface(24,8,(u,v)=>{const a=u*Math.PI*2;return [.020*v*Math.cos(a),.014*v*Math.sin(a),.013*(1-v*v)*(1-.12*Math.sin(a))]});
+ if (!noseGeometry) noseGeometry=gridSurface(24,8,(u,v)=>{const a=u*Math.PI*2;
+ return [.020*v*Math.cos(a),.014*v*Math.sin(a),.013*(1-v*v)*(1-.12*Math.sin(a))]});
  const mesh = new T.Mesh(noseGeometry, material); mesh.name = 'sculpted-nose';
  mesh.position.set(0, -.054, faceSurface(id,0,-.054)+.001); parent.add(mesh); return mesh;
 }

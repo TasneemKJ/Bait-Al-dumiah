@@ -4,7 +4,8 @@ export function createTeaSteam(parent,{color=0xf7e6ce,strength=1}={}){
  const root=new T.Group();root.name='tea-steam';root.position.y=.15;parent.add(root);
  for(let i=0;i<3;i++){
   const curve=new T.CatmullRomCurve3([new T.Vector3(0,0,0),new T.Vector3(.015,.035,0),new T.Vector3(-.013,.075,0),new T.Vector3(.009,.12,0)]);
-  const mesh=new T.Mesh(new T.TubeGeometry(curve,12,.0035,4,false),new T.MeshBasicMaterial({color,transparent:true,opacity:.26,depthWrite:false}));root.add(mesh);
+  const mesh=new T.Mesh(new T.TubeGeometry(curve,12,.0035,4,false),new T.MeshBasicMaterial({color,
+    transparent:true,opacity:.26,depthWrite:false}));root.add(mesh);
  }
  return {root,update(time,active,still){root.visible=active;if(!active)return;const t=still?0:time;
  root.children.forEach((o,i)=>{const phase=((t*.32+i/3)%1+1)%1;o.position.set((i-1)*.025,phase*.045,0);o.rotation.y=i*1.8;
@@ -15,7 +16,8 @@ export function createComfortHearts(parent){
  if(!heartGeometry){const s=new T.Shape();s.moveTo(0,-.038);s.bezierCurveTo(-.09,.015,-.035,.072,0,.03);
  s.bezierCurveTo(.035,.072,.09,.015,0,-.038);heartGeometry=new T.ShapeGeometry(s,12)}
  const root=new T.Group();root.name='comfort-hearts';root.position.y=1.64;parent.add(root);
- for(let i=0;i<3;i++)root.add(new T.Mesh(heartGeometry,new T.MeshBasicMaterial({color:0xe7b3ad,side:T.DoubleSide,transparent:true,opacity:.7,depthWrite:false})));
+ for(let i=0;i<3;i++)root.add(new T.Mesh(heartGeometry,new T.MeshBasicMaterial({color:0xe7b3ad,
+   side:T.DoubleSide,transparent:true,opacity:.7,depthWrite:false})));
  return {root,update(time,active,still){root.visible=active;if(!active)return;const t=still?0:time;
  root.children.forEach((o,i)=>{const phase=((t*.25+i/3)%1+1)%1;o.position.set((i-1)*.16,.30*phase,.04);
  o.rotation.z=Math.sin(i*2.4)*.18;o.material.opacity=.30+.45*Math.sin(phase*Math.PI)})}};

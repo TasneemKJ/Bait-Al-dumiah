@@ -12,7 +12,8 @@ export function mountChimeSurface(host){
  host.append(root);
  const parts={title:root.querySelector('h2'),progress:root.querySelector('.chime-progress'),instructions:root.querySelector('#chime-instructions'),
    short:root.querySelector('.chime-short'),status:root.querySelector('#chime-status'),exit:root.querySelector('button'),
-   readout:root.querySelector('#chime-readout'),demo:root.querySelector('#chime-demonstration'),announcement:root.querySelector('.chime-announcement')};
+   readout:root.querySelector('#chime-readout'),demo:root.querySelector('#chime-demonstration'),
+     announcement:root.querySelector('.chime-announcement')};
  return {root,parts};
 }
 
@@ -21,9 +22,11 @@ export function renderChimeStrip(parts,a,{t,n,input,selection}){
  const listening=a.phase==='listen',done=a.phase==='finished';
  text(parts.title,t('chimeTitle'));text(parts.progress,t(listening?'chimeListen':done?'chimeDone':'chimeEcho'));
  const full=t(done?'chimeDoneHelp':listening?'chimeListenHelp':input==='keyboard'?'chimeKeyboard':'chimeEchoHelp');
- text(parts.instructions,full);text(parts.short,t(done?'chimeDoneShort':listening?'chimeListenShort':input==='keyboard'?'chimeKeysShort':'chimeShort'));
+ text(parts.instructions,full);
+ text(parts.short,t(done?'chimeDoneShort':listening?'chimeListenShort':input==='keyboard'?'chimeKeysShort':'chimeShort'));
  const progress=t('chimeProgress').replace('{done}',n(a.cursor)).replace('{total}',n(a.pattern.length));
- const status=done?(a.result?.practice?t('chimePractice'):t('chimeReward').replace('{reward}',n((a.result?.reward??0)+(a.result?.bonus??0)))):listening&&a.listenTime<0?t('chimeMistake'):progress;
+ const status=done?(a.result?.practice?t('chimePractice'):t('chimeReward').replace('{reward}',
+   n((a.result?.reward??0)+(a.result?.bonus??0)))):listening&&a.listenTime<0?t('chimeMistake'):progress;
  text(parts.status,status);text(parts.exit.querySelector('span'),t('chimeExit'));parts.exit.setAttribute('aria-label',t('chimeExit'));
  const selected=t('chimeSelected').replace('{name}',t(names[selection]));
  text(parts.readout,selected+'. '+t('chimePullReadout').replace('{pull}',n(a.pull*100)));

@@ -26,7 +26,8 @@ export function buildScene(canvas){
  const scene=new T.Scene(), camera=new T.OrthographicCamera(-10,10,6,-6,.1,100);
  const depthFog=new T.FogExp2(0xe7d8c8,.0012);scene.fog=depthFog;
  const controls=new OrbitControls(camera,canvas);controls.enablePan=false;controls.enableDamping=true;controls.dampingFactor=.10;
- controls.minAzimuthAngle=-.48;controls.maxAzimuthAngle=.48;controls.minPolarAngle=1.10;controls.maxPolarAngle=1.50;controls.minZoom=.8;controls.maxZoom=3.5;
+ controls.minAzimuthAngle=-.48;controls.maxAzimuthAngle=.48;controls.minPolarAngle=1.10;
+ controls.maxPolarAngle=1.50;controls.minZoom=.8;controls.maxZoom=3.5;
  controls.touches.ONE=T.TOUCH.ROTATE;controls.touches.TWO=T.TOUCH.DOLLY_ROTATE;
  const hemi=new T.HemisphereLight(0xffecde,0x816a7b,2.3);scene.add(hemi);
  const key=new T.DirectionalLight(0xffeddb,3.5);key.position.set(-5,11,10);key.castShadow=true;key.shadow.mapSize.set(2048,2048);

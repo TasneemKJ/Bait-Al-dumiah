@@ -27,4 +27,5 @@ const art={
    ' stroke-linecap="round"/>'
 };
 export const GIFT_ART_IDS=Object.keys(art);
-export function giftArt(id){return art[id]?`<svg class="gift-art" viewBox="0 0 48 48" width="44" height="44" aria-hidden="true" focusable="false">${art[id]}</svg>`:''}
+export function giftArt(id){return art[id]?
+  `<svg class="gift-art" viewBox="0 0 48 48" width="44" height="44" aria-hidden="true" focusable="false">${art[id]}</svg>`:''}

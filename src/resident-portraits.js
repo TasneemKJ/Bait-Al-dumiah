@@ -8,5 +8,6 @@ export function portraitMarkup(id,url){
 export function avatarMarkup(id,url){
  const portrait=portraitMarkup(id,url);
  if(portrait)return portrait;
- return `<span class="avatar ${id}" aria-hidden="true"><span class="hair"></span><span class="face"><i></i><i></i></span><span class="dress"></span></span>`;
+ return `<span class="avatar ${id}" aria-hidden="true"><span class="hair"></span><span
+   class="face"><i></i><i></i></span><span class="dress"></span></span>`;
 }

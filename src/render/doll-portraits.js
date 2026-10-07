@@ -33,13 +33,16 @@ export function renderPortrait(renderer,doll,size=192){
  size=Number.isFinite(size)?Math.max(64,Math.min(256,Math.floor(size))):192;
  const {scene,camera}=createPortraitScene(doll),target=new T.WebGLRenderTarget(size,size,{depthBuffer:true,stencilBuffer:false});
  const previous={target:renderer.getRenderTarget(),viewport:renderer.getViewport(new T.Vector4()),scissor:renderer.getScissor(new T.Vector4()),
-   test:renderer.getScissorTest(),clear:renderer.getClearColor(new T.Color()),alpha:renderer.getClearAlpha(),auto:renderer.autoClear,shadow:renderer.shadowMap.enabled};
+   test:renderer.getScissorTest(),clear:renderer.getClearColor(new T.Color()),
+     alpha:renderer.getClearAlpha(),auto:renderer.autoClear,shadow:renderer.shadowMap.enabled};
  try{
-  renderer.setRenderTarget(target);renderer.setScissorTest(false);renderer.autoClear=true;renderer.shadowMap.enabled=false;renderer.render(scene,camera);
+  renderer.setRenderTarget(target);renderer.setScissorTest(false);renderer.autoClear=true;
+  renderer.shadowMap.enabled=false;renderer.render(scene,camera);
   const pixels=new Uint8Array(size*size*4);renderer.readRenderTargetPixels(target,0,0,size,size,pixels);return portraitPixels(pixels,size);
  }finally{
   renderer.setRenderTarget(previous.target);renderer.setViewport(previous.viewport);renderer.setScissor(previous.scissor);
-  renderer.setScissorTest(previous.test);renderer.setClearColor(previous.clear,previous.alpha);renderer.autoClear=previous.auto;renderer.shadowMap.enabled=previous.shadow;
+  renderer.setScissorTest(previous.test);renderer.setClearColor(previous.clear,previous.alpha);
+  renderer.autoClear=previous.auto;renderer.shadowMap.enabled=previous.shadow;
   target.dispose();scene.clear();
  }
 }
@@ -53,7 +56,8 @@ export function createPortraitCache(residents,capture){
    if(disposed)return images;
    if(images)return images;
    const result=Object.create(null);
-   for(const doll of residents.dolls){try{const url=capture(doll);if(portraitMarkup(doll.id,url))result[doll.id]=url}catch(error){console.warn('Portrait capture skipped:',doll.id,error)}}
+   for(const doll of residents.dolls){try{const url=capture(doll);
+   if(portraitMarkup(doll.id,url))result[doll.id]=url}catch(error){console.warn('Portrait capture skipped:',doll.id,error)}}
    images=Object.freeze(result);return images;
   },
   dispose(){disposed=true;images=Object.freeze(Object.create(null))}

@@ -3,7 +3,8 @@ import {point} from './stitch-view.js';
 // Pointer, keyboard and lifecycle input for the stitch work surface. The surface
 // owns state and rendering; this module turns browser events into commands.
 export function bindStitchInput(ctx){
- const {root,active,blocked,stop,hit,project,releaseCapture,invoke,cancel,clearFeedback,update,gesture,keyboard,canvas,dispatch,setInputMode,setLost,parts}=ctx;
+ const {root,active,blocked,stop,hit,project,releaseCapture,invoke,cancel,clearFeedback,update,gesture,
+   keyboard,canvas,dispatch,setInputMode,setLost,parts}=ctx;
  function pointerdown(e){
   const stitch=active();if(!stitch||blocked())return;stop(e);if(gesture.pointerId!==null)return;
   const target=hit(e),projected=project(e);
@@ -38,12 +39,14 @@ export function bindStitchInput(ctx){
  function pointercancel(e){if(e.pointerId===gesture.pointerId)cancel()}
  function consumeClick(e){if(active()&&!blocked())stop(e)}
  function contextmenu(e){if(active()){stop(e);cancel()}}
- const unrelated=target=>Boolean(target?.closest?.('input,select,textarea,button,dialog,[contenteditable="true"],[contenteditable=""],[role="textbox"]'));
+ const unrelated=target=>Boolean(target?.closest?.('input,select,textarea,button,dialog,'+
+  '[contenteditable="true"],[contenteditable=""],[role="textbox"]'));
  function keydown(e){
   const stitch=active();if(!stitch||blocked()||e.defaultPrevented)return;
   if(unrelated(e.target)&&!(e.key==='Escape'&&root.contains(e.target)))return;
   if(gesture.pointerId!==null&&e.key!=='Escape'&&e.code!=='Escape'){
-   if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space','KeyU','Enter'].includes(e.code)||['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' ','u','U','Enter'].includes(e.key))stop(e);
+   if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space','KeyU','Enter'].includes(e.code)||
+     ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' ','u','U','Enter'].includes(e.key))stop(e);
    return;
   }
   const owned=keyboard.active,command=keyboard.down(e);if(!command)return;stop(e);setInputMode('keyboard');clearFeedback();
@@ -74,7 +77,8 @@ export function bindStitchInput(ctx){
  const bindings=[[canvas,'pointerdown',pointerdown,true],[canvas,'pointermove',pointermove,true],[canvas,'pointerup',pointerup,true],[canvas,
    'pointercancel',pointercancel,true],[canvas,'lostpointercapture',pointercancel,true],[canvas,'click',consumeClick,true],[canvas,'contextmenu',
    contextmenu,true],[canvas,'webglcontextlost',contextLost,false],[canvas,'focusout',focusout,false],[window,'keydown',keydown,true],[window,'keyup',
-   keyup,true],[window,'blur',cancel,false],[window,'resize',cancel,false],[window,'orientationchange',cancel,false],[document,'visibilitychange',visibility,false],[parts.exit,'click',exit,false]];
+   keyup,true],[window,'blur',cancel,false],[window,'resize',cancel,false],[window,'orientationchange',
+     cancel,false],[document,'visibilitychange',visibility,false],[parts.exit,'click',exit,false]];
  for(const [target,event,handler,capture] of bindings)target.addEventListener(event,handler,{capture});
  return ()=>{for(const [target,event,handler,capture] of bindings)target.removeEventListener(event,handler,{capture})};
 }

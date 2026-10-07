@@ -6,9 +6,12 @@ export const ROOMS = [
  {id:'bedroom',x:2.4,y:3.2,tint:0xe6cfaa},
 ];
 export const DOLLS = [
- {id:'lina',color:0xc16a83,hair:0x44313b,room:'kitchen',wish:'tea',wishes:['tea','soothe','play','tea'],favRoom:'parlor',favItem:'musicbox',hunger:40,energy:84,comfort:70},
- {id:'noor',color:0x789c95,hair:0x604535,room:'bedroom',wish:'rest',wishes:['rest','tea','soothe','rest'],favRoom:'bedroom',favItem:'mobile',hunger:75,energy:35,comfort:60},
- {id:'sami',color:0xa08ab4,hair:0x3b3341,room:'studio',wish:'play',wishes:['play','rest','tea','soothe'],favRoom:'kitchen',favItem:'bear',hunger:80,energy:70,comfort:35},
+ {id:'lina',color:0xc16a83,hair:0x44313b,room:'kitchen',wish:'tea',wishes:['tea','soothe','play','tea'],
+   favRoom:'parlor',favItem:'musicbox',hunger:40,energy:84,comfort:70},
+ {id:'noor',color:0x789c95,hair:0x604535,room:'bedroom',wish:'rest',wishes:['rest','tea','soothe',
+   'rest'],favRoom:'bedroom',favItem:'mobile',hunger:75,energy:35,comfort:60},
+ {id:'sami',color:0xa08ab4,hair:0x3b3341,room:'studio',wish:'play',wishes:['play','rest','tea','soothe'],
+   favRoom:'kitchen',favItem:'bear',hunger:80,energy:70,comfort:35},
 ];
 export const CATALOG = [
  {id:'plant',price:8,cozy:4,icon:'leaf'},

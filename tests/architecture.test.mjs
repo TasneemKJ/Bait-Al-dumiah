@@ -22,13 +22,13 @@ const LAYER_OF={
  'ui.js':'ui','activities-ui.js':'ui','chime-ui.js':'ui','home-ui.js':'ui','object-ui.js':'ui',
  'stitch-ui.js':'ui','stitch-view.js':'ui','canvas-aria.js':'ui','chime-input-bindings.js':'ui','chime-view.js':'ui','objective-ui.js':'ui','shell-markup.js':'ui','hud-sync.js':'ui','ui-events.js':'ui','save-transfer.js':'ui','panels-ui.js':'ui','stitch-input-bindings.js':'ui','tea-input-bindings.js':'ui','tea-view.js':'ui','story-ui.js':'ui','tea-ui.js':'ui','audio.js':'ui','gift-art.js':'ui',
  'object-controls.js':'ui','room-views.js':'ui','resident-label.js':'ui','placement-keys.js':'ui','playfield-layout.js':'ui',
- 'app-feedback.js':'ui','app-view.js':'ui','app-commands.js':'ui','app-loop.js':'ui',
+ 'app-feedback.js':'ui','app-view.js':'ui','app-commands.js':'ui','cmd-home.js':'ui','cmd-camera.js':'ui','cmd-story.js':'ui','cmd-activities.js':'ui','cmd-house.js':'ui','cmd-save.js':'ui','app-loop.js':'ui',
  'main.js':'main',
 };
 const MAX_LINES=500;
 // Long lines hide size: the code here is dense, so bytes, line width and function length are capped too.
 const MAX_BYTES=40000;
-const MAX_LINE_CHARS=200;
+const MAX_LINE_CHARS=150;
 const MAX_FUNCTION_LINES=80;
 // Modules allowed past the cap, each with the reason.
 const SIZE_EXCEPTIONS={

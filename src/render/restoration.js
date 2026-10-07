@@ -28,9 +28,11 @@ export function createRestoration(parent){
  const root=new T.Group();root.name='earned-room-restoration';root.userData.noBatch=true;parent.add(root);
  const stages=[];
  for(const room of ROOMS)arrangements[room.id].forEach(([item,x,y,z,scale],index)=>{
-  const group=new T.Group();group.name=`restoration-${room.id}-${index+1}`;group.position.set(room.x,room.y,0);group.visible=false;group.userData.noBatch=true;group.userData.item=item;
+  const group=new T.Group();group.name=`restoration-${room.id}-${index+1}`;
+  group.position.set(room.x,room.y,0);group.visible=false;group.userData.noBatch=true;group.userData.item=item;
   const asset=makeFurniture(item);miniatureDetail(asset);asset.position.set(x,y,z);asset.scale.setScalar(scale);group.add(asset);
-  const light=item==='lamp'?new T.PointLight(0xffc27d,0,3.1,2):null;if(light){light.name=`restored-${room.id}-light`;light.position.set(x,y+1.0,z);light.castShadow=false;group.add(light)}
+  const light=item==='lamp'?new T.PointLight(0xffc27d,0,3.1,2):null;
+  if(light){light.name=`restored-${room.id}-light`;light.position.set(x,y+1.0,z);light.castShadow=false;group.add(light)}
   // Batch while visible; the batching contract skips invisible ancestors.
   group.visible=true;compactStatic(group);group.visible=false;root.add(group);stages.push({group,light,room:room.id,tier:index+1});
  });

@@ -17,7 +17,8 @@ export function stitchView(state,stitch,{inputMode='pointer',reason=null}={}){
  const instructions=t(keyboard?(prefix==='stitchPointer'?'stitchKeyboardInstructions':prefix+'Keyboard'):prefix+'Instructions');
  const shortInstructions=keyboard&&prefix==='stitchPointer'?t('stitchKeyboardShort'):keyboard?instructions:t(prefix+'Short');
  let progress=fill(t('stitchProgress'),{done:n(stitch.completedSections),total:n(total)});
- let status=stitch.loose?t('stitchLoose'):covered?t('stitchReadyStatus'):fill(t('stitchSectionProgress'),{section:n(section),percent:n(percent)}),detail='';
+ let status=stitch.loose?t('stitchLoose'):covered?t('stitchReadyStatus'):fill(t('stitchSectionProgress'),
+   {section:n(section),percent:n(percent)}),detail='';
  const position=(key,value)=>fill(t(key),{x:n(coordinate(value.x)),y:n(coordinate(value.y))});
  let readout=position('stitchNeedlePosition',stitch.needle);
  if(stitch.nextGuidePoint)readout+=' '+position('stitchGuidePosition',stitch.nextGuidePoint);
@@ -27,9 +28,11 @@ export function stitchView(state,stitch,{inputMode='pointer',reason=null}={}){
   else{
    progress=fill(t('stitchScore'),{score:n(stitch.result?.score??0)});
    if(stitch.best!==null)progress+=' · '+fill(t('stitchBest'),{score:n(stitch.best)});
-   status=stitch.result?.practice?t('practiceLabel'):t('activityReward')+' +'+n((stitch.result?.reward??0)+(stitch.result?.bonus??0))+' '+t('buttons');
+   status=stitch.result?.practice?t('practiceLabel'):t('activityReward')+' +'+n((stitch.result?.reward??
+     0)+(stitch.result?.bonus??0))+' '+t('buttons');
    const next=restorationReady(state,'studio');
-   detail=next.complete?t('stitchHomeRestored'):fill(t(next.ready?'stitchRestoreReady':'stitchRestoreGoal'),{earned:n(state.activities.mastery.stitch),needed:n(next.required),cost:n(next.cost)});
+   detail=next.complete?t('stitchHomeRestored'):fill(t(next.ready?
+     'stitchRestoreReady':'stitchRestoreGoal'),{earned:n(state.activities.mastery.stitch),needed:n(next.required),cost:n(next.cost)});
   }
  }
  if(reason)status=t(reason);
@@ -45,13 +48,15 @@ export function mountStitchSurface(host){
     '<span class="stitch-cue-full"></span><span class="stitch-cue-short" aria-hidden="true"></span></p>'+
     '<p id="stitch-work-status"></p><p class="stitch-work-detail"></p></div><button type="button" class="stitch-exit"'+
     ' data-stitch-action="exit">'+icon('arrow')+'<span></span></button></div>'+
-  '<p id="stitch-needle-readout" class="sr-only"></p><p id="stitch-work-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>';
+  '<p id="stitch-needle-readout" class="sr-only"></p>'+
+  '<p id="stitch-work-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>';
  // House controls rebuild for sound, pause and locale. Keep the work surface
  // beside #ui so those refreshes cannot detach its controls or pointer capture.
  const mount=host.parentElement??host;mount.append(root);
  const parts={title:root.querySelector('#stitch-work-title'),progress:root.querySelector('.stitch-progress'),
    full:root.querySelector('.stitch-cue-full'),short:root.querySelector('.stitch-cue-short'),status:root.querySelector('#stitch-work-status'),
    detail:root.querySelector('.stitch-work-detail'),strip:root.querySelector('.stitch-work-strip'),
-   exit:root.querySelector('[data-stitch-action="exit"]'),readout:root.querySelector('#stitch-needle-readout'),announcement:root.querySelector('#stitch-work-announcement')};
+   exit:root.querySelector('[data-stitch-action="exit"]'),
+     readout:root.querySelector('#stitch-needle-readout'),announcement:root.querySelector('#stitch-work-announcement')};
  return {root,parts};
 }

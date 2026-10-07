@@ -9,10 +9,12 @@ export {stitchView};
 export function createStitchUI(host,canvas,getState,dispatch,{pick,pointAt}){
  const {root,parts}=mountStitchSurface(host);
  const gesture=createStitchGesture(),keyboard=createStitchKeyboard();
- let session=null,previousPhase=null,inputMode='pointer',feedback=null,feedbackAge=0,announcementSignature='',viewSignature='',cachedView=null,lost=false,disposed=false;
+ let session=null,previousPhase=null,inputMode='pointer',feedback=null,feedbackAge=0,
+   announcementSignature='',viewSignature='',cachedView=null,lost=false,disposed=false;
  const original=captureCanvas(canvas),originalDescription=original.description;
  const t=key=>translate(getState().settings.locale,key),active=()=>stitchStatus(getState());
- const blocked=()=>getState().paused||document.hidden||lost||Boolean(host.querySelector('dialog[open],.error-screen'))||host.querySelector('.placement')?.hidden===false;
+ const blocked=()=>getState().paused||document.hidden||lost||
+   Boolean(host.querySelector('dialog[open],.error-screen'))||host.querySelector('.placement')?.hidden===false;
  const stop=e=>{e.preventDefault();e.stopImmediatePropagation()};
  const setText=(element,value)=>{if(element.textContent!==value)element.textContent=value};
  const setAttribute=(element,name,value)=>{if(element.getAttribute(name)!==value)element.setAttribute(name,value)};
@@ -35,13 +37,15 @@ export function createStitchUI(host,canvas,getState,dispatch,{pick,pointAt}){
   if(disposed)return;
   let stitch=active();const hasStitch=Boolean(stitch);
   if(host.dataset.stitchActive!==String(hasStitch))host.dataset.stitchActive=String(hasStitch);
-  if(!hasStitch){if(session){cancel();session=null;previousPhase=null;restoreCanvas();clearFeedback();parts.announcement.textContent=''}root.hidden=true;return}
+  if(!hasStitch){if(session){cancel();session=null;previousPhase=null;restoreCanvas();clearFeedback();
+  parts.announcement.textContent=''}root.hidden=true;return}
   const nextSession=getState().activities.active,newSession=session!==nextSession;
   if(newSession){cancel();session=nextSession;previousPhase=null;clearFeedback();announcementSignature='';viewSignature=''}
   const unavailable=blocked();root.hidden=unavailable;if(unavailable){cancel();return}
   if(newSession)canvas.focus({preventScroll:true});
   if(previousPhase!==stitch.phase){cancel();clearFeedback();previousPhase=stitch.phase;stitch=active()}
-  if(keyboard.active&&gesture.pointerId===null&&stitch.phase==='sew'&&dt>0){invoke('stitch-control',keyboard.controls(dt,stitch.target));stitch=active()}
+  if(keyboard.active&&gesture.pointerId===null&&stitch.phase==='sew'&&dt>0){invoke('stitch-control',
+    keyboard.controls(dt,stitch.target));stitch=active()}
   if(!stitch)return;
   const seconds=Number.isFinite(dt)?Math.max(0,Math.min(dt,.25)):0;feedbackAge+=seconds;
   if(feedbackAge>4)clearFeedback();
@@ -51,10 +55,12 @@ export function createStitchUI(host,canvas,getState,dispatch,{pick,pointAt}){
   root.classList.toggle('stitch-holding',gesture.target==='needle'&&stitch.phase==='sew');
   setAttribute(canvas,'aria-label',t('stitchCanvasLabel'));setAttribute(canvas,'role','application');
   setAttribute(canvas,'aria-keyshortcuts','ArrowLeft ArrowRight ArrowUp ArrowDown Space U Enter Escape');
-  setAttribute(canvas,'aria-describedby',[originalDescription,'stitch-work-instructions','stitch-work-status','stitch-needle-readout'].filter(Boolean).join(' '));
+  setAttribute(canvas,'aria-describedby',[originalDescription,'stitch-work-instructions',
+    'stitch-work-status','stitch-needle-readout'].filter(Boolean).join(' '));
   const progress=stitchSectionProgress(stitch).percent;
   const nextView=JSON.stringify([s.settings.locale,stitch.phase,stitch.mode,inputMode,stitch.section,stitch.completedSections,progress,stitch.loose,
-    stitch.ready,[coordinate(stitch.needle.x),coordinate(stitch.needle.y)],stitch.nextGuidePoint,stitch.result,stitch.best,s.activities.mastery.stitch,s.restoration,feedback]);
+    stitch.ready,[coordinate(stitch.needle.x),coordinate(stitch.needle.y)],stitch.nextGuidePoint,
+      stitch.result,stitch.best,s.activities.mastery.stitch,s.restoration,feedback]);
   if(nextView!==viewSignature){
    const view=cachedView=stitchView(s,stitch,{inputMode,reason:feedback});viewSignature=nextView;
    setText(parts.title,view.title);setText(parts.progress,view.progress);parts.progress.hidden=!view.progress;
@@ -75,5 +81,6 @@ export function createStitchUI(host,canvas,getState,dispatch,{pick,pointAt}){
  const unbindInput=bindStitchInput({root,active,blocked,stop,hit,project,releaseCapture,invoke,cancel,clearFeedback,update,gesture,keyboard,canvas,
    dispatch,setInputMode:mode=>{inputMode=mode},setLost:()=>{lost=true},parts});
  update(0);
- return {update,cancel,respond,dispose(){if(disposed)return;cancel();disposed=true;unbindInput();host.dataset.stitchActive='false';restoreCanvas();root.remove()}};
+ return {update,cancel,respond,dispose(){if(disposed)return;cancel();disposed=true;unbindInput();
+ host.dataset.stitchActive='false';restoreCanvas();root.remove()}};
 }

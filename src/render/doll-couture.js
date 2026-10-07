@@ -13,7 +13,8 @@ export function gridSurface(columns, rows, sample, reverse = false) {
   indices.push(...(reverse?[a,a+1,b,a+1,b+1,b]:[a,b,a+1,a+1,b,b+1]));
  }
  const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(positions,3));
- g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));g.setIndex(indices);g.computeVertexNormals();g.computeBoundingBox();g.computeBoundingSphere();return g;
+ g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));g.setIndex(indices);g.computeVertexNormals();
+ g.computeBoundingBox();g.computeBoundingSphere();return g;
 }
 export function closeSurfaceSeam(g, columns, rows) {
  const p=g.attributes.position,n=g.attributes.normal,a=new T.Vector3(),b=new T.Vector3();
@@ -86,8 +87,10 @@ export function dollFabric(id) {
 let bodice=null;
 export function bodiceGeometry(){
  if(bodice)return bodice;
- const shape=new T.CatmullRomCurve3([[.122,.540,.105],[.133,.627,.109],[.166,.716,.118],[.163,.775,.101],[.112,.816,.078],[.069,.838,.060]].map(p=>new T.Vector3(...p)));
- bodice=closeSurfaceSeam(gridSurface(32,24,(u,v)=>{const p=shape.getPoint(v),a=u*Math.PI*2;return [Math.cos(a)*p.x,p.y,Math.sin(a)*p.z]}),32,24);return bodice;
+ const shape=new T.CatmullRomCurve3([[.122,.540,.105],[.133,.627,.109],[.166,.716,.118],[.163,.775,.101],
+   [.112,.816,.078],[.069,.838,.060]].map(p=>new T.Vector3(...p)));
+ bodice=closeSurfaceSeam(gridSurface(32,24,(u,v)=>{const p=shape.getPoint(v),a=u*Math.PI*2;
+ return [Math.cos(a)*p.x,p.y,Math.sin(a)*p.z]}),32,24);return bodice;
 }
 
 let sleeve=null;
@@ -123,7 +126,8 @@ export function shirtFabric(id){
  if(shirts.has(id))return shirts.get(id);
  const canvas=document.createElement('canvas');canvas.width=canvas.height=128;const c=canvas.getContext('2d');
  c.fillStyle={lina:'#dbaeb1',noor:'#bbd0bc',sami:'#d8c9ac'}[id]||'#d8c9ac';c.fillRect(0,0,128,128);
- c.lineWidth=.6;c.strokeStyle='rgba(255,245,226,.25)';for(let i=1;i<128;i+=4){c.beginPath();c.moveTo(i,0);c.lineTo(i,128);c.moveTo(0,i);c.lineTo(128,i);c.stroke()}
+ c.lineWidth=.6;c.strokeStyle='rgba(255,245,226,.25)';for(let i=1;i<128;i+=4){c.beginPath();
+ c.moveTo(i,0);c.lineTo(i,128);c.moveTo(0,i);c.lineTo(128,i);c.stroke()}
  if(id==='sami'){c.fillStyle='rgba(140,109,87,.15)';for(let y=5;y<128;y+=18)c.fillRect(0,y,128,2)}
  const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;
  const m=new T.MeshStandardMaterial({map,roughness:.91,bumpMap:surfaceFinish('fabric'),roughnessMap:surfaceFinish('fabric'),bumpScale:.0015,

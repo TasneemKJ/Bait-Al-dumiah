@@ -9,5 +9,6 @@ export function teaFraming(width,height){
  const aspect=w/h,usable=Math.max(140,h-top-bottom),span=Math.max(2/aspect,1.02*h/usable),zoom=1.8;
  const upY=14/Math.hypot(12,14),offset=((top+usable/2)/h-.5)*span/upY;
  const room=ROOMS.find(r=>r.id===TEA_TABLE.room);
- return {height:span*zoom,zoom,aspect,eyeOffset:[0,12,14],target:[room.x+TEA_TABLE.x,room.y+.26+TEA_TABLE.y+.34+offset,TEA_TABLE.z+TEA_TABLE.cupZ],safeArea:{top,bottom}};
+ return {height:span*zoom,zoom,aspect,eyeOffset:[0,12,14],target:[room.x+TEA_TABLE.x,
+   room.y+.26+TEA_TABLE.y+.34+offset,TEA_TABLE.z+TEA_TABLE.cupZ],safeArea:{top,bottom}};
 }

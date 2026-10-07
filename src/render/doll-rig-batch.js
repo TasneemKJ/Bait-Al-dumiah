@@ -6,13 +6,16 @@ const coloredGeometry=new WeakMap();
 // glazed, metallic and translucent surfaces keep their authored material response.
 function vertexColored(mesh){
  const m=mesh.material;
- if(!m?.isMeshStandardMaterial||m.isMeshPhysicalMaterial||m.map||m.bumpMap||m.normalMap||m.transparent||m.vertexColors||m.metalness||m.emissive.getHex()!==0)return;
+ if(!m?.isMeshStandardMaterial||m.isMeshPhysicalMaterial||m.map||m.bumpMap||m.normalMap||m.transparent||
+   m.vertexColors||m.metalness||m.emissive.getHex()!==0)return;
  const key=[m.roughness,m.side,m.depthWrite].join(':');
- if(!coloredMaterials.has(key))coloredMaterials.set(key,new T.MeshStandardMaterial({color:0xffffff,vertexColors:true,roughness:m.roughness,side:m.side,depthWrite:m.depthWrite}));
+ if(!coloredMaterials.has(key))coloredMaterials.set(key,new T.MeshStandardMaterial({color:0xffffff,
+   vertexColors:true,roughness:m.roughness,side:m.side,depthWrite:m.depthWrite}));
  let palette=coloredGeometry.get(mesh.geometry);if(!palette){palette=new Map();coloredGeometry.set(mesh.geometry,palette)}
  const shade=m.color.getHexString();let g=palette.get(shade);
  if(!g){g=mesh.geometry.clone();const count=g.attributes.position.count,colors=new Float32Array(count*3);
- for(let i=0;i<count;i++){colors[i*3]=m.color.r;colors[i*3+1]=m.color.g;colors[i*3+2]=m.color.b}g.setAttribute('color',new T.BufferAttribute(colors,3));palette.set(shade,g)}
+ for(let i=0;i<count;i++){colors[i*3]=m.color.r;colors[i*3+1]=m.color.g;
+ colors[i*3+2]=m.color.b}g.setAttribute('color',new T.BufferAttribute(colors,3));palette.set(shade,g)}
  mesh.geometry=g;mesh.material=coloredMaterials.get(key);
 }
 export function batchDoll(doll){

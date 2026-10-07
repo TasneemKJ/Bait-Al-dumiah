@@ -44,7 +44,8 @@ export function ribbonPlacement({width,height,y,rect,upper=[],bottom,safeTop=0})
 function layoutRibbon(root,host,pointOf){
  const ribbon=root.querySelector('.object-ribbon');
  if(!ribbon)return;
- const bounds=host.getBoundingClientRect(),portrait=bounds.width<=680&&bounds.height>bounds.width,landscape=bounds.height<=560&&bounds.width>bounds.height;
+ const bounds=host.getBoundingClientRect(),portrait=bounds.width<=680&&bounds.height>bounds.width,
+   landscape=bounds.height<=560&&bounds.width>bounds.height;
  if(!portrait&&!landscape){if(root.dataset.ribbonEdge!=='bottom')root.dataset.ribbonEdge='bottom';return}
  const point=pointOf(),paper=ribbon.getBoundingClientRect();
  const roomEdge=host.querySelector('.room-views')?.getBoundingClientRect();
@@ -67,17 +68,20 @@ function layoutRibbon(root,host,pointOf){
 function storyMarkup(s,{t,held,object,action,feedback}){
  const label=action?t(action.label).replace('{item}',t('held-'+action.item)):'';
  const response=feedback?`<p class="scene-response ${feedback.complete?'chapter-finished':''}" role="status">${feedback.complete?
-   icon('check'):''}<span>${t(feedback.message)}</span>${feedback.reward?`<small>+${number(s.settings.locale,feedback.reward)} ${icon('button')}</small>`:''}</p>`:'';
+   icon('check'):''}<span>${t(feedback.message)}</span>${feedback.reward?
+     `<small>+${number(s.settings.locale,feedback.reward)} ${icon('button')}</small>`:''}</p>`:'';
  return `${held?
    `<button type="button" class="held-item" data-scene-action="held" data-held-item="${held.id}"
    aria-label="${t('held-'+held.id)}. ${t('storyDragHint')}" title="${t('storyDragHint')}"><span
-   class="held-art">${icon(held.icon)}</span><span><small>${t('storyInHand')}</small><strong>${t('held-'+held.id)}</strong><em>${t('storyDragShort')}</em></span></button>`:''}
+   class="held-art">${icon(held.icon)}</span><span><small>${t('storyInHand')}</small><strong
+     >${t('held-'+held.id)}</strong><em>${t('storyDragShort')}</em></span></button>`:''}
   ${object?`<div class="object-ribbon" aria-label="${t('selectedObject')}"><span class="ribbon-emblem"
     aria-hidden="true">${icon(object.icon)}</span><div class="ribbon-copy"><small>${t(object.room+'Short')}</small><h2>${t(object.title)}</h2><p
     ${feedback?'class="ribbon-feedback" role="status"':''}>${feedback?t(feedback.message):t('storyTouchAgain').replace('{action}',
     label)}</p></div><button type="button" class="scene-primary" data-scene-action="activate" ${action?.disabled?'disabled':''}>${icon(action?.icon??
     'spark')}<span>${label}</span></button><button type="button" class="icon-button scene-inspect" data-scene-action="inspect"
-    aria-label="${t('storyInspect')}">${icon('plus')}</button><button type="button" class="icon-button" data-scene-action="close" aria-label="${t('close')}">${icon('close')}</button></div>`:''}
+    aria-label="${t('storyInspect')}">${icon('plus')}</button><button type="button" class="icon-button"
+      data-scene-action="close" aria-label="${t('close')}">${icon('close')}</button></div>`:''}
   ${object?'':response}`;
 }
 
@@ -105,7 +109,8 @@ export function createStoryUI(host,getState,dispatch,project=()=>null){
   if(selected&&!current())selected=null;
   host.dataset.objectSelected=selected??'';
   const action=sceneObjectAction(s,selected),object=current(),held=STORY_ITEMS.find(i=>i.id===status.held);
-  const next=JSON.stringify([s.settings.locale,selected,status.index,status.step,held?.id,action?.disabled,object?.active,object?.rotation,object?.tendedDay,feedback]);
+  const next=JSON.stringify([s.settings.locale,selected,status.index,status.step,held?.id,
+    action?.disabled,object?.active,object?.rotation,object?.tendedDay,feedback]);
   if(signature===next){placeRibbon();return}
   // A state change cannot leave a stale item image being dragged after use/reset.
   if(dragPointer!==null)cancelDrag();
@@ -146,7 +151,8 @@ export function createStoryUI(host,getState,dispatch,project=()=>null){
   if(previousFocus?.matches('[data-object]'))root.querySelector('[data-scene-action="activate"]')?.focus({preventScroll:true});return true},
   clear(restoreFocus=false){cancelDrag();selected=null;feedback=null;update();
   if(restoreFocus){const origin=previousFocus?.matches('[data-object]')?host.querySelector('[data-object-toggle]'):previousFocus;
-  if(origin?.isConnected&&origin.getClientRects().length)origin.focus({preventScroll:true});else document.querySelector('#world')?.focus({preventScroll:true})}},
+  if(origin?.isConnected&&origin.getClientRects().length)origin.focus({preventScroll:true});
+  else document.querySelector('#world')?.focus({preventScroll:true})}},
   respond(message,complete=false,reward=0){feedback={message,complete,reward};update()},
   update,cancelDrag,layout:placeRibbon,
   dispose(){cancelDrag();root.remove();ghost.remove()},

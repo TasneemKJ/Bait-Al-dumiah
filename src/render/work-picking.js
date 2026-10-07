@@ -7,7 +7,7 @@ import {CHIME_LAYOUT} from './moon-chimes.js';
 // things are on screen and what a touch landed on.
 export function createWorkPicking({canvas,camera,house,ray,mouse,teaTable,sewingPlay,moonChimes,isActive,isLost,sections}){
  function workRay(x,y,id){
-  const active=id==='tea'?isActive('tea'):id==='stitch'?isActive('stitch'):id==='lullaby'?isActive('lullaby'):false,rect=canvas.getBoundingClientRect();
+  const active=['tea','stitch','lullaby'].includes(id)&&isActive(id),rect=canvas.getBoundingClientRect();
   if(!active||isLost()||!Number.isFinite(x)||!Number.isFinite(y)||x<rect.left||x>rect.right||y<rect.top||y>rect.bottom)return false;
   mouse.set((x-rect.left)/rect.width*2-1,-(y-rect.top)/rect.height*2+1);camera.updateMatrixWorld();ray.setFromCamera(mouse,camera);return true;
  }
@@ -24,7 +24,8 @@ export function createWorkPicking({canvas,camera,house,ray,mouse,teaTable,sewing
   // so delta gestures can reach the edge cups; simulation aim is clamped later.
   const room=ROOMS.find(r=>r.id===TEA_TABLE.room);return (teaPoint.x-room.x-TEA_TABLE.x)/TEA_TABLE.aimSpan;
  }
- function projectWorkPoint(point){const p=new T.Vector3(...point).project(camera);return {x:(p.x+1)*canvas.clientWidth/2,y:(1-p.y)*canvas.clientHeight/2}}
+ function projectWorkPoint(point){const p=new T.Vector3(...point).project(camera);
+ return {x:(p.x+1)*canvas.clientWidth/2,y:(1-p.y)*canvas.clientHeight/2}}
  function teaPositions(){
   if(!isActive('tea'))return [];camera.updateMatrixWorld();teaTable.root.updateWorldMatrix(true,true);
   return teaTable.points().map(point=>({key:point.key,...projectWorkPoint(point.world)}));
@@ -48,7 +49,8 @@ export function createWorkPicking({canvas,camera,house,ray,mouse,teaTable,sewing
  }
  function projectStitch(x,y,height=0){
   if(!isActive('stitch')||isLost()||![x,y,height].every(Number.isFinite))return null;camera.updateMatrixWorld();
-  const point=projectWorkPoint([stitchRoom.x+STITCH_TABLE.x+x*STITCH_TABLE.clothScale,house.root.position.y+stitchRoom.y+STITCH_TABLE.y+height,STITCH_TABLE.z+y*STITCH_TABLE.clothScale]);
+  const point=projectWorkPoint([stitchRoom.x+STITCH_TABLE.x+x*STITCH_TABLE.clothScale,
+    house.root.position.y+stitchRoom.y+STITCH_TABLE.y+height,STITCH_TABLE.z+y*STITCH_TABLE.clothScale]);
   return Number.isFinite(point.x)&&Number.isFinite(point.y)?point:null;
  }
  function stitchGuidePositions(){
@@ -73,7 +75,8 @@ export function createWorkPicking({canvas,camera,house,ray,mouse,teaTable,sewing
  }
  function chimePositions(){
   if(!isActive('lullaby'))return [];camera.updateMatrixWorld();
-  return moonChimes.points().map(p=>({key:p.key,...projectWorkPoint(p.world),bounds:chimeTargetBounds(moonChimes.targets.find(target=>target.userData.chime===p.key))}));
+  return moonChimes.points().map(p=>({key:p.key,...projectWorkPoint(p.world),
+    bounds:chimeTargetBounds(moonChimes.targets.find(target=>target.userData.chime===p.key))}));
  }
  function chimePullSpan(){
   if(!isActive('lullaby'))return 0;moonChimes.root.updateWorldMatrix(true,true);camera.updateMatrixWorld();

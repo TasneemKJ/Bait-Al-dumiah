@@ -6,8 +6,10 @@ import {craftMaterial} from './textiles.js';
 const caps=new Map();
 function capGeometry(id){
  if(caps.has(id))return caps.get(id);const vertices=[],uv=[],indices=[],w=40,h=20;
- for(let j=0;j<=h;j++)for(let i=0;i<=w;i++){const phi=i/w*Math.PI*2,front=Math.sin(phi),theta=j/h*(front>0?1.10+.60*(1-front):1.70-.56*front),groove=1+.009*Math.sin(phi*28+theta*3.2)*Math.sin(theta);
-  vertices.push(-Math.cos(phi)*Math.sin(theta)*.307*groove,Math.cos(theta)*({lina:.290,noor:.286,sami:.294}[id]||.290)+.006,Math.sin(phi)*Math.sin(theta)*.288*groove+.008);uv.push(i/w,1-j/h);
+ for(let j=0;j<=h;j++)for(let i=0;i<=w;i++){const phi=i/w*Math.PI*2,front=Math.sin(phi),
+   theta=j/h*(front>0?1.10+.60*(1-front):1.70-.56*front),groove=1+.009*Math.sin(phi*28+theta*3.2)*Math.sin(theta);
+  vertices.push(-Math.cos(phi)*Math.sin(theta)*.307*groove,Math.cos(theta)*({lina:.290,noor:.286,
+    sami:.294}[id]||.290)+.006,Math.sin(phi)*Math.sin(theta)*.288*groove+.008);uv.push(i/w,1-j/h);
  }
  for(let j=0;j<h;j++)for(let i=0;i<w;i++){const a=j*(w+1)+i,b=a+w+1;indices.push(a,b,a+1,a+1,b,b+1)}
  const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(vertices,3));
@@ -24,7 +26,8 @@ function hairTube(parent,points,radius,color,name,taper=0){const path=new T.Catm
   g=new T.TubeGeometry(path,32,radius,6,false);if(taper){const p=g.attributes.position,center=new T.Vector3(),point=new T.Vector3();
 for(let i=0;i<p.count;i++){const t=Math.floor(i/7)/32;path.getPointAt(t,center);
 point.fromBufferAttribute(p,i).sub(center).multiplyScalar(1-taper*t).add(center);
-p.setXYZ(i,point.x,point.y,point.z)}g.computeVertexNormals()}const mesh=new T.Mesh(g,mat(color,{roughness:.66}));mesh.name=name;mesh.castShadow=true;parent.add(mesh);return mesh}
+p.setXYZ(i,point.x,point.y,point.z)}g.computeVertexNormals()}const mesh=new T.Mesh(g,mat(color,
+  {roughness:.66}));mesh.name=name;mesh.castShadow=true;parent.add(mesh);return mesh}
 function createPlait(parent,sign,def){
  const root=new T.Group();root.name='lina-plait';root.userData.noBatch=true;root.position.set(sign*.293,.075,-.022);parent.add(root);root.strands=[];
  for(let strand=0;strand<3;strand++){const points=[];for(let j=0;j<=30;j++){const t=j/30,a=t*Math.PI*5+strand*Math.PI*2/3;
@@ -36,12 +39,15 @@ function createBun(parent,def){
  const root=new T.Group();root.name='noor-braided-bun';root.userData.noBatch=true;root.position.set(.139,.252,-.149);parent.add(root);
  ball(root,0,0,0,.080,.064,.076,mat(def.hair,{roughness:.66}));root.strands=[];
  for(let k=0;k<3;k++){const points=[];for(let j=0;j<=48;j++){const a=j/48*Math.PI*2,r=.073+Math.sin(a*7+k*Math.PI*2/3)*.008;
- points.push([Math.cos(a)*r,Math.sin(a)*r*.80,Math.cos(a*7+k*Math.PI*2/3)*.014+.04])}root.strands.push(hairTube(root,points,.011,def.hair,'bun-braid'))}return root;
+ points.push([Math.cos(a)*r,Math.sin(a)*r*.80,
+   Math.cos(a*7+k*Math.PI*2/3)*.014+.04])}root.strands.push(hairTube(root,points,.011,def.hair,'bun-braid'))}return root;
 }
 function templeLocks(parent,def){return [-1,1].map(sign=>{const paths={lina:[[sign*.255,.176,.164],[sign*.288,.080,.136],[sign*.291,-.022,.119],
-  [sign*.268,-.100,.109]],noor:[[sign*.247,.174,.164],[sign*.280,.077,.134],[sign*.282,-.031,.122],[sign*.265,-.114,.130]],sami:[[sign*.260,.169,.147],
+  [sign*.268,-.100,.109]],noor:[[sign*.247,.174,.164],[sign*.280,.077,.134],[sign*.282,-.031,.122],
+    [sign*.265,-.114,.130]],sami:[[sign*.260,.169,.147],
   [sign*.292,.072,.098],[sign*.298,-.014,.087],[sign*.276,-.070,.084]]};
-const mesh=new T.Mesh(sweptLock(paths[def.id],.020,.012),scalpMaterial(def.hair));mesh.name='temple-lock';mesh.castShadow=true;parent.add(mesh);return mesh})}
+const mesh=new T.Mesh(sweptLock(paths[def.id],.020,.012),scalpMaterial(def.hair));
+mesh.name='temple-lock';mesh.castShadow=true;parent.add(mesh);return mesh})}
 
 function storybookFringe(parent,def){
  const starts=def.id==='lina'?[
@@ -71,7 +77,8 @@ function storybookFringe(parent,def){
  // gap between these two locks; the inset bridge also closes oblique views.
  if(def.id==='noor'||def.id==='sami'){
   const pair=def.id==='noor'?[0,4]:[1,3];
-  const inner=new T.CatmullRomCurve3(starts[pair[0]].map(p=>new T.Vector3(...p))),outer=new T.CatmullRomCurve3(starts[pair[1]].map(p=>new T.Vector3(...p)));
+  const inner=new T.CatmullRomCurve3(starts[pair[0]].map(p=>new T.Vector3(...p))),
+    outer=new T.CatmullRomCurve3(starts[pair[1]].map(p=>new T.Vector3(...p)));
   const g=gridSurface(8,20,(u,v)=>{const t=.06+.93*v,a=inner.getPoint(t),b=outer.getPoint(t),p=a.lerp(b,u);
   return [p.x,p.y-(def.id==='sami'?.035*Math.sin(u*Math.PI)*v*v:0),p.z-.005*Math.sin(u*Math.PI)]});
   const join=new T.Mesh(g,scalpMaterial(def.hair));join.name='joined-side-sweep';join.castShadow=join.receiveShadow=true;parent.add(join);
@@ -84,16 +91,19 @@ function storybookFringe(parent,def){
 }
 
 const bowMaterials=new Map();
-function ribbonMaterial(color){if(!bowMaterials.has(color)){const m=craftMaterial(color).clone();m.side=T.DoubleSide;bowMaterials.set(color,m)}return bowMaterials.get(color)}
+function ribbonMaterial(color){if(!bowMaterials.has(color)){const m=craftMaterial(color).clone();
+m.side=T.DoubleSide;bowMaterials.set(color,m)}return bowMaterials.get(color)}
 export function fabricBow(parent,x,y,z,color){
- const root=new T.Group();root.name='cloth-bow';root.userData.noBatch=true;root.position.set(x,y,z);parent.add(root);const material=ribbonMaterial(color);
+ const root=new T.Group();root.name='cloth-bow';root.userData.noBatch=true;root.position.set(x,y,z);
+ parent.add(root);const material=ribbonMaterial(color);
  for(const sign of [-1,1]){
   const geo=new T.PlaneGeometry(1,1,16,4),p=geo.attributes.position;
   for(let i=0;i<p.count;i++){const t=p.getX(i)+.5,v=p.getY(i)*2,s=Math.sin(t*Math.PI);
   p.setXYZ(i,sign*(.012+.105*s),v*.034*s+.009*Math.sin(t*Math.PI*2),.032*Math.sin(t*Math.PI*2)+.012*v*v)}geo.computeVertexNormals();
   const loop=new T.Mesh(geo,material);loop.name='folded-bow-loop';root.add(loop);
   const s=new T.Shape();s.moveTo(-.018,0);s.lineTo(.018,0);s.lineTo(.029,-.104);s.lineTo(.006,-.088);s.lineTo(-.009,-.113);s.closePath();
-  const tail=new T.Mesh(new T.ShapeGeometry(s),material);tail.name='split-ribbon-tail';tail.position.set(sign*.018,-.012,.006);tail.rotation.z=sign*.30;root.add(tail);
+  const tail=new T.Mesh(new T.ShapeGeometry(s),material);tail.name='split-ribbon-tail';
+  tail.position.set(sign*.018,-.012,.006);tail.rotation.z=sign*.30;root.add(tail);
  }
  ball(root,0,0,.012,.026,.029,.022,material);return root;
 }

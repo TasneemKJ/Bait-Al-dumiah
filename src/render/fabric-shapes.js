@@ -6,7 +6,8 @@ export function cloth(color){
  return materials.get(color);
 }
 export function pleatedShade(parent,x,y,z,radius=.36,height=.38,color=0xecd1aa){
- const profile=[new T.Vector2(radius,-height/2),new T.Vector2(radius*.985,-height*.46),new T.Vector2(radius*.62,height*.46),new T.Vector2(radius*.61,height/2)];
+ const profile=[new T.Vector2(radius,-height/2),new T.Vector2(radius*.985,-height*.46),
+   new T.Vector2(radius*.62,height*.46),new T.Vector2(radius*.61,height/2)];
  const geometry=new T.LatheGeometry(profile,48),p=geometry.attributes.position;
  for(let i=0;i<p.count;i++){const a=Math.atan2(p.getZ(i),p.getX(i)),r=1+Math.cos(a*24)*.026;p.setX(i,p.getX(i)*r);p.setZ(i,p.getZ(i)*r)}
  geometry.computeVertexNormals();const mesh=new T.Mesh(geometry,cloth(color));mesh.position.set(x,y,z);mesh.name='pleated-lampshade';
@@ -39,7 +40,8 @@ export function doily(parent,x,y,z,width=.68){
   laceMap=new T.CanvasTexture(image);laceMap.colorSpace=T.SRGBColorSpace;laceMap.userData.shared=true;
  }
  const material=new T.MeshStandardMaterial({map:laceMap,transparent:true,depthWrite:false,roughness:1,side:T.DoubleSide});
- const mesh=new T.Mesh(new T.PlaneGeometry(width,width),material);mesh.name='lace-doily';mesh.position.set(x,y,z);mesh.rotation.x=-Math.PI/2;mesh.receiveShadow=true;parent.add(mesh);return mesh;
+ const mesh=new T.Mesh(new T.PlaneGeometry(width,width),material);mesh.name='lace-doily';
+ mesh.position.set(x,y,z);mesh.rotation.x=-Math.PI/2;mesh.receiveShadow=true;parent.add(mesh);return mesh;
 }
 let scallopGeometry=null;
 export function eaveScallop(parent,x,y,z,angle){

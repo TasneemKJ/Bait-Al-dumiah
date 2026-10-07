@@ -24,11 +24,13 @@ export function syncHud(host,s,{t,n,panel,placement,selected}){
    `${n(s.wishes.length)} / ${n(3)}`:`${n(story.index+1)} / ${n(3)}`,day:t('day')+' '+n(s.day),time:t(isNight(s)?'evening':'morning')};
  const heading=host.querySelector('[data-story-heading]'),headingText=t(story.finished?'objectiveLabel':'story-'+story.chapter.id+'-title');
  if(heading&&heading.textContent!==headingText)heading.textContent=headingText;
- for(const [key,value] of Object.entries(values)){const el=host.querySelector(`[data-value="${key}"]`);if(el&&el.textContent!==value)el.textContent=value}
+ for(const [key,value] of Object.entries(values)){const el=host.querySelector(`[data-value="${key}"]`);
+ if(el&&el.textContent!==value)el.textContent=value}
  const {copy,label,ico,arrived}=nextStep(s,t,n,host.dataset.focusRoom);host.querySelector('.objective').dataset.arrived=String(Boolean(arrived));
  const objective=host.querySelector('#objective-copy');if(objective.textContent!==copy)objective.textContent=copy;
  const action=host.querySelector('#objective-action');const content=icon(ico)+`<span>${label}</span>`+icon('arrow');setMarkup(action,content);
- const light=host.querySelector('#light-button'),lightHtml=icon(isNight(s)?'sun':'moon')+`<span>${t(isNight(s)?'dawn':'night')}</span>`;setMarkup(light,lightHtml);
+ const light=host.querySelector('#light-button'),lightHtml=icon(isNight(s)?
+   'sun':'moon')+`<span>${t(isNight(s)?'dawn':'night')}</span>`;setMarkup(light,lightHtml);
  host.querySelector('.visitor-hint').hidden=!isNight(s)||s.lastSecretDay===s.day||s.journal.length===6||Boolean(placement);
  host.querySelector('.dock [data-action="panel-household"]')?.classList.toggle('has-news',s.basket>0);
  host.querySelector('.dock [data-action="panel-journal"]')?.classList.toggle('has-news',unclaimed(s).length>0);
@@ -65,7 +67,8 @@ export function createToaster(host){
   show(message,panelOpen){
    if(panelOpen){
     let note=host.querySelector('.panel-notice');
-    if(!note){note=document.createElement('p');note.className='panel-notice';note.setAttribute('role','status');host.querySelector('#sheet-content').prepend(note)}
+    if(!note){note=document.createElement('p');note.className='panel-notice';
+    note.setAttribute('role','status');host.querySelector('#sheet-content').prepend(note)}
     note.textContent=message;
    }
    const el=host.querySelector('#toast');clearTimeout(timer);

@@ -40,7 +40,8 @@ export function createHomeSession({storage,reducedMotion=false}={}){
  const preferenceBase=valid?JSON.stringify(state.settings):null;
  // An overlay applies only to the save settings it was edited against. A
  // newer canonical save remains authoritative after a partial storage failure.
- try{const saved=JSON.parse(storage.getItem(HOME_PREFERENCES_KEY));if(saved&&samePreferenceBase(saved._base,preferenceBase))Object.assign(state.settings,preferences(saved))}catch{}
+ try{const saved=JSON.parse(storage.getItem(HOME_PREFERENCES_KEY));
+ if(saved&&samePreferenceBase(saved._base,preferenceBase))Object.assign(state.settings,preferences(saved))}catch{}
  return {
   state,canContinue:valid,loadStatus,get recovered(){return recovered},get entryIssue(){return entryIssue},get entered(){return entered},
   enter(){if(entered||!checkIdentity())return false;entered=true;return true},
@@ -52,6 +53,7 @@ export function createHomeSession({storage,reducedMotion=false}={}){
    try{if(backupPending){storage.setItem(SAVE_KEY+'.backup',raw);backupPending=false;recovered=true}const encoded=JSON.stringify(current);
    storage.setItem(SAVE_KEY,encoded);expectedRaw=encoded;return true}catch{return false}
   },
-  savePreferences(settings){try{storage.setItem(HOME_PREFERENCES_KEY,JSON.stringify({...preferences(settings),_base:preferenceBase}));return true}catch{return false}},
+  savePreferences(settings){try{storage.setItem(HOME_PREFERENCES_KEY,
+    JSON.stringify({...preferences(settings),_base:preferenceBase}));return true}catch{return false}},
  };
 }

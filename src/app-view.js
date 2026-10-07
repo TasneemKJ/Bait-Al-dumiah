@@ -25,7 +25,8 @@ export function installView(app){
   if(id==='lullaby')audio.stopVoices();
   if(app.ui.panel)app.ui.close();app.ui.collapseTools();app.storyUI?.clear();app.objectControls?.collapse();app.world?.clearObjectSelection();
   host.dataset.focusRoom=ACTIVITY_ROOM[id];host.dataset.focusDoll='';
-  app.world?.setTeaActive(id==='tea');app.world?.setStitchActive(id==='stitch');app.world?.setChimeActive(id==='lullaby');app.world?.setEnabled(!app.state.paused);
+  app.world?.setTeaActive(id==='tea');app.world?.setStitchActive(id==='stitch');
+  app.world?.setChimeActive(id==='lullaby');app.world?.setEnabled(!app.state.paused);
   updateWorkUI();app.roomViews.update();app.objectControls?.update();canvas.focus({preventScroll:true});app.save();
  }
  function leaveWork(){

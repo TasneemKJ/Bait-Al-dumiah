@@ -12,7 +12,8 @@ export function bindChimeInput(ctx){
  }
  function move(e){
   if(!active())return;if(blocked()){cancel();return}stop(e);
-  if(gesture.pointerId===null){const target=pick(e.clientX,e.clientY);canvas.style.cursor=target==='moon'?'pointer':Number.isInteger(target)?'grab':'default';return}
+  if(gesture.pointerId===null){const target=pick(e.clientX,e.clientY);
+  canvas.style.cursor=target==='moon'?'pointer':Number.isInteger(target)?'grab':'default';return}
   if(e.pointerId!==gesture.pointerId)return;
   if(e.pointerType==='mouse'&&e.buttons===0){cancel();return}
   if(!inside(e)){cancel();return}
@@ -37,10 +38,12 @@ export function bindChimeInput(ctx){
   if(e.key==='r'||e.key==='R'){if(!e.repeat){cancel();dispatch('chime-replay')}return}
   if(e.key==='ArrowLeft'||e.key==='ArrowRight'){
    if(!mode.keyboard){mode.selection=(mode.selection+(e.key==='ArrowLeft'?3:1))%4;dispatch('chime-focus',mode.selection)}
-  }else if(!e.repeat&&!mode.keyboard&&a.phase==='echo'){mode.keyboard=true;dispatch('chime-focus',mode.selection);dispatch('chime-grab',mode.selection)}
+  }else if(!e.repeat&&!mode.keyboard&&a.phase==='echo'){mode.keyboard=true;
+  dispatch('chime-focus',mode.selection);dispatch('chime-grab',mode.selection)}
   update(0);
  }
- function keyup(e){if(e.code!=='Space'&&e.key!==' ')return;if(!mode.keyboard)return;stop(e);mode.keyboard=false;if(blocked())cancel();else dispatch('chime-release');update(0)}
+ function keyup(e){if(e.code!=='Space'&&e.key!==' ')return;if(!mode.keyboard)return;stop(e);
+ mode.keyboard=false;if(blocked())cancel();else dispatch('chime-release');update(0)}
  const cancelPointer=e=>{if(e.pointerId===gesture.pointerId)cancel()};
  return bindAll([
   [canvas,'pointerdown',down,true],[canvas,'pointermove',move,true],[canvas,'pointerup',up,true],

@@ -17,13 +17,15 @@ export function renderFrame(w,state,dt,selected){
  // Exponential interpolation is frame-rate independent; reduced motion switches instantly.
  const night=isNight(state);st.nightMix=state.settings.reducedMotion?Number(night):T.MathUtils.damp(st.nightMix,Number(night),2.2,dt);
  applyLighting({renderer,depthFog,hemi,key,fill,house,courtyard},{state,nightMix:st.nightMix,focusedRoom:st.focusedRoom});
- details.update(st.nightMix);atmosphere.update(state,st.nightMix,st.quality);roomEffects.update(state,st.nightMix);restoration.update(state,st.nightMix);
+ details.update(st.nightMix);atmosphere.update(state,st.nightMix,st.quality);
+ roomEffects.update(state,st.nightMix);restoration.update(state,st.nightMix);
  storyProps.update(state,st.nightMix);teaTable.update(state);sewingPlay.update(state);moonChimes.update(state,st.chimeSelection);
  roomFrame.show(working()?null:st.focusedRoom);preview.update(st.previewPose,state);
  residents.update(state,dt,selected,Math.atan2(camera.position.x-controls.target.x,camera.position.z-controls.target.z));
  for(const doll of residents.dolls){const room=state.dolls.find(d=>d.id===doll.id)?.room;
  doll.root.visible=!(st.teaActive&&room==='kitchen'||st.stitchActive&&room==='studio'||st.chimeActive&&room==='bedroom')}
- if(st.focusedDoll){const room=state.dolls.find(d=>d.id===st.focusedDoll)?.room;if(room!==scene.userData.portraitRoom){scene.userData.portraitRoom=room;
+ if(st.focusedDoll){const room=state.dolls.find(d=>d.id===st.focusedDoll)?.room;
+ if(room!==scene.userData.portraitRoom){scene.userData.portraitRoom=room;
  cameraMove.moveTo(focusPose(),st.reducedMotion)}}else scene.userData.portraitRoom=null;
  ghost.update(state.elapsed,night,state.settings.reducedMotion||state.paused,state.journal.length);
  if(working())ghost.root.visible=false;

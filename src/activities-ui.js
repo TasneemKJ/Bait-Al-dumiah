@@ -7,7 +7,8 @@ return ready?'+'+n(activityReward(s,a.id))+' '+t('buttons'):capped?t('activityCa
   Math.ceil(ACTIVITY_COOLDOWN-(s.elapsed-s.activities.lastReward[a.id])))))}
 export function updateActivityStatus(host,s,t,n){
  for(const a of ACTIVITIES){
-  const note=host.querySelector(`[data-activity-note="${a.id}"]`),start=host.querySelector(`.ritual-card [data-id="${a.id}"]`),ready=activityRewardReady(s,a.id);
+  const note=host.querySelector(`[data-activity-note="${a.id}"]`),
+    start=host.querySelector(`.ritual-card [data-id="${a.id}"]`),ready=activityRewardReady(s,a.id);
   if(note)note.textContent=rewardNote(s,a,t,n);
   if(start){start.classList.toggle('primary',ready);start.querySelector('span').textContent=t(ready?'activityStart':'practiceLabel')}
  }
@@ -20,7 +21,8 @@ export function activityMarkup(s,t,n,button,result){
  // All three rituals own real scene surfaces, including from this catalog.
  if(['tea','stitch','lullaby'].includes(active?.id))return '';
  const outcome=result?.complete?`<div class="ritual-result" role="status">${icon('check')}<h3>${t('activityFinished')}</h3><p>${result.practice?
-   t('activityPractice'):t('activityReward')+' +'+n(result.reward+result.bonus)+' '+t('buttons')}</p>${button('begin-activity',t('activityAgain'),'play',
+   t('activityPractice'):t('activityReward')+' +'+n(result.reward+result.bonus)+' '+t('buttons')}</p
+     >${button('begin-activity',t('activityAgain'),'play',
    `data-id="${result.id}" class="primary"`)}</div>`:'';
  return `<h2 id="sheet-title">${t('activities')}</h2><p class="sheet-intro">${t('activitiesIntro')}</p>${outcome}
   <div class="ritual-catalog">${ACTIVITIES.map(a=>{
@@ -31,7 +33,8 @@ export function activityMarkup(s,t,n,button,result){
      class="ritual-level">${n(level+1)}</span></div><p>${t('activity-'+a.id+'Intro')}</p><div
      class="ritual-mastery"><label>${t('masteryLabel')} <strong>${n(points)}${next?' / '+n(next):''}</strong></label><meter min="0" max="${next??
      Math.max(9,points)}" value="${points}" aria-label="${t('masteryLabel')} · ${t('activity-'+a.id)}"></meter></div><p class="ritual-reward-note"
-     data-activity-note="${a.id}">${note}</p>${button('begin-activity',t(ready?'activityStart':'practiceLabel'),a.icon,`data-id="${a.id}" class="${ready?'primary':''}"`)}</article>`;
+     data-activity-note="${a.id}">${note}</p>${button('begin-activity',t(ready?
+       'activityStart':'practiceLabel'),a.icon,`data-id="${a.id}" class="${ready?'primary':''}"`)}</article>`;
   }).join('')}</div>
   <h3 class="section-heading" id="restoration-title">${t('restoreTitle')} <small>${n(Object.values(s.restoration).reduce((a,b)=>a+b,
     0))}/${n(12)}</small></h3><p class="sheet-intro">${t('restoreIntro')}</p>
@@ -41,5 +44,6 @@ export function activityMarkup(s,t,n,button,result){
     'check':'spark')}<span>${t('restore-'+r.id+'-'+i)}</span></li>`).join('')}</ol>${next.complete?
     `<p class="restoration-complete">${t('restorationDone')}</p>`:`<p
     >${t('activity-'+next.activity)} · ${t('masteryLabel')} ${n(s.activities.mastery[next.activity])}/${n(next.required)}</p>${button('restore-room',
-    t('restoreAction')+' · '+n(next.cost)+' '+t('buttons'),'home',`data-id="${r.id}" class="primary" ${next.ready&&s.buttons>=next.cost?'':'disabled'}`)}`}</article>`}).join('')}</div>`;
+    t('restoreAction')+' · '+n(next.cost)+' '+t('buttons'),'home',
+      `data-id="${r.id}" class="primary" ${next.ready&&s.buttons>=next.cost?'':'disabled'}`)}`}</article>`}).join('')}</div>`;
 }

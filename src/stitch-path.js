@@ -22,7 +22,8 @@ export function stitchFront(a,sections){
 }
 export function acceptedTrail(a,sections){
  const trail=[];
- for(let i=0;i<Math.min(a.section,sections.length);i++)for(const p of sections[i])if(!trail.length||length(point(trail.at(-1)),point(p))>EPS)trail.push([...p]);
+ for(let i=0;i<Math.min(a.section,sections.length);i++)for(const p of sections[i])if(!trail.length||
+   length(point(trail.at(-1)),point(p))>EPS)trail.push([...p]);
  if(a.section<sections.length){
   const section=sections[a.section];let left=a.distance;
   if(!trail.length||length(point(trail.at(-1)),point(section[0]))>EPS)trail.push([...section[0]]);
@@ -84,7 +85,8 @@ export function moveStitch(a,sections,dt){
   const e=stitchEdge(a,sections);
   const assisted=!!a.capture,destination=assisted?a.capture.point:a.target,from={...a.needle},distance=length(from,destination);
   if(distance<=EPS){a.capture=null;break}
-  let traveled=Math.min(budget,.02,distance),to={x:from.x+(destination.x-from.x)*traveled/distance,y:from.y+(destination.y-from.y)*traveled/distance},arm=false;
+  let traveled=Math.min(budget,.02,distance),to={x:from.x+(destination.x-from.x)*traveled/distance,
+    y:from.y+(destination.y-from.y)*traveled/distance},arm=false;
   if(!assisted&&!a.loose){
    const p0=project(from,e),p1=project(to,e),entry=diskEntry(from,to,e.end);
    if(entry!==null&&p1>p0+EPS&&p0<=e.front+1e-7&&p1>=e.front-EPS){

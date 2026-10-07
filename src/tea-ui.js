@@ -14,7 +14,8 @@ export function createTeaUI(host,canvas,getState,dispatch,{pick,aimAt}){
  const original=captureCanvas(canvas),originalDescription=original.description;
  const t=key=>translate(getState().settings.locale,key);
  const active=()=>teaStatus(getState());
- const blocked=()=>getState().paused||document.hidden||lost||Boolean(host.querySelector('dialog[open],.error-screen'))||host.querySelector('.placement')?.hidden===false;
+ const blocked=()=>getState().paused||document.hidden||lost||
+   Boolean(host.querySelector('dialog[open],.error-screen'))||host.querySelector('.placement')?.hidden===false;
  const stop=e=>{e.preventDefault();e.stopImmediatePropagation()};
  const setText=(element,value)=>{if(element.textContent!==value)element.textContent=value};
  const setAttribute=(element,name,value)=>{if(element.getAttribute(name)!==value)element.setAttribute(name,value)};
@@ -33,7 +34,8 @@ export function createTeaUI(host,canvas,getState,dispatch,{pick,aimAt}){
   if(disposed)return;
   let tea=active();const hasTea=Boolean(tea);
   if(host.dataset.teaActive!==String(hasTea))host.dataset.teaActive=String(hasTea);
-  if(!hasTea){if(session){cancel();session=null;previousPhase=null;restoreCanvas();clearFeedback();parts.announcement.textContent=''}root.hidden=true;return}
+  if(!hasTea){if(session){cancel();session=null;previousPhase=null;restoreCanvas();clearFeedback();
+  parts.announcement.textContent=''}root.hidden=true;return}
   const nextSession=getState().activities.active,newSession=session!==nextSession;
   if(newSession){cancel();session=nextSession;clearFeedback();announcementSignature='';viewSignature='';announcementAge=Infinity}
   const unavailable=blocked();root.hidden=unavailable;
@@ -45,7 +47,8 @@ export function createTeaUI(host,canvas,getState,dispatch,{pick,aimAt}){
   const seconds=Number.isFinite(dt)?Math.max(0,Math.min(dt,.25)):0;feedbackAge+=seconds;announcementAge+=seconds;
   if(feedbackAge>4)clearFeedback();
   const s=getState();
-  setAttribute(root,'data-phase',tea.phase);setAttribute(root,'data-mode',tea.mode);setAttribute(root,'data-input',inputMode);setAttribute(root,'data-ready',String(tea.ready));
+  setAttribute(root,'data-phase',tea.phase);setAttribute(root,'data-mode',tea.mode);
+  setAttribute(root,'data-input',inputMode);setAttribute(root,'data-ready',String(tea.ready));
   root.classList.toggle('tea-holding',gesture.target==='pot'&&tea.phase==='pour');
   setAttribute(canvas,'aria-label',t('teaCanvasLabel'));
   setAttribute(canvas,'role','application');
@@ -64,7 +67,8 @@ export function createTeaUI(host,canvas,getState,dispatch,{pick,aimAt}){
    setAttribute(parts.cups,'aria-label',t('teaCupList'));setText(parts.cups,view.cups.join('. '));
   }
   const view=cachedView;
-  const signature=JSON.stringify([s.settings.locale,tea.phase,inputMode,tea.aimedCup,tea.ready,tea.cups.map(c=>[Math.floor(c.fill*10),c.ready,c.overfilled]),feedback]);
+  const signature=JSON.stringify([s.settings.locale,tea.phase,inputMode,tea.aimedCup,tea.ready,
+    tea.cups.map(c=>[Math.floor(c.fill*10),c.ready,c.overfilled]),feedback]);
   if(signature!==announcementSignature&&announcementAge>=1.25){
    setText(parts.announcement,(newSession?view.instructions+' ':'')+view.status+(tea.ready?' '+view.instructions:''));
    announcementSignature=signature;announcementAge=0;
@@ -73,5 +77,6 @@ export function createTeaUI(host,canvas,getState,dispatch,{pick,aimAt}){
  const unbindInput=bindTeaInput({root,active,blocked,stop,releaseCapture,invoke,cancel,respond,clearFeedback,update,gesture,keyboard,canvas,dispatch,
    pick,aimAt,setInputMode:mode=>{inputMode=mode},setLost:()=>{lost=true},parts});
  update(0);
- return {update,cancel,respond,dispose(){if(disposed)return;cancel();disposed=true;unbindInput();host.dataset.teaActive='false';restoreCanvas();root.remove()}};
+ return {update,cancel,respond,dispose(){if(disposed)return;cancel();disposed=true;unbindInput();
+ host.dataset.teaActive='false';restoreCanvas();root.remove()}};
 }

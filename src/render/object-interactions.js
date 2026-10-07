@@ -34,9 +34,12 @@ export function createObjectInteractions(parent){
    medallion.scale.set(Math.max(.5,t.scale.x+.12),Math.max(.5,t.scale.z+.12),1);frame.visible=true;frame.updateMatrixWorld(true)}
    if(hideGuides)frame.visible=false;
    const next=storyStatus(state).next,target=next&&targets.get('prop:'+next.object);glow.visible=Boolean(target)&&!state.paused&&!hideGuides;
-   if(target){glow.position.copy(target.position);glow.position.y+=target.scale.y/2+.13;glow.material.opacity=state.settings.reducedMotion?.65:.55+.14*Math.sin(state.elapsed*1.8)}
+   if(target){glow.position.copy(target.position);glow.position.y+=target.scale.y/2+.13;
+   glow.material.opacity=state.settings.reducedMotion?.65:.55+.14*Math.sin(state.elapsed*1.8)}
   },
   project(camera,width,height){root.updateWorldMatrix(true,true);
-  return [...targets].map(([key,target])=>{const p=target.getWorldPosition(new T.Vector3()).project(camera);return {key,room:target.userData.room,x:(p.x+1)*width/2,y:(1-p.y)*height/2}})}
+  return [...targets].map(([key,
+    target])=>{const p=target.getWorldPosition(new T.Vector3()).project(camera);
+  return {key,room:target.userData.room,x:(p.x+1)*width/2,y:(1-p.y)*height/2}})}
  };
 }

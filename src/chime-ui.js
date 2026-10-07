@@ -20,14 +20,17 @@ export function createChimeUI(host,canvas,getState,dispatch,{pick,pullSpan}){
   if(active()?.held!==null&&active())dispatch('chime-cancel');
   canvas.style.cursor='default';
  }
- function restoreCanvas(){for(const [key,value] of Object.entries(original)){if(value===null)canvas.removeAttribute(key);else canvas.setAttribute(key,key==='aria-label'?t('canvasLabel'):value)}}
+ function restoreCanvas(){for(const [key,
+   value] of Object.entries(original)){if(value===null)canvas.removeAttribute(key);
+ else canvas.setAttribute(key,key==='aria-label'?t('canvasLabel'):value)}}
  function update(dt=0){
   if(disposed)return;if(!root.isConnected)host.append(root);
   let a=active();host.dataset.chimeActive=String(Boolean(a));
   if(!a){if(session){cancel();restoreCanvas();session=null;signature=''}root.hidden=true;return}
   if(session!==state().activities.active){cancel();session=state().activities.active;mode.selection=0;signature='';a=active()}
   root.hidden=blocked();if(root.hidden){cancel();return}
-  if(mode.keyboard&&a.phase==='echo'&&a.held!==null){dispatch('chime-pull',Math.min(1,a.pull+Math.max(0,Math.min(.1,Number.isFinite(dt)?dt:0))*1.4));a=active()}
+  if(mode.keyboard&&a.phase==='echo'&&a.held!==null){dispatch('chime-pull',Math.min(1,a.pull+Math.max(0,
+    Math.min(.1,Number.isFinite(dt)?dt:0))*1.4));a=active()}
   root.dataset.phase=a.phase;root.dataset.input=mode.input;
   canvas.setAttribute('role','application');canvas.setAttribute('aria-label',t('chimeCanvas'));
   canvas.setAttribute('aria-keyshortcuts','ArrowLeft ArrowRight Space R Escape');
@@ -36,7 +39,8 @@ export function createChimeUI(host,canvas,getState,dispatch,{pick,pullSpan}){
   const next=JSON.stringify([state().settings.locale,a.phase,a.cursor,a.mistakes,a.round,mode.input,mode.selection]);
   if(next!==signature){text(parts.announcement,status+' '+full+(mode.input==='keyboard'?' '+selected:''));signature=next}
  }
- const unbind=bindChimeInput({canvas,gesture,mode,parts,active,blocked,stop,inside,pick,pullSpan,dispatch,cancel,update,releaseCapture,setLost:()=>{lost=true}});
+ const unbind=bindChimeInput({canvas,gesture,mode,parts,active,blocked,stop,inside,pick,pullSpan,
+   dispatch,cancel,update,releaseCapture,setLost:()=>{lost=true}});
  update(0);
  return {update,cancel,dispose(){if(disposed)return;cancel();disposed=true; unbind();restoreCanvas();host.dataset.chimeActive='false';root.remove()}};
 }

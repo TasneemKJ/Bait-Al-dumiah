@@ -19,11 +19,13 @@ a.setXYZ(i,v.x,v.y,v.z)}g.computeVertexNormals()}return g});return mesh(p,g,c,x,
 export function ball(p,x,y,z,rx,ry,rz,c){const small=Math.max(rx,ry,rz)<=.13;
 return mesh(p,geometry(small?'detail-sphere':'sphere',()=>new T.SphereGeometry(1,small?10:16,small?7:12)),c,x,y,z,rx,ry,rz)}
 export function cylinder(p,x,y,z,r,h,c,bottom=1){return mesh(p,geometry(`cyl:${bottom}`,()=>new T.CylinderGeometry(1,bottom,1,20)),c,x,y,z,r,h,r)}
-export function ring(p,x,y,z,r,t,c,flat=false){const o=mesh(p,geometry(`torus:${t/r}`,()=>new T.TorusGeometry(1,t/r,6,32)),c,x,y,z,r,r,r);if(flat)o.rotation.x=-Math.PI/2;return o}
+export function ring(p,x,y,z,r,t,c,flat=false){const o=mesh(p,geometry(`torus:${t/r}`,
+  ()=>new T.TorusGeometry(1,t/r,6,32)),c,x,y,z,r,r,r);if(flat)o.rotation.x=-Math.PI/2;return o}
 export function line(p,a,b,r,c){const aa=new T.Vector3(...a),bb=new T.Vector3(...b),mid=aa.clone().add(bb).multiplyScalar(.5);
 const o=cylinder(p,...mid.toArray(),r,aa.distanceTo(bb),c);o.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),bb.sub(aa).normalize());return o}
 export function arch(p,x,y,z,w,h,c,depth=.06){const r=w/2,s=new T.Shape();s.moveTo(-r,0);s.lineTo(r,0);s.lineTo(r,h-r);
-s.absarc(0,h-r,r,0,Math.PI,false);s.lineTo(-r,0);const g=new T.ExtrudeGeometry(s,{depth,bevelEnabled:false,curveSegments:20});return mesh(p,g,c,x,y,z)}
+s.absarc(0,h-r,r,0,Math.PI,false);s.lineTo(-r,0);
+const g=new T.ExtrudeGeometry(s,{depth,bevelEnabled:false,curveSegments:20});return mesh(p,g,c,x,y,z)}
 export function texture(kind,colors){return paintedTexture(kind,colors)}
 export function texturedPlane(p,x,y,z,w,h,tex,flat=false){const o=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshStandardMaterial({map:tex,roughness:1,
   side:T.DoubleSide}));o.position.set(x,y,z);if(flat)o.rotation.x=-Math.PI/2;o.receiveShadow=true;p.add(o);return o}

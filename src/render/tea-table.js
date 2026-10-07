@@ -8,10 +8,48 @@ const amber=new T.MeshPhysicalMaterial({color:0x9f5424,roughness:.24,clearcoat:.
 const spillMaterial=new T.MeshPhysicalMaterial({color:0xb5682e,roughness:.28,clearcoat:.35,metalness:0});
 const innerBottom=.024,liquidSpan=.19;
 const fillY=fill=>innerBottom+Math.max(0,Math.min(1,fill))*liquidSpan;
-function mesh(parent,geometry,material,position=[0,0,0]){const o=new T.Mesh(geometry,material);o.position.fromArray(position);o.castShadow=false;o.receiveShadow=true;parent.add(o);return o}
-function torus(parent,r,tube,material,position,flat=false){const o=mesh(parent,new T.TorusGeometry(r,tube,4,20),material,position);if(flat)o.rotation.x=-Math.PI/2;return o}
+function mesh(parent,geometry,material,position=[0,0,0]){const o=new T.Mesh(geometry,material);
+o.position.fromArray(position);o.castShadow=false;o.receiveShadow=true;parent.add(o);return o}
+function torus(parent,r,tube,material,position,flat=false){const o=mesh(parent,new T.TorusGeometry(r,
+  tube,4,20),material,position);if(flat)o.rotation.x=-Math.PI/2;return o}
 function cylinder(parent,r,h,material,position){return mesh(parent,new T.CylinderGeometry(r,r,h,16),material,position)}
 function group(parent,name){const o=new T.Group();o.name=name;o.userData.noBatch=true;parent.add(o);return o}
+
+// The aiming pot: enamel body, brass spout and the painted leaf, with an anchor at the spout tip.
+function buildPot(root,{brass,cream,mint}){
+ const pot=group(root,'tea-aiming-pot');
+ mesh(pot,new T.LatheGeometry([new T.Vector2(.08,-.13),new T.Vector2(.145,-.11),new T.Vector2(.16,-.02),
+   new T.Vector2(.145,.105),new T.Vector2(.105,.14)],20),mint);
+ cylinder(pot,.11,.018,mint,[0,.145,0]);torus(pot,.108,.006,brass,[0,.155,0],true);
+ cylinder(pot,.025,.030,brass,[0,.17,0]);
+ const handle=torus(pot,.074,.010,brass,[-.17,.005,-.015]);handle.rotation.y=.55;
+ const tipOffset=new T.Vector3(.22,.035,0),spoutCurve=new T.CatmullRomCurve3([new T.Vector3(.13,.02,0),new T.Vector3(.18,.025,0),tipOffset]);
+ mesh(pot,new T.TubeGeometry(spoutCurve,6,.025,6,false),brass);
+ const leaf=new T.Shape();leaf.moveTo(0,.042);leaf.lineTo(.024,.016);leaf.lineTo(.016,-.022);
+ leaf.lineTo(0,-.036);leaf.lineTo(-.018,.016);leaf.closePath();
+ // The enamel reaches z=.16 here. Put the entire five-point painted leaf
+ // outside that hull so its center and tips remain visible in the work view.
+ const motif=mesh(pot,new T.ShapeGeometry(leaf),cream,[0,.015,.168]);motif.rotation.z=-.35;
+ batch(pot);
+ const spout=new T.Object3D();spout.name='tea-spout-anchor';spout.position.copy(tipOffset);pot.add(spout);
+ return {pot,tipOffset,spout};
+}
+
+// The spilled-tea patch and its highlight, shown when a pour overflows.
+function buildSpill(presentation){
+ const puddle=new T.Shape();puddle.moveTo(-.22,-.035);puddle.bezierCurveTo(-.27,0,-.19,.08,-.13,.09);
+ puddle.bezierCurveTo(-.08,.145,.005,.115,.03,.10);puddle.bezierCurveTo(.085,.135,.205,.11,.22,.05);
+ puddle.bezierCurveTo(.255,-.015,.155,-.08,.09,-.095);
+ puddle.bezierCurveTo(.015,-.145,-.115,-.08,-.14,-.095);puddle.bezierCurveTo(-.22,-.115,-.26,-.065,-.22,-.035);puddle.closePath();
+ const drop=new T.Shape();drop.absarc(.22,-.105,.024,0,Math.PI*2,false);
+ const spill=mesh(presentation,new T.ShapeGeometry([puddle,drop],8),spillMaterial,[.10,.035,.23]);
+ spill.rotation.x=-Math.PI/2;spill.name='tea-spill-patch';spill.receiveShadow=false;
+ const glintShape=new T.Shape();glintShape.moveTo(-.17,.035);glintShape.quadraticCurveTo(-.15,.078,-.095,.081);glintShape.lineTo(-.097,.071);
+ glintShape.quadraticCurveTo(-.15,.067,-.159,.030);glintShape.closePath();
+ const spillGlint=mesh(spill,new T.ShapeGeometry(glintShape,6),new T.MeshBasicMaterial({color:0xf4d5a0}),
+   [0,0,.001]);spillGlint.name='tea-spill-highlight';spillGlint.receiveShadow=false;
+ return spill;
+}
 
 export function createTeaTable(parent){
  const root=new T.Group();root.name='physical-tea-table';root.visible=false;const room=ROOMS.find(r=>r.id===TEA_TABLE.room);
@@ -21,7 +59,8 @@ export function createTeaTable(parent){
  const presentation=group(root,'tea-presented-service');
  const tray=group(presentation,'tea-serving-tray');
  const trayShape=new T.Shape();trayShape.absellipse(0,0,.525,.25,0,Math.PI*2,false,0);
- const plate=mesh(tray,new T.ExtrudeGeometry(trayShape,{depth:.012,bevelEnabled:false,curveSegments:20}),brass,[0,.014,.18]);plate.rotation.x=-Math.PI/2;
+ const plate=mesh(tray,new T.ExtrudeGeometry(trayShape,{depth:.012,bevelEnabled:false,curveSegments:20}),
+   brass,[0,.014,.18]);plate.rotation.x=-Math.PI/2;
  const lip=torus(tray,.51,.009,brass,[0,.029,.18],true);lip.scale.y=.49;
  // A projecting brass handle is a distinct serving affordance in front of cups.
  mesh(tray,new T.BoxGeometry(.64,.018,.20),brass,[0,.024,.42]);
@@ -40,28 +79,9 @@ export function createTeaTable(parent){
   const liquid=cylinder(cup,inner-.009,.008,amber,[0,fillY(0)-.004,0]);liquid.name='tea-liquid-surface';
   cupViews.push({root:cup,vessel,band,liquid,handle});
  }
- const pot=group(root,'tea-aiming-pot');
- mesh(pot,new T.LatheGeometry([new T.Vector2(.08,-.13),new T.Vector2(.145,-.11),new T.Vector2(.16,-.02),new T.Vector2(.145,.105),new T.Vector2(.105,.14)],20),mint);
- cylinder(pot,.11,.018,mint,[0,.145,0]);torus(pot,.108,.006,brass,[0,.155,0],true);
- cylinder(pot,.025,.030,brass,[0,.17,0]);
- const handle=torus(pot,.074,.010,brass,[-.17,.005,-.015]);handle.rotation.y=.55;
- const tipOffset=new T.Vector3(.22,.035,0),spoutCurve=new T.CatmullRomCurve3([new T.Vector3(.13,.02,0),new T.Vector3(.18,.025,0),tipOffset]);
- mesh(pot,new T.TubeGeometry(spoutCurve,6,.025,6,false),brass);
- const leaf=new T.Shape();leaf.moveTo(0,.042);leaf.lineTo(.024,.016);leaf.lineTo(.016,-.022);leaf.lineTo(0,-.036);leaf.lineTo(-.018,.016);leaf.closePath();
- // The enamel reaches z=.16 here. Put the entire five-point painted leaf
- // outside that hull so its center and tips remain visible in the work view.
- const motif=mesh(pot,new T.ShapeGeometry(leaf),cream,[0,.015,.168]);motif.rotation.z=-.35;
- batch(pot);
- const spout=new T.Object3D();spout.name='tea-spout-anchor';spout.position.copy(tipOffset);pot.add(spout);
+ const {pot,tipOffset,spout}=buildPot(root,{brass,cream,mint});
  const stream=mesh(root,new T.CylinderGeometry(.007,.012,1,8),amber);stream.name='tea-pouring-stream';stream.visible=false;stream.receiveShadow=false;
- const puddle=new T.Shape();puddle.moveTo(-.22,-.035);puddle.bezierCurveTo(-.27,0,-.19,.08,-.13,.09);
- puddle.bezierCurveTo(-.08,.145,.005,.115,.03,.10);puddle.bezierCurveTo(.085,.135,.205,.11,.22,.05);
- puddle.bezierCurveTo(.255,-.015,.155,-.08,.09,-.095);puddle.bezierCurveTo(.015,-.145,-.115,-.08,-.14,-.095);puddle.bezierCurveTo(-.22,-.115,-.26,-.065,-.22,-.035);puddle.closePath();
- const drop=new T.Shape();drop.absarc(.22,-.105,.024,0,Math.PI*2,false);
- const spill=mesh(presentation,new T.ShapeGeometry([puddle,drop],8),spillMaterial,[.10,.035,.23]);spill.rotation.x=-Math.PI/2;spill.name='tea-spill-patch';spill.receiveShadow=false;
- const glintShape=new T.Shape();glintShape.moveTo(-.17,.035);glintShape.quadraticCurveTo(-.15,.078,-.095,.081);glintShape.lineTo(-.097,.071);
- glintShape.quadraticCurveTo(-.15,.067,-.159,.030);glintShape.closePath();
- const spillGlint=mesh(spill,new T.ShapeGeometry(glintShape,6),new T.MeshBasicMaterial({color:0xf4d5a0}),[0,0,.001]);spillGlint.name='tea-spill-highlight';spillGlint.receiveShadow=false;
+ const spill=buildSpill(presentation);
  const servedGlow=mesh(presentation,new T.PlaneGeometry(1.04,.55),new T.MeshBasicMaterial({map:softTexture(),color:0xf7cd8c,transparent:true,
    opacity:.22,depthWrite:false,blending:T.AdditiveBlending}),[0,.006,.24]);servedGlow.rotation.x=-Math.PI/2;servedGlow.receiveShadow=false;
  const hitMaterial=new T.MeshBasicMaterial({visible:false}),targets=[];
@@ -77,10 +97,13 @@ export function createTeaTable(parent){
  return {root,targets,update(state){
   const tea=teaStatus(state);root.visible=Boolean(tea);if(!tea){stream.visible=false;
   actual={...actual,active:false,served:false,cups:[],spillVisible:false,stream:{...actual.stream,visible:false}};return}
-  const served=tea.phase==='served',tilt=served?0:tea.tilt*.75;pot.rotation.z=-tilt;presentation.position.set(served?.12:0,served?.024:0,served?.05:0);
-  const aimPoint=new T.Vector3(tea.aim*TEA_TABLE.aimSpan,.48,TEA_TABLE.cupZ),rotated=tipOffset.clone().applyQuaternion(pot.quaternion);pot.position.copy(aimPoint).sub(rotated);
+  const served=tea.phase==='served',tilt=served?0:tea.tilt*.75;pot.rotation.z=-tilt;
+  presentation.position.set(served?.12:0,served?.024:0,served?.05:0);
+  const aimPoint=new T.Vector3(tea.aim*TEA_TABLE.aimSpan,.48,TEA_TABLE.cupZ),
+    rotated=tipOffset.clone().applyQuaternion(pot.quaternion);pot.position.copy(aimPoint).sub(rotated);
   cupViews.forEach((v,i)=>{const c=tea.cups[i];v.root.visible=Boolean(c);cupHits[i].visible=Boolean(c);if(!c)return;
-  v.root.position.set(c.x,0,TEA_TABLE.cupZ);v.band.position.y=fillY(c.target);v.liquid.position.y=fillY(c.fill)-.004;v.liquid.visible=c.fill>0;v.band.material.color.set(c.ready?0xc9b57a:P.gold)});
+  v.root.position.set(c.x,0,TEA_TABLE.cupZ);v.band.position.y=fillY(c.target);
+  v.liquid.position.y=fillY(c.fill)-.004;v.liquid.visible=c.fill>0;v.band.material.color.set(c.ready?0xc9b57a:P.gold)});
   const start=localPoint(spout),cup=tea.cups.find(c=>c.id===tea.aimedCup),surface=cup?fillY(cup.fill):.035,end=new T.Vector3(start.x,surface,start.z);
   stream.visible=!served&&tea.flow>0;const length=start.distanceTo(end);stream.position.copy(start).add(end).multiplyScalar(.5);stream.scale.y=length;
   spill.visible=tea.spills>0;spill.scale.setScalar(Math.min(1.2,.35+tea.spills*.7));servedGlow.visible=served;
@@ -91,5 +114,6 @@ export function createTeaTable(parent){
     surfaceY:cupViews[i].liquid.position.y+.004,bandY:cupViews[i].band.position.y,visible:cupViews[i].root.visible})),spillVisible:spill.visible};
  },status(){return structuredClone(actual)},points(){if(!root.visible)return [];root.updateWorldMatrix(true,true);
  const result=targets.filter(t=>t.visible).map(t=>({key:t.userData.tea,local:localPoint(t).toArray(),
-   world:t.getWorldPosition(new T.Vector3()).toArray()}));result.push({key:'spout',local:localPoint(spout).toArray(),world:spout.getWorldPosition(new T.Vector3()).toArray()});return result}};
+   world:t.getWorldPosition(new T.Vector3()).toArray()}));
+   result.push({key:'spout',local:localPoint(spout).toArray(),world:spout.getWorldPosition(new T.Vector3()).toArray()});return result}};
 }

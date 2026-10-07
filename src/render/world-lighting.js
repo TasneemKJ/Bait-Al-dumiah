@@ -12,6 +12,7 @@ export function applyLighting(rig,{state,nightMix,focusedRoom}){
  // Each persistent room lamp keeps its own miniature-film colour and falloff;
  // the global night cue still owns overall lamp energy. Lamps are found by room tag.
  for(const l of house.lights){if(!l.isLight||!l.userData.room)continue;
- const p=practicalLight(l.userData.room,nightMix,look.lamps,cue.lamp,focusedRoom===l.userData.room);l.intensity=p.intensity;l.color.setHex(p.color);l.distance=p.distance}
+ const p=practicalLight(l.userData.room,nightMix,look.lamps,cue.lamp,focusedRoom===l.userData.room);
+ l.intensity=p.intensity;l.color.setHex(p.color);l.distance=p.distance}
  house.windows.forEach(m=>{m.emissive.set(0x8baaca).lerp(new T.Color(0xffc27d),dusk*(1-nightMix));m.emissiveIntensity=.14+nightMix*.62+dusk*.30});
 }
