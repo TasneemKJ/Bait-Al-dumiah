@@ -19,13 +19,21 @@ const LAYER_OF={
  'carry-gesture.js':'simulation','pointer-gesture.js':'simulation','wish-glow.js':'simulation',
  'resident-portraits.js':'simulation',
  'ui.js':'ui','activities-ui.js':'ui','chime-ui.js':'ui','home-ui.js':'ui','object-ui.js':'ui',
- 'stitch-ui.js':'ui','stitch-view.js':'ui','canvas-aria.js':'ui','objective-ui.js':'ui','shell-markup.js':'ui','panels-ui.js':'ui','stitch-input-bindings.js':'ui','tea-input-bindings.js':'ui','tea-view.js':'ui','story-ui.js':'ui','tea-ui.js':'ui','audio.js':'ui','gift-art.js':'ui',
+ 'stitch-ui.js':'ui','stitch-view.js':'ui','canvas-aria.js':'ui','objective-ui.js':'ui','shell-markup.js':'ui','save-transfer.js':'ui','panels-ui.js':'ui','stitch-input-bindings.js':'ui','tea-input-bindings.js':'ui','tea-view.js':'ui','story-ui.js':'ui','tea-ui.js':'ui','audio.js':'ui','gift-art.js':'ui',
  'object-controls.js':'ui','room-views.js':'ui','resident-label.js':'ui','placement-keys.js':'ui','playfield-layout.js':'ui',
  'main.js':'main',
 };
 const MAX_LINES=500;
+// Long lines hide size: the code here is dense, so bytes, line width and function length are capped too.
+const MAX_BYTES=40000;
+const MAX_LINE_CHARS=2000;
+const MAX_FUNCTION_LINES=110;
 // Modules allowed past the cap, each with the reason.
 const SIZE_EXCEPTIONS={
+ 'locale-data.js':'bilingual copy table, data only',
+};
+// Modules allowed past the byte cap.
+const BYTE_EXCEPTIONS={
  'locale-data.js':'bilingual copy table, data only',
 };
 
@@ -81,4 +89,27 @@ test('modules stay under the size cap unless listed',()=>{
   const m=modules.find(x=>x.rel===rel);
   assert.ok(m&&lines(m.text)>MAX_LINES,`${rel} no longer needs its size exception`);
  }
+});
+
+test('modules stay under the byte and line-width caps unless listed',()=>{
+ const heavy=modules.filter(m=>Buffer.byteLength(m.text)>MAX_BYTES&&!(m.rel in BYTE_EXCEPTIONS)).map(m=>`${m.rel}: ${Buffer.byteLength(m.text)} bytes`);
+ assert.deepEqual(heavy,[],`split the module or list it in BYTE_EXCEPTIONS (cap ${MAX_BYTES})`);
+ const wide=modules.filter(m=>!(m.rel in BYTE_EXCEPTIONS)&&m.text.split('\n').some(l=>l.length>MAX_LINE_CHARS)).map(m=>m.rel);
+ assert.deepEqual(wide,[],`break up lines over ${MAX_LINE_CHARS} characters`);
+ for(const rel of Object.keys(BYTE_EXCEPTIONS)){
+  const m=modules.find(x=>x.rel===rel);
+  assert.ok(m&&Buffer.byteLength(m.text)>MAX_BYTES,`${rel} no longer needs its byte exception`);
+ }
+});
+
+test('top-level functions stay under the length cap',()=>{
+ const long=[];
+ for(const m of modules){
+  const lines=m.text.split('\n');let start=-1,name='';
+  lines.forEach((line,i)=>{
+   if(/^(export )?(async )?function /.test(line)){start=i;name=line.match(/function\s+([\w$]+)/)[1]}
+   else if(line==='}'&&start>=0){if(i-start+1>MAX_FUNCTION_LINES)long.push(`${m.rel}: ${name} (${i-start+1} lines)`);start=-1}
+  });
+ }
+ assert.deepEqual(long,[],`split functions over ${MAX_FUNCTION_LINES} lines`);
 });

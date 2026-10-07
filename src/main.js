@@ -15,6 +15,7 @@ import {createUI} from './ui.js';
 import {createResidentLabel} from './resident-label.js';
 import {createRoomViews} from './room-views.js';
 import {DollhouseAudio} from './audio.js';
+import {downloadSave,readSaveFile} from './save-transfer.js';
 import {returnGreeting,waveSchedule,waveRoom} from './return-greeting.js';
 
 let storage;try{storage=localStorage}catch{}
@@ -70,20 +71,62 @@ function announce(event){
  if(event.type==='sewn')say(t('sewnHint'));
 }
 function showError(kind){fatal=true;syncPause();save();homeUI?.hide();document.querySelector('#loading')?.remove();if(ui?.panel)ui.close();const error=document.createElement('section');error.className='error-screen';error.setAttribute('role','alert');const h=document.createElement('h2'),p=document.createElement('p'),b=document.createElement('button');h.textContent=ui.t(kind==='context'?'contextTitle':'webglTitle');p.textContent=ui.t(kind==='context'?'contextHelp':'webglHelp');b.textContent=ui.t('reload');b.addEventListener('click',()=>location.reload());error.append(h,p,b);document.querySelector('#app').append(error)}
+// Leaving Home: show the play shell, start sound and greet a returning player.
+function showPlayShell(){
+ homeUI.hide();document.querySelector('#app').dataset.screen='play';host.hidden=false;host.inert=false;canvas.inert=false;canvas.removeAttribute('aria-hidden');canvas.setAttribute('tabindex','0');
+ syncPause();world.syncViewport();world.setEnabled(!state.paused);refreshUI();playfieldLayout.measure();
+}
+function greetReturningPlayer(){
+ const greeting=returnGreeting(state);if(!greeting)return;
+ say(ui.t(greeting.key).replace('{count}',ui.n(greeting.count)));
+ if(!state.settings.reducedMotion)world?.welcomeBack(waveSchedule(DOLLS.length,state.elapsed));
+ welcomeGlance();
+}
+function enterPlay(){
+ if(fatal||!world)return;
+ if(!session.enter()){if(!session.entered&&session.entryIssue)homeUI.requireReload(session.entryIssue==='changed'?'homeEntryChanged':'homeEntryUnreadable');return}
+ showPlayShell();
+ if(!session.canContinue)dispatch('focus-room','kitchen');
+ last=performance.now();lastSave=last;canvas.focus({preventScroll:true});
+ let entrySaved=false;
+ if(!state.settings.muted&&!audio.enabled)void audio.enable().then(ok=>{if(!ok)ui.toast((entrySaved?'':ui.t('savingFailed')+' ')+ui.t('audioUnavailable'));audio.setPaused(state.paused)});
+ entrySaved=save();
+ if(entrySaved){if(session.recovered)say(ui.t('saveRecovered'));else greetReturningPlayer()}
+}
+const storySound=r=>['mint-tin','moon-bed'].includes(r.effect)?r.effect:r.chapterComplete?'secret':r.effect==='music-cabinet'?'musicbox':'care';
+function interactStory(key){
+ if(fatal||manualPause)return;
+ // Optional detail sheets are paused; close first so the same command boundary applies.
+ if(ui.panel)ui.close();
+ const result=sim.interactStory(state,key);
+ if(!result.ok){storyUI?.respond(result.reason);return}
+ if(['tea','stitch','lullaby'].includes(result.startedActivity)){enterWork(result.startedActivity);return}
+ const o=objectInfo(state,key);if(o){world?.focusRoom(o.room,true);host.dataset.focusRoom=o.room;host.dataset.focusDoll=''}
+ // A successful handoff changes the destination. Reveal its clue instead of
+ // leaving a now-invalid source action as the largest control on a phone.
+ storyUI?.clear();world?.clearObjectSelection();
+ storyUI?.respond(result.message,result.chapterComplete,result.reward);audio.effect(storySound(result));
+ save();ui.tick();roomViews.update();objectControls?.update();
+}
+function exportSave(){
+ try{downloadSave(state);say(ui.t('saveExported'))}catch{say(ui.t('saveExportFailed'))}
+}
+// A new run (import or reset) replaces the state wholesale and returns the house to its idle view.
+function replaceRun(next,settings){
+ cancelWorkInput();world?.setTeaActive(false);world?.setStitchActive(false);world?.setChimeActive(false);notices.length=0;
+ ui.close();ui.clearPlacement();ui.setActivityResult(null);
+ next.settings={...settings};state=next;manualPause=false;syncPause();dispatch('camera');world?.setPlacement(null);save();refreshUI();
+}
+function importSave(file){
+ readSaveFile(file,sim.readSave).then(result=>{
+  if(!result){say(ui.t('saveImportFailed'));return}
+  replaceRun(result.state,{...result.state.settings,muted:state.settings.muted});say(ui.t('saveImported'));
+ }).catch(()=>say(ui.t('saveImportFailed')));
+}
 // Command table: one handler per action name. A handler returns early where the
 // former switch used break.
 const handlers={
-'home-play':(value,origin)=>{
-   if(fatal||!world)return;
-   if(!session.enter()){if(!session.entered&&session.entryIssue)homeUI.requireReload(session.entryIssue==='changed'?'homeEntryChanged':'homeEntryUnreadable');return;}
-   homeUI.hide();document.querySelector('#app').dataset.screen='play';host.hidden=false;host.inert=false;canvas.inert=false;canvas.removeAttribute('aria-hidden');canvas.setAttribute('tabindex','0');
-   syncPause();world.syncViewport();world.setEnabled(!state.paused);refreshUI();playfieldLayout.measure();
-   if(!session.canContinue)dispatch('focus-room','kitchen');
-   last=performance.now();lastSave=last;canvas.focus({preventScroll:true});
-   let entrySaved=false;
-   if(!state.settings.muted&&!audio.enabled)void audio.enable().then(ok=>{if(!ok)ui.toast((entrySaved?'':ui.t('savingFailed')+' ')+ui.t('audioUnavailable'));audio.setPaused(state.paused)});
-   entrySaved=save();if(entrySaved){if(session.recovered)say(ui.t('saveRecovered'));else{const greeting=returnGreeting(state);if(greeting){say(ui.t(greeting.key).replace('{count}',ui.n(greeting.count)));if(!state.settings.reducedMotion)world?.welcomeBack(waveSchedule(DOLLS.length,state.elapsed));welcomeGlance()}}}return;
-  },
+'home-play':enterPlay,
 'home-reload':(value,origin)=>{if(!session.entered&&session.entryIssue)location.reload();return;},
 'home-language':(value,origin)=>{if(!session.entered&&['en','ar'].includes(value)){state.settings.locale=value;refreshUI();saveSettings()}return;},
 'home-sound':async (value,origin)=>{if(!session.entered)await dispatch('sound');return;},
@@ -114,20 +157,7 @@ const handlers={
    const story=sim.storyStatus(state);if(story.finished||fatal||manualPause||physicalActivity())return;
    const o=objectInfo(state,'prop:'+story.next.object);if(o){if(ui.panel)ui.close();dispatch('focus-room',o.room)}return;
   },
-'story-interact':(value,origin)=>{
-   if(fatal||manualPause)return;
-   // Optional detail sheets are paused; close first so the same command boundary applies.
-   if(ui.panel)ui.close();
-   const result=sim.interactStory(state,value);
-   if(result.ok){
-    if(['tea','stitch','lullaby'].includes(result.startedActivity)){enterWork(result.startedActivity);return}
-    const o=objectInfo(state,value);if(o){world?.focusRoom(o.room,true);host.dataset.focusRoom=o.room;host.dataset.focusDoll=''}
-    // A successful handoff changes the destination. Reveal its clue instead of
-    // leaving a now-invalid source action as the largest control on a phone.
-    storyUI?.clear();world?.clearObjectSelection();
-    storyUI?.respond(result.message,result.chapterComplete,result.reward);audio.effect(['mint-tin','moon-bed'].includes(result.effect)?result.effect:result.chapterComplete?'secret':result.effect==='music-cabinet'?'musicbox':'care');save();ui.tick();roomViews.update();objectControls?.update();
-   }else storyUI?.respond(result.reason);return;
-  },
+'story-interact':(value)=>interactStory(value),
 'carry-start':(value,origin)=>{carrying=true;world?.setEnabled(false);return;},
 'carry-end':(value,origin)=>{carrying=false;world?.setEnabled(!panelOpen&&!manualPause&&!fatal);return;},
 'drop-story-item':(value,origin)=>{
@@ -260,20 +290,9 @@ const handlers={
    if(value.key==='largeText')state.settings.largeText=Boolean(value.value);
    refreshUI();saveSettings();return;
   },
-'save-export':(value,origin)=>{
-   try{const blob=new Blob([JSON.stringify(state)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`bait-al-dumiah-day-${state.day}.json`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);say(ui.t('saveExported'))}catch{say(ui.t('saveExportFailed'))}
-   return;
-  },
-'save-import':(value,origin)=>{
-   const file=value;if(!file||file.size>512000){say(ui.t('saveImportFailed'));return}
-   file.text().then(text=>{const result=sim.readSave(text);if(!result.ok||result.empty){say(ui.t('saveImportFailed'));return}
-    cancelWorkInput();world?.setTeaActive(false);world?.setStitchActive(false);world?.setChimeActive(false);notices.length=0;ui.close();ui.clearPlacement();ui.setActivityResult(null);
-    result.state.settings.muted=state.settings.muted;state=result.state;manualPause=false;syncPause();dispatch('camera');world?.setPlacement(null);save();refreshUI();say(ui.t('saveImported'))}).catch(()=>say(ui.t('saveImportFailed')));
-   return;
-  },
-'reset-yes':(value,origin)=>{
-   cancelWorkInput();world?.setTeaActive(false);world?.setStitchActive(false);world?.setChimeActive(false);notices.length=0;const settings={...state.settings};ui.close();ui.clearPlacement();ui.setActivityResult(null);state=sim.createState();state.settings=settings;manualPause=false;syncPause();dispatch('camera');world?.setPlacement(null);save();refreshUI();return;
-  },
+'save-export':()=>exportSave(),
+'save-import':file=>importSave(file),
+'reset-yes':()=>replaceRun(sim.createState(),state.settings),
 };
 async function dispatch(action,value,origin='control'){
  if(!session.entered&&!['home-play','home-reload','home-sound','home-language','sound'].includes(action))return;
