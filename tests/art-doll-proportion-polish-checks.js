@@ -1,6 +1,5 @@
 import * as T from 'three';
 import {createDolls} from '../src/render/dolls.js';
-import {rigParts} from '../src/render/doll-rig-batch.js';
 
 export function runArtChecks(){
  const checks=[];const check=(name,passed)=>checks.push({name,passed:Boolean(passed)});

@@ -6,7 +6,6 @@ const cases=[];
 const test=(name,run)=>cases.push({name,run});
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 const fixture=(id='lina')=>{const state=createState(),view=createDolls(new T.Group());return {state,view,doll:view.dolls.find(d=>d.id===id),resident:state.dolls.find(d=>d.id===id)}};
-const named=(root,name)=>{const a=[];root.traverse(o=>{if(o.name===name)a.push(o)});return a};
 export async function runArtChecks(){const results=[];for(const {name,run} of cases){try{await run();results.push({name,passed:true})}catch(e){results.push({name,passed:false,error:e.message})}}return results}
 
 test("D01: Rounded cheek and jaw sculpt (revised after user feedback)",()=>{

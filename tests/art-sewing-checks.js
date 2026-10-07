@@ -3,7 +3,7 @@ import {createSewingPlay} from '../src/render/sewing-play.js';
 import {createHouse} from '../src/render/house.js';
 import {createStoryProps} from '../src/render/story-props.js';
 import {createState,stitchStatus,restore} from '../src/simulation.js';
-import {STITCH_TABLE,STITCH_PATTERNS} from '../src/content.js';
+import {STITCH_PATTERNS} from '../src/content.js';
 import {stitchFraming} from '../src/render/stitch-camera.js';
 
 const cases=[],test=(name,run)=>cases.push({name,run}),assert=(ok,message)=>{if(!ok)throw new Error(message)};

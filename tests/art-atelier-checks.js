@@ -1,8 +1,6 @@
 import * as T from 'three';
 import {createDolls} from '../src/render/dolls.js';
 import {createState} from '../src/simulation.js';
-import {DOLLS} from '../src/content.js';
-import {rigParts} from '../src/render/doll-rig-batch.js';
 const cases=[],test=(name,run)=>cases.push({name,run});
 const assert=(ok,message)=>{if(!ok)throw Error(message)};
 const size=g=>{g.computeBoundingBox();return g.boundingBox.getSize(new T.Vector3())};

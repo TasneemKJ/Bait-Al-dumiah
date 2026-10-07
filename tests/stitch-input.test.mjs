@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createStitchGesture,createStitchKeyboard,STITCH_INPUT} from '../src/stitch-input.js';
+import {createStitchGesture,createStitchKeyboard} from '../src/stitch-input.js';
 import {createStitchUI} from '../src/stitch-ui.js';
 import * as sim from '../src/simulation.js';
 

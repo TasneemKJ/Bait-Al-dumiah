@@ -1,4 +1,4 @@
-import {cp,mkdir,rm,readFile,writeFile,stat} from 'node:fs/promises';
+import {cp,mkdir,rm} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');

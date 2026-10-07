@@ -3,8 +3,6 @@ import * as T from 'three';
 import * as textiles from '../src/render/textiles.js';
 import * as primitives from '../src/render/primitives.js';
 import {createHouse} from '../src/render/house.js';
-import {createDolls,createGhost} from '../src/render/dolls.js';
-import {createState} from '../src/simulation.js';
 const cases=[];
 const test=(name,run)=>cases.push({name,run});
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};

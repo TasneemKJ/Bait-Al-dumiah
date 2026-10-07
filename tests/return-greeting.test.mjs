@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createState,care,claim,unclaimed} from '../src/simulation.js';
+import {createState,claim} from '../src/simulation.js';
 import {returnGreeting,waveSchedule} from '../src/return-greeting.js';
 import {translate} from '../src/i18n.js';
 test('a first visit gets no greeting; the opening clue teaches instead',()=>{assert.equal(returnGreeting(createState()),null);assert.equal(returnGreeting(null),null)});
