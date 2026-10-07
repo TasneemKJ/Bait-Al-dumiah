@@ -49,7 +49,8 @@ export function createHomeSession({storage,reducedMotion=false}={}){
    // A failed read does not prove no save exists. Never overwrite it with a
    // fresh fallback, even if storage later becomes writable in this visit.
    if(!entered||!checkIdentity())return false;
-   try{if(backupPending){storage.setItem(SAVE_KEY+'.backup',raw);backupPending=false;recovered=true}const encoded=JSON.stringify(current);storage.setItem(SAVE_KEY,encoded);expectedRaw=encoded;return true}catch{return false}
+   try{if(backupPending){storage.setItem(SAVE_KEY+'.backup',raw);backupPending=false;recovered=true}const encoded=JSON.stringify(current);
+   storage.setItem(SAVE_KEY,encoded);expectedRaw=encoded;return true}catch{return false}
   },
   savePreferences(settings){try{storage.setItem(HOME_PREFERENCES_KEY,JSON.stringify({...preferences(settings),_base:preferenceBase}));return true}catch{return false}},
  };

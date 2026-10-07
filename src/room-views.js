@@ -16,7 +16,8 @@ export function createRoomViews(host,getState,onFocus){
   nav.hidden=host.querySelector('.placement')?.hidden===false;
   const language=getState().settings.locale;
   if(language!==locale){locale=language;nav.setAttribute('aria-label',translate(locale,'room'));
-   buttons.forEach((b,i)=>{const label=translate(locale,ROOMS[i].id);b.title=label;b.setAttribute('aria-label',label);b.querySelector('.room-long').textContent=label;b.querySelector('.room-short').textContent=translate(locale,ROOMS[i].id+'Short')});
+   buttons.forEach((b,i)=>{const label=translate(locale,ROOMS[i].id);b.title=label;b.setAttribute('aria-label',label);
+   b.querySelector('.room-long').textContent=label;b.querySelector('.room-short').textContent=translate(locale,ROOMS[i].id+'Short')});
   }
   buttons.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.room===host.dataset.focusRoom)));
  }

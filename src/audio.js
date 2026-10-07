@@ -47,7 +47,8 @@ export function playClothTouch(context,destination,start){
 // A soft D-minor chord that rises once as dusk turns to night: D3, A3, D4.
 export const DUSK_SWELL=[146.832,220,293.665];
 export class DollhouseAudio{
- constructor(){this.context=null;this.master=null;this.enabled=false;this.paused=false;this.next=0;this.index=0;this.night=false;this.nodes=new Set();this.nextKnock=Infinity;this.sawDay=false;this.disposed=false;this.enableGeneration=0}
+ constructor(){this.context=null;this.master=null;this.enabled=false;this.paused=false;this.next=0;this.index=0;this.night=false;this.nodes=new Set();
+ this.nextKnock=Infinity;this.sawDay=false;this.disposed=false;this.enableGeneration=0}
  async enable(){
   if(this.disposed)return false;
   const generation=++this.enableGeneration;
@@ -106,7 +107,8 @@ export class DollhouseAudio{
   if(!this.enabled||!this.context||this.paused||this.disposed)return;
   if(kind==='mint-tin')return this.track(playTinTouch(this.context,this.master,this.context.currentTime));
   if(kind==='moon-bed')return this.track(playClothTouch(this.context,this.master,this.context.currentTime));
-  const t=this.context.currentTime,notes=kind==='secret'?[293.665,311.127,392]:kind==='place'?[392,493.883]:kind==='musicbox'?[523.251,659.255,783.991,659.255]:kind==='mobile'?[392,493.883,587.33]:[440,523.251];
+  const t=this.context.currentTime,notes=kind==='secret'?[293.665,311.127,392]:kind==='place'?[392,493.883]:kind==='musicbox'?[523.251,659.255,
+    783.991,659.255]:kind==='mobile'?[392,493.883,587.33]:[440,523.251];
   notes.forEach((f,i)=>this.tone(f,t+i*.16,1.2,.035));
  }
  dispose(){if(this.disposed)return;this.disposed=true;this.enableGeneration++;this.enabled=false;this.stopVoices();this.context?.close().catch(()=>{})}

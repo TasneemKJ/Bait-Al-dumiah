@@ -53,7 +53,8 @@ export const ACTIVITY_THRESHOLDS=[0,2,5,9],ACTIVITY_DAILY_CAP=2,ACTIVITY_COOLDOW
 // Shared table geometry; simulation alone judges stream landing and fill targets.
 export const TEA_TABLE={room:'kitchen',x:-.53,y:.779,z:.10,aimSpan:.45,cupZ:.14,cupRadius:.112,cupOuterRadius:.14,cupHeight:.24};
 // Physical sewing coordinates are normalized cloth x/z; rules own all acceptance.
-export const STITCH_TABLE={room:'studio',x:-.35,y:.891,z:.05,clothScale:.46,hoopRadius:.46,gripHeight:.38,boardSize:[1.68,.06,1.15],boardEdgePadding:.015,spoolOffset:[.65,0,.03],finishOffset:[-.65,0,.15],gripDiameter:.35,spoolDiameter:.35,finishSize:[.35,.54]};
+export const STITCH_TABLE={room:'studio',x:-.35,y:.891,z:.05,clothScale:.46,hoopRadius:.46,gripHeight:.38,boardSize:[1.68,.06,1.15],
+  boardEdgePadding:.015,spoolOffset:[.65,0,.03],finishOffset:[-.65,0,.15],gripDiameter:.35,spoolDiameter:.35,finishSize:[.35,.54]};
 const stitchSections=(anchors,bend)=>anchors.slice(0,-1).map((p,i)=>[p,[(p[0]+anchors[i+1][0])/2*bend,(p[1]+anchors[i+1][1])/2*bend],anchors[i+1]]);
 export const STITCH_PATTERNS=[
  {id:'bear-seam',sections:[[[-.58,-.05],[-.30,-.20],[0,-.05]],[[0,-.05],[.30,.15],[.58,-.05]]]},

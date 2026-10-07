@@ -34,5 +34,7 @@ export function createRestoration(parent){
   // Batch while visible; the batching contract skips invisible ancestors.
   group.visible=true;compactStatic(group);group.visible=false;root.add(group);stages.push({group,light,room:room.id,tier:index+1});
  });
- return {root,lights:stages.flatMap(s=>s.light?[s.light]:[]),update(state,mix){for(const stage of stages){stage.group.visible=(state.restoration?.[stage.room]??0)>=stage.tier;stage.group.userData.nightMix=mix;if(stage.light)stage.light.intensity=stage.group.visible ? .18+Math.max(0,Math.min(1,mix))*1.72 : 0}}};
+ return {root,lights:stages.flatMap(s=>s.light?[s.light]:[]),update(state,
+   mix){for(const stage of stages){stage.group.visible=(state.restoration?.[stage.room]??0)>=stage.tier;stage.group.userData.nightMix=mix;
+ if(stage.light)stage.light.intensity=stage.group.visible ? .18+Math.max(0,Math.min(1,mix))*1.72 : 0}}};
 }

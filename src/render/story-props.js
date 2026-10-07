@@ -19,10 +19,12 @@ function finish(group){
  });
  batch(group);return group;
 }
-function anchor(root,name,roomId,position){const g=new T.Group(),room=ROOMS.find(r=>r.id===roomId);g.name=name;g.position.set(room.x+position[0],room.y+position[1],position[2]);g.userData.noBatch=true;root.add(g);return g}
+function anchor(root,name,roomId,position){const g=new T.Group(),room=ROOMS.find(r=>r.id===roomId);g.name=name;
+g.position.set(room.x+position[0],room.y+position[1],position[2]);g.userData.noBatch=true;root.add(g);return g}
 function group(parent,name){const g=new T.Group();g.name=name;g.userData.noBatch=true;parent.add(g);return g}
 const petalGeometry=new T.CircleGeometry(1,8);
-function petals(parent,x,y,z,size=.035){for(let i=0;i<5;i++){const a=i*Math.PI*2/5,petal=new T.Mesh(petalGeometry,mat(P.cream));petal.position.set(x+Math.cos(a)*size*.58,y+Math.sin(a)*size*.58,z);petal.scale.set(size*.46,size*.46,1);parent.add(petal)}ball(parent,x,y,z+.008,.012,.012,.009,P.gold)}
+function petals(parent,x,y,z,size=.035){for(let i=0;i<5;i++){const a=i*Math.PI*2/5,petal=new T.Mesh(petalGeometry,mat(P.cream));
+petal.position.set(x+Math.cos(a)*size*.58,y+Math.sin(a)*size*.58,z);petal.scale.set(size*.46,size*.46,1);parent.add(petal)}ball(parent,x,y,z+.008,.012,.012,.009,P.gold)}
 
 export function createStoryProps(parent){
  const root=new T.Group();root.name='hidden-house-stories';root.userData.noBatch=true;parent.add(root);
@@ -58,13 +60,16 @@ export function createStoryProps(parent){
  const jasmine=anchor(root,'story-jasmine-window','parlor',[-.90,1.03,-1.43]);
  box(jasmine,0,.025,0,.62,.07,.34,P.wood);cylinder(jasmine,0,.145,0,.18,.24,P.rose,.73);
  line(jasmine,[0,.26,0],[-.02,.86,-.015],.012,P.mint);
- for(let i=0;i<6;i++){const y=.31+i*.082,sign=i%2?1:-1;line(jasmine,[0,y,0],[sign*.11,y+.045,0],.009,P.mint);const leaf=ball(jasmine,sign*.12,y+.035,.018,.065,.023,.025,P.mint);leaf.rotation.z=sign*.5}
+ for(let i=0;i<6;i++){const y=.31+i*.082,sign=i%2?1:-1;line(jasmine,[0,y,0],[sign*.11,y+.045,0],.009,P.mint);
+ const leaf=ball(jasmine,sign*.12,y+.035,.018,.065,.023,.025,P.mint);leaf.rotation.z=sign*.5}
  staticParts(jasmine);
  const blooms=group(jasmine,'story-jasmine-blooms');for(const [x,y] of [[-.02,.86],[-.13,.48],[.13,.68]])petals(blooms,x,y,.04);finish(blooms);
 
  const basin=anchor(root,'story-basin-details','kitchen',[-1.27,1.08,-1.06]);
- const water=new T.Mesh(new T.CircleGeometry(.185,20),new T.MeshStandardMaterial({color:0x568f89,roughness:.22,metalness:.12,transparent:true,opacity:.80,depthWrite:false}));water.name='story-basin-water';water.rotation.x=-Math.PI/2;water.scale.y=.68;basin.add(water);
- const ripple=new T.Mesh(new T.RingGeometry(.055,.062,24),new T.MeshBasicMaterial({color:0xf4dfb8,side:T.DoubleSide,transparent:true,opacity:0,depthWrite:false}));ripple.name='story-basin-ripple';ripple.rotation.x=-Math.PI/2;ripple.position.y=.003;basin.add(ripple);
+ const water=new T.Mesh(new T.CircleGeometry(.185,20),new T.MeshStandardMaterial({color:0x568f89,roughness:.22,metalness:.12,transparent:true,
+   opacity:.80,depthWrite:false}));water.name='story-basin-water';water.rotation.x=-Math.PI/2;water.scale.y=.68;basin.add(water);
+ const ripple=new T.Mesh(new T.RingGeometry(.055,.062,24),new T.MeshBasicMaterial({color:0xf4dfb8,side:T.DoubleSide,transparent:true,opacity:0,
+   depthWrite:false}));ripple.name='story-basin-ripple';ripple.rotation.x=-Math.PI/2;ripple.position.y=.003;basin.add(ripple);
 
  const bear=anchor(root,'story-mended-bear','bedroom',[.09,.875,-1.03]);bear.rotation.y=-.22;
  ball(bear,0,.16,0,.115,.15,.085,P.wood);ball(bear,0,.35,0,.14,.12,.095,P.wood);
@@ -89,7 +94,8 @@ export function createStoryProps(parent){
  const shade=cylinder(tea,.27,.34,-.035,.085,.13,P.cream,.75);shade.material=mat(P.cream,{emissive:0xe8a455,emissiveIntensity:.65});
  for(const x of [-.30,.30])for(const z of [.24,.34]){const foot=ball(tea,x,.006,z,.031,.004,.052,P.ink);foot.rotation.y=x<0?-.15:.15}
  finish(tea);
- const glow=new T.Mesh(new T.PlaneGeometry(1.15,.90),new T.MeshBasicMaterial({map:softTexture(),color:0xf8c385,transparent:true,opacity:.25,depthWrite:false,blending:T.AdditiveBlending}));glow.name='story-welcome-light';glow.rotation.x=-Math.PI/2;glow.position.set(.1,.005,.15);tea.add(glow);
+ const glow=new T.Mesh(new T.PlaneGeometry(1.15,.90),new T.MeshBasicMaterial({map:softTexture(),color:0xf8c385,transparent:true,opacity:.25,
+   depthWrite:false,blending:T.AdditiveBlending}));glow.name='story-welcome-light';glow.rotation.x=-Math.PI/2;glow.position.set(.1,.005,.15);tea.add(glow);
  const guest=group(tea,'story-shy-guest');guest.position.set(.48,.06,.26);
  const cloth=new T.Mesh(new T.LatheGeometry([new T.Vector2(0,.39),new T.Vector2(.065,.38),new T.Vector2(.10,.31),new T.Vector2(.115,.19),new T.Vector2(.15,0)],16),mat(P.cream));guest.add(cloth);
  for(const x of [-.044,.044])ball(guest,x,.245,.105,.016,.022,.008,P.ink);finish(guest);
@@ -102,7 +108,8 @@ export function createStoryProps(parent){
   // Initialize from the save even when the first frame is paused. Reduced
   // motion changes poses, never the age of a deliberate story interaction.
   if(visualTime===null||!state.paused)visualTime=state.elapsed;
-  snapshot={tinOpen:story.index>0||story.step>=1,cabinetOpen:story.index>1||story.index===1&&story.step>=2,bearVisible:story.completed.includes('mended-friend'),musicRepaired:story.completed.includes('lost-song'),jasmineBloomed:story.index>2||story.index===2&&story.step>=2,guestVisible:story.finished};
+  snapshot={tinOpen:story.index>0||story.step>=1,cabinetOpen:story.index>1||story.index===1&&story.step>=2,
+    bearVisible:story.completed.includes('mended-friend'),musicRepaired:story.completed.includes('lost-song'),jasmineBloomed:story.index>2||story.index===2&&story.step>=2,guestVisible:story.finished};
   // Fold nearly flat beside the case; a shallow swing would enter the owned
   // right-hand keepsake slot even though the cabinet body itself is clear.
   door.rotation.y=snapshot.cabinetOpen?-3.05:0;
@@ -121,6 +128,8 @@ export function createStoryProps(parent){
   ripple.visible=active&&state.story?.lastAction==='prop:wash-basin';ripple.scale.setScalar(.8+phase*.8);ripple.material.opacity=Math.max(0,.4*(1-phase/2.2));
   water.material.opacity=.78+.04*mix;glow.material.opacity=.16+.19*mix;shade.material.emissiveIntensity=.38+.65*mix;
   // Story input leaves a physical response as well as the lasting earned pose.
-  const response=active?Math.sin(phase/2.2*Math.PI)*.04:0;tinLid.rotation.x=(snapshot.tinOpen?-2.1:0)-(state.story?.lastAction==='prop:mint-tin'?response:0);blooms.rotation.z=state.story?.lastAction==='prop:jasmine-window'?response:0;bear.rotation.z=state.story?.lastAction==='prop:moon-bed'?response:0;
+  const response=active?Math.sin(phase/2.2*Math.PI)*.04:0;
+  tinLid.rotation.x=(snapshot.tinOpen?-2.1:0)-(state.story?.lastAction==='prop:mint-tin'?response:0);
+  blooms.rotation.z=state.story?.lastAction==='prop:jasmine-window'?response:0;bear.rotation.z=state.story?.lastAction==='prop:moon-bed'?response:0;
  },status(){return {...snapshot}}};
 }

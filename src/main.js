@@ -21,7 +21,8 @@ import {returnGreeting,waveSchedule,waveRoom} from './return-greeting.js';
 let storage;try{storage=localStorage}catch{}
 const session=createHomeSession({storage,reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches});
 let state=session.state;
-let world=null,ui=null,homeUI=null,manualPause=false,panelOpen=false,fatal=false,saveWarning=false,objectControls=null,storyUI=null,teaUI=null,stitchUI=null,chimeUI=null,lastChimeTone=null,carrying=false;
+let world=null,ui=null,homeUI=null,manualPause=false,panelOpen=false,fatal=false,saveWarning=false,objectControls=null,storyUI=null,teaUI=null,
+  stitchUI=null,chimeUI=null,lastChimeTone=null,carrying=false;
 const audio=new DollhouseAudio(),canvas=document.querySelector('#world'),host=document.querySelector('#ui');
 const ACTIVITY_ROOM=Object.fromEntries(ACTIVITIES.map(a=>[a.id,a.room]));
 const physicalActivity=()=>['tea','stitch','lullaby'].includes(state.activities.active?.id)?state.activities.active.id:null;
@@ -55,7 +56,8 @@ function leaveWork(){
  host.dataset.focusRoom=ACTIVITY_ROOM[id];host.dataset.focusDoll='';storyUI?.clear();if(storyResult)storyUI?.respond(storyResult.message);
  roomViews.update();objectControls?.update();ui.tick();canvas.focus({preventScroll:true});save();
 }
-function save(){if(!session.entered)return false;if(session.save(state))return true;if(!saveWarning&&ui){ui.toast(ui.t('savingFailed'));saveWarning=true;const note=host.querySelector('.saved-note span');if(note)note.textContent=ui.t('savingFailed')}return false}
+function save(){if(!session.entered)return false;if(session.save(state))return true;if(!saveWarning&&ui){ui.toast(ui.t('savingFailed'));
+saveWarning=true;const note=host.querySelector('.saved-note span');if(note)note.textContent=ui.t('savingFailed')}return false}
 function saveSettings(){const saved=session.savePreferences(state.settings);if(session.entered)save();else if(!saved)homeUI?.notify(ui.t('savingFailed'))}
 function notify(result,success){if(!result.ok){say(ui.t(result.reason));return false}if(success)say(ui.t(success));save();ui.tick();return true}
 // Notices queue so a reward, a level-up and a milestone never overwrite one another.
@@ -70,7 +72,11 @@ function announce(event){
  if(event.type==='dawn')say(event.fresh?`${t('dawnRecap')} ${n(event.wishes)} / ${n(DOLLS.length)}`:t('dawnTooSoon'));
  if(event.type==='sewn')say(t('sewnHint'));
 }
-function showError(kind){fatal=true;syncPause();save();homeUI?.hide();document.querySelector('#loading')?.remove();if(ui?.panel)ui.close();const error=document.createElement('section');error.className='error-screen';error.setAttribute('role','alert');const h=document.createElement('h2'),p=document.createElement('p'),b=document.createElement('button');h.textContent=ui.t(kind==='context'?'contextTitle':'webglTitle');p.textContent=ui.t(kind==='context'?'contextHelp':'webglHelp');b.textContent=ui.t('reload');b.addEventListener('click',()=>location.reload());error.append(h,p,b);document.querySelector('#app').append(error)}
+function showError(kind){fatal=true;syncPause();save();homeUI?.hide();document.querySelector('#loading')?.remove();if(ui?.panel)ui.close();
+const error=document.createElement('section');error.className='error-screen';error.setAttribute('role','alert');
+const h=document.createElement('h2'),p=document.createElement('p'),b=document.createElement('button');
+h.textContent=ui.t(kind==='context'?'contextTitle':'webglTitle');p.textContent=ui.t(kind==='context'?'contextHelp':'webglHelp');
+b.textContent=ui.t('reload');b.addEventListener('click',()=>location.reload());error.append(h,p,b);document.querySelector('#app').append(error)}
 // Leaving Home: show the play shell, start sound and greet a returning player.
 function showPlayShell(){
  homeUI.hide();document.querySelector('#app').dataset.screen='play';host.hidden=false;host.inert=false;canvas.inert=false;canvas.removeAttribute('aria-hidden');canvas.setAttribute('tabindex','0');
@@ -135,7 +141,9 @@ const handlers={
    // Dismissing a sequence also leaves it. Physical work remains in its scene
    // when the optional catalog closes during entry or a paused modal closes.
    if(panelOpen==='activities'&&value!=='activities'&&!physicalActivity())sim.endActivity(state);
-   if(value)cancelWorkInput();panelOpen=value||false;syncPause();storyUI?.clear();world?.setEnabled(!panelOpen&&!manualPause&&!carrying&&!fatal);world?.clearObjectSelection();if(!value)ui.clearObject();objectControls?.update();updateWorkUI();if(value==='household'&&world){try{ui.setPortraits(world.getPortraits())}catch(error){console.warn('Resident portrait unavailable:',error)}}return;},
+   if(value)cancelWorkInput();panelOpen=value||false;syncPause();storyUI?.clear();world?.setEnabled(!panelOpen&&!manualPause&&!carrying&&!fatal);
+   world?.clearObjectSelection();if(!value)ui.clearObject();objectControls?.update();updateWorkUI();
+   if(value==='household'&&world){try{ui.setPortraits(world.getPortraits())}catch(error){console.warn('Resident portrait unavailable:',error)}}return;},
 'select-object':(value,origin)=>{
    const o=objectInfo(state,value);if(!o||fatal||manualPause||panelOpen||ui.placement)return;
    ui.collapseTools();
@@ -167,21 +175,27 @@ const handlers={
 'play-story-keepsake':(value,origin)=>{
    if(fatal||manualPause)return;if(ui.panel)ui.close();
    const result=sim.playStoryKeepsake(state,value);
-   if(result.ok){storyUI?.respond(result.message);audio.effect(result.effect==='moon-bed'?'moon-bed':result.effect==='music-cabinet'?'musicbox':'care');save()}else storyUI?.respond(result.reason);return;
+   if(result.ok){storyUI?.respond(result.message);
+   audio.effect(result.effect==='moon-bed'?'moon-bed':result.effect==='music-cabinet'?'musicbox':'care');save()}else storyUI?.respond(result.reason);return;
   },
 'use-object':(value,origin)=>{
    const item=state.decor.find(d=>d.id===value),result=sim.useDecor(state,value);
-   if(result.ok){if(ui.panel)ui.close();dispatch('focus-room',item.room);audio.effect(item.item==='musicbox'?'musicbox':item.item==='mobile'?'mobile':'care');storyUI?.respond('keepsake-'+(result.effect==='water'?'watered':result.effect==='light'?'lit':result.effect==='dim'?'dimmed':result.effect==='wind'?'wound':'rocked'));save();storyUI?.update()}else storyUI?.respond(result.reason);return;
+   if(result.ok){if(ui.panel)ui.close();dispatch('focus-room',item.room);
+   audio.effect(item.item==='musicbox'?'musicbox':item.item==='mobile'?'mobile':'care');
+   storyUI?.respond('keepsake-'+(result.effect==='water'?'watered':result.effect==='light'?'lit':result.effect==='dim'?'dimmed':result.effect==='wind'?
+     'wound':'rocked'));save();storyUI?.update()}else storyUI?.respond(result.reason);return;
   },
 'rotate-object':(value,origin)=>{if(notify(sim.rotateDecor(state,value),'objectRotated'))ui.refresh();return;},
 'move-object':(value,origin)=>{ui.beginMove(value);return;},
 'pack-object':(value,origin)=>{if(notify(sim.remove(state,value),'packed')){ui.close();objectControls?.update()}return;},
-'relocate-object':(value,origin)=>{if(notify(sim.moveDecor(state,value.id,value.room,value.slot),'objectMoved')){ui.clearPlacement();world?.setPlacement(null);dispatch('focus-room',value.room);save()}return},
+'relocate-object':(value,origin)=>{if(notify(sim.moveDecor(state,value.id,value.room,value.slot),'objectMoved')){ui.clearPlacement();
+world?.setPlacement(null);dispatch('focus-room',value.room);save()}return},
 'recall-ready':(value,origin)=>{if(sim.startRecall(state).ok)ui.setActivityResult(null);return;},
 'activity-hint':(value,origin)=>{if(sim.toggleActivityHint(state).ok)ui.setActivityResult(null);return;},
 'begin-activity':(value,origin)=>{
    if(manualPause||fatal){say(ui.t('pausedActivity'));return}if(ui.panel)ui.close();
-   const result=sim.beginActivity(state,value);if(result.ok){ui.setActivityResult(null);if(physicalActivity())enterWork(value);else{ui.open('activities');dispatch('focus-room',ACTIVITY_ROOM[value]);save()}}else say(ui.t(result.reason));return;
+   const result=sim.beginActivity(state,value);if(result.ok){ui.setActivityResult(null);if(physicalActivity())enterWork(value);
+   else{ui.open('activities');dispatch('focus-room',ACTIVITY_ROOM[value]);save()}}else say(ui.t(result.reason));return;
   },
 'tea-control':(value,origin)=>{if(!fatal&&!panelOpen)sim.controlTea(state,value);return;},
 'tea-release':(value,origin)=>{sim.releaseTea(state);return;},
@@ -227,16 +241,19 @@ const handlers={
   },
 'chime-exit':(value,origin)=>{if(state.activities.active?.id==='lullaby')leaveWork();return;},
 'activity-input':(value,origin)=>{
-   const result=sim.activityInput(state,value);if(result.ok){if(!result.mistake)audio.effect(result.complete?'place':'care');ui.setActivityResult(result);save();ui.tick()}else say(ui.t(result.reason));return;
+   const result=sim.activityInput(state,value);if(result.ok){if(!result.mistake)audio.effect(result.complete?'place':'care');
+   ui.setActivityResult(result);save();ui.tick()}else say(ui.t(result.reason));return;
   },
 'end-activity':(value,origin)=>{if(physicalActivity())leaveWork();else{sim.endActivity(state);ui.setActivityResult(null);ui.close();save()}return;},
 'restore-room':(value,origin)=>{
-   const result=sim.restoreRoom(state,value);if(result.ok){ui.close();world?.focusRoom(value);host.dataset.focusRoom=value;host.dataset.focusDoll='';audio.effect('secret');say(ui.t('restoreSuccess'));save();refreshUI()}else say(ui.t(result.reason));return;
+   const result=sim.restoreRoom(state,value);if(result.ok){ui.close();world?.focusRoom(value);host.dataset.focusRoom=value;host.dataset.focusDoll='';
+   audio.effect('secret');say(ui.t('restoreSuccess'));save();refreshUI()}else say(ui.t(result.reason));return;
   },
 'select':(value,origin)=>{return;},
 'care':(value,origin)=>{
    const result=sim.care(state,value.id,value.action);
-   if(result.ok){ui.close();say(ui.t(value.action+'Success')+(result.reward?` +${ui.n(result.reward)} ${ui.t('reward')}`:''));audio.effect('care');save();ui.tick()}else say(ui.t(result.reason));return;
+   if(result.ok){ui.close();say(ui.t(value.action+'Success')+(result.reward?` +${ui.n(result.reward)} ${ui.t('reward')}`:''));audio.effect('care');
+   save();ui.tick()}else say(ui.t(result.reason));return;
   },
 'objective':(value,origin)=>{
    const next=ui.objective();
@@ -272,16 +289,20 @@ const handlers={
    if(ui.panel)ui.close();sim.changeLight(state);save();refreshUI();if(sim.isNight(state))say(ui.t('nightHint'));return;
   },
 'discover':(value,origin)=>{
-   const result=sim.discover(state);if(result.ok){save();audio.effect('secret');ui.open('journal');say(ui.t('newSecret'))}else say(ui.t(result.reason)+(result.needed?` ${ui.t('shyNeed')} ${ui.n(result.needed)}%`:''));return;
+   const result=sim.discover(state);if(result.ok){save();audio.effect('secret');ui.open('journal');
+   say(ui.t('newSecret'))}else say(ui.t(result.reason)+(result.needed?` ${ui.t('shyNeed')} ${ui.n(result.needed)}%`:''));return;
   },
 'camera':(value,origin)=>{storyUI?.clear();world?.clearObjectSelection();world?.home();host.dataset.focusRoom='';host.dataset.focusDoll='';roomViews.update();objectControls?.update();return;},
 'focus-doll':(value,origin)=>{if(state.dolls.some(d=>d.id===value)){ui.close();if(world?.focusDoll(value)){host.dataset.focusDoll=value;host.dataset.focusRoom='';roomViews.update()}}return;},
-'focus-room':(value,origin)=>{if(world?.focusRoom(value)){if(objectInfo(state,storyUI?.selected)?.room!==value){storyUI?.clear();world?.clearObjectSelection()}host.dataset.focusRoom=value;host.dataset.focusDoll='';ui.tick();roomViews.update();objectControls?.update()}return;},
+'focus-room':(value,origin)=>{if(world?.focusRoom(value)){if(objectInfo(state,storyUI?.selected)?.room!==value){storyUI?.clear();
+world?.clearObjectSelection()}host.dataset.focusRoom=value;host.dataset.focusDoll='';ui.tick();roomViews.update();objectControls?.update()}return;},
 'zoom-in':(value,origin)=>{world?.zoom(1.2);return;},
 'zoom-out':(value,origin)=>{world?.zoom(1/1.2);return;},
 'pause':(value,origin)=>{cancelWorkInput();manualPause=!manualPause;storyUI?.clear();world?.clearObjectSelection();syncPause();world?.setEnabled(!panelOpen&&!manualPause);refreshUI();return;},
 'sound':async (value,origin)=>{
-   let unavailable=false;if(state.settings.muted){if(await audio.enable()){state.settings.muted=false;audio.setPaused(state.paused)}else unavailable=true}else{state.settings.muted=true;audio.mute()}refreshUI();saveSettings();if(unavailable){if(session.entered)ui.toast(ui.t('audioUnavailable'));else homeUI?.notify(ui.t('audioUnavailable'))}return;
+   let unavailable=false;if(state.settings.muted){if(await audio.enable()){state.settings.muted=false;
+   audio.setPaused(state.paused)}else unavailable=true}else{state.settings.muted=true;audio.mute()}refreshUI();saveSettings();
+   if(unavailable){if(session.entered)ui.toast(ui.t('audioUnavailable'));else homeUI?.notify(ui.t('audioUnavailable'))}return;
   },
 'setting':(value,origin)=>{
    if(value.key==='locale'&&['en','ar'].includes(value.value))state.settings.locale=value.value;
@@ -322,11 +343,18 @@ storyUI=createStoryUI(host,()=>state,dispatch,key=>world?.objectPositions().find
 teaUI=createTeaUI(host,canvas,()=>state,dispatch,{pick:(x,y)=>world?.teaAt(x,y),aimAt:(x,y)=>world?.teaAimAt(x,y)});
 stitchUI=createStitchUI(host,canvas,()=>state,dispatch,{pick:(x,y)=>world?.stitchAt(x,y),pointAt:(x,y)=>world?.stitchPointAt(x,y)});
 chimeUI=createChimeUI(host,canvas,()=>state,dispatch,{pick:(x,y)=>world?.chimeAt(x,y),pullSpan:()=>world?.chimePullSpan()??0});
-const playfieldLayout=createPlayfieldLayout(host,(value,viewport)=>{if(session.entered){world?.setPresentation(value,viewport);storyUI?.layout()}},()=>{if(world?.syncViewport()&&session.entered)storyUI?.cancelDrag();if(session.entered)storyUI?.layout()});
+const playfieldLayout=createPlayfieldLayout(host,(value,viewport)=>{if(session.entered){world?.setPresentation(value,viewport);
+storyUI?.layout()}},()=>{if(world?.syncViewport()&&session.entered)storyUI?.cancelDrag();if(session.entered)storyUI?.layout()});
 let last=performance.now(),lastUI=0,lastSave=0,stopped=false;
 function frame(now){if(stopped)return;const dt=Math.min(.1,Math.max(0,(now-last)/1000));last=now;
  if(!document.hidden&&!fatal&&!session.entered&&homeUI?.previewVisible){world?.render(state,0,null)}
- if(!document.hidden&&!fatal&&session.entered){updateWorkUI(dt);session.advance(state,dt);if(state.events.length)for(const event of state.events.splice(0))announce(event);if(notices.length&&now>=noticeAt&&!physicalActivity())showNotice(now);world?.render(state,dt,ui.selected);residentLabel.update(state,ui.selected,host.dataset.focusRoom||(host.dataset.focusDoll?state.dolls.find(d=>d.id===host.dataset.focusDoll)?.room:''),world?.project(ui.selected,.05),Boolean(ui.panel||ui.placement||state.paused||storyUI?.selected||physicalActivity()));if(physicalActivity()!=='lullaby')audio.tick(sim.isNight(state));if(now-lastUI>250){ui.tick();roomViews.update();objectControls.update();storyUI.update();lastUI=now}if(now-lastSave>8000){save();lastSave=now}}
+ if(!document.hidden&&!fatal&&session.entered){updateWorkUI(dt);session.advance(state,dt);
+ if(state.events.length)for(const event of state.events.splice(0))announce(event);
+ if(notices.length&&now>=noticeAt&&!physicalActivity())showNotice(now);world?.render(state,dt,ui.selected);
+ residentLabel.update(state,ui.selected,host.dataset.focusRoom||(host.dataset.focusDoll?state.dolls.find(d=>d.id===host.dataset.focusDoll)?.room:''),
+   world?.project(ui.selected,.05),Boolean(ui.panel||ui.placement||state.paused||storyUI?.selected||physicalActivity()));
+ if(physicalActivity()!=='lullaby')audio.tick(sim.isNight(state));if(now-lastUI>250){ui.tick();roomViews.update();objectControls.update();
+ storyUI.update();lastUI=now}if(now-lastSave>8000){save();lastSave=now}}
  requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
@@ -349,5 +377,9 @@ window.addEventListener('keydown',event=>{
 });
 // Explicit opt-in diagnostics for reproducible browser verification, never enabled by default.
 if(new URLSearchParams(location.search).get('debug')==='1'){
- window.dollhouse={state:()=>structuredClone(state),stats:()=>({calls:world?.renderer.info.render.calls,triangles:world?.renderer.info.render.triangles,geometries:world?.renderer.info.memory.geometries,textures:world?.renderer.info.memory.textures}),project:(id,height)=>world?.project(id,height),visual:()=>world?.visualStatus(),objects:()=>world?.objectPositions(),tea:()=>sim.teaStatus(state),teaObjects:()=>world?.teaPositions(),stitch:()=>sim.stitchStatus(state),stitchObjects:()=>world?.stitchPositions(),projectStitch:(x,y,height)=>world?.projectStitch(x,y,height),chimes:()=>sim.chimeStatus(state),chimeObjects:()=>world?.chimePositions(),chimePullSpan:()=>world?.chimePullSpan()};
+ window.dollhouse={state:()=>structuredClone(state),stats:()=>({calls:world?.renderer.info.render.calls,
+   triangles:world?.renderer.info.render.triangles,geometries:world?.renderer.info.memory.geometries,textures:world?.renderer.info.memory.textures}),
+   project:(id,height)=>world?.project(id,height),visual:()=>world?.visualStatus(),objects:()=>world?.objectPositions(),tea:()=>sim.teaStatus(state),
+   teaObjects:()=>world?.teaPositions(),stitch:()=>sim.stitchStatus(state),stitchObjects:()=>world?.stitchPositions(),projectStitch:(x,y,
+   height)=>world?.projectStitch(x,y,height),chimes:()=>sim.chimeStatus(state),chimeObjects:()=>world?.chimePositions(),chimePullSpan:()=>world?.chimePullSpan()};
 }

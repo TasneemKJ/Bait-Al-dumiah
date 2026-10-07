@@ -9,10 +9,13 @@ export function createArm(parent,sign,def,skin){
  const sleeve=new T.Mesh(sleeveGeometry(),shirtFabric(def.id));sleeve.name='gathered-sleeve';sleeve.castShadow=sleeve.receiveShadow=true;arm.add(sleeve);arm.sleeve=sleeve;
  const elbow=ball(arm,0,-.132,0,.044,.043,.044,skin);elbow.name='bisque-elbow';
  const forearm=new T.Group();forearm.name='articulated-forearm';forearm.userData.noBatch=true;forearm.position.set(0,-.132,0);arm.add(forearm);arm.forearm=forearm;
- const shell=new T.Mesh(forearmGeometry(),skin);shell.name='sculpted-forearm';shell.castShadow=shell.receiveShadow=true;forearm.add(shell);arm.forearmShell=shell;ring(forearm,0,-.096,0,.04,.005,0xe6d3bc,true);
+ const shell=new T.Mesh(forearmGeometry(),skin);shell.name='sculpted-forearm';shell.castShadow=shell.receiveShadow=true;forearm.add(shell);
+ arm.forearmShell=shell;ring(forearm,0,-.096,0,.04,.005,0xe6d3bc,true);
  const hand=new T.Group();hand.name='articulated-hand';hand.userData.noBatch=true;hand.position.set(0,-.129,.01);forearm.add(hand);arm.hand=hand;
  const palm=ball(hand,0,.004,0,.039,.037,.027,skin);palm.name='porcelain-palm';
- for(let i=0;i<4;i++){const length=[.012,.016,.014,.010][i],finger=new T.Mesh(new T.CapsuleGeometry(.009,length,3,8),skin);finger.name='porcelain-finger';finger.position.set(-.0225+i*.015,-.028-length/2,0);finger.rotation.x=-.17-(i%2)*.04;finger.rotation.z=(i-1.5)*-.03;finger.position.z=.003;finger.castShadow=true;hand.add(finger)}
+ for(let i=0;i<4;i++){const length=[.012,.016,.014,.010][i],finger=new T.Mesh(new T.CapsuleGeometry(.009,length,3,8),skin);
+ finger.name='porcelain-finger';finger.position.set(-.0225+i*.015,-.028-length/2,0);finger.rotation.x=-.17-(i%2)*.04;finger.rotation.z=(i-1.5)*-.03;
+ finger.position.z=.003;finger.castShadow=true;hand.add(finger)}
  const thumb=ball(hand,-sign*.030,.008,.006,.015,.026,.013,skin);thumb.name='porcelain-thumb';thumb.rotation.z=-sign*.38;
  arm.rotation.z=sign*.19;return arm;
 }
@@ -41,7 +44,8 @@ export function gaze(v,selected,yaw,motion,dt,resident){
 }
 
 export function express(v,d,still,dt){
- const mood=d.action==='rest'?'sleepy':d.action==='play'?'delighted':d.action==='soothe'?'comforted':d.action==='tea'?'content':d.energy<32?'sleepy':Math.min(d.comfort,d.hunger)<25?'worried':'content';
+ const mood=d.action==='rest'?'sleepy':d.action==='play'?'delighted':d.action==='soothe'?'comforted':d.action==='tea'?'content':d.energy<32?
+   'sleepy':Math.min(d.comfort,d.hunger)<25?'worried':'content';
  v.expression=mood;shapeMouth(v.mouth,mood,dt,still);
  const brow=mood==='worried'?.10:mood==='sleepy'?-.09:mood==='delighted'?-.13:0;
  v.brows.forEach((b,i)=>{const z=(i===0?-1:1)*brow;b.rotation.z=still?z:T.MathUtils.damp(b.rotation.z,z,8,dt);b.position.y=mood==='delighted'?.092:.082});
@@ -67,7 +71,8 @@ export function carePose(v,d,t,still){
  v.teaPhase=0;v.body.scale.y=1;
  if(d.action==='play'){
   const age=Math.max(0,t-(Number.isFinite(d.lastCare)?d.lastCare:0)),gap=still?.044:.028+.055*(.5+.5*Math.cos(age*Math.PI*3.2));
-  v.arms.forEach((arm,i)=>{const sign=i===0?-1:1;aimArm(arm,[sign*gap,.763,.171]);const parent=arm.quaternion.clone().multiply(arm.forearm.quaternion);arm.hand.quaternion.copy(parent.invert()).multiply(new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),-sign*Math.PI/2))});
+  v.arms.forEach((arm,i)=>{const sign=i===0?-1:1;aimArm(arm,[sign*gap,.763,.171]);
+  const parent=arm.quaternion.clone().multiply(arm.forearm.quaternion);arm.hand.quaternion.copy(parent.invert()).multiply(new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),-sign*Math.PI/2))});
  }
  if(d.action==='rest'){
   aimArm(v.arms[1],[.178,.943,.110]);aimArm(v.arms[0],[-.080,.705,.163]);
@@ -77,13 +82,16 @@ export function carePose(v,d,t,still){
  }
  if(d.action==='soothe'){
   aimArm(v.arms[0],[-.055,.731,.175]);aimArm(v.arms[1],[.055,.709,.185]);
-  v.arms.forEach((arm,i)=>{const parent=arm.quaternion.clone().multiply(arm.forearm.quaternion),palm=new T.Quaternion().setFromAxisAngle(new T.Vector3(0,0,1),i===0?.65:-.65).multiply(new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),Math.PI));arm.hand.quaternion.copy(parent.invert()).multiply(palm)});
+  v.arms.forEach((arm,i)=>{const parent=arm.quaternion.clone().multiply(arm.forearm.quaternion),
+    palm=new T.Quaternion().setFromAxisAngle(new T.Vector3(0,0,1),i===0?.65:-.65).multiply(new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),
+    Math.PI));arm.hand.quaternion.copy(parent.invert()).multiply(palm)});
   v.head.rotation.x=.09+(still?0:Math.sin(t*1.2)*.012);
  }
  if(d.action==='tea'){
   const age=Math.max(0,t-(Number.isFinite(d.lastCare)?d.lastCare:t)),lift=still?1:age<.85?smooth(age/.85):age<=2.55?1:1-smooth((age-2.55)/1.30);
   v.teaPhase=lift;aimArm(v.arms[1],[.085,.837,.204],lift);aimArm(v.arms[0],[-.025,.804,.175],lift);v.head.rotation.x=.28*lift;
-  v.arms.forEach((arm,i)=>{const parent=arm.quaternion.clone().multiply(arm.forearm.quaternion),palm=new T.Quaternion().setFromAxisAngle(new T.Vector3(1,0,0),i===0?-Math.PI/2:-.35);arm.hand.quaternion.slerp(parent.invert().multiply(palm),lift)});
+  v.arms.forEach((arm,i)=>{const parent=arm.quaternion.clone().multiply(arm.forearm.quaternion),
+    palm=new T.Quaternion().setFromAxisAngle(new T.Vector3(1,0,0),i===0?-Math.PI/2:-.35);arm.hand.quaternion.slerp(parent.invert().multiply(palm),lift)});
  }
 }
 
@@ -103,7 +111,8 @@ export function nightCuriosity(v,d,state,index,still){
 }
 
 export function hairFollow(v,t,still,dt){
- v.hairStyle.tails.forEach((tail,i)=>{const z=still?0:T.MathUtils.clamp(-v.head.rotation.z*.60+Math.sin(t*1.9+i)*.016,-.075,.075),x=still?0:T.MathUtils.clamp(-v.head.rotation.y*.13,-.055,.055);tail.rotation.z=still?0:T.MathUtils.damp(tail.rotation.z,z,5,dt);tail.rotation.x=still?0:T.MathUtils.damp(tail.rotation.x,x,5,dt)});
+ v.hairStyle.tails.forEach((tail,i)=>{const z=still?0:T.MathUtils.clamp(-v.head.rotation.z*.60+Math.sin(t*1.9+i)*.016,-.075,.075),x=still?
+   0:T.MathUtils.clamp(-v.head.rotation.y*.13,-.055,.055);tail.rotation.z=still?0:T.MathUtils.damp(tail.rotation.z,z,5,dt);tail.rotation.x=still?0:T.MathUtils.damp(tail.rotation.x,x,5,dt)});
  v.hairStyle.bows.forEach((bow,i)=>{bow.rotation.x=still?0:Math.sin(t*1.35+i)*.035});
 }
 

@@ -15,6 +15,9 @@ const paths={
  bear:'<circle cx="7" cy="5" r="3"/><circle cx="17" cy="5" r="3"/><ellipse cx="12" cy="10" rx="7" ry="6"/><ellipse cx="12" cy="18" rx="5" ry="4"/><path d="M9 9h.01M15 9h.01m-4 3h2"/>',
  music:'<path d="M9 18V5l11-2v13M9 8l11-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="17" cy="16" rx="3" ry="2"/>',
  volume:'<path d="M11 4 6 8H2v8h4l5 4ZM15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/>',muted:'<path d="M11 4 6 8H2v8h4l5 4Zm5 5 6 6m0-6-6 6"/>',
- pause:'<path d="M7 4v16M17 4v16"/>',resume:'<path d="m7 3 14 9-14 9z"/>',check:'<path d="m4 12 5 5L20 6"/>',plus:'<path d="M12 5v14M5 12h14"/>',minus:'<path d="M5 12h14"/>',arrow:'<path d="M4 12h16m-6-6 6 6-6 6"/>',ghost:'<path d="M4 21V10a8 8 0 0 1 16 0v11l-4-3-4 3-4-3ZM9 9v2m6-2v2"/>',spark:'<path d="m12 2 2 7 7 3-7 2-2 8-2-8-8-2 8-3Z"/>',
+ pause:'<path d="M7 4v16M17 4v16"/>',resume:'<path d="m7 3 14 9-14 9z"/>',check:'<path d="m4 12 5 5L20 6"/>',plus:'<path d="M12 5v14M5 12h14"/>',
+   minus:'<path d="M5 12h14"/>',arrow:'<path d="M4 12h16m-6-6 6 6-6 6"/>',
+     ghost:'<path d="M4 21V10a8 8 0 0 1 16 0v11l-4-3-4 3-4-3ZM9 9v2m6-2v2"/>',spark:'<path d="m12 2 2 7 7 3-7 2-2 8-2-8-8-2 8-3Z"/>',
 };
-export function icon(name){return `<svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.spark}</svg>`}
+export function icon(name){return `<svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55"
+  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.spark}</svg>`}

@@ -11,7 +11,8 @@ function group(parent,name){const o=new T.Group();o.name=name;o.userData.noBatch
 function box(parent,size,material,position,name=''){return mesh(parent,new T.BoxGeometry(...size),material,position,name)}
 function torus(parent,r,tube,material,position,flat=false){const o=mesh(parent,new T.TorusGeometry(r,tube,4,24),material,position);if(flat)o.rotation.x=-Math.PI/2;return o}
 function cylinder(parent,r,h,material,position,name=''){return mesh(parent,new T.CylinderGeometry(r,r,h,20),material,position,name)}
-function emptyGeometry(){const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute([],3));g.setAttribute('normal',new T.Float32BufferAttribute([],3));g.setAttribute('uv',new T.Float32BufferAttribute([],2));return g}
+function emptyGeometry(){const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute([],3));
+g.setAttribute('normal',new T.Float32BufferAttribute([],3));g.setAttribute('uv',new T.Float32BufferAttribute([],2));return g}
 // Small raised rectangular strands follow the exact supplied polyline. No
 // curve smoothing, pointer prediction or coverage decisions live in the art.
 function strandGeometry(points,scale,width,bottom,height){
@@ -20,15 +21,18 @@ function strandGeometry(points,scale,width,bottom,height){
  for(let i=1;i<points.length;i++){
   const a=points[i-1],b=points[i],dx=(b[0]-a[0])*scale,dz=(b[1]-a[1])*scale,len=Math.hypot(dx,dz);if(len<1e-8)continue;
   const nx=-dz/len*width/2,nz=dx/len*width/2,ax=a[0]*scale,az=a[1]*scale,bx=b[0]*scale,bz=b[1]*scale;
-  const v=[[ax+nx,bottom,az+nz],[ax-nx,bottom,az-nz],[bx-nx,bottom,bz-nz],[bx+nx,bottom,bz+nz],[ax+nx,bottom+height,az+nz],[ax-nx,bottom+height,az-nz],[bx-nx,bottom+height,bz-nz],[bx+nx,bottom+height,bz+nz]];
+  const v=[[ax+nx,bottom,az+nz],[ax-nx,bottom,az-nz],[bx-nx,bottom,bz-nz],[bx+nx,bottom,bz+nz],[ax+nx,bottom+height,az+nz],[ax-nx,bottom+height,
+    az-nz],[bx-nx,bottom+height,bz-nz],[bx+nx,bottom+height,bz+nz]];
   for(const [a,b,c,d] of [[4,7,6,5],[0,1,2,3],[0,4,5,1],[1,5,6,2],[2,6,7,3],[3,7,4,0]]){triangle(v[a],v[b],v[c]);triangle(v[a],v[c],v[d])}
  }
- const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(positions,3));g.setAttribute('uv',new T.Float32BufferAttribute(uvs,2));g.computeVertexNormals();if(positions.length){g.computeBoundingBox();g.computeBoundingSphere()}return g;
+ const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(positions,3));
+ g.setAttribute('uv',new T.Float32BufferAttribute(uvs,2));g.computeVertexNormals();if(positions.length){g.computeBoundingBox();g.computeBoundingSphere()}return g;
 }
 function allPoints(sections){const result=[];for(const section of sections)for(const p of section){const last=result.at(-1);if(!last||last[0]!==p[0]||last[1]!==p[1])result.push(p)}return result}
 
 export function createSewingPlay(parent){
- const table=STITCH_TABLE,room=ROOMS.find(r=>r.id===table.room),root=new T.Group();root.name='physical-sewing-table';root.visible=false;root.position.set(room.x+table.x,room.y+table.y,table.z);parent.add(root);
+ const table=STITCH_TABLE,room=ROOMS.find(r=>r.id===table.room),root=new T.Group();root.name='physical-sewing-table';root.visible=false;
+ root.position.set(room.x+table.x,room.y+table.y,table.z);parent.add(root);
  const cream=new T.MeshStandardMaterial({color:P.cream,roughness:.86}),wood=mat(P.wood),brass=mat(P.gold);
  const linen=new T.MeshStandardMaterial({color:0xffffff,map:texture('fabric',['#f1e1c7','#dccbab']),roughness:1,side:T.DoubleSide});
  const threadMaterial=new T.MeshStandardMaterial({color:0xa74345,roughness:.60,side:T.DoubleSide});
@@ -43,7 +47,8 @@ export function createSewingPlay(parent){
  cylinder(staticArt,.025,.037,brass,[0,.024,-table.hoopRadius-.012]);
  batch(staticArt);
  const cloth=mesh(root,new T.CircleGeometry(table.hoopRadius-.025,48),linen,[0,0,0],'stitch-working-cloth');cloth.rotation.x=-Math.PI/2;
- const mendPatch=mesh(root,new T.CircleGeometry(.20,24),new T.MeshStandardMaterial({color:0xc5a080,roughness:1,side:T.DoubleSide}),[0,.002,0],'stitch-bear-mending-patch');mendPatch.rotation.x=-Math.PI/2;mendPatch.scale.set(1.45,.70,1);
+ const mendPatch=mesh(root,new T.CircleGeometry(.20,24),new T.MeshStandardMaterial({color:0xc5a080,roughness:1,side:T.DoubleSide}),[0,.002,0],
+   'stitch-bear-mending-patch');mendPatch.rotation.x=-Math.PI/2;mendPatch.scale.set(1.45,.70,1);
  const guide=mesh(root,emptyGeometry(),guideMaterial,[0,0,0],'stitch-contour-guide');
  const trail=mesh(root,emptyGeometry(),threadMaterial,[0,0,0],'stitch-accepted-thread');
  const guideBead=mesh(root,new T.SphereGeometry(.014,10,6),brass,[0,.021,0],'stitch-next-guide-point');
@@ -82,13 +87,21 @@ export function createSewingPlay(parent){
   const key=JSON.stringify([stitch.patternId,stitch.sections]);
   if(key!==patternKey){const old=guide.geometry;guide.geometry=strandGeometry(allPoints(stitch.sections),table.clothScale,.010,.003,.002);old.dispose();patternKey=key}
   const nextTrailKey=JSON.stringify(stitch.acceptedTrail);
-  if(nextTrailKey!==trailKey){const old=trail.geometry,newGeometry=strandGeometry(stitch.acceptedTrail,table.clothScale,.011,.008,.007);trail.geometry=newGeometry;finishedThread.geometry=newGeometry;old.dispose();trailKey=nextTrailKey}
+  if(nextTrailKey!==trailKey){const old=trail.geometry,newGeometry=strandGeometry(stitch.acceptedTrail,table.clothScale,.011,.008,.007);
+  trail.geometry=newGeometry;finishedThread.geometry=newGeometry;old.dispose();trailKey=nextTrailKey}
   trail.visible=trail.geometry.attributes.position.count>0;finishedThread.visible=trail.visible;
   const lifted=stitch.pressed?0:.10;needle.position.set(stitch.needle.x*table.clothScale,lifted,stitch.needle.y*table.clothScale);
   mendPatch.visible=stitch.mode==='mend';threadMaterial.color.set(stitch.mode==='mend'?0xb44946:0xa74345);
   const complete=stitch.completedSections>=stitch.sections.length;
   finish.visible=complete||stitch.phase==='finished';looseLoop.visible=stitch.loose;looseLoop.position.set(needle.position.x+.030,.022,needle.position.z+.020);
   guideBead.visible=Boolean(stitch.nextGuidePoint)&&!complete;if(stitch.nextGuidePoint)guideBead.position.set(stitch.nextGuidePoint.x*table.clothScale,.021,stitch.nextGuidePoint.y*table.clothScale);
-  actual={active:true,phase:stitch.phase,patternId:stitch.patternId,needle:{x:stitch.needle.x,y:stitch.needle.y,pressed:stitch.pressed,tip:localPoint(tipAnchor),grip:localPoint(grip)},loose:stitch.loose,section:stitch.section,completedSections:stitch.completedSections,trail:stitch.acceptedTrail.map(p=>[...p]),nextGuidePoint:stitch.nextGuidePoint?{...stitch.nextGuidePoint}:null,finishedClothVisible:finish.visible,board:{center:[0,-.041,0],size:[...table.boardSize]},spool:{center:localPoint(spoolBody),diameter:table.spoolDiameter},finish:{center:localPoint(finishCloth),size:[...table.finishSize],visible:finish.visible}};
- },points(){if(!root.visible)return [];root.updateWorldMatrix(true,true);const result=targets.filter(t=>{for(let o=t;o;o=o.parent)if(!o.visible)return false;return true}).map(t=>({key:t.userData.stitch,local:localPoint(t),world:t.getWorldPosition(new T.Vector3()).toArray()}));result.push({key:'tip',local:localPoint(tipAnchor),world:tipAnchor.getWorldPosition(new T.Vector3()).toArray()});return result},status(){return structuredClone(actual)}};
+  actual={active:true,phase:stitch.phase,patternId:stitch.patternId,needle:{x:stitch.needle.x,y:stitch.needle.y,pressed:stitch.pressed,
+    tip:localPoint(tipAnchor),grip:localPoint(grip)},loose:stitch.loose,section:stitch.section,completedSections:stitch.completedSections,
+    trail:stitch.acceptedTrail.map(p=>[...p]),nextGuidePoint:stitch.nextGuidePoint?{...stitch.nextGuidePoint}:null,finishedClothVisible:finish.visible,
+    board:{center:[0,-.041,0],size:[...table.boardSize]},spool:{center:localPoint(spoolBody),diameter:table.spoolDiameter},
+    finish:{center:localPoint(finishCloth),size:[...table.finishSize],visible:finish.visible}};
+ },points(){if(!root.visible)return [];root.updateWorldMatrix(true,true);
+ const result=targets.filter(t=>{for(let o=t;o;o=o.parent)if(!o.visible)return false;
+ return true}).map(t=>({key:t.userData.stitch,local:localPoint(t),world:t.getWorldPosition(new T.Vector3()).toArray()}));
+ result.push({key:'tip',local:localPoint(tipAnchor),world:tipAnchor.getWorldPosition(new T.Vector3()).toArray()});return result},status(){return structuredClone(actual)}};
 }

@@ -4,21 +4,14 @@ import {icon} from './icons.js';
 import {captureCanvas} from './canvas-aria.js';
 import {bindTeaInput} from './tea-input-bindings.js';
 import {createTeaGesture,createTeaKeyboard} from './tea-input.js';
-import {teaView,percent} from './tea-view.js';
+import {teaView,mountTeaSurface,percent} from './tea-view.js';
 export {teaView};
 
 export function createTeaUI(host,canvas,getState,dispatch,{pick,aimAt}){
- const root=document.createElement('section');root.className='tea-playfield';root.hidden=true;
- root.setAttribute('aria-labelledby','tea-work-title');
- root.innerHTML=`<header class="tea-heading"><h2 id="tea-work-title"></h2><p class="tea-progress"></p></header>
-  <div class="tea-work-strip" role="region"><div class="tea-work-copy"><p id="tea-work-instructions"><span class="tea-cue-full"></span><span class="tea-cue-short" aria-hidden="true"></span></p><p id="tea-work-status"></p><p class="tea-work-detail"></p></div><button type="button" class="tea-exit" data-tea-action="exit">${icon('arrow')}<span></span></button></div>
-  <div id="tea-cup-readout" class="sr-only" role="group"></div><p id="tea-work-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>`;
- // #ui is rebuilt for sound, pause and locale changes. Keep this input surface
- // beside it so a refresh cannot remove a captured pointer or the Exit button.
- const mount=host.parentElement??host;mount.append(root);
+ const {root,parts}=mountTeaSurface(host);
  const gesture=createTeaGesture(),keyboard=createTeaKeyboard();
- const parts={title:root.querySelector('#tea-work-title'),progress:root.querySelector('.tea-progress'),full:root.querySelector('.tea-cue-full'),short:root.querySelector('.tea-cue-short'),status:root.querySelector('#tea-work-status'),detail:root.querySelector('.tea-work-detail'),strip:root.querySelector('.tea-work-strip'),exit:root.querySelector('[data-tea-action="exit"]'),cups:root.querySelector('#tea-cup-readout'),announcement:root.querySelector('#tea-work-announcement')};
- let session=null,previousPhase=null,inputMode='pointer',feedback=null,feedbackAge=0,announcementAge=Infinity,announcementSignature='',viewSignature='',cachedView=null,lost=false,disposed=false;
+ let session=null,previousPhase=null,inputMode='pointer',feedback=null,feedbackAge=0,announcementAge=Infinity,
+   announcementSignature='',viewSignature='',cachedView=null,lost=false,disposed=false;
  const original=captureCanvas(canvas),originalDescription=original.description;
  const t=key=>translate(getState().settings.locale,key);
  const active=()=>teaStatus(getState());
@@ -61,11 +54,13 @@ export function createTeaUI(host,canvas,getState,dispatch,{pick,aimAt}){
   setAttribute(canvas,'aria-describedby',[originalDescription,'tea-work-instructions','tea-work-status','tea-cup-readout'].filter(Boolean).join(' '));
   // Input still advances every frame. Rebuild number formatting and visible
   // text only when something a player can read has actually changed.
-  const nextView=JSON.stringify([s.settings.locale,tea.phase,tea.mode,inputMode,tea.aimedCup,tea.ready,tea.cups.map(c=>[c.id,percent(c.fill),percent(c.target),c.ready,c.overfilled]),tea.result,tea.best,s.activities.mastery.tea,s.restoration,feedback]);
+  const nextView=JSON.stringify([s.settings.locale,tea.phase,tea.mode,inputMode,tea.aimedCup,tea.ready,tea.cups.map(c=>[c.id,percent(c.fill),
+    percent(c.target),c.ready,c.overfilled]),tea.result,tea.best,s.activities.mastery.tea,s.restoration,feedback]);
   if(nextView!==viewSignature){
    const view=cachedView=teaView(s,tea,{inputMode,reason:feedback});viewSignature=nextView;
    setText(parts.title,view.title);setText(parts.progress,view.progress);parts.progress.hidden=!view.progress;
-   setText(parts.full,view.instructions);setText(parts.short,view.shortInstructions);setText(parts.status,view.status);setText(parts.detail,view.detail);parts.detail.hidden=!view.detail;
+   setText(parts.full,view.instructions);setText(parts.short,view.shortInstructions);setText(parts.status,view.status);
+   setText(parts.detail,view.detail);parts.detail.hidden=!view.detail;
    setAttribute(parts.strip,'aria-label',t('teaWorkRegion'));setText(parts.exit.querySelector('span'),t('teaWorkExit'));
    setAttribute(parts.cups,'aria-label',t('teaCupList'));setText(parts.cups,view.cups.join('. '));
   }
@@ -76,7 +71,8 @@ export function createTeaUI(host,canvas,getState,dispatch,{pick,aimAt}){
    announcementSignature=signature;announcementAge=0;
   }
  }
- const unbindInput=bindTeaInput({root,active,blocked,stop,releaseCapture,invoke,cancel,respond,clearFeedback,update,gesture,keyboard,canvas,dispatch,pick,aimAt,setInputMode:mode=>{inputMode=mode},setLost:()=>{lost=true},parts});
+ const unbindInput=bindTeaInput({root,active,blocked,stop,releaseCapture,invoke,cancel,respond,clearFeedback,update,gesture,keyboard,canvas,dispatch,
+   pick,aimAt,setInputMode:mode=>{inputMode=mode},setLost:()=>{lost=true},parts});
  update(0);
  return {update,cancel,respond,dispose(){if(disposed)return;cancel();disposed=true;unbindInput();host.dataset.teaActive='false';restoreCanvas();root.remove()}};
 }

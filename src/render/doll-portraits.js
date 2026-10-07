@@ -25,18 +25,21 @@ const srgb=x=>Math.round(255*(x<=.0031308?12.92*x:1.055*Math.pow(x,1/2.4)-.055))
 export function portraitPixels(pixels,size){
  const canvas=document.createElement('canvas');canvas.width=canvas.height=size;const ctx=canvas.getContext('2d'),image=ctx.createImageData(size,size);
  // Offscreen Three r180 targets are linear; Canvas2D PNGs require sRGB and top-down rows.
- for(let y=0;y<size;y++)for(let x=0;x<size;x++){const source=((size-1-y)*size+x)*4,dest=(y*size+x)*4;for(let c=0;c<3;c++)image.data[dest+c]=srgb(pixels[source+c]/255);image.data[dest+3]=pixels[source+3]}
+ for(let y=0;y<size;y++)for(let x=0;x<size;x++){const source=((size-1-y)*size+x)*4,dest=(y*size+x)*4;
+ for(let c=0;c<3;c++)image.data[dest+c]=srgb(pixels[source+c]/255);image.data[dest+3]=pixels[source+3]}
  ctx.putImageData(image,0,0);return canvas.toDataURL('image/png');
 }
 export function renderPortrait(renderer,doll,size=192){
  size=Number.isFinite(size)?Math.max(64,Math.min(256,Math.floor(size))):192;
  const {scene,camera}=createPortraitScene(doll),target=new T.WebGLRenderTarget(size,size,{depthBuffer:true,stencilBuffer:false});
- const previous={target:renderer.getRenderTarget(),viewport:renderer.getViewport(new T.Vector4()),scissor:renderer.getScissor(new T.Vector4()),test:renderer.getScissorTest(),clear:renderer.getClearColor(new T.Color()),alpha:renderer.getClearAlpha(),auto:renderer.autoClear,shadow:renderer.shadowMap.enabled};
+ const previous={target:renderer.getRenderTarget(),viewport:renderer.getViewport(new T.Vector4()),scissor:renderer.getScissor(new T.Vector4()),
+   test:renderer.getScissorTest(),clear:renderer.getClearColor(new T.Color()),alpha:renderer.getClearAlpha(),auto:renderer.autoClear,shadow:renderer.shadowMap.enabled};
  try{
   renderer.setRenderTarget(target);renderer.setScissorTest(false);renderer.autoClear=true;renderer.shadowMap.enabled=false;renderer.render(scene,camera);
   const pixels=new Uint8Array(size*size*4);renderer.readRenderTargetPixels(target,0,0,size,size,pixels);return portraitPixels(pixels,size);
  }finally{
-  renderer.setRenderTarget(previous.target);renderer.setViewport(previous.viewport);renderer.setScissor(previous.scissor);renderer.setScissorTest(previous.test);renderer.setClearColor(previous.clear,previous.alpha);renderer.autoClear=previous.auto;renderer.shadowMap.enabled=previous.shadow;
+  renderer.setRenderTarget(previous.target);renderer.setViewport(previous.viewport);renderer.setScissor(previous.scissor);
+  renderer.setScissorTest(previous.test);renderer.setClearColor(previous.clear,previous.alpha);renderer.autoClear=previous.auto;renderer.shadowMap.enabled=previous.shadow;
   target.dispose();scene.clear();
  }
 }

@@ -4,20 +4,12 @@ import {icon} from './icons.js';
 import {captureCanvas} from './canvas-aria.js';
 import {bindStitchInput} from './stitch-input-bindings.js';
 import {createStitchGesture,createStitchKeyboard} from './stitch-input.js';
-import {stitchView,coordinate,point} from './stitch-view.js';
+import {stitchView,mountStitchSurface,coordinate,point} from './stitch-view.js';
 export {stitchView};
 
 export function createStitchUI(host,canvas,getState,dispatch,{pick,pointAt}){
- const root=document.createElement('section');root.className='stitch-playfield';root.hidden=true;
- root.setAttribute('aria-labelledby','stitch-work-title');
- root.innerHTML='<header class="stitch-heading"><h2 id="stitch-work-title"></h2><p class="stitch-progress"></p></header>'+
-  '<div class="stitch-work-strip" role="region"><div class="stitch-work-copy"><p id="stitch-work-instructions"><span class="stitch-cue-full"></span><span class="stitch-cue-short" aria-hidden="true"></span></p><p id="stitch-work-status"></p><p class="stitch-work-detail"></p></div><button type="button" class="stitch-exit" data-stitch-action="exit">'+icon('arrow')+'<span></span></button></div>'+
-  '<p id="stitch-needle-readout" class="sr-only"></p><p id="stitch-work-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>';
- // House controls rebuild for sound, pause and locale. Keep the work surface
- // beside #ui so those refreshes cannot detach its controls or pointer capture.
- const mount=host.parentElement??host;mount.append(root);
+ const {root,parts}=mountStitchSurface(host);
  const gesture=createStitchGesture(),keyboard=createStitchKeyboard();
- const parts={title:root.querySelector('#stitch-work-title'),progress:root.querySelector('.stitch-progress'),full:root.querySelector('.stitch-cue-full'),short:root.querySelector('.stitch-cue-short'),status:root.querySelector('#stitch-work-status'),detail:root.querySelector('.stitch-work-detail'),strip:root.querySelector('.stitch-work-strip'),exit:root.querySelector('[data-stitch-action="exit"]'),readout:root.querySelector('#stitch-needle-readout'),announcement:root.querySelector('#stitch-work-announcement')};
  let session=null,previousPhase=null,inputMode='pointer',feedback=null,feedbackAge=0,announcementSignature='',viewSignature='',cachedView=null,lost=false,disposed=false;
  const original=captureCanvas(canvas),originalDescription=original.description;
  const t=key=>translate(getState().settings.locale,key),active=()=>stitchStatus(getState());
@@ -55,17 +47,20 @@ export function createStitchUI(host,canvas,getState,dispatch,{pick,pointAt}){
   const seconds=Number.isFinite(dt)?Math.max(0,Math.min(dt,.25)):0;feedbackAge+=seconds;
   if(feedbackAge>4)clearFeedback();
   const s=getState();
-  setAttribute(root,'data-phase',stitch.phase);setAttribute(root,'data-mode',stitch.mode);setAttribute(root,'data-input',inputMode);setAttribute(root,'data-ready',String(stitch.ready));setAttribute(root,'data-loose',String(stitch.loose));
+  setAttribute(root,'data-phase',stitch.phase);setAttribute(root,'data-mode',stitch.mode);setAttribute(root,'data-input',inputMode);
+  setAttribute(root,'data-ready',String(stitch.ready));setAttribute(root,'data-loose',String(stitch.loose));
   root.classList.toggle('stitch-holding',gesture.target==='needle'&&stitch.phase==='sew');
   setAttribute(canvas,'aria-label',t('stitchCanvasLabel'));setAttribute(canvas,'role','application');
   setAttribute(canvas,'aria-keyshortcuts','ArrowLeft ArrowRight ArrowUp ArrowDown Space U Enter Escape');
   setAttribute(canvas,'aria-describedby',[originalDescription,'stitch-work-instructions','stitch-work-status','stitch-needle-readout'].filter(Boolean).join(' '));
   const progress=stitchSectionProgress(stitch).percent;
-  const nextView=JSON.stringify([s.settings.locale,stitch.phase,stitch.mode,inputMode,stitch.section,stitch.completedSections,progress,stitch.loose,stitch.ready,[coordinate(stitch.needle.x),coordinate(stitch.needle.y)],stitch.nextGuidePoint,stitch.result,stitch.best,s.activities.mastery.stitch,s.restoration,feedback]);
+  const nextView=JSON.stringify([s.settings.locale,stitch.phase,stitch.mode,inputMode,stitch.section,stitch.completedSections,progress,stitch.loose,
+    stitch.ready,[coordinate(stitch.needle.x),coordinate(stitch.needle.y)],stitch.nextGuidePoint,stitch.result,stitch.best,s.activities.mastery.stitch,s.restoration,feedback]);
   if(nextView!==viewSignature){
    const view=cachedView=stitchView(s,stitch,{inputMode,reason:feedback});viewSignature=nextView;
    setText(parts.title,view.title);setText(parts.progress,view.progress);parts.progress.hidden=!view.progress;
-   setText(parts.full,view.instructions);setText(parts.short,view.shortInstructions);setText(parts.status,view.status);setText(parts.detail,view.detail);parts.detail.hidden=!view.detail;
+   setText(parts.full,view.instructions);setText(parts.short,view.shortInstructions);setText(parts.status,view.status);
+   setText(parts.detail,view.detail);parts.detail.hidden=!view.detail;
    setAttribute(parts.strip,'aria-label',t('stitchWorkRegion'));setText(parts.exit.querySelector('span'),t('stitchWorkExit'));
    setAttribute(parts.readout,'aria-label',t('stitchNeedleReadout'));setText(parts.readout,view.readout);
   }
@@ -78,7 +73,8 @@ export function createStitchUI(host,canvas,getState,dispatch,{pick,pointAt}){
    announcementSignature=signature;
   }
  }
- const unbindInput=bindStitchInput({root,active,blocked,stop,hit,project,releaseCapture,invoke,cancel,clearFeedback,update,gesture,keyboard,canvas,dispatch,setInputMode:mode=>{inputMode=mode},setLost:()=>{lost=true},parts});
+ const unbindInput=bindStitchInput({root,active,blocked,stop,hit,project,releaseCapture,invoke,cancel,clearFeedback,update,gesture,keyboard,canvas,
+   dispatch,setInputMode:mode=>{inputMode=mode},setLost:()=>{lost=true},parts});
  update(0);
  return {update,cancel,respond,dispose(){if(disposed)return;cancel();disposed=true;unbindInput();host.dataset.stitchActive='false';restoreCanvas();root.remove()}};
 }

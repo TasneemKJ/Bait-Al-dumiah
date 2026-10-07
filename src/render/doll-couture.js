@@ -13,7 +13,8 @@ export function gridSurface(columns, rows, sample, reverse = false) {
   const a=j*(columns+1)+i,b=a+columns+1;
   indices.push(...(reverse?[a,a+1,b,a+1,b+1,b]:[a,b,a+1,a+1,b,b+1]));
  }
- const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(positions,3));g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));g.setIndex(indices);g.computeVertexNormals();g.computeBoundingBox();g.computeBoundingSphere();return g;
+ const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(positions,3));
+ g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));g.setIndex(indices);g.computeVertexNormals();g.computeBoundingBox();g.computeBoundingSphere();return g;
 }
 export function closeSurfaceSeam(g, columns, rows) {
  const p=g.attributes.position,n=g.attributes.normal,a=new T.Vector3(),b=new T.Vector3();
@@ -79,7 +80,8 @@ export function dollFabric(id) {
  for(let i=1;i<256;i+=4){c.beginPath();c.moveTo(i,0);c.lineTo(i,256);c.moveTo(0,i);c.lineTo(256,i);c.stroke()}
  const map=new T.CanvasTexture(image);map.colorSpace=T.SRGBColorSpace;map.anisotropy=4;
  if(id==='sami')map.userData.pattern='sami-woven-bib-band';
- const m=new T.MeshStandardMaterial({map,roughness:.88,bumpMap:surfaceFinish('fabric'),roughnessMap:surfaceFinish('fabric'),bumpScale:.002,side:T.DoubleSide});m.userData.shared=true;fabrics.set(id,m);return m;
+ const m=new T.MeshStandardMaterial({map,roughness:.88,bumpMap:surfaceFinish('fabric'),roughnessMap:surfaceFinish('fabric'),bumpScale:.002,
+   side:T.DoubleSide});m.userData.shared=true;fabrics.set(id,m);return m;
 }
 
 let bodice=null;
@@ -91,13 +93,15 @@ export function bodiceGeometry(){
 
 let sleeve=null;
 export function sleeveGeometry(){
- if(!sleeve)sleeve=closeSurfaceSeam(gridSurface(32,16,(u,v)=>{const a=u*Math.PI*2,r=.0385+.013*Math.sin(v*Math.PI)-.0185*Math.pow(v,6),fold=1+.020*Math.cos(a*12)*Math.sin(v*Math.PI);return [Math.cos(a)*r*fold,-.112+.124*v,Math.sin(a)*r*fold*.91]}),32,16);
+ if(!sleeve)sleeve=closeSurfaceSeam(gridSurface(32,16,(u,v)=>{const a=u*Math.PI*2,r=.0385+.013*Math.sin(v*Math.PI)-.0185*Math.pow(v,6),
+   fold=1+.020*Math.cos(a*12)*Math.sin(v*Math.PI);return [Math.cos(a)*r*fold,-.112+.124*v,Math.sin(a)*r*fold*.91]}),32,16);
  return sleeve;
 }
 
 let forearm=null;
 export function forearmGeometry(){
- if(!forearm)forearm=closeSurfaceSeam(gridSurface(24,14,(u,v)=>{const a=u*Math.PI*2,r=.029+.010*Math.pow(Math.sin(v*Math.PI),.7)+.003*v;return [Math.cos(a)*r,-.117+.128*v,Math.sin(a)*r*.93+.006*Math.sin(v*Math.PI)]}),24,14);
+ if(!forearm)forearm=closeSurfaceSeam(gridSurface(24,14,(u,v)=>{const a=u*Math.PI*2,r=.029+.010*Math.pow(Math.sin(v*Math.PI),.7)+.003*v;
+ return [Math.cos(a)*r,-.117+.128*v,Math.sin(a)*r*.93+.006*Math.sin(v*Math.PI)]}),24,14);
  return forearm;
 }
 
@@ -118,10 +122,13 @@ export function trouserLegGeometry(sign=1){
 const shirts=new Map();
 export function shirtFabric(id){
  if(shirts.has(id))return shirts.get(id);
- const canvas=document.createElement('canvas');canvas.width=canvas.height=128;const c=canvas.getContext('2d');c.fillStyle={lina:'#dbaeb1',noor:'#bbd0bc',sami:'#d8c9ac'}[id]||'#d8c9ac';c.fillRect(0,0,128,128);
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=128;const c=canvas.getContext('2d');
+ c.fillStyle={lina:'#dbaeb1',noor:'#bbd0bc',sami:'#d8c9ac'}[id]||'#d8c9ac';c.fillRect(0,0,128,128);
  c.lineWidth=.6;c.strokeStyle='rgba(255,245,226,.25)';for(let i=1;i<128;i+=4){c.beginPath();c.moveTo(i,0);c.lineTo(i,128);c.moveTo(0,i);c.lineTo(128,i);c.stroke()}
  if(id==='sami'){c.fillStyle='rgba(140,109,87,.15)';for(let y=5;y<128;y+=18)c.fillRect(0,y,128,2)}
- const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;const m=new T.MeshStandardMaterial({map,roughness:.91,bumpMap:surfaceFinish('fabric'),roughnessMap:surfaceFinish('fabric'),bumpScale:.0015,side:T.DoubleSide});m.userData.shared=true;shirts.set(id,m);return m;
+ const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;
+ const m=new T.MeshStandardMaterial({map,roughness:.91,bumpMap:surfaceFinish('fabric'),roughnessMap:surfaceFinish('fabric'),bumpScale:.0015,
+   side:T.DoubleSide});m.userData.shared=true;shirts.set(id,m);return m;
 }
 
 // Project sewn details onto the same sampled bodice profile used by the mesh.
@@ -139,7 +146,8 @@ export function bodiceTop(x,z){
  const p=bodiceGeometry().attributes.position,stride=33;
  const inside=(row)=>{const w=p.getX(row*stride),d=p.getZ(row*stride+8);return (x/w)**2+(z/d)**2<=1};
  let row=23;while(row>0&&!inside(row))row--;
- let a=0,b=1;for(let i=0;i<12;i++){const t=(a+b)/2,w=T.MathUtils.lerp(p.getX(row*stride),p.getX((row+1)*stride),t),d=T.MathUtils.lerp(p.getZ(row*stride+8),p.getZ((row+1)*stride+8),t);if((x/w)**2+(z/d)**2<=1)a=t;else b=t}
+ let a=0,b=1;for(let i=0;i<12;i++){const t=(a+b)/2,w=T.MathUtils.lerp(p.getX(row*stride),p.getX((row+1)*stride),t),
+   d=T.MathUtils.lerp(p.getZ(row*stride+8),p.getZ((row+1)*stride+8),t);if((x/w)**2+(z/d)**2<=1)a=t;else b=t}
  return T.MathUtils.lerp(p.getY(row*stride),p.getY((row+1)*stride),(a+b)/2);
 }
 const shoulderStraps=new Map();

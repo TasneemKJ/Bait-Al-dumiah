@@ -9,14 +9,20 @@ const text=(el,value)=>{if(el.textContent!==value)el.textContent=value};
 // The only visible button is Exit. All notes and replay live in the 3D room.
 export function createChimeUI(host,canvas,getState,dispatch,{pick,pullSpan}){
  const root=document.createElement('section');root.className='chime-playfield';root.hidden=true;
- root.innerHTML=`<header class="chime-heading"><h2></h2><p class="chime-progress"></p></header><div class="chime-work-strip"><div><p id="chime-instructions" class="chime-long"></p><p class="chime-short" aria-hidden="true"></p><p id="chime-status"></p></div><button type="button" class="chime-exit">${icon('arrow')}<span></span></button></div><p class="sr-only" id="chime-readout"></p><p class="sr-only" id="chime-demonstration"></p><p class="sr-only chime-announcement" role="status" aria-live="polite"></p>`;
+ root.innerHTML=`<header class="chime-heading"><h2></h2><p class="chime-progress"></p></header><div class="chime-work-strip"><div><p
+   id="chime-instructions" class="chime-long"></p><p class="chime-short" aria-hidden="true"></p><p id="chime-status"></p></div><button type="button"
+   class="chime-exit">${icon('arrow')}<span></span></button></div><p class="sr-only" id="chime-readout"></p><p class="sr-only"
+   id="chime-demonstration"></p><p class="sr-only chime-announcement" role="status" aria-live="polite"></p>`;
  host.append(root);
- const parts={title:root.querySelector('h2'),progress:root.querySelector('.chime-progress'),instructions:root.querySelector('#chime-instructions'),short:root.querySelector('.chime-short'),status:root.querySelector('#chime-status'),exit:root.querySelector('button'),readout:root.querySelector('#chime-readout'),demo:root.querySelector('#chime-demonstration'),announcement:root.querySelector('.chime-announcement')};
+ const parts={title:root.querySelector('h2'),progress:root.querySelector('.chime-progress'),instructions:root.querySelector('#chime-instructions'),
+   short:root.querySelector('.chime-short'),status:root.querySelector('#chime-status'),exit:root.querySelector('button'),
+   readout:root.querySelector('#chime-readout'),demo:root.querySelector('#chime-demonstration'),announcement:root.querySelector('.chime-announcement')};
  const original=Object.fromEntries(['role','aria-label','aria-describedby','aria-keyshortcuts'].map(k=>[k,canvas.getAttribute(k)]));
  const gesture=createChimeGesture();let session=null,keyboard=false,selection=0,input='pointer',signature='',disposed=false,lost=false;
  const state=()=>getState(),active=()=>chimeStatus(state()),t=k=>translate(state().settings.locale,k),n=v=>number(state().settings.locale,v);
  const blocked=()=>state().paused||document.hidden||lost||Boolean(host.querySelector('dialog[open],.error-screen'));
- const inside=e=>{const r=canvas.getBoundingClientRect();return Number.isFinite(e.clientX)&&Number.isFinite(e.clientY)&&e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom&&document.elementFromPoint(e.clientX,e.clientY)===canvas};
+ const inside=e=>{const r=canvas.getBoundingClientRect();
+ return Number.isFinite(e.clientX)&&Number.isFinite(e.clientY)&&e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom&&document.elementFromPoint(e.clientX,e.clientY)===canvas};
  const releaseCapture=id=>{if(id!==null){try{if(canvas.hasPointerCapture(id))canvas.releasePointerCapture(id)}catch{}}};
  function cancel(){
   const id=gesture.pointerId;gesture.cancel();keyboard=false;releaseCapture(id);
@@ -92,8 +98,12 @@ export function createChimeUI(host,canvas,getState,dispatch,{pick,pullSpan}){
  const visibility=()=>{if(document.hidden)cancel()};
  const contextLost=()=>{lost=true;cancel()};
  const consume=e=>{if(active())stop(e)};
- const bindings=[[canvas,'pointerdown',down,true],[canvas,'pointermove',move,true],[canvas,'pointerup',up,true],[canvas,'pointercancel',cancelPointer,true],[canvas,'lostpointercapture',cancelPointer,true],[canvas,'click',consume,true],[canvas,'contextmenu',e=>{if(active()){stop(e);cancel()}},true],[canvas,'focusout',cancel,false],[canvas,'webglcontextlost',contextLost,false],[window,'keydown',keydown,true],[window,'keyup',keyup,true],[window,'blur',cancel,false],[window,'resize',cancel,false],[window,'orientationchange',cancel,false],[document,'visibilitychange',visibility,false],[parts.exit,'click',exit,false]];
+ const bindings=[[canvas,'pointerdown',down,true],[canvas,'pointermove',move,true],[canvas,'pointerup',up,true],[canvas,'pointercancel',cancelPointer,
+   true],[canvas,'lostpointercapture',cancelPointer,true],[canvas,'click',consume,true],[canvas,'contextmenu',e=>{if(active()){stop(e);
+ cancel()}},true],[canvas,'focusout',cancel,false],[canvas,'webglcontextlost',contextLost,false],[window,'keydown',keydown,true],[window,'keyup',keyup,
+   true],[window,'blur',cancel,false],[window,'resize',cancel,false],[window,'orientationchange',cancel,false],[document,'visibilitychange',visibility,false],[parts.exit,'click',exit,false]];
  for(const [target,event,handler,capture] of bindings)target.addEventListener(event,handler,{capture});
  update(0);
- return {update,cancel,dispose(){if(disposed)return;cancel();disposed=true;for(const [target,event,handler,capture] of bindings)target.removeEventListener(event,handler,{capture});restoreCanvas();host.dataset.chimeActive='false';root.remove()}};
+ return {update,cancel,dispose(){if(disposed)return;cancel();disposed=true;
+ for(const [target,event,handler,capture] of bindings)target.removeEventListener(event,handler,{capture});restoreCanvas();host.dataset.chimeActive='false';root.remove()}};
 }

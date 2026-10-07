@@ -7,7 +7,8 @@ export const CHIME_LAYOUT={z:1.35,y:.20,pull:.44,diameter:.66,x:[-1.05,-.35,.35,
 function add(parent,geometry,material,position,name=''){
  const mesh=new T.Mesh(geometry,material);mesh.position.fromArray(position);mesh.name=name;mesh.castShadow=false;mesh.receiveShadow=true;parent.add(mesh);return mesh;
 }
-function starShape(radius=.30){const shape=new T.Shape();for(let i=0;i<10;i++){const a=Math.PI/2+i*Math.PI/5,r=i%2?radius*.46:radius;const x=Math.cos(a)*r,y=Math.sin(a)*r;i?shape.lineTo(x,y):shape.moveTo(x,y)}shape.closePath();return shape}
+function starShape(radius=.30){const shape=new T.Shape();for(let i=0;i<10;i++){const a=Math.PI/2+i*Math.PI/5,r=i%2?radius*.46:radius;
+const x=Math.cos(a)*r,y=Math.sin(a)*r;i?shape.lineTo(x,y):shape.moveTo(x,y)}shape.closePath();return shape}
 function heartShape(){const s=new T.Shape();s.moveTo(0,-.29);s.bezierCurveTo(-.64,.13,-.22,.48,0,.22);s.bezierCurveTo(.22,.48,.64,.13,0,-.29);return s}
 function moonShape(){const s=new T.Shape();s.absarc(0,0,.29,.67,Math.PI*2-.67,false);s.absarc(.13,0,.245,Math.PI*2-.67,.67,true);s.closePath();return s}
 const relief=shape=>new T.ExtrudeGeometry(shape,{depth:.065,bevelEnabled:true,bevelSize:.018,bevelThickness:.012,bevelSegments:2,steps:1,curveSegments:20});
@@ -18,7 +19,8 @@ export function createMoonChimes(parent){
  const wood=new T.MeshStandardMaterial({color:0x76574f,roughness:.77});
  const silk=new T.MeshStandardMaterial({color:0xffffff,map:texture('fabric',['#e7ceaa','#b99877']),roughness:.9});
  const frame=new T.Group();frame.name='chime-carved-arch';root.add(frame);
- const arch=new T.CatmullRomCurve3([new T.Vector3(-1.46,.11,0),new T.Vector3(-1.46,1.88,0),new T.Vector3(-1.13,2.34,0),new T.Vector3(0,2.50,0),new T.Vector3(1.13,2.34,0),new T.Vector3(1.46,1.88,0),new T.Vector3(1.46,.11,0)]);
+ const arch=new T.CatmullRomCurve3([new T.Vector3(-1.46,.11,0),new T.Vector3(-1.46,1.88,0),new T.Vector3(-1.13,2.34,0),new T.Vector3(0,2.50,0),
+   new T.Vector3(1.13,2.34,0),new T.Vector3(1.46,1.88,0),new T.Vector3(1.46,.11,0)]);
  add(frame,new T.TubeGeometry(arch,48,.035,8,false),wood,[0,0,0]);
  for(const x of [-1.46,1.46]){add(frame,new T.SphereGeometry(.065,12,8),brass,[x,.16,0]);add(frame,new T.BoxGeometry(.22,.07,.25),wood,[x,.07,0])}
  for(const x of [-1.05,-.70,0,.70,1.05]){const y=2.35-Math.abs(x)*.16;const jewel=add(frame,new T.SphereGeometry(.032,10,6),brass,[x,y,.02]);jewel.scale.y=1.8}
@@ -47,7 +49,8 @@ export function createMoonChimes(parent){
  // This earned object stays in the bedroom after leaving the instrument.
  const constellation=new T.Group();constellation.name='earned-moon-constellation';constellation.position.set(room.x,room.y+2.30,-.95);parent.add(constellation);
  const stars=[];for(let i=0;i<4;i++){
-  const star=add(constellation,relief(starShape(.095)),new T.MeshStandardMaterial({color:0xe4c28e,emissive:0xc4a168,emissiveIntensity:.2,roughness:.6}),[(i-1.5)*.32,Math.sin(i*Math.PI/3)*.07,0],`earned-moon-star-${i}`);stars.push(star);
+  const star=add(constellation,relief(starShape(.095)),new T.MeshStandardMaterial({color:0xe4c28e,emissive:0xc4a168,emissiveIntensity:.2,
+    roughness:.6}),[(i-1.5)*.32,Math.sin(i*Math.PI/3)*.07,0],`earned-moon-star-${i}`);stars.push(star);
  }
  let view={active:false};
  return {root,targets,constellation,update(state,selected=-1){
@@ -64,6 +67,8 @@ export function createMoonChimes(parent){
   }
   winder.rotation.z=still?0:a.phase==='listen'?Math.sin(a.listenTime*2)*.055:0;
   light.intensity=finished?.9:.36;
-  view={active:true,phase:a.phase,held:a.held,pull:a.pull,sounding:a.sounding,earnedStars:earned,allLit:finished,turns:charms.map(c=>c.charm.rotation.z),centers:charms.map(c=>c.charm.position.toArray())};
- },points(){if(!root.visible)return [];root.updateWorldMatrix(true,true);return targets.map(t=>({key:t.userData.chime,world:t.getWorldPosition(new T.Vector3()).toArray()}))},status(){return structuredClone(view)}};
+  view={active:true,phase:a.phase,held:a.held,pull:a.pull,sounding:a.sounding,earnedStars:earned,allLit:finished,
+    turns:charms.map(c=>c.charm.rotation.z),centers:charms.map(c=>c.charm.position.toArray())};
+ },points(){if(!root.visible)return [];root.updateWorldMatrix(true,true);
+ return targets.map(t=>({key:t.userData.chime,world:t.getWorldPosition(new T.Vector3()).toArray()}))},status(){return structuredClone(view)}};
 }

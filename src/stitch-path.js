@@ -10,7 +10,8 @@ export function stitchEdge(a,sections){
  let offset=0;
  for(let edge=0;edge<section.length-1;edge++){
   const start=point(section[edge]),end=point(section[edge+1]),size=length(start,end);
-  if(a.distance<offset+size-EPS||edge===section.length-2)return {section:a.section,edge,start,end,size,offset,last:edge===section.length-2,front:Math.max(0,Math.min(size,a.distance-offset)),ux:(end.x-start.x)/size,uy:(end.y-start.y)/size};
+  if(a.distance<offset+size-EPS||edge===section.length-2)return {section:a.section,edge,start,end,size,offset,last:edge===section.length-2,
+    front:Math.max(0,Math.min(size,a.distance-offset)),ux:(end.x-start.x)/size,uy:(end.y-start.y)/size};
   offset+=size;
  }
  return null;

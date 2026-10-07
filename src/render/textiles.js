@@ -5,14 +5,16 @@ let radialMask=null;
 const seeded=(i)=>{const v=Math.sin(i*127.1+311.7)*43758.5453;return v-Math.floor(v)};
 function canvas(size=512){const c=document.createElement('canvas');c.width=c.height=size;return [c,c.getContext('2d')]}
 function diamond(c,x,y,r){c.beginPath();c.moveTo(x,y-r);c.lineTo(x+r,y);c.lineTo(x,y+r);c.lineTo(x-r,y);c.closePath()}
-function flower(c,x,y,r,ink){c.fillStyle=ink;for(let k=0;k<5;k++){const a=k*Math.PI*2/5;c.beginPath();c.ellipse(x+Math.sin(a)*r*.55,y+Math.cos(a)*r*.55,r*.33,r*.60,-a,0,Math.PI*2);c.fill()}c.fillStyle='#e7c181';c.beginPath();c.arc(x,y,r*.22,0,Math.PI*2);c.fill()}
+function flower(c,x,y,r,ink){c.fillStyle=ink;for(let k=0;k<5;k++){const a=k*Math.PI*2/5;c.beginPath();
+c.ellipse(x+Math.sin(a)*r*.55,y+Math.cos(a)*r*.55,r*.33,r*.60,-a,0,Math.PI*2);c.fill()}c.fillStyle='#e7c181';c.beginPath();c.arc(x,y,r*.22,0,Math.PI*2);c.fill()}
 
 function star8(c,x,y,outer,inner){
  const points=[];for(let i=0;i<16;i++){const a=-Math.PI/2+i*Math.PI/8,r=i%2?inner:outer;points.push([x+Math.cos(a)*r,y+Math.sin(a)*r])}
  c.beginPath();points.forEach(([px,py],i)=>i?c.lineTo(px,py):c.moveTo(px,py));c.closePath();
 }
 function steppedLozenge(c,x,y,rx,ry,steps=4){
- c.beginPath();c.moveTo(x,y-ry);for(let i=1;i<=steps;i++){const t=i/steps;c.lineTo(x+rx*t,y-ry*(1-t))}for(let i=1;i<=steps;i++){const t=i/steps;c.lineTo(x+rx*(1-t),y+ry*t)}for(let i=1;i<=steps;i++){const t=i/steps;c.lineTo(x-rx*t,y+ry*(1-t))}for(let i=1;i<=steps;i++){const t=i/steps;c.lineTo(x-rx*(1-t),y-ry*t)}c.closePath();
+ c.beginPath();c.moveTo(x,y-ry);for(let i=1;i<=steps;i++){const t=i/steps;c.lineTo(x+rx*t,y-ry*(1-t))}for(let i=1;i<=steps;i++){const t=i/steps;
+ c.lineTo(x+rx*(1-t),y+ry*t)}for(let i=1;i<=steps;i++){const t=i/steps;c.lineTo(x-rx*t,y+ry*(1-t))}for(let i=1;i<=steps;i++){const t=i/steps;c.lineTo(x-rx*(1-t),y-ry*t)}c.closePath();
 }
 export function paintedTexture(kind,colors){
  if(kind==='wood')return walnutColor(colors[0]);
@@ -57,7 +59,8 @@ export function paintedTexture(kind,colors){
   }
   c.strokeStyle=colors[1];c.globalAlpha=.8;c.lineWidth=2;for(const y of [82,430]){c.beginPath();for(let x=78;x<=434;x+=18)c.lineTo(x,y+((x/18)%2?7:-7));c.stroke()}
  }else if(kind==='wood'){
-  for(let i=0;i<160;i++){c.globalAlpha=.07+seeded(i)*.10;c.strokeStyle=i%3?'#50372f':'#f7d0a2';c.lineWidth=.5+seeded(i+2)*2;c.beginPath();const y=i*3.3;c.moveTo(0,y);for(let x=0;x<=512;x+=16)c.lineTo(x,y+Math.sin(x*.025+i)*1.5);c.stroke()}
+  for(let i=0;i<160;i++){c.globalAlpha=.07+seeded(i)*.10;c.strokeStyle=i%3?'#50372f':'#f7d0a2';c.lineWidth=.5+seeded(i+2)*2;c.beginPath();
+  const y=i*3.3;c.moveTo(0,y);for(let x=0;x<=512;x+=16)c.lineTo(x,y+Math.sin(x*.025+i)*1.5);c.stroke()}
   for(let i=0;i<4;i++){c.globalAlpha=.17;c.strokeStyle='#513c32';c.strokeRect(0,i*128,512,128)}
  }else if(kind==='fabric'){
   c.globalAlpha=.18;c.strokeStyle=colors[1];for(let i=0;i<512;i+=4){c.beginPath();c.moveTo(i,0);c.lineTo(i,512);c.moveTo(0,i);c.lineTo(512,i);c.stroke()}
@@ -65,7 +68,8 @@ export function paintedTexture(kind,colors){
  }
  // Fine paper/fibre variation is baked once rather than animated screen noise.
  for(let i=0;i<4500;i++){c.globalAlpha=.028;c.fillStyle=i%2?'#fff8e6':'#312332';c.fillRect(seeded(i)*512,seeded(i+77)*512,1+seeded(i+3)*2,1)}
- c.globalAlpha=1;const tex=new T.CanvasTexture(image);tex.colorSpace=T.SRGBColorSpace;tex.anisotropy=4;if(kind==='wall')tex.userData.pattern='limewash-jasmine-frieze';if(kind==='rug')tex.userData.pattern='stepped-lozenge-weave';if(kind==='tile')tex.userData.pattern='eight-point-stone-star';return tex;
+ c.globalAlpha=1;const tex=new T.CanvasTexture(image);tex.colorSpace=T.SRGBColorSpace;tex.anisotropy=4;
+ if(kind==='wall')tex.userData.pattern='limewash-jasmine-frieze';if(kind==='rug')tex.userData.pattern='stepped-lozenge-weave';if(kind==='tile')tex.userData.pattern='eight-point-stone-star';return tex;
 }
 // Height data is shared, linear, and independent of the painted color layer.
 const reliefCache=new Map();
@@ -77,16 +81,19 @@ export function reliefTexture(kind){
   const weave=Math.sin(x*Math.PI/2)*Math.cos(y*Math.PI/2)*18+Math.sin(y*Math.PI/2)*9;
   const value=Math.round(128+(kind==='fabric'?weave:grain));const i=(y*size+x)*4;data[i]=data[i+1]=data[i+2]=value;data[i+3]=255;
  }
- const texture=new T.DataTexture(data,size,size);texture.wrapS=texture.wrapT=T.RepeatWrapping;texture.magFilter=T.LinearFilter;texture.minFilter=T.LinearMipmapLinearFilter;texture.generateMipmaps=true;texture.needsUpdate=true;texture.userData.shared=true;reliefCache.set(kind,texture);return texture;
+ const texture=new T.DataTexture(data,size,size);texture.wrapS=texture.wrapT=T.RepeatWrapping;texture.magFilter=T.LinearFilter;
+ texture.minFilter=T.LinearMipmapLinearFilter;texture.generateMipmaps=true;texture.needsUpdate=true;texture.userData.shared=true;reliefCache.set(kind,texture);return texture;
 }
 export function craftMaterial(color,kind='fabric'){
  const key=`${kind}:${color}`;if(cache.has(key))return cache.get(key);
  const hex='#'+new T.Color(color).getHexString();const map=paintedTexture(kind,[hex,kind==='wood'?'#eccfa5':'#f5dfc4']);
- const m=new T.MeshStandardMaterial({map,roughness:kind==='wood'?.72:.98});if(kind==='wood'||kind==='fabric'){m.bumpMap=surfaceFinish(kind);m.roughnessMap=m.bumpMap;m.bumpScale=kind==='wood'?.0075:.0025}m.userData.shared=true;cache.set(key,m);return m;
+ const m=new T.MeshStandardMaterial({map,roughness:kind==='wood'?.72:.98});if(kind==='wood'||kind==='fabric'){m.bumpMap=surfaceFinish(kind);
+ m.roughnessMap=m.bumpMap;m.bumpScale=kind==='wood'?.0075:.0025}m.userData.shared=true;cache.set(key,m);return m;
 }
 export function softTexture(){
  if(radialMask)return radialMask;
  const [image,c]=canvas(128),g=c.createRadialGradient(64,64,0,64,64,64);
- g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.16,'rgba(255,255,255,.65)');g.addColorStop(.45,'rgba(255,255,255,.15)');g.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g;c.fillRect(0,0,128,128);
+ g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.16,'rgba(255,255,255,.65)');g.addColorStop(.45,'rgba(255,255,255,.15)');
+ g.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g;c.fillRect(0,0,128,128);
  radialMask=new T.CanvasTexture(image);radialMask.userData.shared=true;return radialMask;
 }

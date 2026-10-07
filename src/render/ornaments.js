@@ -21,7 +21,8 @@ function vase(p,x,y,z,color){
 }
 function borderShade(p){
  const canvas=document.createElement('canvas');canvas.width=canvas.height=128;const c=canvas.getContext('2d');
- for(const [x1,y1,x2,y2] of [[0,0,28,0],[128,0,100,0],[0,0,0,24],[0,128,0,100]]){const g=c.createLinearGradient(x1,y1,x2,y2);g.addColorStop(0,'rgba(45,26,39,.28)');g.addColorStop(1,'rgba(45,26,39,0)');c.fillStyle=g;c.fillRect(0,0,128,128)}
+ for(const [x1,y1,x2,y2] of [[0,0,28,0],[128,0,100,0],[0,0,0,24],[0,128,0,100]]){const g=c.createLinearGradient(x1,y1,x2,y2);
+ g.addColorStop(0,'rgba(45,26,39,.28)');g.addColorStop(1,'rgba(45,26,39,0)');c.fillStyle=g;c.fillRect(0,0,128,128)}
  const texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;
  const o=new T.Mesh(new T.PlaneGeometry(4.68,2.93),new T.MeshBasicMaterial({map:texture,transparent:true,depthWrite:false}));o.position.set(0,1.61,-1.49);o.userData.noBatch=true;p.add(o);
 }
@@ -29,7 +30,8 @@ export function createCraftDetails(parent){
  const root=new T.Group();parent.add(root);const fixtures=[],halos=[];const glow=softTexture();
  const porcelain=mat(0xf4d7ac,{roughness:.42});
  const bulb=new T.MeshStandardMaterial({color:0xffebbf,emissive:0xffbd67,emissiveIntensity:1.5,roughness:.2});
- function halo(x,y,z,size,opacity=.24){const m=new T.SpriteMaterial({map:glow,color:0xffcb88,transparent:true,opacity,depthWrite:false,blending:T.AdditiveBlending});const s=new T.Sprite(m);s.position.set(x,y,z);s.scale.set(size,size,1);parent.add(s);halos.push({s,opacity});}
+ function halo(x,y,z,size,opacity=.24){const m=new T.SpriteMaterial({map:glow,color:0xffcb88,transparent:true,opacity,depthWrite:false,
+   blending:T.AdditiveBlending});const s=new T.Sprite(m);s.position.set(x,y,z);s.scale.set(size,size,1);parent.add(s);halos.push({s,opacity});}
  function sconce(p,x,y,z,room){
   ball(p,x,y,z,.10,.20,.055,P.gold);line(p,[x,y-.06,z],[x,y-.10,z+.23],.025,P.gold);
   cylinder(p,x,y-.10,z+.23,.085,.04,P.gold);ball(p,x,y+.045,z+.23,.085,.14,.085,bulb);
@@ -46,7 +48,8 @@ export function createCraftDetails(parent){
   for(const x of [-2.3,2.3]){box(g,x,1.57,-1.54,.10,2.95,.12,P.cream);rosette(g,x,2.83,-1.45,.065)}
   sconce(g,room.id==='parlor'?-1.82:1.94,2.35,-1.43,room);
   // Contact shadows remain available even in battery-friendly shadowless mode.
-  const shadow=new T.Mesh(new T.PlaneGeometry(3.7,2.75),new T.MeshBasicMaterial({map:glow,color:0x422535,transparent:true,opacity:.17,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.set(0,.118,-.10);shadow.userData.noBatch=true;g.add(shadow);
+  const shadow=new T.Mesh(new T.PlaneGeometry(3.7,2.75),new T.MeshBasicMaterial({map:glow,color:0x422535,transparent:true,opacity:.17,
+    depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.set(0,.118,-.10);shadow.userData.noBatch=true;g.add(shadow);
   if(room.id==='kitchen'){
    vase(g,.30,1.04,-1.13,0xc48488);
    box(g,.60,1.93,-1.44,.48,.57,.04,P.gold);box(g,.60,1.93,-1.40,.39,.48,.02,0xebe1c7);rose(g,.60,1.96,-1.38,1.4);line(g,[.60,1.78,-1.38],[.60,1.94,-1.38],.012,0x7a956f);
@@ -66,7 +69,8 @@ export function createCraftDetails(parent){
    for(let j=0;j<3;j++)for(let i=0;i<6;i++)ball(g,-.53+i*.37,.79+j*.16,-.911,.018,.018,.015,P.gold);
   }
   if(room.id==='studio'){
-   for(let i=0;i<7;i++){const x=-.35+i*.22;line(g,[x,2.78,-1.47],[x,2.70-Math.sin(i)*.07,-1.45],.006,P.gold);const flag=box(g,x,2.57-Math.sin(i)*.07,-1.42,.15,.23,.018,[0xc894a6,0x94b0a4,0xd6bb8f][i%3]);flag.rotation.z=(i-3)*.03}
+   for(let i=0;i<7;i++){const x=-.35+i*.22;line(g,[x,2.78,-1.47],[x,2.70-Math.sin(i)*.07,-1.45],.006,P.gold);
+   const flag=box(g,x,2.57-Math.sin(i)*.07,-1.42,.15,.23,.018,[0xc894a6,0x94b0a4,0xd6bb8f][i%3]);flag.rotation.z=(i-3)*.03}
    box(g,-1.62,.29,-.37,.50,.40,.40,0xb59a81,true);ring(g,-1.62,.5,-.37,.2,.023,P.cream,true);
    for(let i=0;i<3;i++)ball(g,-1.74+i*.12,.53,-.37,.094,.084,.09,[0xbd829e,0xa2b7ad,0xe2c392][i]);
    vase(g,1.54,.75,-.66,0xc391a8);
@@ -90,7 +94,8 @@ export function createCraftDetails(parent){
  const dial=cylinder(root,0,7.15,-1.52,.45,.05,0xf1ddbd);dial.rotation.x=Math.PI/2;ring(root,0,7.15,-1.47,.47,.037,P.gold);
  for(let i=0;i<12;i++){const a=i*Math.PI/6;ball(root,Math.sin(a)*.36,7.15+Math.cos(a)*.36,-1.425,.018,.018,.012,0x795b63)}
  line(root,[0,7.15,-1.41],[.16,7.37,-1.41],.015,P.dark);line(root,[0,7.15,-1.41],[-.20,7.09,-1.41],.012,P.dark);
- for(let i=0;i<19;i++){const x=-4.46+i*.495,y=6.72-.18*Math.cos(x*.66);if(i)line(root,[x-.495,6.72-.18*Math.cos((x-.495)*.66),1.84],[x,y,1.84],.01,P.gold);ball(root,x,y-.06,1.84,.035,.058,.035,bulb);if(i%3===0)halo(x,y-.06,1.87,.66,.15)}
+ for(let i=0;i<19;i++){const x=-4.46+i*.495,y=6.72-.18*Math.cos(x*.66);
+ if(i)line(root,[x-.495,6.72-.18*Math.cos((x-.495)*.66),1.84],[x,y,1.84],.01,P.gold);ball(root,x,y-.06,1.84,.035,.058,.035,bulb);if(i%3===0)halo(x,y-.06,1.87,.66,.15)}
  // Winding jasmine and roses follow the two outer posts, not the room centres.
  for(const sign of [-1,1]){
   for(let i=0;i<34;i++){const y=.22+i*.175,x=sign*(4.95+Math.sin(i*.53)*.10),z=1.70+Math.cos(i*.53)*.08;
@@ -112,7 +117,8 @@ export function createGarden(parent){
  for(let sign of [-1,1]){
   for(let i=0;i<9;i++){const x=sign*(5.17+(i%3)*.36),z=-1.55+Math.floor(i/3)*1.13;ball(g,x,-.035,z,.34,.13,.28,i%2?0x7b977a:0x9ba782);if(i%2===0)plant(g,x,.02,z,.50)}
   for(let i=0;i<20;i++){const x=sign*(5.10+(i%4)*.27),z=-1.65+Math.floor(i/4)*.68;rose(g,x,.16+(i%3)*.04,z,.7)}
-  const lampX=sign*5.62;line(g,[lampX,-.12,1.22],[lampX,1.3,1.22],.03,P.gold);box(g,lampX,1.34,1.22,.29,.39,.29,0xd9b76b,true);box(g,lampX,1.57,1.22,.39,.06,.39,P.dark,true);ball(g,lampX,1.65,1.22,.05,.07,.05,P.gold);
+  const lampX=sign*5.62;line(g,[lampX,-.12,1.22],[lampX,1.3,1.22],.03,P.gold);box(g,lampX,1.34,1.22,.29,.39,.29,0xd9b76b,true);
+  box(g,lampX,1.57,1.22,.39,.06,.39,P.dark,true);ball(g,lampX,1.65,1.22,.05,.07,.05,P.gold);
  }
  // Front feet and miniature brass corner plates anchor the whole toy in space.
  for(const x of [-5.6,5.6])for(const z of [-1.75,1.9])ball(g,x,-.73,z,.19,.22,.18,wood);

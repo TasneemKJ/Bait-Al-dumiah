@@ -14,7 +14,7 @@ const LAYERS=['data','simulation','render','ui','main'];
 const LAYER_OF={
  'content.js':'data','locale-data.js':'data','i18n.js':'data','icons.js':'data',
  'simulation.js':'simulation','home-session.js':'simulation','return-greeting.js':'simulation',
- 'stitch-path.js':'simulation','lullaby-score.js':'simulation','night-score.js':'simulation',
+ 'stitch-path.js':'simulation','sim-util.js':'simulation','sim-state.js':'simulation','save-codec.js':'simulation','lullaby-score.js':'simulation','night-score.js':'simulation',
  'tea-input.js':'simulation','stitch-input.js':'simulation','chime-input.js':'simulation',
  'carry-gesture.js':'simulation','pointer-gesture.js':'simulation','wish-glow.js':'simulation',
  'resident-portraits.js':'simulation',
@@ -26,8 +26,8 @@ const LAYER_OF={
 const MAX_LINES=500;
 // Long lines hide size: the code here is dense, so bytes, line width and function length are capped too.
 const MAX_BYTES=40000;
-const MAX_LINE_CHARS=2000;
-const MAX_FUNCTION_LINES=110;
+const MAX_LINE_CHARS=200;
+const MAX_FUNCTION_LINES=160;
 // Modules allowed past the cap, each with the reason.
 const SIZE_EXCEPTIONS={
  'locale-data.js':'bilingual copy table, data only',

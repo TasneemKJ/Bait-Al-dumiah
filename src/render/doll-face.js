@@ -25,7 +25,8 @@ export function paintedFace(id) {
  const canvas = document.createElement('canvas'); canvas.width = canvas.height = 512;
  const c = canvas.getContext('2d');
  c.fillStyle = {lina:'#f1cfb7',noor:'#eed1ba',sami:'#e9c5aa'}[id]||'#f1cfb7'; c.fillRect(0, 0, 512, 512);
- const wash=c.createLinearGradient(0,80,0,440);wash.addColorStop(0,'rgba(255,240,225,.10)');wash.addColorStop(.5,'rgba(255,240,225,0)');wash.addColorStop(1,'rgba(212,145,119,.07)');c.fillStyle=wash;c.fillRect(0,0,512,512);
+ const wash=c.createLinearGradient(0,80,0,440);wash.addColorStop(0,'rgba(255,240,225,.10)');wash.addColorStop(.5,'rgba(255,240,225,0)');
+ wash.addColorStop(1,'rgba(212,145,119,.07)');c.fillStyle=wash;c.fillRect(0,0,512,512);
  // Feathered blush remains baked into the ceramic, not separate cheek spheres.
  for (const x of [76, 180]) {
   const g = c.createRadialGradient(x, 282, 2, x, 282, 42);

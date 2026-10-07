@@ -1,5 +1,6 @@
 import {restorationReady,stitchSectionProgress} from './simulation.js';
 import {translate,number} from './i18n.js';
+import {icon} from './icons.js';
 
 const fill=(text,values)=>text.replace(/\{(\w+)\}/g,(_,key)=>values[key]??'');
 export const coordinate=value=>Math.round(value*100);
@@ -34,4 +35,24 @@ export function stitchView(state,stitch,{inputMode='pointer',reason=null}={}){
  }
  if(reason)status=t(reason);
  return {title:t(mend?'stitchMendTitle':'activity-stitch'),instructions,shortInstructions,progress,status,detail,readout};
+}
+
+// Builds the stitch work surface beside #ui and returns it with the elements the surface updates.
+export function mountStitchSurface(host){
+ const root=document.createElement('section');root.className='stitch-playfield';root.hidden=true;
+ root.setAttribute('aria-labelledby','stitch-work-title');
+ root.innerHTML='<header class="stitch-heading"><h2 id="stitch-work-title"></h2><p class="stitch-progress"></p></header>'+
+  '<div class="stitch-work-strip" role="region"><div class="stitch-work-copy"><p id="stitch-work-instructions">'+
+    '<span class="stitch-cue-full"></span><span class="stitch-cue-short" aria-hidden="true"></span></p>'+
+    '<p id="stitch-work-status"></p><p class="stitch-work-detail"></p></div><button type="button" class="stitch-exit"'+
+    ' data-stitch-action="exit">'+icon('arrow')+'<span></span></button></div>'+
+  '<p id="stitch-needle-readout" class="sr-only"></p><p id="stitch-work-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>';
+ // House controls rebuild for sound, pause and locale. Keep the work surface
+ // beside #ui so those refreshes cannot detach its controls or pointer capture.
+ const mount=host.parentElement??host;mount.append(root);
+ const parts={title:root.querySelector('#stitch-work-title'),progress:root.querySelector('.stitch-progress'),
+   full:root.querySelector('.stitch-cue-full'),short:root.querySelector('.stitch-cue-short'),status:root.querySelector('#stitch-work-status'),
+   detail:root.querySelector('.stitch-work-detail'),strip:root.querySelector('.stitch-work-strip'),
+   exit:root.querySelector('[data-stitch-action="exit"]'),readout:root.querySelector('#stitch-needle-readout'),announcement:root.querySelector('#stitch-work-announcement')};
+ return {root,parts};
 }
