@@ -1,6 +1,5 @@
 import {surfaceFinish} from './atelier-surfaces.js';
 import * as T from 'three';
-import {reliefTexture} from './textiles.js';
 
 // Parametric cloth and hair surfaces. All coordinates are model-space and all
 // color/height maps are cached; no per-frame asset construction is required.

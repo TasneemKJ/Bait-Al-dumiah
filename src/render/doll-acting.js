@@ -1,8 +1,7 @@
-import {dollFabric,sleeveGeometry,forearmGeometry,shirtFabric} from './doll-couture.js';
+import {sleeveGeometry,forearmGeometry,shirtFabric} from './doll-couture.js';
 import * as T from 'three';
 import {shapeMouth} from './doll-expression.js';
 import {ball,ring} from './primitives.js';
-import {craftMaterial} from './textiles.js';
 const rotation=new T.Quaternion();
 export function createArm(parent,sign,def,skin){
  const arm=new T.Group();arm.name='upper-arm';arm.position.set(sign*.19,.73,0);parent.add(arm);

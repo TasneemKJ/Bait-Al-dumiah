@@ -7,7 +7,6 @@ import {houseFraming} from './house-framing.js';
 import {portraitFraming} from './doll-camera.js';
 import * as T from 'three';
 import {ROOMS} from '../content.js';
-import {isNight,stitchStatus} from '../simulation.js';
 import {createWorkPicking} from './work-picking.js';
 import {createTapGesture} from '../pointer-gesture.js';
 import {teaFraming} from './tea-camera.js';
@@ -15,7 +14,7 @@ import {stitchFraming} from './stitch-camera.js';
 import {chimeFraming} from './chime-camera.js';
 import {createCameraMove} from './camera-motion.js';
 import {createRoomPresentation} from './room-presentation.js';
-import {detail,framing} from './visual-policy.js';
+import {framing} from './visual-policy.js';
 
 export function createWorld(canvas,{onPick,onError}){
  const {renderer,scene,camera,depthFog,controls,hemi,key,fill,house,residents,ghost,courtyard,portraitCache,details,atmosphere,

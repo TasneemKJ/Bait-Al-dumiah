@@ -2,7 +2,7 @@ import {DOLLS,ROOMS,CATALOG,SLOTS,SECRETS,ACTIONS,BOND_LEVELS,SECRET_COZY,MILEST
   BASKET_MAX,DOOR_STEPS,GIFT_COST,VISITOR_GIFTS,WISH_REFRESH_SECONDS,ACTIVITIES,ACTIVITY_THRESHOLDS,
   ACTIVITY_DAILY_CAP,ACTIVITY_COOLDOWN,RESTORATION_COSTS,RESTORATION_MASTERY,INTERACTIVE_PROPS,STORY_CHAPTERS,
   TEA_TABLE,STITCH_PATTERNS} from './content.js';
-import {sectionLength,requiredLength,stitchEdge,stitchFront,acceptedTrail,moveStitch} from './stitch-path.js';
+import {requiredLength,stitchEdge,acceptedTrail,moveStitch} from './stitch-path.js';
 import {clamp,integer,has,fail} from './sim-util.js';
 import {createState} from './sim-state.js';
 export {createState};

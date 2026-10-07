@@ -1,5 +1,5 @@
 import {SAVE_KEY} from './content.js';
-import {createState,readSave,step} from './simulation.js';
+import {readSave,step} from './simulation.js';
 
 // Preferences can change before entry without replacing the player's house.
 export const HOME_PREFERENCES_KEY=SAVE_KEY+'.preferences';

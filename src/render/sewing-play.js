@@ -56,7 +56,7 @@ export function createSewingPlay(parent){
  const tip=mesh(metal,new T.ConeGeometry(.007,.027,8),silver,[0,.0135,0],'stitch-needle-tip');tip.rotation.z=Math.PI;
  cylinder(metal,.006,table.gripHeight-.027,silver,[0,(table.gripHeight+.027)/2,0],'stitch-needle-shaft');batch(metal);
  const grip=mesh(needle,new T.SphereGeometry(table.gripDiameter/2,20,12),brass,[0,table.gripHeight,0],'stitch-needle-grip');grip.userData.stitch='needle';
- const inlay=mesh(needle,new T.CircleGeometry(.055,16),cream,[0,table.gripHeight,table.gripDiameter/2+.003],'stitch-grip-cream-inlay');
+ mesh(needle,new T.CircleGeometry(.055,16),cream,[0,table.gripHeight,table.gripDiameter/2+.003],'stitch-grip-cream-inlay');
  const tipAnchor=new T.Object3D();tipAnchor.name='stitch-tip-anchor';needle.add(tipAnchor);
  const spool=group(root,'stitch-repair-spool');spool.position.set(table.spoolOffset[0],table.spoolOffset[1],table.spoolOffset[2]);
  // A single closed surface avoids coplanar caps and touching decorative rings.

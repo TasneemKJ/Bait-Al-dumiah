@@ -1,6 +1,5 @@
 import {stitchStatus,stitchSectionProgress,stitchCoordinate as coordinate} from './simulation.js';
 import {translate} from './i18n.js';
-import {icon} from './icons.js';
 import {captureCanvas} from './canvas-aria.js';
 import {bindStitchInput} from './stitch-input-bindings.js';
 import {createStitchGesture,createStitchKeyboard} from './stitch-input.js';

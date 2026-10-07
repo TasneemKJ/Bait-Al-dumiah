@@ -1,7 +1,6 @@
 import {bellRadius,bodiceFront} from './doll-couture.js';
 import * as T from 'three';
 import {craftMaterial} from './textiles.js';
-import {mat} from './primitives.js';
 let lace=null;
 function laceMaterial(){
  if(lace)return lace;const canvas=document.createElement('canvas');canvas.width=128;canvas.height=64;const c=canvas.getContext('2d');c.strokeStyle='#f1e3ce';c.lineWidth=4;c.lineCap='round';

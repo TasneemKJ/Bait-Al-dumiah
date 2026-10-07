@@ -1,7 +1,7 @@
 import * as T from 'three';
 import {pleatedShade,eaveScallop} from './fabric-shapes.js';
 import {ROOMS} from '../content.js';
-import {palette as P,box,ball,cylinder,ring,line,arch,mat,plant,books,batch} from './primitives.js';
+import {palette as P,box,ball,cylinder,ring,line,arch,plant,batch} from './primitives.js';
 import {craftMaterial,softTexture} from './textiles.js';
 
 function rose(p,x,y,z,scale=1){
@@ -67,8 +67,7 @@ function dressBedroom(g,room,halo){
 const ROOM_DRESSING={kitchen:dressKitchen,parlor:dressParlor,studio:dressStudio,bedroom:dressBedroom};
 
 export function createCraftDetails(parent){
- const root=new T.Group();parent.add(root);const fixtures=[],halos=[];const glow=softTexture();
- const porcelain=mat(0xf4d7ac,{roughness:.42});
+ const root=new T.Group();parent.add(root);const halos=[];const glow=softTexture();
  const bulb=new T.MeshStandardMaterial({color:0xffebbf,emissive:0xffbd67,emissiveIntensity:1.5,roughness:.2});
  function halo(x,y,z,size,opacity=.24){const m=new T.SpriteMaterial({map:glow,color:0xffcb88,transparent:true,opacity,depthWrite:false,
    blending:T.AdditiveBlending});const s=new T.Sprite(m);s.position.set(x,y,z);s.scale.set(size,size,1);parent.add(s);halos.push({s,opacity});}

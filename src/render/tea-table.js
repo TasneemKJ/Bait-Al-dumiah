@@ -24,7 +24,7 @@ export function createTeaTable(parent){
  const plate=mesh(tray,new T.ExtrudeGeometry(trayShape,{depth:.012,bevelEnabled:false,curveSegments:20}),brass,[0,.014,.18]);plate.rotation.x=-Math.PI/2;
  const lip=torus(tray,.51,.009,brass,[0,.029,.18],true);lip.scale.y=.49;
  // A projecting brass handle is a distinct serving affordance in front of cups.
- const tab=mesh(tray,new T.BoxGeometry(.64,.018,.20),brass,[0,.024,.42]);
+ mesh(tray,new T.BoxGeometry(.64,.018,.20),brass,[0,.024,.42]);
  const insert=mesh(tray,new T.PlaneGeometry(.88,.32),mat(P.mint),[0,.028,.16]);insert.rotation.x=-Math.PI/2;
  batch(tray);
  const cupViews=[];
@@ -41,7 +41,7 @@ export function createTeaTable(parent){
   cupViews.push({root:cup,vessel,band,liquid,handle});
  }
  const pot=group(root,'tea-aiming-pot');
- const body=mesh(pot,new T.LatheGeometry([new T.Vector2(.08,-.13),new T.Vector2(.145,-.11),new T.Vector2(.16,-.02),new T.Vector2(.145,.105),new T.Vector2(.105,.14)],20),mint);
+ mesh(pot,new T.LatheGeometry([new T.Vector2(.08,-.13),new T.Vector2(.145,-.11),new T.Vector2(.16,-.02),new T.Vector2(.145,.105),new T.Vector2(.105,.14)],20),mint);
  cylinder(pot,.11,.018,mint,[0,.145,0]);torus(pot,.108,.006,brass,[0,.155,0],true);
  cylinder(pot,.025,.030,brass,[0,.17,0]);
  const handle=torus(pot,.074,.010,brass,[-.17,.005,-.015]);handle.rotation.y=.55;

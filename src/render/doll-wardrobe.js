@@ -1,8 +1,8 @@
 import {paintLevantineLinen,embroideryFinish} from './levantine-textiles.js';
 import {gridSurface,closeSurfaceSeam,bellRadius,dollFabric,shoulderStrapGeometry} from './doll-couture.js';
 import * as T from 'three';
-import {mat,box,ball,cylinder,ring,batch} from './primitives.js';
-import {craftMaterial,reliefTexture} from './textiles.js';
+import {mat,box,ball,cylinder} from './primitives.js';
+import {craftMaterial} from './textiles.js';
 import {crescentGeometry} from './resident-effects.js';
 const cloth=new Map();
 function embroideredLinen(id){

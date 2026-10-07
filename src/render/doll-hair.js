@@ -1,7 +1,7 @@
 import {sweptLock,gridSurface} from './doll-couture.js';
 import * as T from 'three';
 import {scalpMaterial} from './doll-hair-grain.js';
-import {mat,ball,ring,batch} from './primitives.js';
+import {mat,ball,ring} from './primitives.js';
 import {craftMaterial} from './textiles.js';
 const caps=new Map();
 function capGeometry(id){

@@ -1,6 +1,6 @@
 import * as T from 'three';
 import {ROOMS} from '../content.js';
-import {palette as P,box,ball,cylinder,ring,line,mat,glaze,batch} from './primitives.js';
+import {palette as P,box,ball,cylinder,ring,line,glaze,batch} from './primitives.js';
 import {cloth} from './fabric-shapes.js';
 import {reliefTexture} from './textiles.js';
 const pieces=[];

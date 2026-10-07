@@ -1,6 +1,5 @@
 import {teaStatus,teaPercent as percent} from './simulation.js';
 import {translate} from './i18n.js';
-import {icon} from './icons.js';
 import {captureCanvas} from './canvas-aria.js';
 import {bindTeaInput} from './tea-input-bindings.js';
 import {createTeaGesture,createTeaKeyboard} from './tea-input.js';

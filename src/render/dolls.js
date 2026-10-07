@@ -10,8 +10,8 @@ import {createSculptedHead,createPortraitEye,createBrow,closePortraitEye,createP
 import {wishGlowStrength,wishGlowOpacity} from '../wish-glow.js';
 import {createTeaSteam,createComfortHearts,createSleepCrescent} from './resident-effects.js';
 import {DOLLS,ROOMS} from '../content.js';
-import {palette as P,box,cylinder,ring,line,mat,cup,batch} from './primitives.js';
-import {craftMaterial,softTexture} from './textiles.js';
+import {palette as P,cylinder,ring,mat,cup,batch} from './primitives.js';
+import {softTexture} from './textiles.js';
 export function blinkOpen(time,index=0){
  if(!Number.isFinite(time))return 1;const phase=((time+(Number.isFinite(index)?index:0)*1.37)%4.8+4.8)%4.8;
  if(phase<4.48||phase>4.66)return 1;return Math.max(.1,1-.9*Math.sin((phase-4.48)/.18*Math.PI)**2);
@@ -30,7 +30,6 @@ const ribbon=fabricBow;
 function makeDoll(def){
  const root=new T.Group(),body=new T.Group();root.add(body);
  const skin=bisqueMaterial();
- const fabric=dollFabric(def.id),hair=mat(def.hair,{roughness:.42});
  const legs=[];
  for(const sign of [-1,1]){
   const leg=new T.Group();leg.name='articulated-leg';leg.position.set(sign*.12,.40,0);body.add(leg);legs.push(leg);
