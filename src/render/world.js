@@ -4,11 +4,12 @@ import {portraitFraming} from './doll-camera.js';
 import * as T from 'three';
 import {renderPortrait,createPortraitCache} from './doll-portraits.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-import {ROOMS,SLOTS,TEA_TABLE,STITCH_TABLE} from '../content.js';
+import {ROOMS} from '../content.js';
 import {isNight,stitchStatus} from '../simulation.js';
+import {createDecorSync,createSlotMarkers} from './decor-sync.js';
+import {createWorkPicking} from './work-picking.js';
 import {createTapGesture} from '../pointer-gesture.js';
-import {createHouse,makeFurniture} from './house.js';
-import {poolOpacity} from './lamp-pool.js';
+import {createHouse} from './house.js';
 import {createDolls,createGhost} from './dolls.js';
 import {createCraftDetails,createGarden} from './ornaments.js';
 import {createKeepsakeDetails} from './keepsake-details.js';
@@ -21,7 +22,7 @@ import {createTeaTable} from './tea-table.js';
 import {teaFraming} from './tea-camera.js';
 import {createSewingPlay} from './sewing-play.js';
 import {stitchFraming} from './stitch-camera.js';
-import {createMoonChimes,CHIME_LAYOUT} from './moon-chimes.js';
+import {createMoonChimes} from './moon-chimes.js';
 import {chimeFraming} from './chime-camera.js';
 import {createRestoration} from './restoration.js';
 import {createCameraMove} from './camera-motion.js';
@@ -53,14 +54,7 @@ export function createWorld(canvas,{onPick,onError}){
  const portraitCache=createPortraitCache(residents,doll=>renderPortrait(renderer,doll));
  createKeepsakeDetails(house.root);const details=createCraftDetails(house.root);createGarden(house.root);const atmosphere=createAtmosphere(scene),roomEffects=createRoomEffects(house.root),roomFrame=createRoomFrame(house.root),preview=createPlacementPreview(house.root);let previewPose=null;
  const restoration=createRestoration(house.root),objects=createObjectInteractions(house.root),storyProps=createStoryProps(house.root),teaTable=createTeaTable(house.root),sewingPlay=createSewingPlay(house.root),moonChimes=createMoonChimes(house.root);let stitchSections=[];
- const decor=new Map(),slotTargets=[];
- const slotGroup=new T.Group();house.root.add(slotGroup);
- for(const room of ROOMS)for(let i=0;i<SLOTS.length;i++){
-  const slot=SLOTS[i],material=new T.MeshBasicMaterial({color:0xd2a972,side:T.DoubleSide,transparent:true,opacity:.85,depthWrite:false});
-  const mesh=new T.Mesh(new T.RingGeometry(.21,.25,24),material);mesh.rotation.x=-Math.PI/2;mesh.position.set(room.x+slot.x,room.y+.14,slot.z);mesh.userData.slot={room:room.id,slot:i};
-  const disk=new T.Mesh(new T.CircleGeometry(.42,20),new T.MeshBasicMaterial({visible:false}));disk.rotation.x=-Math.PI/2;disk.position.copy(mesh.position);disk.userData.slot={room:room.id,slot:i};slotGroup.add(mesh,disk);slotTargets.push(disk);
- }
- slotGroup.visible=false;
+ const decorSync=createDecorSync(house.root),slots=createSlotMarkers(house.root);
  const ray=new T.Raycaster(),mouse=new T.Vector2();let placement=null,disposed=false,lost=false,quality='',nightMix=0;
  function objectAt(x,y){
   const rect=canvas.getBoundingClientRect();if(!Number.isFinite(x)||!Number.isFinite(y)||x<rect.left||x>rect.right||y<rect.top||y>rect.bottom||lost||working())return null;
@@ -85,87 +79,14 @@ export function createWorld(canvas,{onPick,onError}){
  function setTeaActive(active){if(active)setWorkActivity('tea');else if(teaActive)setWorkActivity(null)}
  function setStitchActive(active){if(active)setWorkActivity('stitch');else if(stitchActive)setWorkActivity(null)}
  function setChimeActive(active){if(active)setWorkActivity('lullaby');else if(chimeActive)setWorkActivity(null)}
- function workRay(x,y,id){
-  const active=id==='tea'?teaActive:id==='stitch'?stitchActive:id==='lullaby'?chimeActive:false,rect=canvas.getBoundingClientRect();
-  if(!active||lost||!Number.isFinite(x)||!Number.isFinite(y)||x<rect.left||x>rect.right||y<rect.top||y>rect.bottom)return false;
-  mouse.set((x-rect.left)/rect.width*2-1,-(y-rect.top)/rect.height*2+1);camera.updateMatrixWorld();ray.setFromCamera(mouse,camera);return true;
- }
- function teaRay(x,y){return workRay(x,y,'tea')}
- function teaAt(x,y){
-  if(!teaRay(x,y)||!teaTable.root.visible)return null;teaTable.root.updateWorldMatrix(true,true);
-  const targets=teaTable.targets.filter(target=>{for(let p=target;p;p=p.parent)if(!p.visible)return false;return true});
-  return ray.intersectObjects(targets,false)[0]?.object.userData.tea??null;
- }
- const teaPlane=new T.Plane(new T.Vector3(0,1,0),-(house.root.position.y+TEA_TABLE.y+.48)),teaPoint=new T.Vector3();
- function teaAimAt(x,y){
-  if(!teaRay(x,y)||!ray.ray.intersectPlane(teaPlane,teaPoint))return null;
-  // The grabbed body is offset from the spout. Keep this coordinate unbounded
-  // so delta gestures can reach the edge cups; simulation aim is clamped later.
-  const room=ROOMS.find(r=>r.id===TEA_TABLE.room);return (teaPoint.x-room.x-TEA_TABLE.x)/TEA_TABLE.aimSpan;
- }
- function projectWorkPoint(point){const p=new T.Vector3(...point).project(camera);return {x:(p.x+1)*canvas.clientWidth/2,y:(1-p.y)*canvas.clientHeight/2}}
- function teaPositions(){
-  if(!teaActive)return [];camera.updateMatrixWorld();teaTable.root.updateWorldMatrix(true,true);
-  return teaTable.points().map(point=>({key:point.key,...projectWorkPoint(point.world)}));
- }
- const stitchRoom=ROOMS.find(room=>room.id===STITCH_TABLE.room);
- const stitchPlane=new T.Plane(new T.Vector3(0,1,0),-(house.root.position.y+stitchRoom.y+STITCH_TABLE.y)),stitchPoint=new T.Vector3();
- function stitchAt(x,y){
-  if(!workRay(x,y,'stitch')||!sewingPlay.root.visible)return null;sewingPlay.root.updateWorldMatrix(true,true);
-  const targets=sewingPlay.targets.filter(target=>{for(let p=target;p;p=p.parent)if(!p.visible)return false;return true});
-  return ray.intersectObjects(targets,false)[0]?.object.userData.stitch??null;
- }
- function stitchPointAt(x,y){
-  if(!workRay(x,y,'stitch')||!ray.ray.intersectPlane(stitchPlane,stitchPoint))return null;
-  // The elevated grip projects beyond the cloth. Preserve that raw offset;
-  // the input adapter clamps only after applying its two-dimensional delta.
-  return {x:(stitchPoint.x-stitchRoom.x-STITCH_TABLE.x)/STITCH_TABLE.clothScale,y:(stitchPoint.z-STITCH_TABLE.z)/STITCH_TABLE.clothScale};
- }
- function stitchPositions(){
-  if(!stitchActive)return [];camera.updateMatrixWorld();sewingPlay.root.updateWorldMatrix(true,true);
-  return sewingPlay.points().map(point=>({key:point.key,...projectWorkPoint(point.world)}));
- }
- function projectStitch(x,y,height=0){
-  if(!stitchActive||lost||![x,y,height].every(Number.isFinite))return null;camera.updateMatrixWorld();
-  const point=projectWorkPoint([stitchRoom.x+STITCH_TABLE.x+x*STITCH_TABLE.clothScale,house.root.position.y+stitchRoom.y+STITCH_TABLE.y+height,STITCH_TABLE.z+y*STITCH_TABLE.clothScale]);
-  return Number.isFinite(point.x)&&Number.isFinite(point.y)?point:null;
- }
- function stitchGuidePositions(){
-  if(!stitchActive||lost)return [];
-  return stitchSections.map(section=>section.map(([x,y])=>projectStitch(x,y)));
- }
- function chimeAt(x,y){
-  if(!workRay(x,y,'lullaby')||!moonChimes.root.visible)return null;
-  moonChimes.root.updateWorldMatrix(true,true);
-  return ray.intersectObjects(moonChimes.targets,false)[0]?.object.userData.chime??null;
- }
- function chimeTargetBounds(target){
-  target.updateWorldMatrix(true,false);
-  const positions=target.geometry.attributes.position,point=new T.Vector3();
-  let left=Infinity,right=-Infinity,top=Infinity,bottom=-Infinity;
-  for(let i=0;i<positions.count;i++){
-   point.fromBufferAttribute(positions,i).applyMatrix4(target.matrixWorld).project(camera);
-   const x=(point.x+1)*canvas.clientWidth/2,y=(1-point.y)*canvas.clientHeight/2;
-   left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);
-  }
-  return {left,right,top,bottom,width:right-left,height:bottom-top};
- }
- function chimePositions(){
-  if(!chimeActive)return [];camera.updateMatrixWorld();
-  return moonChimes.points().map(p=>({key:p.key,...projectWorkPoint(p.world),bounds:chimeTargetBounds(moonChimes.targets.find(target=>target.userData.chime===p.key))}));
- }
- function chimePullSpan(){
-  if(!chimeActive)return 0;moonChimes.root.updateWorldMatrix(true,true);camera.updateMatrixWorld();
-  const p=moonChimes.root.localToWorld(new T.Vector3(0,1.16,0)),q=p.clone();q.y-=CHIME_LAYOUT.pull;
-  return Math.abs(projectWorkPoint(p.toArray()).y-projectWorkPoint(q.toArray()).y);
- }
+ const {teaAt,teaAimAt,teaPositions,stitchAt,stitchPointAt,stitchPositions,stitchGuidePositions,projectStitch,chimeAt,chimePositions,chimePullSpan}=createWorkPicking({canvas,camera,house,ray,mouse,teaTable,sewingPlay,moonChimes,isActive:id=>id==='tea'?teaActive:id==='stitch'?stitchActive:chimeActive,isLost:()=>lost,sections:()=>stitchSections});
  const pointerdown=e=>{scenePointers.add(e.pointerId);tapGesture.down(e)};
  const pointermove=e=>tapGesture.move(e);
  const pointerup=e=>{
   scenePointers.delete(e.pointerId);
   if(!tapGesture.up(e)||!controls.enabled||lost)return;
   const rect=canvas.getBoundingClientRect();mouse.set((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1);ray.setFromCamera(mouse,camera);
-  const targets=placement?slotTargets:[...residents.targets,...objects.targets,...(ghost.root.visible?[ghost.hit]:[])];
+  const targets=placement?slots.targets:[...residents.targets,...objects.targets,...(ghost.root.visible?[ghost.hit]:[])];
   const hit=ray.intersectObjects(targets,false)[0];if(hit)onPick(hit.object.userData);
  };
  const cancel=()=>{scenePointers.clear();tapGesture.cancel()};canvas.addEventListener('pointerdown',pointerdown);canvas.addEventListener('pointermove',pointermove);canvas.addEventListener('pointerup',pointerup);canvas.addEventListener('pointercancel',cancel);
@@ -185,23 +106,20 @@ export function createWorld(canvas,{onPick,onError}){
   setPresentation(value,viewport){if(!working())presentation.update(value,viewport)},
   focusRoom(id,immediate=false){if(working()||!ROOMS.some(r=>r.id===id))return false;focusedRoom=id;focusedDoll=null;cameraMove.moveTo(framing(canvas.clientWidth,canvas.clientHeight,id,presentation.value),reducedMotion||immediate);return true},
   focusDoll(id){const p=residents.position(id);if(working()||!p)return false;focusedDoll=id;focusedRoom=null;cameraMove.moveTo(focusPose(),reducedMotion);return true},
-  visualStatus(){return {atmosphereFx:roomEffects.status(),portraitCount:portraitCache.size,quality,focusedRoom,focusedDoll,presentation:presentation.value,nightMix,cameraMoving:cameraMove.active,previewVisible:preview.root.visible,previewValid:preview.root.userData.valid??false,windowMaterials:house.windows.size,activeOwnedLights:[...decor.values()].filter(o=>o.userData.ownedLight?.intensity>0).length,restoredLights:restoration.lights.filter(l=>l.intensity>0).length,reactivePoses:Object.fromEntries([...decor].map(([id,o])=>[id,{turn:o.rotation.y,rock:o.rotation.z,scale:o.scale.x}])),courtyard:house.root.getObjectByName('levantine-courtyard')?.userData.nightCue,selectedObject:objects.selected,story:storyProps.status(),teaActive,tea:teaTable.status(),stitchActive,workCeilingVisible:house.workCeiling.visible,workArchVisible:courtyard.studioArch.visible,stitch:sewingPlay.status(),stitchGuides:stitchGuidePositions(),chimeActive,chimes:moonChimes.status()}},
+  visualStatus(){return {atmosphereFx:roomEffects.status(),portraitCount:portraitCache.size,quality,focusedRoom,focusedDoll,presentation:presentation.value,nightMix,cameraMoving:cameraMove.active,previewVisible:preview.root.visible,previewValid:preview.root.userData.valid??false,windowMaterials:house.windows.size,activeOwnedLights:[...decorSync.items.values()].filter(o=>o.userData.ownedLight?.intensity>0).length,restoredLights:restoration.lights.filter(l=>l.intensity>0).length,reactivePoses:Object.fromEntries([...decorSync.items].map(([id,o])=>[id,{turn:o.rotation.y,rock:o.rotation.z,scale:o.scale.x}])),courtyard:house.root.getObjectByName('levantine-courtyard')?.userData.nightCue,selectedObject:objects.selected,story:storyProps.status(),teaActive,tea:teaTable.status(),stitchActive,workCeilingVisible:house.workCeiling.visible,workArchVisible:courtyard.studioArch.visible,stitch:sewingPlay.status(),stitchGuides:stitchGuidePositions(),chimeActive,chimes:moonChimes.status()}},
   zoom(amount){if(working())return;cameraMove.cancel();camera.zoom=T.MathUtils.clamp(camera.zoom*amount,.8,3.5);camera.updateProjectionMatrix()},
   orbit(amount){if(working())return;cameraMove.cancel();const offset=camera.position.clone().sub(controls.target);offset.applyAxisAngle(new T.Vector3(0,1,0),amount);camera.position.copy(controls.target).add(offset);controls.update()},
   setEnabled(enabled){requestedEnabled=Boolean(enabled);controls.enabled=requestedEnabled&&!working();if(!enabled)cameraMove.cancel()},
-  setPlacement(item){placement=item;slotGroup.visible=Boolean(item);if(!item){previewPose=null;preview.clear()}},
+  setPlacement(item){placement=item;slots.setActive(item);if(!item){previewPose=null;preview.clear()}},
   setPreview(pose){previewPose=pose},
   project(id,height=1.0){const p=residents.position(id);if(!p)return null;p.y+=height;p.add(house.root.position);p.project(camera);return {x:(p.x+1)*canvas.clientWidth/2,y:(1-p.y)*canvas.clientHeight/2}},
   render(state,dt,selected){
    if(disposed||lost)return;reducedMotion=state.settings.reducedMotion;setWorkActivity(state.activities.active?.id);stitchSections=stitchActive?(stitchStatus(state)?.sections??[]):[];if(!state.paused)cameraMove.tick(dt,reducedMotion);
    const budget=detail(canvas.clientWidth,canvas.clientHeight,state.settings.quality,window.devicePixelRatio||1);
    if(quality!==budget.level){quality=budget.level;renderer.setPixelRatio(budget.pixelRatio);renderer.shadowMap.enabled=budget.shadows;resize()}
-   for(const d of state.decor)if(!decor.has(d.id)){const obj=makeFurniture(d.item),room=ROOMS.find(r=>r.id===d.room),slot=SLOTS[d.slot];obj.position.set(room.x+slot.x,room.y+.13,slot.z);if(d.item==='lamp'){const light=new T.PointLight(0xffc07a,0,3.4,2);light.name='owned-keepsake-light';light.position.set(0,1.05,0);light.castShadow=false;obj.add(light);obj.userData.ownedLight=light}house.root.add(obj);decor.set(d.id,obj)}
-   for(const d of state.decor){const obj=decor.get(d.id),room=ROOMS.find(r=>r.id===d.room),slot=SLOTS[d.slot],recent=state.elapsed-(d.lastUse??-10)<5,phase=Math.max(0,state.elapsed-(d.lastUse??-10));obj.position.set(room.x+slot.x,room.y+.13,slot.z);obj.scale.setScalar(d.item==='plant'&&d.tendedDay===state.day?1.08:1);obj.rotation.y=(d.rotation??0)*Math.PI/2+(d.item==='musicbox'&&recent?(reducedMotion ? .14 : phase*2.4):0);obj.rotation.z=d.item==='mobile'&&recent?(reducedMotion ? .06 : Math.sin(phase*5)*.12):0;if(obj.userData.ownedLight){obj.userData.ownedLight.intensity=d.active?(.25+nightMix*2.15):0;if(obj.userData.pool)obj.userData.pool.material.opacity=poolOpacity(d.active?.2+nightMix*.8:0)}obj.visible=d.id!==previewPose?.moveId}
+   decorSync.add(state);decorSync.place(state,{reducedMotion,nightMix,hiddenId:previewPose?.moveId});
    objects.update(state,working());
-   for(const [id,obj] of decor)if(!state.decor.some(d=>d.id===id)){obj.removeFromParent();obj.traverse(o=>{if(o.material?.map&&!o.material.userData.shared){o.material.map.dispose();o.material.dispose();o.geometry?.dispose()}});decor.delete(id)}
-   slotTargets.forEach(o=>{o.visible=!state.decor.some(d=>d.id!==previewPose?.moveId&&d.room===o.userData.slot.room&&d.slot===o.userData.slot.slot)});
-   slotGroup.children.forEach(o=>{o.visible=!state.decor.some(d=>d.id!==previewPose?.moveId&&d.room===o.userData.slot.room&&d.slot===o.userData.slot.slot)});
+   decorSync.prune(state);slots.refresh(state,previewPose?.moveId);
    // Exponential interpolation is frame-rate independent; reduced motion switches instantly.
    const night=isNight(state);nightMix=state.settings.reducedMotion?Number(night):T.MathUtils.damp(nightMix,Number(night),2.2,dt);
    const cue=courtyard.update(state,nightMix),look=lighting(nightMix),haze=fogPolicy(nightMix);hemi.intensity=look.ambient;key.intensity=look.key;fill.intensity=look.rim;renderer.toneMappingExposure=look.exposure;depthFog.density=haze.density;depthFog.color.setHex(haze.color);
