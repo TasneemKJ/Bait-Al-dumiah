@@ -11,5 +11,6 @@ export function createRoomFrame(parent){
  const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.Float32BufferAttribute(vertices,3));
  const material=new T.LineBasicMaterial({color:0xe9c18d,transparent:true,opacity:.62,depthWrite:false});
  root.add(new T.LineSegments(geometry,material));
- return {root,show(id){const room=ROOMS.find(r=>r.id===id);root.visible=Boolean(room);if(room)root.position.set(room.x,room.y+.20,1.84);return root.visible}};
+ return {root,show(id){const room=ROOMS.find(r=>r.id===id);root.visible=Boolean(room);
+ if(room)root.position.set(room.x,room.y+.20,1.84);return root.visible}};
 }

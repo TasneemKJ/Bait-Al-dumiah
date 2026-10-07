@@ -8,5 +8,6 @@ export function chimeFraming(width,height){
  const usable=Math.max(120,h-top-bottom),aspect=w/h,span=Math.max(3.25/aspect,2.75*h/usable),zoom=1.7;
  const upY=14/Math.hypot(1,14),offset=((top+usable/2)/h-.5)*span/upY;
  const room=ROOMS.find(r=>r.id==='bedroom');
- return {height:span*zoom,zoom,aspect,eyeOffset:[0,1,14],target:[room.x,room.y+.26+.20+1.30+offset,1.35],safeArea:{top,bottom}};
+ return {height:span*zoom,zoom,aspect,eyeOffset:[0,1,14],target:[room.x,
+   room.y+.26+.20+1.30+offset,1.35],safeArea:{top,bottom}};
 }

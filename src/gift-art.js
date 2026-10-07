@@ -1,13 +1,46 @@
 // Small hand-drawn keepsakes for the visitor's gifts, local inline SVG only.
 const art={
- 'pressed-jasmine':'<g fill="#fbf4e9" stroke="#b68d5d" stroke-width="1.2"><ellipse cx="24" cy="12" rx="5" ry="8"/><ellipse cx="24" cy="36" rx="5" ry="8"/><ellipse cx="12" cy="24" rx="8" ry="5"/><ellipse cx="36" cy="24" rx="8" ry="5"/><ellipse cx="14.5" cy="14.5" rx="5" ry="7.5" transform="rotate(-45 14.5 14.5)"/><ellipse cx="33.5" cy="33.5" rx="5" ry="7.5" transform="rotate(-45 33.5 33.5)"/></g><circle cx="24" cy="24" r="3.4" fill="#e5b471"/>',
- 'brass-thimble':'<path d="M14 40V22c0-8 4-13 10-13s10 5 10 13v18z" fill="#d6a95c" stroke="#8d6a3a" stroke-width="1.4"/><path d="M12 40h24v3H12z" fill="#b68d5d" stroke="#8d6a3a" stroke-width="1.2"/><g fill="#8d6a3a"><circle cx="20" cy="18" r="1.1"/><circle cx="28" cy="18" r="1.1"/><circle cx="24" cy="24" r="1.1"/><circle cx="19" cy="30" r="1.1"/><circle cx="29" cy="30" r="1.1"/></g>',
- 'paper-boat':'<path d="M6 30h36l-7 9H13z" fill="#fbf4e9" stroke="#a9627e" stroke-width="1.4" stroke-linejoin="round"/><path d="M24 8v22M24 8l13 20H24z" fill="#f0dfe4" stroke="#a9627e" stroke-width="1.4" stroke-linejoin="round"/>',
- 'sugar-cube':'<path d="M10 18 24 10l14 8v16l-14 8-14-8z" fill="#fbf4e9" stroke="#b9a69a" stroke-width="1.4" stroke-linejoin="round"/><path d="M10 18l14 8 14-8M24 26v16" fill="none" stroke="#b9a69a" stroke-width="1.2"/><g fill="#e6d8cb"><circle cx="17" cy="29" r="1"/><circle cx="31" cy="30" r="1"/><circle cx="24" cy="16" r="1"/></g>',
- 'blue-bead':'<circle cx="24" cy="24" r="14" fill="#6f93b8" stroke="#46688a" stroke-width="1.4"/><circle cx="24" cy="24" r="4.2" fill="#f1e7dd" stroke="#46688a" stroke-width="1.2"/><ellipse cx="18" cy="17" rx="4" ry="2.4" fill="#fff" opacity=".45" transform="rotate(-35 18 17)"/>',
- 'tiny-key':'<circle cx="15" cy="16" r="8" fill="none" stroke="#8d6a3a" stroke-width="3"/><path d="M21 22 38 39M31 32l4-4m-1 9 4-4" fill="none" stroke="#b68d5d" stroke-width="3.2" stroke-linecap="round"/><circle cx="15" cy="16" r="2" fill="#e5b471"/>',
- 'folded-letter':'<rect x="7" y="12" width="34" height="24" rx="2.5" fill="#fbf4e9" stroke="#b68d5d" stroke-width="1.4"/><path d="m7 14 17 13 17-13M7 35l12-12m22 12L29 23" fill="none" stroke="#b68d5d" stroke-width="1.2"/><circle cx="24" cy="27" r="3.2" fill="#a9627e"/>',
- 'fifth-cup':'<path d="M10 20h24v8a12 12 0 0 1-12 12 12 12 0 0 1-12-12z" fill="#fbf4e9" stroke="#a9627e" stroke-width="1.4"/><path d="M34 22h3a5 5 0 0 1 0 10h-4" fill="none" stroke="#a9627e" stroke-width="1.4"/><path d="M12 42h20M17 10c-2 3 2 4 0 7m6-7c-2 3 2 4 0 7m6-7c-2 3 2 4 0 7" fill="none" stroke="#c9b6ae" stroke-width="1.3" stroke-linecap="round"/>'
+ 'pressed-jasmine':'<g fill="#fbf4e9" stroke="#b68d5d" stroke-width="1.2"><ellipse cx="24" cy="12" rx="5"'+
+   ' ry="8"/><ellipse cx="24" cy="36"'+
+   ' rx="5" ry="8"/><ellipse cx="12" cy="24" rx="8" ry="5"/><ellipse cx="36" cy="24" rx="8" ry="5"/><ellipse cx="14.5"'+
+   ' cy="14.5" rx="5" ry="7.5" transform="rotate(-45 14.5 14.5)"/><ellipse cx="33.5" cy="33.5" rx="5" ry="7.5"'+
+   ' transform="rotate(-45 33.5 33.5)"/></g><circle cx="24" cy="24" r="3.4" fill="#e5b471"/>',
+ 'brass-thimble':
+  '<path d="M14 40V22c0-8 4-13 10-13s10 5 10 13v18z" fill="#d6a95c" stroke="#8d6a3a" stroke-width="1.4"/>'+
+   '<path d="M12 40h24v3H12z" fill="#b68d5d" stroke="#8d6a3a" stroke-width="1.2"/>'+
+     '<g fill="#8d6a3a"><circle cx="20" cy="18"'+
+   ' r="1.1"/><circle cx="28" cy="18" r="1.1"/><circle cx="24" cy="24" r="1.1"/><circle cx="19" cy="30" r="1.1"/>'+
+   '<circle cx="29" cy="30" r="1.1"/></g>',
+ 'paper-boat':
+  '<path d="M6 30h36l-7 9H13z" fill="#fbf4e9" stroke="#a9627e" stroke-width="1.4" stroke-linejoin="round"/>'+
+   '<path d="M24 8v22M24 8l13 20H24z" fill="#f0dfe4" stroke="#a9627e" stroke-width="1.4" stroke-linejoin="round"/>',
+ 'sugar-cube':'<path d="M10 18 24 10l14 8v16l-14 8-14-8z" fill="#fbf4e9" stroke="#b9a69a"'+
+   ' stroke-width="1.4" stroke-linejoin="round"/>'+
+   '<path d="M10 18l14 8 14-8M24 26v16" fill="none" stroke="#b9a69a" stroke-width="1.2"/>'+
+     '<g fill="#e6d8cb"><circle cx="17"'+
+   ' cy="29" r="1"/><circle cx="31" cy="30" r="1"/><circle cx="24" cy="16" r="1"/></g>',
+ 'blue-bead':'<circle cx="24" cy="24" r="14" fill="#6f93b8" stroke="#46688a" stroke-width="1.4"/>'+
+   '<circle cx="24" cy="24" r="4.2"'+
+   ' fill="#f1e7dd" stroke="#46688a" stroke-width="1.2"/><ellipse cx="18" cy="17" rx="4"'+
+     ' ry="2.4" fill="#fff" opacity=".45"'+
+   ' transform="rotate(-35 18 17)"/>',
+ 'tiny-key':'<circle cx="15" cy="16" r="8" fill="none" stroke="#8d6a3a" stroke-width="3"/>'+
+   '<path d="M21 22 38 39M31 32l4-4m-1 9 4-4"'+
+   ' fill="none" stroke="#b68d5d" stroke-width="3.2" stroke-linecap="round"/><circle cx="15"'+
+     ' cy="16" r="2" fill="#e5b471"/>',
+ 'folded-letter':
+  '<rect x="7" y="12" width="34" height="24" rx="2.5" fill="#fbf4e9" stroke="#b68d5d" stroke-width="1.4"/>'+
+   '<path d="m7 14 17 13 17-13M7 35l12-12m22 12L29 23" fill="none" stroke="#b68d5d"'+
+     ' stroke-width="1.2"/><circle cx="24"'+
+   ' cy="27" r="3.2" fill="#a9627e"/>',
+ 'fifth-cup':'<path d="M10 20h24v8a12 12 0 0 1-12 12 12 12 0 0 1-12-12z" fill="#fbf4e9" stroke="#a9627e"'+
+   ' stroke-width="1.4"/>'+
+   '<path d="M34 22h3a5 5 0 0 1 0 10h-4" fill="none" stroke="#a9627e" stroke-width="1.4"/>'+
+   '<path d="M12 42h20M17 10c-2 3 2 4 0 7m6-7c-2 3 2 4 0 7m6-7c-2 3 2 4 0 7" fill="none"'+
+     ' stroke="#c9b6ae" stroke-width="1.3"'+
+   ' stroke-linecap="round"/>'
 };
 export const GIFT_ART_IDS=Object.keys(art);
-export function giftArt(id){return art[id]?`<svg class="gift-art" viewBox="0 0 48 48" width="44" height="44" aria-hidden="true" focusable="false">${art[id]}</svg>`:''}
+export function giftArt(id){return art[id]?
+  `<svg class="gift-art" viewBox="0 0 48 48" width="44" height="44" aria-hidden="true"
+    focusable="false">${art[id]}</svg>`:''}

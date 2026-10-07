@@ -1,20 +1,35 @@
 const paths={
  home:'<path d="m3 11 9-8 9 8v10H3z"/><path d="M9 21v-7h6v7M8 9h.01M16 9h.01"/>',
  heart:'<path d="M20.5 4.7a5.5 5.5 0 0 0-8.5.9 5.5 5.5 0 0 0-8.5-.9C-.3 8.5 4 14.5 12 21c8-6.5 12.3-12.5 8.5-16.3Z"/>',
- moon:'<path d="M20.8 14A9 9 0 0 1 10 3.2 9 9 0 1 0 20.8 14Z"/><path d="m18 3 .5 1.5L20 5l-1.5.5L18 7l-.5-1.5L16 5l1.5-.5Z"/>',
- sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/>',
- button:'<circle cx="12" cy="12" r="9"/><circle cx="9" cy="9" r=".7"/><circle cx="15" cy="9" r=".7"/><circle cx="9" cy="15" r=".7"/><circle cx="15" cy="15" r=".7"/>',
+ moon:'<path d="M20.8 14A9 9 0 0 1 10 3.2 9 9 0 1 0 20.8 14Z"/>'+
+   '<path d="m18 3 .5 1.5L20 5l-1.5.5L18 7l-.5-1.5L16 5l1.5-.5Z"/>',
+ sun:'<circle cx="12" cy="12" r="4"/>'+
+   '<path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/>',
+ button:'<circle cx="12" cy="12" r="9"/><circle cx="9" cy="9" r=".7"/><circle cx="15" cy="9" r=".7"/>'+
+  '<circle cx="9" cy="15" r=".7"/><circle cx="15" cy="15" r=".7"/>',
  souls:'<circle cx="9" cy="7" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M17 4a3 3 0 0 1 0 6m1 4a4 4 0 0 1 3 4v3"/>',
  leaf:'<path d="M20 3C9 2 2 7 5 15c3 7 15 4 15-12Z"/><path d="M3 22 15 9M8 17l-1-5m5 1 5 1"/>',
  book:'<path d="M12 5C8 2 3 3 2 4v16c4-2 7-1 10 1 3-2 6-3 10-1V4c-1-1-6-2-10 1v16"/>',
- settings:'<path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="10" cy="18" r="2"/>',
- close:'<path d="m6 6 12 12M18 6 6 18"/>',tea:'<path d="M3 8h13v8a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5Zm13 1h3a3 3 0 0 1 0 6h-3M6 3v2m4-3v3m4-2v2"/>',
+ settings:'<path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="2"/><circle cx="16" cy="12"'+
+   ' r="2"/><circle cx="10" cy="18" r="2"/>',
+ close:'<path d="m6 6 12 12M18 6 6 18"/>',
+   tea:'<path d="M3 8h13v8a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5Zm13 1h3a3 3 0 0 1 0 6h-3M6 3v2m4-3v3m4-2v2"/>',
  play:'<path d="m12 2 2.7 6.4 6.9.6-5.2 4.5 1.6 6.7-6-3.6-6 3.6 1.6-6.7L2.4 9l6.9-.6Z"/>',
  rest:'<path d="M3 18V8m18 10V8M3 14h18M3 10h18v4M6 10V7h5v3M3 18v3m18-3v3"/>',
- lamp:'<path d="m7 3-4 10h18L17 3ZM12 13v8M7 21h10"/>',rug:'<path d="M5 4h14v16H5zM2 5h3m-3 4h3m-3 5h3m-3 5h3m14-14h3m-3 4h3m-3 5h3m-3 5h3m-10-12 4 5-4 5-4-5z"/>',
- bear:'<circle cx="7" cy="5" r="3"/><circle cx="17" cy="5" r="3"/><ellipse cx="12" cy="10" rx="7" ry="6"/><ellipse cx="12" cy="18" rx="5" ry="4"/><path d="M9 9h.01M15 9h.01m-4 3h2"/>',
- music:'<path d="M9 18V5l11-2v13M9 8l11-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="17" cy="16" rx="3" ry="2"/>',
- volume:'<path d="M11 4 6 8H2v8h4l5 4ZM15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/>',muted:'<path d="M11 4 6 8H2v8h4l5 4Zm5 5 6 6m0-6-6 6"/>',
- pause:'<path d="M7 4v16M17 4v16"/>',resume:'<path d="m7 3 14 9-14 9z"/>',check:'<path d="m4 12 5 5L20 6"/>',plus:'<path d="M12 5v14M5 12h14"/>',minus:'<path d="M5 12h14"/>',arrow:'<path d="M4 12h16m-6-6 6 6-6 6"/>',ghost:'<path d="M4 21V10a8 8 0 0 1 16 0v11l-4-3-4 3-4-3ZM9 9v2m6-2v2"/>',spark:'<path d="m12 2 2 7 7 3-7 2-2 8-2-8-8-2 8-3Z"/>',
+ lamp:'<path d="m7 3-4 10h18L17 3ZM12 13v8M7 21h10"/>',
+   rug:'<path d="M5 4h14v16H5zM2 5h3m-3 4h3m-3 5h3m-3 5h3m14-14h3m-3 4h3m-3 5h3m-3 5h3m-10-12 4 5-4 5-4-5z"/>',
+ bear:'<circle cx="7" cy="5" r="3"/><circle cx="17" cy="5" r="3"/><ellipse cx="12" cy="10" rx="7" ry="6"/>'+
+  '<ellipse cx="12" cy="18" rx="5" ry="4"/><path d="M9 9h.01M15 9h.01m-4 3h2"/>',
+ music:'<path d="M9 18V5l11-2v13M9 8l11-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/>'+
+   '<ellipse cx="17" cy="16" rx="3" ry="2"/>',
+ volume:'<path d="M11 4 6 8H2v8h4l5 4ZM15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/>',
+   muted:'<path d="M11 4 6 8H2v8h4l5 4Zm5 5 6 6m0-6-6 6"/>',
+ pause:'<path d="M7 4v16M17 4v16"/>',resume:'<path d="m7 3 14 9-14 9z"/>',
+   check:'<path d="m4 12 5 5L20 6"/>',plus:'<path d="M12 5v14M5 12h14"/>',
+   minus:'<path d="M5 12h14"/>',arrow:'<path d="M4 12h16m-6-6 6 6-6 6"/>',
+     ghost:'<path d="M4 21V10a8 8 0 0 1 16 0v11l-4-3-4 3-4-3ZM9 9v2m6-2v2"/>',
+       spark:'<path d="m12 2 2 7 7 3-7 2-2 8-2-8-8-2 8-3Z"/>',
 };
-export function icon(name){return `<svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.spark}</svg>`}
+export function icon(name){return `<svg class="icon" width="22" height="22"
+  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55"
+  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.spark}</svg>`}

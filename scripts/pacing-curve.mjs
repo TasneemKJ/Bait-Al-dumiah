@@ -16,7 +16,7 @@
  * Excluded on purpose: the tea, sewing and chime minigames (they need real
  * touch input); their rewards are daily-capped, so this is a floor, not a total. */
 import * as sim from '../src/simulation.js';
-import {CATALOG,ROOMS,SLOTS,ACTIONS,DOLLS,MILESTONES,SECRETS,VISITOR_GIFTS,DOOR_STEPS} from '../src/content.js';
+import {CATALOG,ROOMS,SLOTS,DOLLS,MILESTONES,SECRETS,VISITOR_GIFTS} from '../src/content.js';
 
 const STEP=.25,MINUTES=Number(process.env.MINUTES)||30;
 const seedsArg=Number(process.argv[2])||7,SEEDS=Array.from({length:seedsArg},(_,i)=>i+1);
@@ -28,7 +28,7 @@ function run(kind,seed){
  const s=sim.createState(),rand=lcg(seed),first={},rows=[];
  const mark=(k,t)=>{if(first[k]==null)first[k]=+(t/60).toFixed(2)};
  const expert=kind==='expert';
- let earned=0,prevToday=0,prevDay=1,spent={decor:0,door:0,gifts:0,care:0},idle=0;
+ let earned=0,prevToday=0,prevDay=1,spent={decor:0,door:0,gifts:0,care:0};
  const claimAll=()=>{for(const m of sim.unclaimed(s))if(sim.claim(s,m.id).ok)mark('firstClaim',t)};
  let t=0;
  const spend=(key,before)=>{if(s.buttons<before)spent[key]+=before-s.buttons};

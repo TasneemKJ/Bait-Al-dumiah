@@ -21,7 +21,7 @@ Read `README.md`, then `ARCHITECTURE.md`, `DESIGN_RULES.md`, `DESIGN.md`, `TODO.
 ## Commands
 ```sh
 npm install ; npm run verify          # node tests + build (the fast gate)
-PORT=4391 CHROMIUM_PATH=/opt/pw-browsers/chromium npm run test:browser   # play_check.py; needs `pip install -r requirements.txt`
+PORT=4391 CHROMIUM_PATH=/opt/pw-browsers/chromium npm run test:browser   # play_check.py then story_smoke.py (pause key, story interaction, drag-and-drop); needs `pip install -r requirements.txt`
 ```
 `scripts/play_check.py` honours `PORT` (default 4177). Other machine-wide browser scripts are listed in `README.md`. On a shared machine pick a unique port, and wrap each single browser command (one journey, one screenshot batch or one play_check, under about 10 minutes) in `flock /tmp/browser.lock`, never a whole round script. Start servers outside the lock. Competitive lessons live in `docs/COMPETITIVE.md`.
 

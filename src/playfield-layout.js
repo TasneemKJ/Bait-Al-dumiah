@@ -11,10 +11,13 @@ export function playfieldInsets(width,height,regions=[]){
   if(r.edge==='top')top=Math.max(top,r.bottom+12);
   if(r.edge==='bottom')bottom=Math.max(bottom,height-r.top+12);
  }
- return {top:Math.round(Math.min(height-120,Math.max(0,top))),bottom:Math.round(Math.min(height-120,Math.max(0,bottom)))};
+ return {top:Math.round(Math.min(height-120,Math.max(0,top))),
+   bottom:Math.round(Math.min(height-120,Math.max(0,bottom)))};
 }
-const upper='.brand,.house-status,.time-tools,.objective,.visitor-hint,.story-playfield[data-ribbon-edge="top"] .object-ribbon';
-const lower='.room-views,.dock,.camera-tools,.object-controls>[data-object-toggle],.object-ribbon,.held-item,.scene-response';
+const upper='.brand,.house-status,.time-tools,.objective,.visitor-hint,'+
+  '.story-playfield[data-ribbon-edge="top"] .object-ribbon';
+const lower='.room-views,.dock,.camera-tools,.object-controls>[data-object-toggle],.object-ribbon,'+
+  '.held-item,.scene-response';
 export function createPlayfieldLayout(host,onChange,prepare=()=>{}){
  let pending=0,signature='',disposed=false;
  const watched=new Set();
@@ -36,7 +39,8 @@ export function createPlayfieldLayout(host,onChange,prepare=()=>{}){
    if(!node.getClientRects().length)continue;
    const style=getComputedStyle(node);if(style.visibility==='hidden'||style.display==='none')continue;
    const r=node.getBoundingClientRect();if(!r.width||!r.height)continue;
-   regions.push({edge:node.matches(upper)?'top':'bottom',left:r.left-root.left,right:r.right-root.left,top:r.top-root.top,bottom:r.bottom-root.top});
+   regions.push({edge:node.matches(upper)?'top':'bottom',left:r.left-root.left,
+     right:r.right-root.left,top:r.top-root.top,bottom:r.bottom-root.top});
   }
   const value=playfieldInsets(root.width,root.height,regions),next=JSON.stringify([root.width,root.height,value]);
   if(next!==signature){signature=next;onChange(value,{width:root.width,height:root.height})}
@@ -52,7 +56,12 @@ export function createPlayfieldLayout(host,onChange,prepare=()=>{}){
    return node===host||Boolean(node.closest?.(upper+','+lower+',.story-playfield,.object-controls'));
   }))schedule();
  });
- changes.observe(host,{subtree:true,childList:true,attributes:true,attributeOldValue:true,attributeFilter:['hidden','data-expanded','data-arrived','data-object-selected','data-ribbon-edge','data-focus-room','data-tea-active','data-stitch-active','data-chime-active','class']});
- sizes.observe(host);window.addEventListener('resize',schedule);window.visualViewport?.addEventListener('resize',schedule);schedule();
- return {measure:schedule,dispose(){disposed=true;cancelAnimationFrame(pending);changes.disconnect();sizes.disconnect();window.removeEventListener('resize',schedule);window.visualViewport?.removeEventListener('resize',schedule)}};
+ changes.observe(host,{subtree:true,childList:true,attributes:true,attributeOldValue:true,
+   attributeFilter:['hidden','data-expanded','data-arrived',
+   'data-object-selected','data-ribbon-edge','data-focus-room','data-tea-active',
+     'data-stitch-active','data-chime-active','class']});
+ sizes.observe(host);window.addEventListener('resize',schedule);
+ window.visualViewport?.addEventListener('resize',schedule);schedule();
+ return {measure:schedule,dispose(){disposed=true;cancelAnimationFrame(pending);changes.disconnect();sizes.disconnect();
+ window.removeEventListener('resize',schedule);window.visualViewport?.removeEventListener('resize',schedule)}};
 }

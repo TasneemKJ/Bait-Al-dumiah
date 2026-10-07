@@ -25,8 +25,10 @@ export function roomLighting(roomId,mix){
 // One room practical's values. The house light list also holds window glass,
 // so callers identify a lamp by its room tag, never by its list position.
 export function practicalLight(roomId,mix,lamps,cue=1,focused=false){
- const practical=roomLighting(roomId,mix),energy=Number.isFinite(lamps)?Math.max(0,lamps):0,gain=Number.isFinite(cue)?Math.max(0,cue):1;
- return {color:practical.color,distance:practical.distance,intensity:(energy*PRACTICAL_SHARE+practical.intensity)*gain*(focused?1.12:1)};
+ const practical=roomLighting(roomId,mix),energy=Number.isFinite(lamps)?Math.max(0,
+   lamps):0,gain=Number.isFinite(cue)?Math.max(0,cue):1;
+ return {color:practical.color,distance:practical.distance,
+   intensity:(energy*PRACTICAL_SHARE+practical.intensity)*gain*(focused?1.12:1)};
 }
 const PRACTICAL_SHARE=.22;
 export function detail(width,height,preference='auto',dpr=1){
@@ -57,7 +59,8 @@ export function framing(width,height,roomId=null,presentation={}){
 // Shader uniforms are linear RGB. Hex art-direction swatches are sRGB.
 // Explicit conversion prevents an intended midnight blue becoming pale gray.
 export function nightSky(){
- const linear=hex=>[16,8,0].map(shift=>{const c=((hex>>shift)&255)/255;return c<=.04045?c/12.92:Math.pow((c+.055)/1.055,2.4)});
+ const linear=hex=>[16,8,0].map(shift=>{const c=((hex>>shift)&255)/255;
+ return c<=.04045?c/12.92:Math.pow((c+.055)/1.055,2.4)});
  return {bottom:linear(0x292940),top:linear(0x10162c),glow:linear(0x1b1830)};
 }
 

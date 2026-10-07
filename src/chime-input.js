@@ -6,7 +6,8 @@ export function createChimeGesture(){
  return {
   get pointerId(){return held?.pointer??null},
   down(e,target,span){
-   if(held||!valid(e)||e.isPrimary===false||(e.button!==undefined&&e.button!==0)||!Number.isFinite(span)||span<=0||!(Number.isInteger(target)&&target>=0&&target<4||target==='moon'))return false;
+   if(held||!valid(e)||e.isPrimary===false||(e.button!==undefined&&e.button!==0)||
+     !Number.isFinite(span)||span<=0||!(Number.isInteger(target)&&target>=0&&target<4||target==='moon'))return false;
    held={pointer:e.pointerId,target,x:e.clientX,y:e.clientY,span,travel:0};return true;
   },
   move(e){

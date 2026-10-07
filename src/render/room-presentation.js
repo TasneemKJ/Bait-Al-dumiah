@@ -5,8 +5,10 @@ export function createRoomPresentation(refit,blocked=()=>false){
   get value(){return {...value}},
   reset(){value={}},
   update(next,size){
-   const measuredSize=size&&Number.isFinite(size.width)&&Number.isFinite(size.height)?{width:size.width,height:size.height}:null;
-   const resized=Boolean(viewport&&measuredSize&&(viewport.width!==measuredSize.width||viewport.height!==measuredSize.height));
+   const measuredSize=size&&Number.isFinite(size.width)&&Number.isFinite(size.height)?
+     {width:size.width,height:size.height}:null;
+   const resized=Boolean(viewport&&measuredSize&&(viewport.width!==measuredSize.width||
+     viewport.height!==measuredSize.height));
    if(measuredSize)viewport=measuredSize;
    if(!resized&&value.top===next.top&&value.bottom===next.bottom)return false;
    value={top:next.top,bottom:next.bottom};

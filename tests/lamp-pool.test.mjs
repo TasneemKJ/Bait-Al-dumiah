@@ -13,7 +13,7 @@ test('pools and kettle steam are wired without adding lights, and reduced motion
  const pool=src('lamp-pool.js');assert.doesNotMatch(pool,/PointLight|SpotLight/);
  assert.match(src('house.js'),/createLampPool\(g,0,0,1\.15,\{y:\.03\}\)/);assert.match(src('house.js'),/kettle-steam-anchor/);
  assert.match(src('room-effects.js'),/Boolean\(lina\)&&lina\.action==='idle'/);assert.match(src('room-effects.js'),/reducedMotion\|\|state\.paused/);
- assert.match(src('world.js'),/userData\.pool\.material\.opacity=poolOpacity/);
+ assert.match(src('decor-sync.js'),/userData\.pool\.material\.opacity=poolOpacity/);
 });
 import {puffPhase,puffLook,PUFFS} from '../src/render/kettle-steam.js';
 test('kettle steam puffs are staggered, soft, bounded, and still under reduced motion',()=>{

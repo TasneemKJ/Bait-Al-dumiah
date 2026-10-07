@@ -71,6 +71,7 @@ python scripts/ui_check.py
 python scripts/art_check.py
 python scripts/expansion_check.py
 python scripts/story_check.py
+python scripts/story_smoke.py
 TEA_HEADED=1 xvfb-run -a python scripts/tea_check.py
 STITCH_HEADED=1 STITCH_SCENARIO=desktop xvfb-run -a python scripts/stitch_check.py
 STITCH_HEADED=1 STITCH_SCENARIO=phone xvfb-run -a python scripts/stitch_check.py
@@ -126,6 +127,7 @@ Pull requests and pushes to `main` run only the fast gate (`verify`: `npm ci`, `
 npm run verify && npm run test:browser          # core flows (PORT=4391 if 4177 is busy)
 python scripts/ui_check.py && python scripts/art_check.py && python scripts/atmosphere_check.py
 python scripts/chime_check.py; python scripts/story_check.py            # moon chimes, object stories
+python scripts/story_smoke.py                                           # pause key, story interaction, drag-and-drop
 python scripts/expansion_check.py                                       # three rituals journey
 python scripts/perf_check.py                                            # phone budgets, 4x CPU throttle
 xvfb-run -a python scripts/tea_check.py; xvfb-run -a python scripts/stitch_check.py; xvfb-run -a python scripts/visibility_check.py

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as sim from '../src/simulation.js';
 import * as content from '../src/content.js';
-import {fillStitch,finishStitch,storyAction} from './tea-test-helpers.mjs';
+import {fillStitch,finishStitch} from './tea-test-helpers.mjs';
 const active=s=>s.activities.active;
 const move=(s,x,y,dt=.1,pressed=true)=>{assert.equal(sim.controlStitch(s,{x,y,pressed}).ok,true);sim.step(s,dt)};
 const snap=s=>JSON.stringify(s);
