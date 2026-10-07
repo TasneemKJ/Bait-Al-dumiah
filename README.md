@@ -72,6 +72,7 @@ python scripts/art_check.py
 python scripts/expansion_check.py
 python scripts/story_check.py
 python scripts/story_smoke.py
+SHOTS_DIR=/tmp/world-ui python scripts/world_ui_check.py   # 390x844 touch, EN and AR: 44px controls, no sideways scroll, world coverage, carried-item handle
 TEA_HEADED=1 xvfb-run -a python scripts/tea_check.py
 STITCH_HEADED=1 STITCH_SCENARIO=desktop xvfb-run -a python scripts/stitch_check.py
 STITCH_HEADED=1 STITCH_SCENARIO=phone xvfb-run -a python scripts/stitch_check.py
