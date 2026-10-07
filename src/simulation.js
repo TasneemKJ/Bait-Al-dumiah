@@ -1,38 +1,24 @@
-import {DOLLS,ROOMS,CATALOG,SLOTS,SECRETS,ACTIONS,MILESTONES,SEW_SECONDS,SEW_DAILY,
-  BASKET_MAX,DOOR_STEPS,GIFT_COST,VISITOR_GIFTS,WISH_REFRESH_SECONDS,ACTIVITIES,ACTIVITY_THRESHOLDS,
-  ACTIVITY_DAILY_CAP,ACTIVITY_COOLDOWN,RESTORATION_COSTS,RESTORATION_MASTERY,INTERACTIVE_PROPS,STORY_CHAPTERS,
-  TEA_TABLE,STITCH_PATTERNS} from './content.js';
-import {requiredLength,stitchEdge,acceptedTrail,moveStitch} from './stitch-path.js';
-import {clamp,integer,has,fail} from './sim-util.js';
+import {earn,emit,checkMilestones,growBond,activityDef,activityLevel,completeActivity} from './sim-core.js';
+import {createTea,stepTea,releaseTea} from './sim-tea.js';
+import {stitchActive,stitchSections,createStitch,releaseStitch} from './sim-stitch.js';
+import {stepChimes,cancelChime} from './sim-chimes.js';
+import {clamp,has,fail} from './sim-util.js';
+import {isNight,wishFor,bondLevel,wishReward,currentStreak,inFavoriteRoom,isContent,
+  secretCozyNeeded,coziness} from './sim-queries.js';
+import {moveStitch} from './stitch-path.js';
+import {ROOMS,DOLLS,CATALOG,SLOTS,SECRETS,ACTIONS,MILESTONES,SEW_SECONDS,DOOR_STEPS,GIFT_COST,
+  VISITOR_GIFTS,ACTIVITIES,RESTORATION_COSTS,RESTORATION_MASTERY,WISH_REFRESH_SECONDS,
+    SEW_DAILY,BASKET_MAX} from './content.js';
 import {createState} from './sim-state.js';
 export {createState};
 export * from './sim-queries.js';
-import {isNight,wishFor,bondLevel,wishReward,currentStreak,fullRooms,inFavoriteRoom,isContent,
-  secretCozyNeeded,coziness} from './sim-queries.js';
+export {controlStitch,finishStitch,releaseStitch,stitchSectionProgress,stitchStatus,
+  unpickStitch} from './sim-stitch.js';
+export {cancelChime,chimeStatus,grabChime,pullChime,releaseChime,replayChimes} from './sim-chimes.js';
+export {activityLevel,activityReward,activityRewardReady,checkMilestones,storyStatus} from './sim-core.js';
+export {controlTea,emptyTeaCup,releaseTea,serveTea,teaStatus} from './sim-tea.js';
+export {interactStory,playStoryKeepsake} from './sim-story.js';
 export {SAVE_VERSION,migrate,readSave,restore} from './save-codec.js';
-const earn=(s,amount)=>{s.buttons=Math.min(9999,s.buttons+amount);s.earnedToday=Math.min(99999,s.earnedToday+amount)};
-// Events are transient notices for the presentation layer; they are never restored from a save.
-const emit=(s,event)=>{if(s.events.length<24)s.events.push(event)};
-const milestoneMet={
- 'first-care':s=>s.cares>=1,
- 'first-keepsake':s=>s.decor.length>=1,
- 'full-house':s=>s.lastFullDay>0,
- 'first-friend':s=>s.dolls.some(d=>bondLevel(d.bond)>=2),
- 'every-room':s=>ROOMS.every(r=>s.decor.some(d=>d.room===r.id)),
- 'room-complete':s=>fullRooms(s)>=1,
- 'three-whispers':s=>s.journal.length>=3,
- 'cozy-home':s=>coziness(s)>=70,
- 'streak-3':s=>currentStreak(s)>=3,
- 'family':s=>s.dolls.every(d=>bondLevel(d.bond)>=3),
- 'all-whispers':s=>s.journal.length>=SECRETS.length,
- 'door-open':s=>s.door>=DOOR_STEPS.length,
- 'all-gifts':s=>s.gifts.length>=VISITOR_GIFTS.length,
-};
-// Reached milestones wait to be collected, so buttons only change on an explicit action.
-export function checkMilestones(s){
- for(const m of MILESTONES)if(!s.achieved.includes(m.id)&&milestoneMet[m.id](s)){s.achieved.push(m.id);
- emit(s,{type:'milestone',id:m.id,reward:m.reward})}
-}
 export const unclaimed=s=>MILESTONES.filter(m=>s.achieved.includes(m.id)&&!s.milestones.includes(m.id));
 export function claim(s,id){
  const m=MILESTONES.find(x=>x.id===id);
@@ -42,11 +28,6 @@ export function claim(s,id){
 }
 export function collectBasket(s){if(s.basket<1)return fail('emptyBasket');
 const reward=s.basket;s.basket=0;earn(s,reward);return {ok:true,reward}}
-function growBond(s,d,amount){
- const before=bondLevel(d.bond);d.bond=clamp(d.bond+amount);const after=bondLevel(d.bond);
- for(let level=before+1;level<=after;level++){const reward=5*level;earn(s,reward);
- emit(s,{type:'bond',id:d.id,level,reward})}
-}
 export function care(s,id,action){
  const d=s.dolls.find(x=>x.id===id), a=Object.hasOwn(ACTIONS,action)?ACTIONS[action]:null;
  if(!d||!a)return fail('invalid');
@@ -176,17 +157,11 @@ export function leaveGift(s){
  checkMilestones(s);
  return {ok:true,gift,cost:GIFT_COST};
 }
-const activityDef=id=>ACTIVITIES.find(a=>a.id===id);
-export const activityLevel=(s,id)=>activityDef(id)?ACTIVITY_THRESHOLDS.reduce((level,min,
-  i)=>s.activities.mastery[id]>=min?i:level,0):0;
-export const activityReward=(s,id)=>7+activityLevel(s,id)*2;
 export function activityPattern(s,id){
  const a=activityDef(id);if(!a)return [];
  const level=activityLevel(s,id),seed=a.seed+s.activities.mastery[id]*3;
  return Array.from({length:Math.min(5,3+level)},(_,i)=>(seed+i*(a.seed+1)+Math.floor(i/2))%4);
 }
-export function activityRewardReady(s,id){return Boolean(activityDef(id))&&
-  s.activities.completed[id]<ACTIVITY_DAILY_CAP&&s.elapsed-s.activities.lastReward[id]>=ACTIVITY_COOLDOWN}
 export function beginActivity(s,id){
  if(s.paused)return fail('pausedActivity');if(!activityDef(id))return fail('invalid');
  if(s.activities.active)return fail('activityBusy');
@@ -217,147 +192,6 @@ export function activityInput(s,choice){
  if(active.cursor<active.pattern.length)return {ok:true,complete:false};
  const id=active.id;s.activities.active=null;return completeActivity(s,id);
 }
-// Sequence and physical rituals share one economic boundary.
-function completeActivity(s,id){
- const a=activityDef(id),before=activityLevel(s,id),rewarded=activityRewardReady(s,id),base=activityReward(s,id);
- let reward=0,bonus=0;
- if(rewarded){
-  s.activities.completed[id]++;s.activities.lastReward[id]=s.elapsed;
-  s.activities.mastery[id]=Math.min(999,s.activities.mastery[id]+1);
-  reward=base;bonus=activityLevel(s,id)>before?10*(before+1):0;earn(s,reward+bonus);
-  const d=s.dolls.find(d=>d.id===a.resident);growBond(s,d,3);d.comfort=clamp(d.comfort+8);s.unease=clamp(s.unease-3);
- }
- checkMilestones(s);
- return {ok:true,complete:true,id,reward,bonus,level:activityLevel(s,id),practice:!rewarded};
-}
-const TEA_TOLERANCE=.07;
-const teaActive=s=>s.activities.active?.id==='tea'?s.activities.active:null;
-const cupReady=c=>Math.abs(c.fill-c.target)<=TEA_TOLERANCE+1e-9;
-const teaHit=a=>a.cups.find(c=>Math.abs(c.x-a.aim*TEA_TABLE.aimSpan)<=TEA_TABLE.cupRadius)??null;
-const teaFlow=(s,a)=>a.phase==='pour'&&!s.paused&&a.pressed?Math.max(0,(a.tilt-.15)/.85)*.55:0;
-function createTea(s,mode){
- const level=mode==='guest'?0:activityLevel(s,'tea'),xs=mode==='guest'?[0]:level<2?[-.23,.23]:[-.33,0,.33];
- return {id:'tea',phase:'pour',mode,level,cups:xs.map((x,id)=>({id,x,
-   target:mode==='guest'?.70:.60+((level*3+s.day+s.activities.mastery.tea+id*4)%5)*.05,fill:0})),aim:0,tilt:0,
-     pressed:false,spills:0,poured:0,result:null};
-}
-function stepTea(s,dt){
- const a=teaActive(s);if(!a)return;const volume=teaFlow(s,a)*dt;if(volume<=0)return;
- a.poured+=volume;const cup=teaHit(a);
- if(!cup){a.spills+=volume;return}
- const added=Math.min(volume,Math.max(0,1.2-cup.fill));cup.fill+=added;a.spills+=volume-added;
-}
-export function teaStatus(s){
- const a=teaActive(s);if(!a)return null;
- return {...a,result:a.result?structuredClone(a.result):null,flow:teaFlow(s,a),
-   aimedCup:teaHit(a)?.id??null,best:a.mode==='ritual'?
-   s.activities.teaRecords[a.level]:null,cups:a.cups.map(c=>({...c,ready:cupReady(c),
-     overfilled:c.fill>c.target+TEA_TOLERANCE+1e-9})),ready:a.phase==='pour'&&!a.pressed&&a.cups.every(cupReady)};
-}
-function teaCommand(s){
- if(s.paused)return fail('pausedActivity');const a=teaActive(s);
- if(!a)return fail('teaNotActive');if(a.phase==='served')return fail('teaServed');return null;
-}
-export function controlTea(s,input){
- const blocked=teaCommand(s);if(blocked)return blocked;
- if(!input||typeof input!=='object'||Array.isArray(input)||
-   Object.keys(input).some(k=>!['aim','tilt','pressed'].includes(k))||
-   !Number.isFinite(input.aim)||input.aim< -1||input.aim>1||!Number.isFinite(input.tilt)||input.tilt<0||
-     input.tilt>1||typeof input.pressed!=='boolean')return fail('invalid');
- const a=teaActive(s);a.aim=input.aim;a.tilt=input.tilt;a.pressed=input.pressed;return {ok:true};
-}
-export function releaseTea(s){
- const a=teaActive(s);if(!a)return fail('teaNotActive');a.pressed=false;a.tilt=0;return {ok:true};
-}
-export function emptyTeaCup(s,id){
- const blocked=teaCommand(s);if(blocked)return blocked;
- const a=teaActive(s),cup=Number.isInteger(id)?a.cups.find(c=>c.id===id):null;
- if(!cup)return fail('invalid');if(a.pressed)return fail('teaHeld');
- if(cup.fill<=cup.target+TEA_TOLERANCE+1e-9)return fail('teaNotOverfilled');
- a.spills+=cup.fill;cup.fill=0;return {ok:true};
-}
-export function serveTea(s){
- const blocked=teaCommand(s);if(blocked)return blocked;const a=teaActive(s);
- if(a.pressed)return fail('teaHeld');if(!a.cups.every(cupReady))return fail('teaNotReady');
- if(a.mode==='guest'){const story=storyStatus(s);
- if(story.chapter?.id!=='guest-tea'||story.step!==2)return fail('storyNotHere')}
- const accuracy=a.cups.reduce((sum,c)=>sum+Math.max(0,1-Math.abs(c.fill-c.target)/TEA_TOLERANCE),0)/a.cups.length;
- const useful=a.cups.reduce((sum,c)=>sum+Math.min(c.fill,c.target),0),
-   score=integer(Math.round(100*accuracy*Math.min(1,useful/a.poured)),0,100);
- let result;
- if(a.mode==='guest')result={ok:true,complete:true,id:'tea',mode:'guest',reward:0,bonus:0,level:a.level,
-   practice:true,score,storyResult:advanceStory(s,storyStatus(s))};
- else{result={...completeActivity(s,'tea'),mode:'ritual',score};
- s.activities.teaRecords[a.level]=Math.max(s.activities.teaRecords[a.level]??0,score)}
- a.pressed=false;a.tilt=0;a.phase='served';a.result=result;return structuredClone(result);
-}
-
-const stitchActive=s=>s.activities.active?.id==='stitch'?s.activities.active:null;
-const stitchSections=a=>STITCH_PATTERNS.find(p=>p.id===a.patternId).sections;
-function createStitch(s,mode){
- const level=mode==='mend'?0:activityLevel(s,'stitch'),patternId=mode==='mend'?
-   'bear-seam':['leaf','diamond','jasmine','heart'][level];
- const p=STITCH_PATTERNS.find(p=>p.id===patternId).sections[0][0],needle={x:p[0],y:p[1]};
- return {id:'stitch',mode,phase:'sew',level,patternId,section:0,distance:0,needle,target:{...needle},
-   pressed:false,loose:false,travel:0,alignmentTravel:0,repairs:0,capture:null,result:null};
-}
-export function stitchStatus(s){
- const a=stitchActive(s);if(!a)return null;const sections=stitchSections(a),e=stitchEdge(a,sections);
- return {...structuredClone(a),sections:structuredClone(sections),
-   completedSections:Math.min(a.section,sections.length),acceptedTrail:acceptedTrail(a,
-   sections),nextGuidePoint:e?{...e.end}:null,requiredLength:requiredLength(sections),
-     best:a.mode==='ritual'?s.activities.stitchRecords[a.level]:null,
-   ready:a.phase==='sew'&&a.section===sections.length&&!a.pressed&&!a.loose&&!a.capture};
-}
-// Where the needle is in the current section, for readouts: 1-based section and rounded percent.
-export function stitchSectionProgress(stitch){
- const total=stitch.sections.length,covered=stitch.completedSections>=total;
- const length=stitch.sections[stitch.section]?.reduce((sum,p,i,points)=>i?
-   sum+Math.hypot(p[0]-points[i-1][0],p[1]-points[i-1][1]):sum,0)??0;
- const fraction=length?Math.max(0,Math.min(1,stitch.distance/length)):0;
- return {section:Math.min(total,stitch.section+1),percent:covered?100:Math.round(fraction*100)};
-}
-function stitchCommand(s){
- if(s.paused)return fail('pausedActivity');const a=stitchActive(s);
- if(!a)return fail('stitchNotActive');if(a.phase==='finished')return fail('stitchFinished');return null;
-}
-export function controlStitch(s,input){
- const blocked=stitchCommand(s);if(blocked)return blocked;
- if(!input||typeof input!=='object'||Array.isArray(input)||
-   Object.keys(input).some(k=>!['x','y','pressed'].includes(k))||!Number.isFinite(input.x)||
-   input.x< -1||input.x>1||!Number.isFinite(input.y)||input.y< -1||input.y>1||
-     typeof input.pressed!=='boolean')return fail('invalid');
- const a=stitchActive(s);a.target={x:input.x,y:input.y};a.pressed=input.pressed;
- if(!input.pressed)a.capture=null;return {ok:true};
-}
-export function releaseStitch(s){
- const a=stitchActive(s);if(!a)return fail('stitchNotActive');a.pressed=false;
- a.capture=null;a.target={...a.needle};return {ok:true};
-}
-export function unpickStitch(s){
- const blocked=stitchCommand(s);if(blocked)return blocked;const a=stitchActive(s);
- if(a.pressed)return fail('stitchHeld');
- if(a.section>=stitchSections(a).length||(!a.loose&&a.distance<=0))return fail('stitchNoRepair');
- const p=stitchSections(a)[a.section][0];a.distance=0;a.loose=false;a.capture=null;a.needle={x:p[0],y:p[1]};
- a.target={...a.needle};a.repairs++;return {ok:true};
-}
-export function finishStitch(s){
- const blocked=stitchCommand(s);if(blocked)return blocked;const a=stitchActive(s),sections=stitchSections(a);
- if(a.pressed)return fail('stitchHeld');
- if(a.loose||a.capture||a.section!==sections.length)return fail('stitchNotReady');
- if(a.mode==='mend'){const story=storyStatus(s);
- if(story.chapter?.id!=='mended-friend'||story.step!==1)return fail('storyNotHere')}
- const score=integer(Math.round(100*(a.travel>0?a.alignmentTravel/a.travel:0)*Math.min(1,
-   requiredLength(sections)/Math.max(a.travel,1e-9))),0,100);
- let result;
- if(a.mode==='mend')result={ok:true,complete:true,id:'stitch',mode:'mend',reward:0,bonus:0,level:a.level,
-   practice:true,score,storyResult:advanceStory(s,storyStatus(s))};
- else{result={...completeActivity(s,'stitch'),mode:'ritual',score};
- s.activities.stitchRecords[a.level]=Math.max(s.activities.stitchRecords[a.level]??0,score)}
- a.phase='finished';a.capture=null;a.pressed=false;a.target={...a.needle};
- a.result=structuredClone(result);return structuredClone(result);
-}
-
 export function restorationReady(s,room){
  const r=ROOMS.find(r=>r.id===room);if(!r)return null;const tier=s.restoration[room];
  const id=room==='parlor'?'tea':ACTIVITIES.find(a=>a.room===room)?.id;
@@ -368,108 +202,4 @@ export function restoreRoom(s,room){
  const next=restorationReady(s,room);if(!next)return fail('invalid');if(next.complete)return fail('restorationDone');
  if(!next.ready)return fail('restorationLocked');if(s.buttons<next.cost)return fail('funds');
  s.buttons-=next.cost;s.restoration[room]++;return {ok:true,room,tier:s.restoration[room],cost:next.cost};
-}
-// A single ordered progress record owns inventory, completed memories and rewards.
-// No separate held/claimed flags can disagree after an interrupted mobile session.
-export function storyStatus(s){
- const index=s.story.chapter,chapter=STORY_CHAPTERS[index]??null,step=chapter?s.story.step:0;
- const completed=STORY_CHAPTERS.slice(0,index).map(c=>c.id);
- const progress=STORY_CHAPTERS.slice(0,index).reduce((sum,c)=>sum+c.steps.length,0)+step;
- return {chapter,index,step,next:chapter?.steps[step]??null,held:chapter&&step>0?
-   chapter.steps[step-1].gives:null,completed,finished:chapter===null,
-   progress,totalSteps:STORY_CHAPTERS.reduce((sum,c)=>sum+c.steps.length,0)};
-}
-export function interactStory(s,key){
- if(s.paused)return fail('pausedActivity');
- if(typeof key!=='string'||!INTERACTIVE_PROPS.some(p=>'prop:'+p.id===key))return fail('invalid');
- if(s.activities.active)return fail('activityBusy');
- const status=storyStatus(s);if(status.finished)return fail('storyFinished');
- if(key!=='prop:'+status.next.object)return fail('storyNotHere');
- if(status.chapter.id==='mended-friend'&&status.step===1){s.activities.active=createStitch(s,'mend');
- return {ok:true,startedActivity:'stitch',mode:'mend',held:status.held}}
- if(status.chapter.id==='guest-tea'&&status.step===2){s.activities.active=createTea(s,'guest');
- return {ok:true,startedActivity:'tea',mode:'guest',held:status.held}}
- return advanceStory(s,status);
-}
-function advanceStory(s,status){
- const {chapter,step,next}=status,chapterComplete=step===chapter.steps.length-1,reward=chapterComplete?chapter.reward:0;
- s.story.lastAction='prop:'+next.object;s.story.lastActionAt=s.elapsed;
- if(chapterComplete){s.story.chapter++;s.story.step=0;earn(s,reward)}else s.story.step++;
- return {ok:true,chapterComplete,reward,chapterId:chapter.id,step,message:`story-${chapter.id}-${step}-done`,
-   effect:next.object,held:storyStatus(s).held};
-}
-// Earned tableaux remain toys; replay records a visual cue, never progression.
-export function playStoryKeepsake(s,key){
- if(s.paused)return fail('pausedActivity');
- const chapters={'prop:moon-bed':'mended-friend','prop:music-cabinet':'lost-song','prop:doorstep':'guest-tea'};
- if(typeof key!=='string'||!Object.hasOwn(chapters,key))return fail('invalid');
- if(!storyStatus(s).completed.includes(chapters[key]))return fail('storyNotReady');
- s.story.lastAction=key;s.story.lastActionAt=s.elapsed;
- const effect=key.slice(5);return {ok:true,effect,message:'story-replay-'+effect};
-}
-// Whitelist all persisted fields: no saved HTML/prose, renderer objects, or wall-clock catch-up.
-// Fields added after the first release default safely, so earlier version-1 saves keep loading.
-// Save schema. Version 1 is the only released format (key bait-al-dumiah.v1).
-// A future format adds MIGRATIONS[n] (n -> n+1) and bumps SAVE_VERSION; restore()
-// then upgrades older saves step by step. Unknown or newer versions are refused.
-// Moon chimes: the same validated pull/release commands serve pointer and keys.
-// Listening, cancellation and weak taps never enter the economic boundary.
-const chimeActive=s=>s.activities.active?.id==='lullaby'?s.activities.active:null;
-const CHIME_LEAD=.35,CHIME_BEAT=.8,CHIME_RING=.52,CHIME_MIN_PULL=.22;
-function stepChimes(s,dt){
- const a=chimeActive(s);if(!a||a.phase!=='listen')return;
- a.listenTime+=dt;
- if(a.listenTime>=CHIME_LEAD+a.pattern.length*CHIME_BEAT){a.phase='echo';a.cursor=0}
-}
-export function chimeStatus(s){
- const a=chimeActive(s);if(!a)return null;
- const index=Math.floor((a.listenTime-CHIME_LEAD)/CHIME_BEAT);
- const demo=a.phase==='listen'&&index>=0&&index<a.pattern.length&&(a.listenTime-CHIME_LEAD)%CHIME_BEAT<CHIME_RING;
- const recent=a.lastTone!==null&&s.elapsed-a.lastPluck<CHIME_RING;
- const sounding=demo?a.pattern[index]:recent?a.lastTone:null;
- return {...a,pattern:[...a.pattern],result:a.result?structuredClone(a.result):null,
-  sounding,tone:demo?`${a.round}:demo:${index}`:recent?`pluck:${a.toneSerial}`:null,
-  demoIndex:demo?index:null,minPull:CHIME_MIN_PULL};
-}
-function chimeBlocked(s,phase='echo'){
- if(s.paused)return fail('pausedActivity');const a=chimeActive(s);
- if(!a)return fail('chimeNotActive');
- if(a.phase!==phase)return fail(a.phase==='finished'?'chimeFinished':'chimeListening');return null;
-}
-export function grabChime(s,id){
- const blocked=chimeBlocked(s);if(blocked)return blocked;
- if(!Number.isInteger(id)||id<0||id>3)return fail('invalid');
- const a=chimeActive(s);if(a.held!==null)return fail('chimeHeld');
- a.held=id;a.pull=0;return {ok:true};
-}
-export function pullChime(s,pull){
- const blocked=chimeBlocked(s);if(blocked)return blocked;
- if(!Number.isFinite(pull)||pull<0||pull>1)return fail('invalid');
- const a=chimeActive(s);if(a.held===null)return fail('chimeNotHeld');
- a.pull=pull;return {ok:true};
-}
-export function cancelChime(s){
- const a=chimeActive(s);if(!a)return fail('chimeNotActive');a.held=null;a.pull=0;return {ok:true};
-}
-export function releaseChime(s){
- if(s.paused){cancelChime(s);return fail('pausedActivity')}
- const blocked=chimeBlocked(s);if(blocked)return blocked;
- const a=chimeActive(s);if(a.held===null)return fail('chimeNotHeld');
- const id=a.held,pull=a.pull;cancelChime(s);
- if(pull<CHIME_MIN_PULL)return {ok:true,silent:true};
- a.lastTone=id;a.lastPluck=s.elapsed;a.toneSerial++;
- if(id!==a.pattern[a.pattern.length-1-a.cursor]){
-  a.cursor=0;a.mistakes++;a.phase='listen';a.listenTime=-.55;a.round++;
-  return {ok:true,mistake:true,complete:false};
- }
- a.cursor++;
- if(a.cursor<a.pattern.length)return {ok:true,complete:false};
- a.phase='finished';a.result={...completeActivity(s,'lullaby'),mistakes:a.mistakes};
- return {...a.result};
-}
-export function replayChimes(s){
- if(s.paused)return fail('pausedActivity');const a=chimeActive(s);
- if(!a)return fail('chimeNotActive');if(a.phase==='finished')return fail('chimeFinished');
- cancelChime(s);a.phase='listen';a.listenTime=0;a.cursor=0;a.round++;a.lastTone=null;
- return {ok:true};
 }

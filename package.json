@@ -12,7 +12,7 @@
     "build": "node scripts/build.mjs && node scripts/check-size.mjs",
     "verify": "npm run lint && npm test && npm run build",
     "preview": "node scripts/serve.mjs dist",
-    "test:browser": "python scripts/play_check.py",
+    "test:browser": "python scripts/play_check.py && python scripts/story_smoke.py",
     "lint": "eslint src tests scripts eslint.config.js"
   },
   "dependencies": {

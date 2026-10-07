@@ -15,7 +15,7 @@ const LAYERS=['shared','data','simulation','render','ui','main'];
 const LAYER_OF={
  'event-bindings.js':'shared','content.js':'data','locale-data.js':'data','i18n.js':'data','icons.js':'data',
  'simulation.js':'simulation','home-session.js':'simulation','return-greeting.js':'simulation',
- 'stitch-path.js':'simulation','sim-util.js':'simulation','sim-queries.js':'simulation','sim-state.js':'simulation','save-codec.js':'simulation','lullaby-score.js':'simulation','night-score.js':'simulation',
+ 'stitch-path.js':'simulation','sim-util.js':'simulation','sim-core.js':'simulation','sim-tea.js':'simulation','sim-stitch.js':'simulation','sim-chimes.js':'simulation','sim-story.js':'simulation','sim-queries.js':'simulation','sim-state.js':'simulation','save-codec.js':'simulation','lullaby-score.js':'simulation','night-score.js':'simulation',
  'tea-input.js':'simulation','stitch-input.js':'simulation','chime-input.js':'simulation',
  'carry-gesture.js':'simulation','pointer-gesture.js':'simulation','wish-glow.js':'simulation',
  'resident-portraits.js':'simulation',
@@ -124,4 +124,20 @@ test('top-level functions stay under the length cap',()=>{
   });
  }
  assert.deepEqual(long,[],`split functions over ${MAX_FUNCTION_LINES} lines`);
+});
+
+test('modules never import each other in a cycle',()=>{
+ const graph=new Map(modules.map(m=>[m.rel,importsOf(m.text).filter(s=>s.startsWith('.'))
+  .map(s=>relative(srcDir,resolve(dirname(m.file),s)).split('\\').join('/'))]));
+ const state=new Map(),cycles=[];
+ const visit=(node,path)=>{
+  state.set(node,'open');
+  for(const next of graph.get(node)??[]){
+   if(state.get(next)==='open')cycles.push([...path,node,next].join(' -> '));
+   else if(!state.has(next))visit(next,[...path,node]);
+  }
+  state.set(node,'done');
+ };
+ for(const node of graph.keys())if(!state.has(node))visit(node,[]);
+ assert.deepEqual(cycles,[]);
 });
