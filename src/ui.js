@@ -4,7 +4,7 @@ import {portraitMarkup} from './resident-portraits.js';
 import {activityMarkup,updateActivityStatus} from './activities-ui.js';
 import {DOLLS,ROOMS,CATALOG,SECRETS,ACTIONS,MILESTONES,SEW_DAILY,BASKET_MAX,DOOR_STEPS,GIFT_COST,VISITOR_GIFTS} from './content.js';
 import {translate,number} from './i18n.js';
-import {isNight,coziness,wishFor,wishReward,bondLevel,nextBond,isContent,contentThreshold,delighted,inFavoriteRoom,currentStreak,unclaimed,secretCozyNeeded,doorOpen,nextDoorStep,doorReady,restorationReady,storyStatus} from './simulation.js';
+import {daySweepDegrees,isNight,coziness,wishFor,wishReward,bondLevel,nextBond,isContent,contentThreshold,delighted,inFavoriteRoom,currentStreak,unclaimed,secretCozyNeeded,doorOpen,nextDoorStep,doorReady,restorationReady,storyStatus} from './simulation.js';
 import {giftArt} from './gift-art.js';
 import {icon} from './icons.js';
 const actionIcon={tea:'tea',play:'play',rest:'rest',soothe:'heart'};
@@ -115,7 +115,7 @@ export function createUI(host,getState,dispatch){
  function tick(){
   const s=getState();document.body.classList.toggle('night',isNight(s));
   if(panel==='activities')updateActivityStatus(host,s,t,n);
-  host.style.setProperty('--day-progress',(Number.isFinite(s.clock)?Math.max(0,Math.min(240,s.clock))*1.5:0)+'deg');
+  host.style.setProperty('--day-progress',daySweepDegrees(s)+'deg');
   const story=storyStatus(s),values={buttons:n(s.buttons),cozy:n(coziness(s))+'%',wishes:story.finished?`${n(s.wishes.length)} / ${n(3)}`:`${n(story.index+1)} / ${n(3)}`,day:t('day')+' '+n(s.day),time:t(isNight(s)?'evening':'morning')};
   const heading=host.querySelector('[data-story-heading]'),headingText=t(story.finished?'objectiveLabel':'story-'+story.chapter.id+'-title');if(heading&&heading.textContent!==headingText)heading.textContent=headingText;
   for(const [key,value] of Object.entries(values)){const el=host.querySelector(`[data-value="${key}"]`);if(el&&el.textContent!==value)el.textContent=value}

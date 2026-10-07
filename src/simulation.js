@@ -18,6 +18,8 @@ export function createState(){
   settings:{locale:'en',muted:true,reducedMotion:false,quality:'auto',largeText:false}};
 }
 export const isNight=s=>s.clock>=120;
+// Share of the day gone by as a 0-360 degree sweep for the clock face; a corrupt clock reads as dawn.
+export const daySweepDegrees=s=>Number.isFinite(s.clock)?Math.max(0,Math.min(240,s.clock))*1.5:0;
 export const hour=s=>(8+s.clock/10)%24;
 // Day one keeps each resident's authored wish; later days rotate through their personal wish list.
 export function wishFor(s,id){const i=DOLLS.findIndex(d=>d.id===id);if(i<0)return null;const pool=DOLLS[i].wishes,day=Math.max(1,s.day)-1;return pool[(day*(i+1)+Math.floor(day/pool.length))%pool.length]}
@@ -280,6 +282,13 @@ function createStitch(s,mode){
 export function stitchStatus(s){
  const a=stitchActive(s);if(!a)return null;const sections=stitchSections(a),e=stitchEdge(a,sections);
  return {...structuredClone(a),sections:structuredClone(sections),completedSections:Math.min(a.section,sections.length),acceptedTrail:acceptedTrail(a,sections),nextGuidePoint:e?{...e.end}:null,requiredLength:requiredLength(sections),best:a.mode==='ritual'?s.activities.stitchRecords[a.level]:null,ready:a.phase==='sew'&&a.section===sections.length&&!a.pressed&&!a.loose&&!a.capture};
+}
+// Where the needle is in the current section, for readouts: 1-based section and rounded percent.
+export function stitchSectionProgress(stitch){
+ const total=stitch.sections.length,covered=stitch.completedSections>=total;
+ const length=stitch.sections[stitch.section]?.reduce((sum,p,i,points)=>i?sum+Math.hypot(p[0]-points[i-1][0],p[1]-points[i-1][1]):sum,0)??0;
+ const fraction=length?Math.max(0,Math.min(1,stitch.distance/length)):0;
+ return {section:Math.min(total,stitch.section+1),percent:covered?100:Math.round(fraction*100)};
 }
 function stitchCommand(s){
  if(s.paused)return fail('pausedActivity');const a=stitchActive(s);

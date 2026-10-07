@@ -19,7 +19,7 @@ const LAYER_OF={
  'carry-gesture.js':'simulation','pointer-gesture.js':'simulation','wish-glow.js':'simulation',
  'resident-portraits.js':'simulation',
  'ui.js':'ui','activities-ui.js':'ui','chime-ui.js':'ui','home-ui.js':'ui','object-ui.js':'ui',
- 'stitch-ui.js':'ui','story-ui.js':'ui','tea-ui.js':'ui','audio.js':'ui','gift-art.js':'ui',
+ 'stitch-ui.js':'ui','stitch-view.js':'ui','canvas-aria.js':'ui','stitch-input-bindings.js':'ui','tea-input-bindings.js':'ui','tea-view.js':'ui','story-ui.js':'ui','tea-ui.js':'ui','audio.js':'ui','gift-art.js':'ui',
  'object-controls.js':'ui','room-views.js':'ui','resident-label.js':'ui','placement-keys.js':'ui','playfield-layout.js':'ui',
  'main.js':'main',
 };
