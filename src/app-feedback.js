@@ -3,7 +3,9 @@ import {DOLLS} from './content.js';
 
 export function installFeedback(app){
  const {session,audio,host}=app;
- function save(){if(!session.entered)return false;if(session.save(app.state))return true;
+ function save(){if(!session.entered)return false;if(session.save(app.state)){
+ if(app.saveWarning){app.saveWarning=false;app.ui?.toast(app.ui.t('saved'));
+ const note=host.querySelector('.saved-note span');if(note)note.textContent=app.ui.t('saved')}return true}
  if(!app.saveWarning&&app.ui){app.ui.toast(app.ui.t('savingFailed'));
  app.saveWarning=true;const note=host.querySelector('.saved-note span');
  if(note)note.textContent=app.ui.t('savingFailed')}return false}
@@ -18,6 +20,8 @@ export function installFeedback(app){
  function showNotice(now){if(!app.notices.length)return;app.ui.toast(app.notices.shift());app.noticeAt=now+2400}
  function announce(event){
   const t=app.ui.t,n=app.ui.n;
+  if(event.type==='first-night')say(t('firstNightHint'));
+  if(event.type==='calm')say(t('calmDayOne'));
   if(event.type==='milestone')say(`${t('milestoneReached')} ${t('ms-'+event.id+'Title')} `+
    `· +${n(event.reward)} ${t('buttons')}`);
   if(event.type==='bond'){
