@@ -343,3 +343,13 @@ IDEAL: identify dense immediate entry; define safe one-activation entry; explore
 Twenty ideas: 1. Two-action Home. 2. Safe Continue. 3. Native miniature as focal point. 4. One flat Preferences. 5. Named alternate language. 6. Saved sound intent plus gesture unlock. 7. Saved reduced motion respected. 8. No canonical Home time. 9. No Home economy. 10. Separate preference persistence. 11. Protected failed storage read. 12. Corrupt-save fallback. 13. One-time activation latch. 14. Keyboard focus handoff. 15. Inert gameplay during Home. 16. Portrait/landscape stage. 17. Bilingual safe-area targets. 18. No stacked tutorial. 19. Preserve earned rewards. 20. Honest incremental/native acceptance reporting.
 
 Selected: these bounded entry/lifecycle safeguards, preserving all gameplay commands and native house art. Deferred: world-led chrome removal, full command access map, sparse Pause/Home return routing, advanced world-state simplification. No retention improvement is claimed.
+
+## 2026-10-08 — Six material feedback cycles
+
+The detailed [juice iteration record](juice-iteration-ledger-2026-10-08.md) records B1–B6, their focused behavior counterchecks, specific IDEAL/5Ws decisions, and twenty concrete alternatives per cycle. The expanded alternatives are explicitly identified as design review performed after the initial implementation.
+
+The six implemented changes are material care sounds; finite reassurance hearts; a ready-cup engraving glow; flow-weighted pouring and surface response; sewing section/repair-spool cues; and distinct moon-chime acceptance/recovery halos. All use existing objects and canonical simulation results.
+
+Independent source review is complete. The coordinating verification passed lint, all 419 source tests, the production build and the unchanged size gate (402,362 / 512,000 aggregate JavaScript gzip bytes) on product revision e7583fd. Subsequent updates are documentation only.
+
+Changed-head touch, EN/AR, rotation/backgrounding, WebGL performance, viewed screenshots and physical audio acceptance remain pending because native browser startup is blocked. These six engineering cycles are part of the requested forty; they are not six completed native visual acceptance passes. Keep their PR in draft until the repository's mobile/visual gates are satisfied.

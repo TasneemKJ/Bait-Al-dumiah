@@ -115,6 +115,21 @@ export class DollhouseAudio{
  }
  effect(kind){
   if(!this.enabled||!this.context||this.paused||this.disposed)return;
+  const care=kind?.startsWith('care:')?kind.slice(5):null;
+  if(care){
+   const now=this.context.currentTime;
+   if(care==='tea'){
+    this.track(voice(this.context,this.master,640,now,.22,.023,'sine',2200));
+    this.track(playTinTouch(this.context,this.master,now+.13));
+   }else if(care==='play'){
+    this.track(playWoodTap(this.context,this.master,now,.026));
+    this.track(playWoodTap(this.context,this.master,now+.19,.018));
+   }else if(care==='rest'||care==='soothe'){
+    this.track(playClothTouch(this.context,this.master,now));
+    if(care==='soothe')this.track(playWoodTap(this.context,this.master,now+.16,.012));
+   }
+   return;
+  }
   if(kind==='mint-tin')return this.track(playTinTouch(this.context,this.master,this.context.currentTime));
   if(kind==='moon-bed')return this.track(playClothTouch(this.context,this.master,this.context.currentTime));
   const t=this.context.currentTime,notes=kind==='secret'?[293.665,311.127,
