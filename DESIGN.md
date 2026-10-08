@@ -44,5 +44,19 @@ Later days (4+): the wish ring is half as strong, daylight only, and appears onl
 ## Golden hour
 Clock 96-126 (the last half minute before night): a warm peach band at the sky's horizon, an amber key light and warm window glow, peaking near clock 112 and handing over to the night look at 120. Zero for the rest of the day, so noon and night are unchanged.
 
+## Bounded play and recovery corrections, 2026-10-08
+
+Moving focus from the tea canvas to another control puts the pot down. Returning focus does not resume the interrupted pour; a fresh deliberate grab does. The physical pot, cup tolerance, rewards, art and existing bilingual work instructions remain the same.
+
+In house play, one deliberate Space press toggles pause once; holding the key keeps that pause state. Browser/system shortcuts using Alt, Control or Command stay with the browser. Physical rituals retain their existing held-Space controls.
+
+The brief returning-player camera glance yields to input on the house itself as well as the HUD. A touch or key action before the glance suppresses it; an action during the glance suppresses its automatic return. An untouched house retains the existing welcome.
+
+During save recovery, the latest chosen file or confirmed reset owns the outcome. A slower earlier file cannot replace that choice or display a stale failure afterward. This request identity is transient and changes no save fields.
+
+Import and reset commit their candidate through the existing protected save boundary before replacing the visible house. If storage refuses the write or another tab has changed the save, the current house, pause state and recovery controls remain available with the existing saving-failed message. Import success is announced only after that commit.
+
+A held story item starts carrying only from the primary pointer. A second finger resting or moving elsewhere cannot begin an accidental handoff; rejecting it leaves the next deliberate primary drag available. The existing targets, wrong-drop recovery and keyboard alternative remain intact.
+
 ## Existing first-session notices, 2026-10-08 audit
 The first-night pointer and the quiet day-one line reach the existing paced notice queue in both languages when their simulation events occur. While tea, sewing or moon chimes hide the house toast, notices stay queued until the player leaves the ritual; their order, eight-notice cap and 2.4-second display interval stay the same. Their one-time flags, timing, copy and rewards remain owned by the existing simulation. Checked against `DESIGN_RULES.md`; no design-rule violations found.

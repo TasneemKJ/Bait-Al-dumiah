@@ -1,5 +1,17 @@
 # TODO
 
+## Six bounded corrections — 2026-10-08
+
+Twenty candidates, IDEAL/5Ws, RED/GREEN outcomes and evidence limits for each pass are recorded under B1–B6 in `docs/superpowers/iteration-ledger.md`.
+- [x] B1: Release held tea on focus transfer; 13/13 tea-input behavior tests pass. Native acceptance remains below.
+- [x] B2: One physical Space press toggles pause once; preserve modified browser shortcuts; 10/10 focused/main behavior tests pass.
+- [x] B3: Returning-player welcome camera yields to canvas input; 18/18 focused/greeting/Home integration tests pass.
+- [x] B4: Latest save import/reset intent owns asynchronous completion; 20/20 focused/save-safety/Home identity tests pass.
+- [x] B5: Failed replacement persistence preserves the current run and reports failure; 34/34 focused/save-safety/Home checks pass, including later retry.
+- [x] B6: Secondary fingers cannot initiate a held-story item drag; 25/25 carry, pointer and story behavior tests pass.
+- [x] Fresh `npm run verify`: lint, all 430 behavior tests and static build pass; JavaScript is 392.0 KiB gzip against the 500 KiB budget.
+- [ ] Exact-source browser journey and inspected EN/AR phone/landscape screenshots with 4× CPU measurements; source tests alone do not close native acceptance.
+
 ## Audit 2026-10-08 — B1: first-session event delivery
 IDEAL: identify missing notices, define the event-to-player contract, explore failure paths, restore only proven missing handlers, look back through behavioral regression. 5Ws: a new EN/AR phone player; the first calm interval and first night; in the existing house notice; guidance is needed to make the intended quiet and visitor legible.
 Twenty audit candidates: 1 first-night event delivery; 2 calm-line delivery; 3 repeated-frame suppression; 4 returning-save hint suppression; 5 paused clock; 6 manual night switch; 7 Arabic notice text; 8 unchanged English text; 9 queue ordering; 10 reward notice coexistence; 11 muted guidance; 12 reduced-motion guidance; 13 day-one prerequisite care; 14 later-day exclusion; 15 saved one-time flags; 16 empty-queue behavior; 17 hint timing boundaries; 18 no automatic new panel; 19 notice visibility over the house; 20 short-phone target reachability.
