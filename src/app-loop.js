@@ -28,7 +28,7 @@ export function installLoop(app){
  bindPlacementEscape(window,()=>{if(!app.ui.placement)return false;app.ui.clearPlacement();
  app.world?.setPlacement(null);app.roomViews.update();return true});
  window.addEventListener('keydown',event=>{
-  if(!app.session.entered||event.defaultPrevented)return;
+  if(!app.session.entered||event.defaultPrevented||event.altKey||event.ctrlKey||event.metaKey)return;
   if(app.physicalActivity())return;
   if(event.key==='Escape'&&!app.ui.panel&&!app.ui.placement&&(app.storyUI?.selected||
     app.carrying)){event.preventDefault();app.dispatch('deselect-object');return}
@@ -36,7 +36,7 @@ export function installLoop(app){
   if(event.key==='Escape'){if(app.ui.placement){app.ui.clearPlacement();
   app.world?.setPlacement(null)}else if(app.ui.panel)app.ui.close();return}
   if(app.panelOpen)return;
-  if(event.code==='Space'){event.preventDefault();app.dispatch('pause')}
+  if(event.code==='Space'){event.preventDefault();if(!event.repeat)app.dispatch('pause')}
   if(event.key==='h'||event.key==='H'){event.preventDefault();app.dispatch('camera')}
   if(event.key==='+'||event.key==='='){event.preventDefault();app.dispatch('zoom-in')}
   if(event.key==='-'){event.preventDefault();app.dispatch('zoom-out')}

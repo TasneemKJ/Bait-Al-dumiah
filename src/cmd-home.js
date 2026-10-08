@@ -32,8 +32,10 @@ function enterPlay(app){
 function welcomeGlance(app){
  if(app.state.settings.reducedMotion)return;const room=waveRoom(app.state);if(!room)return;
  let touched=false;const mark=()=>{touched=true};
- app.host.addEventListener('pointerdown',mark,{once:true,capture:true});
- app.host.addEventListener('keydown',mark,{once:true,capture:true});
+ for(const target of [app.host,app.canvas]){
+  target.addEventListener('pointerdown',mark,{once:true,capture:true});
+  target.addEventListener('keydown',mark,{once:true,capture:true});
+ }
  setTimeout(()=>{if(touched||app.ui.panel||app.state.paused)return;app.dispatch('focus-room',room);
   setTimeout(()=>{if(!touched&&app.host.dataset.focusRoom===room)app.dispatch('camera')},2600)},700);
 }
