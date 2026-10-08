@@ -133,3 +133,8 @@ Chosen: **golden hour at dusk** (shipped). Shortlist, not built: (a) soft lamp l
 Twenty candidates, IDEAL/5Ws and selected boundaries for each source/behavior round are recorded in `docs/audits/2026-10-08-review.md`: persistence/cold entry; tea; sewing; moon chimes; story/economy/mobile contracts. No speculative features are selected.
 - [x] Execute B2–B6 focused source/behavior groups (55/42/49/29/76 checks); latest full verify after the B1 review correction passes 423 tests plus lint/build.
 - [ ] Complete required native screenshots and performance; source checks do not close these gates.
+
+## Browser readiness correction — 2026-10-08
+- [x] Diagnose the story smoke's stale sewing coordinates under software WebGL: its fixed delay sampled an unfinished room-camera flight.
+- [x] Reuse read-only scene readiness before aiming; require the same destination to remain fixed and exposed during the real drag. No gameplay or design changes.
+- [x] Re-run the core browser journey: 56 checks and story smoke pass; inspect desktop night and phone portrait/landscape originals. Results retained in the workspace readiness evidence; extended ritual/performance suites remain separate.
