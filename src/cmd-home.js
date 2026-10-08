@@ -32,10 +32,13 @@ function enterPlay(app){
 function welcomeGlance(app){
  if(app.state.settings.reducedMotion)return;const room=waveRoom(app.state);if(!room)return;
  let touched=false;const mark=()=>{touched=true};
- app.host.addEventListener('pointerdown',mark,{once:true,capture:true});
- app.host.addEventListener('keydown',mark,{once:true,capture:true});
- setTimeout(()=>{if(touched||app.ui.panel||app.state.paused)return;app.dispatch('focus-room',room);
-  setTimeout(()=>{if(!touched&&app.host.dataset.focusRoom===room)app.dispatch('camera')},2600)},700);
+ const root=document.querySelector('#app');
+ root.addEventListener('pointerdown',mark,{once:true,capture:true});
+ root.addEventListener('keydown',mark,{once:true,capture:true});
+ const state=app.state,allowed=()=>!touched&&!document.hidden&&!app.ui.panel&&!app.state.paused&&
+  !app.fatal&&!app.physicalActivity()&&!app.state.settings.reducedMotion&&app.state===state;
+ setTimeout(()=>{if(!allowed())return;app.dispatch('focus-room',room);
+  setTimeout(()=>{if(allowed()&&app.host.dataset.focusRoom===room)app.dispatch('camera')},2600)},700);
 }
 export const homeCommands={
 'home-play':app=>enterPlay(app),

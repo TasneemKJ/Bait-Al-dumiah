@@ -343,3 +343,177 @@ IDEAL: identify dense immediate entry; define safe one-activation entry; explore
 Twenty ideas: 1. Two-action Home. 2. Safe Continue. 3. Native miniature as focal point. 4. One flat Preferences. 5. Named alternate language. 6. Saved sound intent plus gesture unlock. 7. Saved reduced motion respected. 8. No canonical Home time. 9. No Home economy. 10. Separate preference persistence. 11. Protected failed storage read. 12. Corrupt-save fallback. 13. One-time activation latch. 14. Keyboard focus handoff. 15. Inert gameplay during Home. 16. Portrait/landscape stage. 17. Bilingual safe-area targets. 18. No stacked tutorial. 19. Preserve earned rewards. 20. Honest incremental/native acceptance reporting.
 
 Selected: these bounded entry/lifecycle safeguards, preserving all gameplay commands and native house art. Deferred: world-led chrome removal, full command access map, sparse Pause/Home return routing, advanced world-state simplification. No retention improvement is claimed.
+
+## 2026-10-08 — Cycle 1: first-night invitation delivery
+
+IDEAL: Identify the missing announcement handler; define a once-only visible invitation; explore the twenty options below; act on the existing event-to-notice route; look back with RED/GREEN simulation-to-feedback tests and rendered night capture.
+5Ws: casual phone player; understands how to greet the visitor; first earned dusk; door and existing toast; makes the existing gentle mystery discoverable without a new loop.
+
+1. Reveal the existing visitor hint at first night. **Selected.**
+2. Keep the hint silent on repeat nights. **Selected.**
+3. Use the authored Arabic visitor verb. **Selected.**
+4. Match the invitation to the visible visitor control. Preserve/check; no separate feature claimed.
+5. Route the hint through the existing notice queue. **Selected.**
+6. Retain the existing once-only simulation flag. Preserve/check; no separate feature claimed.
+7. Keep it visible with sound disabled. Preserve/check; no separate feature claimed.
+8. Check the night toast contrast. Preserve/check; no separate feature claimed.
+9. Keep the door scene unobstructed. Preserve/check; no separate feature claimed.
+10. Avoid a second tutorial sheet. Preserve/check; no separate feature claimed.
+11. Preserve a pending reward announcement. Preserve/check; no separate feature claimed.
+12. Keep the ghost non-threatening. Preserve/check; no separate feature claimed.
+13. Do not automatically greet the visitor. Preserve/check; no separate feature claimed.
+14. Do not spend buttons when explaining. Preserve/check; no separate feature claimed.
+15. Use the existing screen-reader status region. Preserve/check; no separate feature claimed.
+16. Test manual evening and natural dusk. **Selected.**
+17. Preserve old-save hint suppression. Preserve/check; no separate feature claimed.
+18. Check small portrait wrapping. Preserve/check; no separate feature claimed.
+19. Check RTL short-landscape wrapping. Preserve/check; no separate feature claimed.
+20. Stamp screenshot evidence to source. **Selected.**
+
+Root cause: `step()` emits `first-night` and records its hint flag, but `announce()` discards it. RED: the real simulation-to-feedback test failed because no localized hint reached the toast. Native visual acceptance pending.
+
+## 2026-10-08 — Cycle 2: first-day quiet delivery
+
+IDEAL: Identify consumed calm event; define visible reassurance after care; explore twenty alternatives; act on existing bilingual notice; look back through actual care/step/announcement regression and phone screenshots.
+5Ws: first-time care player; reads a warm quiet beat; minute 1.5 on day one; kettle/house toast; understands intentional breathing room without added currency or urgency.
+
+1. Deliver the authored quiet-after-care sentence. **Selected.**
+2. Keep the quiet beat optional to read. Preserve/check or deferred; not a shipped feature.
+3. Retain the ninety-second trigger. Preserve/check or deferred; not a shipped feature.
+4. Avoid promising protection beyond current needs. Preserve/check or deferred; not a shipped feature.
+5. Keep later days quiet. Preserve/check or deferred; not a shipped feature.
+6. Prevent a repeated calm announcement. **Selected.**
+7. Let queued rewards retain their order. **Selected.**
+8. Keep the kettle as the named local anchor. Preserve/check or deferred; not a shipped feature.
+9. Retain warm Levantine Arabic. **Selected.**
+10. Test a real care before the quiet beat. **Selected.**
+11. Test an idle visitor receives no care praise. Preserve/check or deferred; not a shipped feature.
+12. Preserve old-save suppression. Preserve/check or deferred; not a shipped feature.
+13. Keep natural time progression unchanged. Preserve/check or deferred; not a shipped feature.
+14. Do not add income during the trough. Preserve/check or deferred; not a shipped feature.
+15. Keep the house actionable during the line. Preserve/check or deferred; not a shipped feature.
+16. Inspect cream/rose message balance. Preserve/check or deferred; not a shipped feature.
+17. Check Arabic long-line wrapping. Preserve/check or deferred; not a shipped feature.
+18. Check smaller text with larger-text enabled. Preserve/check or deferred; not a shipped feature.
+19. Keep sound unnecessary. Preserve/check or deferred; not a shipped feature.
+20. Compare the calm state against the existing dusk. **Selected.**
+
+RED: actual care followed by ninety seconds produced the simulation flag but no calm message. Root cause: missing `calm` handler beside the other announcement routes. Native acceptance pending.
+
+## 2026-10-08 — Cycle 3: player camera ownership on return
+
+IDEAL: Identify wrong input ancestor; define player input priority; explore twenty options; act by capturing at the shared app root; look back with actual main-wiring canvas event regression and rendered same-position touches.
+5Ws: returning touch/keyboard player; keeps the camera after interacting; first 700 ms; canvas alongside HUD; prevents an automatic welcome from moving the object under a finger.
+
+1. Let canvas touches own the camera. **Selected.**
+2. Let canvas keyboard input own the camera. **Selected.**
+3. Capture HUD input at the same shared root. **Selected.**
+4. Do not move a selected prop during welcome. Invariant/check or deferred.
+5. Keep a returning player’s room navigation. Invariant/check or deferred.
+6. Keep reset-camera as an explicit choice. Invariant/check or deferred.
+7. Preserve the existing welcome wave. Invariant/check or deferred.
+8. Retain no camera glance with reduced motion. **Selected.**
+9. Let the untouched house receive one glance. Invariant/check or deferred.
+10. Avoid extra confirmation UI. Invariant/check or deferred.
+11. Preserve scene picking order. Invariant/check or deferred.
+12. Do not change mesh hit volumes. Invariant/check or deferred.
+13. Test capture rather than relying on sibling bubbling. **Selected.**
+14. Make a key held during return cancel the glance. Invariant/check or deferred.
+15. Check a pot grab before the delayed move. Invariant/check or deferred.
+16. Check a carry before the delayed move. Invariant/check or deferred.
+17. Check pinch input begins ownership. Invariant/check or deferred.
+18. Keep bilingual welcome line unchanged. Invariant/check or deferred.
+19. Avoid saving camera state. Invariant/check or deferred.
+20. Inspect unchanged-coordinate target after welcome. **Selected.**
+
+RED: real cmd-home wiring moved to kitchen after a canvas pointer. The listener was attached to sibling #ui, which never receives canvas events. Native screenshots pending.
+
+## 2026-10-08 — Cycle 4: delayed welcome interruption safety
+
+IDEAL: Identify unguarded second welcome timer; define interruption-preserving camera behavior; explore twenty options; act on both delayed command guards; look back via main-wiring hide/pause reproductions and returned screenshots.
+5Ws: returning phone player; leaves camera frozen during interruption; after initial glance and before automatic return; background tab or paused home; avoids losing the active scene context.
+
+1. Prevent hidden-tab welcome reset. **Selected.**
+2. Prevent paused welcome reset. **Selected.**
+3. Prevent ritual camera replacement. **Selected.**
+4. Prevent modal-sheet camera replacement. **Selected.**
+5. Prevent fatal recovery camera replacement. Invariant/check or deferred.
+6. Respect motion preference changed during return. **Selected.**
+7. Keep original state identity through delayed work. **Selected.**
+8. Allow an uninterrupted welcome to finish. **Selected.**
+9. Do not replay the welcome after resume. Invariant/check or deferred.
+10. Keep the returned view where it stopped. Invariant/check or deferred.
+11. Retain safe carried input release. Invariant/check or deferred.
+12. Keep audio pause synchronized. Invariant/check or deferred.
+13. Avoid elapsed-time catch-up. Invariant/check or deferred.
+14. Avoid welcome timers in simulation. Invariant/check or deferred.
+15. Remove expired input listeners. Invariant/check or deferred.
+16. Test first and second delayed boundaries. **Selected.**
+17. Check portrait return while paused. Invariant/check or deferred.
+18. Check Arabic return while paused. Invariant/check or deferred.
+19. Inspect selected-room before/after resume. **Selected.**
+20. Avoid a new resume popup. Invariant/check or deferred.
+
+RED: actual visibility handling paused the simulation, but the second timer still dispatched camera reset. This is a UI timer guard defect, not simulation progression. Native acceptance pending.
+
+## 2026-10-08 — Cycle 5: truthful saving recovery
+
+IDEAL: Identify stale warning state; define accurate recovery after an actual successful write; explore twenty options; act with existing saved feedback; look back through quota-denial/recovery/re-denial tests and bilingual toast screenshots.
+5Ws: player with temporarily full/blocked storage; sees whether progress now persists; autosave after recovery; existing toast and saved note; avoids a permanent false failure and permits later failure warning.
+
+1. Retire the failed-save flag after a real owned write. **Selected.**
+2. Announce recovered saving once. **Selected.**
+3. Warn again if storage fails later. **Selected.**
+4. Reuse the bilingual saved copy. **Selected.**
+5. Restore the existing saved-note text. **Selected.**
+6. Do not claim recovery on a failed write. **Selected.**
+7. Preserve canonical-byte ownership checks. Invariant/check or deferred.
+8. Leave unreadable identity recovery to Reload. Invariant/check or deferred.
+9. Keep warnings quiet during repeated failures. Invariant/check or deferred.
+10. Check quota denial then recovery. **Selected.**
+11. Check both locales. **Selected.**
+12. Avoid adding a permanent warning panel. Invariant/check or deferred.
+13. Do not auto-export private progress. Invariant/check or deferred.
+14. Keep blocked backup behavior intact. Invariant/check or deferred.
+15. Preserve preferences separately. Invariant/check or deferred.
+16. Keep autosave frequency unchanged. Invariant/check or deferred.
+17. Show saving recovery in current dialog. Invariant/check or deferred.
+18. Do not drown out earned-reward messages. Invariant/check or deferred.
+19. Inspect long Arabic failure wrapping. **Selected.**
+20. Keep the whole house visible during notices. Invariant/check or deferred.
+
+RED: a real HomeSession write recovered after quota denial while app.saveWarning remained true. The stale latch also suppresses subsequent failed-write notices. Identity read failures stay intentionally sticky. Native acceptance pending.
+
+## 2026-10-08 — Cycle 6: pending import ownership
+
+IDEAL: Identify competing asynchronous save reads; define latest intentional command ownership; explore twenty options; act with an ephemeral request generation; look back with delayed real file-text validation and browser import/reset checks.
+5Ws: player moving a house between browsers; sees the house they most recently selected; while file reading overlaps a second choice or reset; optional save settings; prevents delayed earlier work from replacing a later intentional house.
+
+1. Latest file choice owns pending import. **Selected.**
+2. Confirmed reset cancels older reads. **Selected.**
+3. Ignore stale failed-read messages. **Selected.**
+4. Keep the selected file’s locale. Invariant/check or deferred.
+5. Retain current sound gesture intent. Invariant/check or deferred.
+6. Preserve save-v1 validation. **Selected.**
+7. Do not put import tokens in saved state. **Selected.**
+8. Keep file-size guard. Invariant/check or deferred.
+9. Let a failed latest import leave current state. **Selected.**
+10. Avoid an import progress modal. Invariant/check or deferred.
+11. Do not upload save copies. Invariant/check or deferred.
+12. Test reverse file-read completion order. **Selected.**
+13. Test reset while file is reading. **Selected.**
+14. Verify no stale imported toast. **Selected.**
+15. Keep earned progress on valid latest import. Invariant/check or deferred.
+16. Keep canonical identity check after import. Invariant/check or deferred.
+17. Keep existing state replacement cleanup. Invariant/check or deferred.
+18. Inspect restored room scene. **Selected.**
+19. Check English and Arabic success copy. **Selected.**
+20. Keep import optional in existing settings. Invariant/check or deferred.
+
+RED: the older real readSaveFile completion replaced 202 buttons with 101; a pending 303-button import also replaced a later confirmed fresh reset. Root cause: no request ownership across file-text awaits. Native acceptance pending.
+
+## 2026-10-08 source checkpoint — native acceptance pending
+
+Six independently reproduced source defects have RED/GREEN behavior regressions. `npm run verify` exited 0: lint, 419 tests (419 pass, zero failures/cancellations/skips), static build and gzip JavaScript budget 401,253 / 512,000 bytes. Runtime changes are confined to `app-feedback.js`, `cmd-home.js` and `cmd-save.js`. Each candidate cycle has twenty ideas above; no new saved simulation state, currency, artwork, dependency, analytics or remote request was introduced.
+
+**Completion count: six implemented/source-verified candidate cycles, zero native-accepted cycles.** Browser launch in this environment is blocked before page creation, as investigated by the parent. No current-source phone play, 4x CPU measurement, screenshot capture or screenshot inspection is claimed. Independent source review is pending. Preserve open PR #42 (hud.css and quiet-world-play-ui.test.mjs); those files are unchanged here. Parent owns publication, native acceptance and integration.
