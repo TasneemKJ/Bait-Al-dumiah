@@ -5,7 +5,7 @@ export function createCarryGesture(){
  const valid=e=>Number.isFinite(e.clientX)&&Number.isFinite(e.clientY)&&Number.isFinite(e.pointerId);
  return {
   down(e){
-   if(pointer||!valid(e)||(e.button!==undefined&&e.button!==0))return false;
+   if(pointer||!valid(e)||e.isPrimary===false||(e.button!==undefined&&e.button!==0))return false;
    pointer={id:e.pointerId,x:e.clientX,y:e.clientY,moved:false};return true;
   },
   move(e){

@@ -209,3 +209,20 @@ test('pause, rotation, hidden tab and blur release the real adapter without an a
   assert.equal(f.canvas.getAttribute('role'),null);assert.equal(f.canvas.getAttribute('aria-keyshortcuts'),null);
  }finally{f.close()}
 });
+
+test('moving focus from a held pot to another control releases tea until a fresh grab',()=>{
+ const f=adapterFixture();try{
+  emit(f.canvas,'pointerdown',pointer(100,100));emit(f.canvas,'pointermove',pointer(100,180));
+  sim.step(f.state,.1);
+  const before=sim.teaStatus(f.state),other=document.createElement('button');f.app.append(other);
+  assert.equal(before.pressed,true);assert.ok(before.poured>0);
+  other.focus();
+  assert.equal(sim.teaStatus(f.state).pressed,false,'focus transfer must put the held pot down');
+  assert.equal(sim.teaStatus(f.state).tilt,0);assert.equal(f.canvas.hasPointerCapture(1),false);
+  sim.step(f.state,.1);assert.equal(sim.teaStatus(f.state).poured,before.poured);
+  f.canvas.focus();emit(f.canvas,'pointermove',pointer(100,180));sim.step(f.state,.1);
+  assert.equal(sim.teaStatus(f.state).poured,before.poured,'returning focus cannot resume the old pour');
+  emit(f.canvas,'pointerdown',pointer(100,100));emit(f.canvas,'pointermove',pointer(100,180));
+  sim.step(f.state,.1);assert.ok(sim.teaStatus(f.state).poured>before.poured);
+ }finally{f.close()}
+});

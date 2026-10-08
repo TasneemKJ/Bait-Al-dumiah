@@ -1,5 +1,18 @@
 # TODO
 
+## Six bounded corrections — 2026-10-08
+
+Twenty candidates, IDEAL/5Ws, RED/GREEN outcomes and evidence limits for each pass are recorded under B1–B6 in `docs/superpowers/iteration-ledger.md`.
+- [x] B1: Release held tea on focus transfer; 13/13 tea-input behavior tests pass. Native acceptance remains below.
+- [x] B2: One physical Space press toggles pause once; preserve modified browser shortcuts; 10/10 focused/main behavior tests pass.
+- [x] B3: Returning-player welcome camera yields to canvas input; 18/18 focused/greeting/Home integration tests pass.
+- [x] B4: Latest save import/reset intent owns asynchronous completion; 20/20 focused/save-safety/Home identity tests pass.
+- [x] B5: Failed replacement persistence preserves the current run and reports failure; 34/34 focused/save-safety/Home checks pass, including later retry.
+- [x] B6: Secondary fingers cannot initiate a held-story item drag; 25/25 carry, pointer and story behavior tests pass.
+- [x] Fresh `npm run verify`: lint, all 430 behavior tests and static build pass; JavaScript is 392.0 KiB gzip against the 500 KiB budget.
+- [ ] Exact-source browser journey and inspected EN/AR phone/landscape screenshots with 4× CPU measurements; source tests alone do not close native acceptance.
+
+
 ## Done this iteration
 - [x] play_check honours `PORT`; CI fast gate, failure-only trimmed artifacts, weekly full suite.
 - [x] Objective step counter no longer wraps on narrow landscape cards (test: `tests/mobile-hud.test.mjs`).

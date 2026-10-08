@@ -3,7 +3,7 @@ import {DOLLS} from './content.js';
 
 export function installFeedback(app){
  const {session,audio,host}=app;
- function save(){if(!session.entered)return false;if(session.save(app.state))return true;
+ function save(current=app.state){if(!session.entered)return false;if(session.save(current))return true;
  if(!app.saveWarning&&app.ui){app.ui.toast(app.ui.t('savingFailed'));
  app.saveWarning=true;const note=host.querySelector('.saved-note span');
  if(note)note.textContent=app.ui.t('savingFailed')}return false}
