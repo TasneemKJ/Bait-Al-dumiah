@@ -58,3 +58,56 @@ html[lang=ar] .time-tools>button{white-space:nowrap;font-size:11px;gap:5px;max-w
 @media(forced-colors:active){
  #ui .objective:focus-within{outline:1px solid Highlight}
 }
+
+/* House Tools is one temporary paper drawer, never a permanent app footer.
+   The five destinations are named at every width; its empty space also owns
+   pointer input so touching paper cannot activate a doll behind the drawer. */
+#ui .dock[data-expanded=true]{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;
+ width:min(440px,calc(100% - 24px));max-width:calc(100% - 24px);
+ max-height:calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+ box-sizing:border-box;overflow-y:auto;overscroll-behavior:contain;
+ left:50%;right:auto;transform:translateX(-50%);
+ bottom:max(12px,env(safe-area-inset-bottom));padding:12px;
+ border:1px solid var(--line);border-radius:16px 16px 8px 8px;
+ background:var(--paper);color:var(--ink);box-shadow:0 12px 40px #23162438;
+ backdrop-filter:none;pointer-events:auto;touch-action:pan-y;
+}
+#ui .dock[data-expanded=true]>.dock-divider{display:none}
+#ui .dock[data-expanded=true]>button{
+ box-sizing:border-box;min-width:0;min-height:56px;width:auto;
+ margin:0;padding:10px 12px;gap:9px;display:flex;flex-direction:row;
+ justify-content:flex-start;border:1px solid var(--line);border-radius:8px;
+ color:var(--ink);background:transparent;font-size:max(14px,.94rem);
+ line-height:1.4;text-align:start;white-space:normal;word-break:normal;
+}
+#ui .dock[data-expanded=true]>button>.icon{width:21px;height:21px;flex-shrink:0}
+#ui .dock[data-expanded=true]>:is(.tools-toggle,[data-action^="panel-"])>span{
+ display:block;position:static;width:auto;height:auto;max-width:100%;
+ clip:auto;clip-path:none;overflow:visible;white-space:normal;overflow-wrap:normal;
+}
+#ui .dock[data-expanded=true]>.tools-toggle{
+ grid-column:1/-1;justify-content:flex-start;font-weight:700;min-height:48px;
+ border:0;border-bottom:1px dashed var(--line);border-radius:0;padding-top:2px;
+}
+#ui .dock[data-expanded=true]>[data-action="panel-settings"]{grid-column:1;grid-row:4}
+#ui .dock[data-expanded=true]>:is([data-action="sound"],[data-action="pause"]){
+ grid-column:2;grid-row:4;width:56px;min-width:56px;justify-content:center;
+}
+#ui .dock[data-expanded=true]>[data-action="sound"]{justify-self:start}
+#ui .dock[data-expanded=true]>[data-action="pause"]{justify-self:end}
+#ui .dock[data-expanded=true]>button:focus-visible{
+ outline:3px solid var(--rose-dark);outline-offset:2px;
+}
+html[lang=ar] #ui .dock[data-expanded=true]>button{font-size:max(16px,1rem)}
+.large-text #ui .dock[data-expanded=true]>button{font-size:1.125rem}
+@media(forced-colors:active){
+ #ui .dock[data-expanded=true],#ui .dock[data-expanded=true]>button{
+  background:Canvas;color:CanvasText;border-color:CanvasText;box-shadow:none;
+ }
+ #ui .dock[data-expanded=true]>button:focus-visible{outline-color:Highlight}
+}
+/* Enlarged text gets a single readable column, not clipped words in half-width cells. */
+.large-text #ui .dock[data-expanded=true]{grid-template-columns:minmax(0,1fr)}
+.large-text #ui .dock[data-expanded=true]>[data-action="panel-settings"]{grid-column:1;grid-row:6}
+.large-text #ui .dock[data-expanded=true]>:is([data-action="sound"],[data-action="pause"]){grid-column:1;grid-row:7}
