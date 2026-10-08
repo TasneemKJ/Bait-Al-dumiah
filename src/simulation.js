@@ -91,15 +91,13 @@ export function place(s,item,room,slot){
  if(s.buttons<entry.price)return fail('funds');
  s.buttons-=entry.price;
  s.decor.push({id:s.nextId++,item,room,slot,rotation:0,originRoom:room,active:false,tendedDay:0,lastUse:-10});
- for(const d of s.dolls)if(d.room===room)d.comfort=clamp(d.comfort+entry.cozy);
  const loved=s.dolls.filter(d=>d.room===room&&DOLLS.find(x=>x.id===d.id).favItem===item).map(d=>d.id);
  checkMilestones(s);
  return {ok:true,cost:entry.price,loved};
 }
-// Packing away returns the price and the comfort that placing gave, so a place/refund loop earns nothing.
+// Furniture benefits come from what is placed, never a one-time comfort credit to refund.
 export function remove(s,id){const index=s.decor.findIndex(d=>d.id===id);if(index<0)return fail('invalid');
 const item=s.decor.splice(index,1)[0],entry=CATALOG.find(i=>i.id===item.item),refund=entry.price;
-for(const d of s.dolls)if(d.room===(item.originRoom??item.room))d.comfort=clamp(d.comfort-entry.cozy);
 s.buttons=Math.min(9999,s.buttons+refund);return {ok:true,refund}}
 export function moveDecor(s,id,room,slot){
  const item=s.decor.find(d=>d.id===id);

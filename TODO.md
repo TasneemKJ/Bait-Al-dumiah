@@ -1,5 +1,17 @@
 # TODO
 
+## Reliability review — 2026-10-08, cycles 35–40
+
+Twenty alternatives, IDEAL and the 5Ws for each bounded cycle are recorded in `docs/superpowers/iteration-ledger.md`.
+- [x] 35: Deliver existing first-calm and first-night announcements through the notice queue.
+- [x] 36: Cancel the returning camera on canvas/HUD interaction, including its delayed reset.
+- [x] 37: Rearm save-failure feedback after a successful retry.
+- [x] 38: Preserve the current house and work when importing cannot be saved.
+- [x] 39: Make placement/refund leave care-earned comfort intact across relocation and clamping.
+- [x] 40: Ignore older file-read results after a newer import or reset.
+- [ ] Verify the complete batch, inspect mobile EN/AR originals, and record measured limits before merge.
+
+
 ## Done this iteration
 - [x] play_check honours `PORT`; CI fast gate, failure-only trimmed artifacts, weekly full suite.
 - [x] Objective step counter no longer wraps on narrow landscape cards (test: `tests/mobile-hud.test.mjs`).
