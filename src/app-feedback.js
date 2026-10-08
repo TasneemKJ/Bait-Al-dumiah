@@ -15,7 +15,8 @@ export function installFeedback(app){
  app.notices=[];app.noticeAt=0;
  function say(message){if(app.notices.length<8)app.notices.push(message);
  if(app.notices.length===1&&performance.now()>=app.noticeAt)showNotice(performance.now())}
- function showNotice(now){if(!app.notices.length)return;app.ui.toast(app.notices.shift());app.noticeAt=now+2400}
+ function showNotice(now){if(!app.notices.length||app.physicalActivity())return;
+ app.ui.toast(app.notices.shift());app.noticeAt=now+2400}
  function announce(event){
   const t=app.ui.t,n=app.ui.n;
   if(event.type==='milestone')say(`${t('milestoneReached')} ${t('ms-'+event.id+'Title')} `+
@@ -27,6 +28,8 @@ export function installFeedback(app){
    `· ${t('streakLabel')}: ${n(event.streak)}`);
   if(event.type==='dawn')say(event.fresh?`${t('dawnRecap')} ${n(event.wishes)} / ${n(DOLLS.length)}`:t('dawnTooSoon'));
   if(event.type==='sewn')say(t('sewnHint'));
+  if(event.type==='first-night')say(t('firstNightHint'));
+  if(event.type==='calm')say(t('calmDayOne'));
  }
  function showError(kind){app.fatal=true;app.syncPause();save();app.homeUI?.hide();
  document.querySelector('#loading')?.remove();if(app.ui?.panel)app.ui.close();

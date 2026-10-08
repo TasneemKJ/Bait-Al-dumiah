@@ -1,5 +1,14 @@
 # TODO
 
+## Audit 2026-10-08 — B1: first-session event delivery
+IDEAL: identify missing notices, define the event-to-player contract, explore failure paths, restore only proven missing handlers, look back through behavioral regression. 5Ws: a new EN/AR phone player; the first calm interval and first night; in the existing house notice; guidance is needed to make the intended quiet and visitor legible.
+Twenty audit candidates: 1 first-night event delivery; 2 calm-line delivery; 3 repeated-frame suppression; 4 returning-save hint suppression; 5 paused clock; 6 manual night switch; 7 Arabic notice text; 8 unchanged English text; 9 queue ordering; 10 reward notice coexistence; 11 muted guidance; 12 reduced-motion guidance; 13 day-one prerequisite care; 14 later-day exclusion; 15 saved one-time flags; 16 empty-queue behavior; 17 hint timing boundaries; 18 no automatic new panel; 19 notice visibility over the house; 20 short-phone target reachability.
+Selected: 1–3 and 7–10 as a focused bug regression; existing suites cover timing/persistence. The other candidates are audit questions, not new features or completed iterations.
+- [x] Reproduce four missing EN/AR notices through real simulation events and the production notice adapter.
+- [x] Restore the two existing handlers and verify affected/full source gates (29 focused; 416 full-suite checks plus lint/build).
+- [x] Correct B1 after independent review: cover candidates 9, 10, 16, 17 and 19 during tea/sewing/chimes. Seven new cases reproduced hidden-toast consumption; a central dequeue guard now defers delivery until ritual exit. All 11 notice cases pass in EN/AR with reward ordering, the eight-notice cap, immediate house delivery and the existing 2.4-second interval preserved. Final full verify passes 423 tests plus lint/build. This is a B1 correction, not an additional counted audit round.
+- [ ] Inspect exact-source mobile notice screenshots; native rendering availability remains a separate gate.
+
 ## Done this iteration
 - [x] play_check honours `PORT`; CI fast gate, failure-only trimmed artifacts, weekly full suite.
 - [x] Objective step counter no longer wraps on narrow landscape cards (test: `tests/mobile-hud.test.mjs`).
@@ -96,3 +105,8 @@ Chosen: **golden hour at dusk** (shipped). Shortlist, not built: (a) soft lamp l
 - Brainstorm 3 follow-up: lamp pools and kettle steam shipped. Sunbeam motes NOT built: the frame-cost check is too noisy under SwiftShader to prove it free (see the PR); revisit with a real-device measurement.
 
 - Cloud shadows skipped: the backdrop is a procedural shader, not a texture on a mesh, so a scrolling cloud term would add per-pixel shader work over the whole screen; not a cheap texture offset. Sunbeam motes still wait for a real-device frame-cost check.
+
+## Audit 2026-10-08 — B2 through B6
+Twenty candidates, IDEAL/5Ws and selected boundaries for each source/behavior round are recorded in `docs/audits/2026-10-08-review.md`: persistence/cold entry; tea; sewing; moon chimes; story/economy/mobile contracts. No speculative features are selected.
+- [x] Execute B2–B6 focused source/behavior groups (55/42/49/29/76 checks); latest full verify after the B1 review correction passes 423 tests plus lint/build.
+- [ ] Complete required native screenshots and performance; source checks do not close these gates.
