@@ -43,3 +43,6 @@ Later days (4+): the wish ring is half as strong, daylight only, and appears onl
 
 ## Golden hour
 Clock 96-126 (the last half minute before night): a warm peach band at the sky's horizon, an amber key light and warm window glow, peaking near clock 112 and handing over to the night look at 120. Zero for the rest of the day, so noon and night are unchanged.
+
+## Existing first-session notices, 2026-10-08 audit
+The first-night pointer and the quiet day-one line reach the existing paced notice queue in both languages when their simulation events occur. While tea, sewing or moon chimes hide the house toast, notices stay queued until the player leaves the ritual; their order, eight-notice cap and 2.4-second display interval stay the same. Their one-time flags, timing, copy and rewards remain owned by the existing simulation. Checked against `DESIGN_RULES.md`; no design-rule violations found.

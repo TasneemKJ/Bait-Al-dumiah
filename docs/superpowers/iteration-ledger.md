@@ -343,3 +343,22 @@ IDEAL: identify dense immediate entry; define safe one-activation entry; explore
 Twenty ideas: 1. Two-action Home. 2. Safe Continue. 3. Native miniature as focal point. 4. One flat Preferences. 5. Named alternate language. 6. Saved sound intent plus gesture unlock. 7. Saved reduced motion respected. 8. No canonical Home time. 9. No Home economy. 10. Separate preference persistence. 11. Protected failed storage read. 12. Corrupt-save fallback. 13. One-time activation latch. 14. Keyboard focus handoff. 15. Inert gameplay during Home. 16. Portrait/landscape stage. 17. Bilingual safe-area targets. 18. No stacked tutorial. 19. Preserve earned rewards. 20. Honest incremental/native acceptance reporting.
 
 Selected: these bounded entry/lifecycle safeguards, preserving all gameplay commands and native house art. Deferred: world-led chrome removal, full command access map, sparse Pause/Home return routing, advanced world-state simplification. No retention improvement is claimed.
+## Audit 2026-10-08 — B1: first-session event delivery
+
+Baseline: `912737900ba232c2ed1041c8374c9095e3a90dd2` (`Architecture audit`, PR #41). `npm run verify` passed 412 tests plus lint/build before this audit. The simulation emits `calm` and `first-night`; `app-loop` drains those events, but `app-feedback.announce` omitted both cases after the command/module extraction. A first-session player therefore never sees the existing quiet line or the visitor pointer.
+
+IDEAL and 5Ws, and the twenty candidates, are recorded under B1 in `TODO.md`: first-night delivery, calm delivery, duplicate suppression, returning-save suppression, pause, manual night, Arabic, English, ordering, reward coexistence, mute, reduced motion, prerequisite care, later days, saved flags, empty queue, timing boundaries, existing-panel preservation, visible notice and short-phone reachability. Selected: the two missing handlers and bilingual event-to-notice regression. No new game mechanic or presentation design.
+
+RED evidence: `node --test tests/onboarding-notices.test.mjs` failed all four cases because the produced notice list was empty, while each expected simulation event was present. Native visual acceptance is pending; unit evidence is not a screenshot review.
+
+
+## Audit 2026-10-08 — B2 through B6
+The twenty-candidate lists, IDEAL/5Ws, selected boundaries and commands are in `../audits/2026-10-08-review.md` (repository path `docs/audits/2026-10-08-review.md`). These are source/behavior rounds; native screenshot acceptance remains pending.
+
+Source/behavior evidence after the bounded repair: B1 29, B2 55, B3 42, B4 49, B5 29 and B6 76 checks passed (groups overlap; these are not additive unique test counts). Final `npm run verify`: lint, 416 tests, build and 401,100-byte gzip JavaScript check all passed. Required native screenshot/performance gates remain pending.
+
+## Audit 2026-10-08 — B1 correction after independent review
+
+Review found that the initial B1 handler repair still consumed notices during physical rituals: `say()` immediately dequeued an empty queue through `showNotice`, bypassing `app-loop`'s ritual visibility check. A real fresh state, Lina's wished-for care, tea/sewing/chime entry and 125 one-second simulation steps reproduced the loss in English and Arabic after the one-time calm/night flags had been set. This revisits B1's existing twenty-candidate list (ordering, rewards, empty queue, timing and visibility); it is not another counted audit round.
+
+RED: seven new notice tests failed for hidden-toast consumption while four house-delivery cases passed. The correction adds the existing `physicalActivity()` check at the central dequeue, installed before notice callbacks run. GREEN: all eleven notice cases pass, including both languages across all three rituals, direct dequeue protection, ordered first-care reward/sewn/calm/night delivery after exit, unchanged reward state, the eight-notice cap, immediate house notices and the 2,400 ms interval. Final `npm run verify` was run once after this correction and passed lint, 423 tests, build and the 401,100-byte gzip JavaScript check. Evidence: `bait-ritual-notices-red.log`, `bait-ritual-notices-green.log`, `bait-review-correction-verify.log`. No browser or remote writes were attempted; native screenshot/performance gates remain pending.
