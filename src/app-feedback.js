@@ -4,10 +4,10 @@ import {DOLLS} from './content.js';
 export function installFeedback(app){
  const {session,audio,host}=app;
  function updateSaveStatus(){if(!app.ui)return;const note=host.querySelector('.saved-note span');
+  app.ui.setSaveWarning?.(app.saveWarning?app.ui.t('savingFailed'):null);
   if(note)note.textContent=app.ui.t(app.saveWarning?'savingFailed':'saved')}
  function save(current=app.state){if(!session.entered)return false;
   const saved=session.save(current);
-  if(!saved&&!app.saveWarning&&app.ui)app.ui.toast(app.ui.t('savingFailed'));
   app.saveWarning=!saved;updateSaveStatus();return saved;
  }
  function saveSettings(){const saved=session.savePreferences(app.state.settings);
@@ -18,7 +18,8 @@ export function installFeedback(app){
  app.notices=[];app.noticeAt=0;
  function say(message){if(app.notices.length<8)app.notices.push(message);
  if(app.notices.length===1&&performance.now()>=app.noticeAt)showNotice(performance.now())}
- function showNotice(now){if(!app.notices.length)return;app.ui.toast(app.notices.shift());app.noticeAt=now+2400}
+ function showNotice(now){if(!app.notices.length||app.physicalActivity())return;
+ app.ui.toast(app.notices.shift());app.noticeAt=now+2400}
  function announce(event){
   const t=app.ui.t,n=app.ui.n;
   if(event.type==='milestone')say(`${t('milestoneReached')} ${t('ms-'+event.id+'Title')} `+

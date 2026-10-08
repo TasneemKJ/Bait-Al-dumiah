@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 import {createState,step} from '../src/simulation.js';
 import {DOLLS} from '../src/content.js';
 import {installFeedback} from '../src/app-feedback.js';
+import {installView} from '../src/app-view.js';
 import {translate} from '../src/i18n.js';
 import {returnGreeting,waveSchedule,waveRoom} from '../src/return-greeting.js';
 
@@ -11,7 +12,7 @@ test('the first calm moment and first night reach the player in both languages',
  for(const locale of ['en','ar']){
   const state=createState();state.settings.locale=locale;state.cares=1;
   const shown=[],app={state,session:{},audio:{},host:{},ui:{t:key=>translate(locale,key),n:String,toast:message=>shown.push(message)}};
-  installFeedback(app);
+  installFeedback(app);installView(app);
   for(let i=0;i<121;i++){step(state,1);for(const event of state.events.splice(0))app.announce(event)}
   const hintMessages=[translate(locale,'calmDayOne'),translate(locale,'firstNightHint')];
   const delivered=()=>[...shown,...app.notices].filter(message=>hintMessages.includes(message));
