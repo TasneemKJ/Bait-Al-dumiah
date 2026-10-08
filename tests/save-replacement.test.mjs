@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {setImmediate as nextTurn} from 'node:timers/promises';
 import {saveCommands} from '../src/cmd-save.js';
 import {installFeedback} from '../src/app-feedback.js';
+import {installView} from '../src/app-view.js';
 import {createHomeSession} from '../src/home-session.js';
 import {createState} from '../src/simulation.js';
 import {SAVE_KEY} from '../src/content.js';
@@ -22,7 +23,10 @@ function fixture(){
   syncPause(){this.state.paused=Boolean(this.manualPause||this.panelOpen)},
   ui:{panel:'settings',t:key=>key,toast:message=>messages.push(message),
    close(){this.panel=null;app.panelOpen=false},clearPlacement(){},setActivityResult(){}}};
- installFeedback(app);
+ const viewStubs={cancelWorkInput:app.cancelWorkInput,refreshUI:app.refreshUI,syncPause:app.syncPause};
+ // Feedback now uses the production physical-activity detector before showing
+ // a notice; keep only DOM/render operations stubbed for this save fixture.
+ installView(app);Object.assign(app,viewStubs);installFeedback(app);
  return {app,data,messages,failWrites(value=true){failWrites=value},
   notices:()=>[...messages,...app.notices]};
 }
