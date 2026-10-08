@@ -31,13 +31,16 @@ function enterPlay(app){
 }
 function welcomeGlance(app){
  if(app.state.settings.reducedMotion)return;const room=waveRoom(app.state);if(!room)return;
- let touched=false;const mark=()=>{touched=true};
- for(const target of [app.host,app.canvas]){
-  target.addEventListener('pointerdown',mark,{once:true,capture:true});
-  target.addEventListener('keydown',mark,{once:true,capture:true});
- }
- setTimeout(()=>{if(touched||app.ui.panel||app.state.paused)return;app.dispatch('focus-room',room);
-  setTimeout(()=>{if(!touched&&app.host.dataset.focusRoom===room)app.dispatch('camera')},2600)},700);
+ const listeners=new AbortController();let glanceTimer,returnTimer;
+ const cancel=()=>{clearTimeout(glanceTimer);clearTimeout(returnTimer);listeners.abort()};
+ for(const target of [app.canvas,app.host])for(const type of ['pointerdown','keydown','wheel','click'])
+  target.addEventListener(type,cancel,{capture:true,signal:listeners.signal});
+ glanceTimer=setTimeout(()=>{
+  if(app.ui.panel||app.state.paused||app.state.settings.reducedMotion){cancel();return}
+  app.dispatch('focus-room',room);
+  returnTimer=setTimeout(()=>{if(app.host.dataset.focusRoom===room&&!app.ui.panel&&!app.state.paused)
+   app.dispatch('camera');cancel()},2600);
+ },700);
 }
 export const homeCommands={
 'home-play':app=>enterPlay(app),

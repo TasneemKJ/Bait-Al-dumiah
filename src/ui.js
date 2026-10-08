@@ -19,7 +19,7 @@ export function createUI(host,getState,dispatch){
   const s=getState();applyDocumentState(s,t);
   host.innerHTML=shellMarkup(s,{t,n,button,clueExpanded,toolsExpanded});
   const sheet=wireSheet(host,close);
-  if(panel){renderPanel();sheet.showModal()}renderPlacement();tick();
+  if(panel){renderPanel();sheet.showModal()}renderPlacement();tick();toaster.refresh();
  }
  function open(name,id){if(placement){placement=null;moveId=null;renderPlacement();
  dispatch('placement-cancel')}panel=name;resetConfirm=false;if(id)selected=id;previousFocus=focusOrigin(host);
@@ -36,7 +36,7 @@ export function createUI(host,getState,dispatch){
   // Re-rendering the same sheet keeps its latest notice, so a collected reward stays visible.
   const notice=renderedPanel===panel?root.querySelector('.panel-notice')?.textContent:null;renderedPanel=panel;
   root.innerHTML=sheetMarkup(panel,s,{t,n,button,avatar,selected,selectedObject,activityResult,resetConfirm});
-  if(notice)prependNotice(root,notice);
+  if(notice)prependNotice(root,notice);toaster.refresh();
  }
  function renderPlacement(){
   const root=host.querySelector('.placement');if(!root)return;root.hidden=!placement;if(!placement)return;
@@ -56,7 +56,7 @@ export function createUI(host,getState,dispatch){
  const s=getState();
  syncHud(host,s,{t,n,panel,placement,selected});setClue(clueExpanded);
  }
- const toaster=createToaster(host),toast=message=>toaster.show(message,Boolean(panel));
+ const toaster=createToaster(host,()=>Boolean(panel)),toast=message=>toaster.show(message);
  function refresh(){const wasPanel=panel;if(wasPanel){host.querySelector('#sheet')?.close()}build()}
  function setTools(expanded){toolsExpanded=expanded;setDock(host,expanded);dispatch('tools-state',expanded)}
  // Phone portrait shows the clue as a compact chip; the copy opens on demand and a dot marks an unread clue.
@@ -78,7 +78,7 @@ export function createUI(host,getState,dispatch){
  return {collapseTools(){if(toolsExpanded)setTools(false)},
    openObject(key){if(!objectInfo(getState(),key))return false;selectedObject=key;
  open('object');return true},clearObject(){selectedObject=null},beginMove,
-   get moveId(){return moveId},open,close,refresh,tick,toast,
+   get moveId(){return moveId},open,close,refresh,tick,toast,setSaveWarning:toaster.setWarning,
    objective:()=>nextStep(getState(),t,n,host.dataset.focusRoom),clearPlacement,
      setActivityResult(result){activityResult=result;
  const choice=host.querySelector('#sheet [data-choice]:focus')?.dataset.choice;renderPanel();

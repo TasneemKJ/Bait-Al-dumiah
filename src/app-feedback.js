@@ -3,10 +3,13 @@ import {DOLLS} from './content.js';
 
 export function installFeedback(app){
  const {session,audio,host}=app;
- function save(current=app.state){if(!session.entered)return false;if(session.save(current))return true;
- if(!app.saveWarning&&app.ui){app.ui.toast(app.ui.t('savingFailed'));
- app.saveWarning=true;const note=host.querySelector('.saved-note span');
- if(note)note.textContent=app.ui.t('savingFailed')}return false}
+ function updateSaveStatus(){if(!app.ui)return;const note=host.querySelector('.saved-note span');
+  app.ui.setSaveWarning?.(app.saveWarning?app.ui.t('savingFailed'):null);
+  if(note)note.textContent=app.ui.t(app.saveWarning?'savingFailed':'saved')}
+ function save(current=app.state){if(!session.entered)return false;
+  const saved=session.save(current);
+  app.saveWarning=!saved;updateSaveStatus();return saved;
+ }
  function saveSettings(){const saved=session.savePreferences(app.state.settings);
  if(session.entered)save();else if(!saved)app.homeUI?.notify(app.ui.t('savingFailed'))}
  function notify(result,success){if(!result.ok){say(app.ui.t(result.reason));
@@ -39,5 +42,5 @@ export function installFeedback(app){
  p.textContent=app.ui.t(kind==='context'?'contextHelp':'webglHelp');
  b.textContent=app.ui.t('reload');b.addEventListener('click',()=>location.reload());
  error.append(h,p,b);document.querySelector('#app').append(error)}
- Object.assign(app,{save,saveSettings,notify,say,showNotice,announce,showError});
+ Object.assign(app,{save,saveSettings,updateSaveStatus,notify,say,showNotice,announce,showError});
 }

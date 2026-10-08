@@ -3,6 +3,14 @@
 Living summary; details in `README.md` and `docs/superpowers/specs/`.
 
 ## Loop
+
+### Reliable visits and reversible decoration
+
+The first calm stretch and first night deliver their existing one-time lines through the same queue as other house notices. A welcome camera gesture yields immediately to touch, keyboard or zoom on the miniature or its controls; it never resets the view after the player takes over.
+
+Save warnings persist on the existing notice surface until a successful save, including after leaving a ritual or changing language. Ordinary notices keep their usual timing, then return to the unresolved warning; recovery preserves any unrelated message already showing. Open sheets mirror the warning. Successful visits keep their quiet interface. Import and reset replace the visible house only after the replacement saves successfully. When overlapping file reads finish out of order, the latest import or reset remains authoritative.
+
+Decoration benefits are ongoing: placed keepsakes raise house coziness, ease comfort decay and help a resident feel content near a favorite item. Placing or packing an object does not directly change care-earned comfort. Packing still returns its full price, including for older saves; moving residents or furniture cannot turn a reversible purchase into free comfort or a comfort penalty.
 Look into the four-room house, care for three dolls (tea, play, rest, reassure), fulfil daily wishes for buttons, decorate with six keepsakes, deepen closeness, perform three physical rituals (tea, sewing, moon chimes), follow three object stories, restore rooms, and greet the visitor after dark to collect six whispers and open the closed door. A four-minute day/night cycle drives atmosphere.
 
 ## Visual language

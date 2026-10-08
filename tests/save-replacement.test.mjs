@@ -15,13 +15,14 @@ function fileRead(){
 }
 function fixture(){
  const data=new Map([[SAVE_KEY,savedHouse(77)]]),messages=[];
- let failWrites=false;
+ let failWrites=false,warning;
  const storage={getItem:key=>data.get(key)??null,setItem(key,value){if(failWrites)throw Error('quota');data.set(key,value)}};
  const session=createHomeSession({storage});session.enter();
  const app={session,state:session.state,world:null,manualPause:false,panelOpen:'settings',saveWarning:false,
   audio:{},host:{querySelector:()=>null},cancelWorkInput(){},refreshUI(){},dispatch(){},
   syncPause(){this.state.paused=Boolean(this.manualPause||this.panelOpen)},
   ui:{panel:'settings',t:key=>key,toast:message=>messages.push(message),
+   setSaveWarning(message){if(message&&message!==warning)messages.push(message);warning=message},
    close(){this.panel=null;app.panelOpen=false},clearPlacement(){},setActivityResult(){}}};
  const viewStubs={cancelWorkInput:app.cancelWorkInput,refreshUI:app.refreshUI,syncPause:app.syncPause};
  // Feedback now uses the production physical-activity detector before showing

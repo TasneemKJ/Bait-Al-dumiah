@@ -1,5 +1,90 @@
 # Improvement ledger
 
+## 2026-10-08 — Reliability and direct interaction, cycles 35–40
+
+These are new review cycles, not historical ledger entries. Baseline: `912737900ba232c2ed1041c8374c9095e3a90dd2`. No new dependencies, save key/version changes, art, remote services, or additional menu surfaces. Every cycle uses a production behavior regression before its fix. Runtime browser/visual acceptance is still pending until evidence is recorded below.
+
+### Cycle 35: Let the first quiet moment and first night speak
+
+**Identify / define, 5Ws:** A new phone player reaches the calm stretch and first night; the simulation emits hints but the display drops them, so the intended pace and visitor invitation are silent. This matters because lost agency or unreliable progress interrupts a calm, repeatable visit. Target: one-time hint delivery in EN/AR, using the existing notice queue.
+
+**Explore — 20 ideas:** 1. queue existing calm line; 2. queue existing first-night line; 3. draw visitor silhouette; 4. brighten threshold; 5. add dawn chime; 6. revise first-night Arabic; 7. pause during hints; 8. stretch hint duration; 9. fold clue more slowly; 10. log hints in journal; 11. narrate calm line; 12. reward first visitor; 13. replay hints on reload; 14. shorten tutorial; 15. emphasize night palette; 16. add audio captions; 17. announce via live region; 18. measure hint timing; 19. retain current save flags; 20. test event consumer.
+
+**Act:** The selected correction and its production regression are implemented; alternatives remain deferred. **Look back:** RED/GREEN evidence is recorded in the batch table below. Rendered EN/AR acceptance remains blocked by browser startup; no screenshot or physical-device result is claimed.
+
+### Cycle 36: Give returning camera control back immediately
+
+**Identify / define, 5Ws:** A returning touch/keyboard player begins exploring on the world canvas during the welcome; the sibling HUD never sees that input, so the delayed camera overrides their choice. This matters because lost agency or unreliable progress interrupts a calm, repeatable visit. Target: cancel pending welcome camera movement on actual world or HUD interaction.
+
+**Explore — 20 ideas:** 1. listen on world canvas; 2. listen on HUD; 3. cancel delayed reset; 4. cancel zoom takeover; 5. remove spent listeners; 6. skip for reduced motion; 7. add camera lock button; 8. remove greeting camera; 9. lengthen delay; 10. shorten delay; 11. zoom to waiting gift; 12. wave only; 13. preserve last camera; 14. persist camera pose; 15. add orbit tutorial; 16. improve Arabic return line; 17. lower welcome foley; 18. keep entire house visible; 19. test untouched greeting; 20. test post-glance input.
+
+**Act:** The selected correction and its production regression are implemented; alternatives remain deferred. **Look back:** RED/GREEN evidence is recorded in the batch table below. Rendered EN/AR acceptance remains blocked by browser startup; no screenshot or physical-device result is claimed.
+
+### Cycle 37: Recover save feedback between storage failures
+
+**Identify / define, 5Ws:** A returning player encounters temporary storage failure; after a successful retry, a later outage is silent because the warning is permanently latched. This matters because lost agency or unreliable progress interrupts a calm, repeatable visit. Target: one warning per failed interval, rearmed only by a successful save.
+
+**Explore — 20 ideas:** 1. reset warning on success; 2. clear stale inline note; 3. show recovery notice; 4. queue storage notices; 5. add storage meter; 6. add export shortcut; 7. retry faster; 8. retry slower; 9. keep house playable; 10. preserve save identity check; 11. localize recovery wording; 12. announce inline warning; 13. style warning paper; 14. add warning icon; 15. suppress duplicates per interval; 16. test failed-success-failed; 17. test unopened home; 18. test write exception; 19. test preference save separately; 20. document honest feedback.
+
+**Act:** The selected correction and its production regression are implemented; alternatives remain deferred. **Look back:** RED/GREEN evidence is recorded in the batch table below. Rendered EN/AR acceptance remains blocked by browser startup; no screenshot or physical-device result is claimed.
+
+### Cycle 38: Commit an imported house before replacing the live one
+
+**Identify / define, 5Ws:** A player imports a valid file while storage rejects writes; the app discards live work and says saved although the imported house was never persisted. This matters because lost agency or unreliable progress interrupts a calm, repeatable visit. Target: synchronous save success gates state/view replacement and success copy.
+
+**Explore — 20 ideas:** 1. persist candidate first; 2. roll back candidate pointer; 3. retain current ritual on failure; 4. preserve imported settings; 5. keep current audio preference; 6. reject corrupt file; 7. enforce size cap; 8. add import preview; 9. add confirmation step; 10. export before import; 11. retain old snapshot; 12. show truthful failure; 13. add inline file error; 14. retry failed import; 15. validate save version; 16. test old storage bytes; 17. test UI continuity; 18. test success once; 19. test reset failure; 20. document transaction boundary.
+
+**Act:** The selected correction and its production regression are implemented; alternatives remain deferred. **Look back:** RED/GREEN evidence is recorded in the batch table below. Rendered EN/AR acceptance remains blocked by browser startup; no screenshot or physical-device result is claimed.
+
+### Cycle 39: Make reversible decoration truly reversible
+
+**Identify / define, 5Ws:** A player relocates a resident after placing an item, then packs it away; the original one-time comfort grant survives, while clamping can also penalize a nearly content resident. This matters because lost agency or unreliable progress interrupts a calm, repeatable visit. Target: derive furniture benefits from placed objects; preserve care-earned comfort and exact refunds.
+
+**Explore — 20 ideas:** 1. remove immediate comfort grant; 2. remove guessed comfort debit; 3. keep ongoing decay protection; 4. keep favorite item threshold; 5. keep house coziness; 6. track per-doll grants; 7. track clamped deltas; 8. add persistent bonus layer; 9. lock doll movement; 10. charge packing fee; 11. reduce refund; 12. decay temporary credit; 13. restore original comfort snapshot; 14. preview cozy score; 15. show room warmth; 16. add placement foley; 17. test resident relocation; 18. test near-cap comfort; 19. test intervening care; 20. test old-save removal.
+
+**Act:** The selected correction and its production regression are implemented; alternatives remain deferred. **Look back:** RED/GREEN evidence is recorded in the batch table below. Rendered EN/AR acceptance remains blocked by browser startup; no screenshot or physical-device result is claimed.
+
+### Cycle 40: Let the latest import or reset own the house
+
+**Identify / define, 5Ws:** A file read resolves after the player has reset or chosen another file; its stale completion silently replaces the newer choice. This matters because lost agency or unreliable progress interrupts a calm, repeatable visit. Target: invalidate older asynchronous reads on newer import/reset; stale results stay silent.
+
+**Explore — 20 ideas:** 1. app-scoped request generation; 2. cancel old reader; 3. disable reset during read; 4. disable import while pending; 5. show loading sheet; 6. show filename; 7. add import spinner; 8. preserve current house until success; 9. ignore stale errors; 10. ignore stale success; 11. keep reset synchronous; 12. test two imports reversed; 13. test failed later import; 14. test reset followed by late success; 15. test reset followed by late error; 16. maintain no save fields; 17. use WeakMap ownership; 18. reuse existing failure wording; 19. retain current focus; 20. document last-intent rule.
+
+**Act:** The selected correction and its production regression are implemented; alternatives remain deferred. **Look back:** RED/GREEN evidence is recorded in the batch table below. Rendered EN/AR acceptance remains blocked by browser startup; no screenshot or physical-device result is claimed.
+
+### New batch evidence
+
+| Cycle | Observed RED behavior | Verified correction |
+| --- | --- | --- |
+| 35 | The calm/night events were consumed without visible notices. | Actual simulation events reach existing bilingual notice copy once; `arrival-feedback.test.mjs`. |
+| 36 | Canvas input allowed both delayed camera moves; review also reproduced click-only takeover. | Touch, keyboard, wheel and semantic clicks cancel before/during the greeting; untouched greeting still works. |
+| 37 | Failure-success-failure left the warning latched; review reproduced false saved text after Arabic refresh. | One warning per failed interval, truthful persistent status through actual shell rebuilds and recovery; `save-command-transaction.test.mjs`. |
+| 38 | Failed import/reset replaced live state despite unchanged stored bytes. | Successful storage gates live replacement; failed imports preserve active work/settings sheet and give bilingual failure copy. |
+| 39 | Resident moves farmed comfort; clamping and later care could lose comfort on refund. | Care-earned comfort remains intact; exact price refunds and ongoing furniture benefits survive moves and older saves; `decoration-comfort.test.mjs`. |
+| 40 | A late import replaced a subsequent reset or newer import; obsolete errors still appeared. | Four deferred-read regressions cover reset, reverse completion, obsolete error and failed newer selection. |
+
+Commands: `node --test tests/arrival-feedback.test.mjs tests/save-command-transaction.test.mjs tests/decoration-comfort.test.mjs tests/architecture.test.mjs` passed 28/28 after independent review corrections. Final release gate: `npm run verify` passed lint, all 432/432 tests and the production build; aggregate JavaScript is 401,504 / 512,000 bytes gzip. The independent reviewer reran all 20 new behavior tests after both corrections and found no remaining scoped code blocker.
+
+Browser evidence: `scripts/play_check.py` attempted with the shared Chromium 153 executable and SwiftShader; the process exited SIGTRAP before navigation. No local gameplay frames, screenshots, audio listening or 4× CPU results were obtained. Source/unit checks cannot establish visual/mobile acceptance. Independent review found and resolved the two P2 issues above; these refinements remain inside cycles 36/37, not extra iterations.
+
+### Integration with current main, 2026-10-08
+
+PR #46 head `0fc07d63b7b88d25a1d19c5fd70eeca9ebfae71a` and main `b98e1ef02acc6746694e7828afb364fbc2702aa8` share baseline `912737900ba232c2ed1041c8374c9095e3a90dd2`. Main's B1 correction independently restores the same calm/night handlers and adds central notice deferral during tea, sewing and chimes. The combined source retains one handler per event, the new ritual guard, and all six reliability corrections. The only textual merge conflict was in `TODO.md`; both audit sections are retained. Main's design, audit report, ledger and eleven notice regressions remain intact. This integration adds no feature or counted cycle.
+
+Fresh main baseline: `npm ci` and `npm run verify` succeeded with 423 tests plus lint/build. The first combined focused run passed 30/31: our older arrival fixture omitted the production `installView` adapter that supplies `physicalActivity`. Composing the actual view adapter fixed that fixture. Self-review then tightened valid-import message assertions and reproduced two false positives: the similarly incomplete save-command fixture threw inside import's catch, appending an unreadable-file notice. That fixture now composes the real view adapter before installing its explicit rendering-boundary spies. Production behavior was not weakened to accommodate either fixture.
+
+Initial combined evidence before the review correction below: `node --test tests/arrival-feedback.test.mjs tests/onboarding-notices.test.mjs tests/save-command-transaction.test.mjs tests/decoration-comfort.test.mjs` passed 31/31. `npm run verify` passed lint, 443/443 tests, build and 401,524 / 512,000 bytes gzip JavaScript. Scratch evidence: `integration-evidence/bait/main-baseline-verify.log`, `combined-before-fixture-red.log`, `combined-save-fixture-red.log`, `combined-focused-final-green.log` and `combined-final-verify.log`.
+
+Independent integration review reopened cycle 37: `.saved-note` is globally hidden by `story.css`, while all three ritual styles hide the toast. A failed save's transient message could expire during a ritual, and the warning latch prevented another after exit. This inherited gap made the cycle's visible-status claim incomplete. The correction revisits cycle 37's existing twenty ideas (persistent feedback, duplicate suppression, truthful status and recovery); it adds no counted cycle. Ten regressions using the real toaster, feedback/view adapters, simulation and controlled timers were RED for missing persistence, transient preservation, current-language restoration or sheet ownership. A further review regression reproduced four identical live-text writes instead of one.
+
+The existing toaster now retains the current failure beneath ordinary transient notices; their timeout restores the current warning, while a successful save clears it without erasing unrelated notice text. Existing ritual CSS and the main queue's ordering/cap/ritual guard are unchanged. The UI reapplies current status after rebuild and new-sheet rendering; recovery removes only a sheet notice marked as the warning. Identical live text is not rewritten on repeated failed autosaves. No new copy, CSS, layout, dependency, save field or storage key was added. The older main-entry UI stub now implements the warning adapter; its unchanged failed-save assertions still pass.
+
+Evidence after that correction, before the additional main advance below: the five affected behavioral files, including `save-warning-toast.test.mjs`, passed 42/42. The full `npm run verify` passed lint, 454/454 tests, build and 401,701 / 512,000 bytes gzip JavaScript. Intermediate full verification exposed two source formatting caps and two incomplete main-entry UI stubs; those were corrected without weakening their checks. Evidence: `cycle37-persistent-warning-red.log`, `cycle37-live-status-red.log`, `combined-cycle37-final-focused.log`, `cycle37-final-architecture-green.log` and `combined-cycle37-release-verify.log` in the same scratch directory.
+
+Before publication, main advanced again to `72535fd6d4c27877666d520986e4027f907b3a3f` (PR #44). The reviewed local candidate `64fcb1e5b1f16f46e7f8bd347e6cf1efdc523af5` was retained while reconciling that newer main. Its modified-shortcut/Space-repeat guards, primary-pointer carry admission and held-tea focus-transfer cancellation are incorporated unchanged, together with every incoming test and documentation section. Overlapping `app-feedback`, `cmd-home` and `cmd-save` conflicts retain the reviewed implementations: they include main's candidate-save parameter, canvas cancellation and per-app import ownership, plus the already-reviewed persistent warning, timer cancellation and truthful failed-import explanation. The duplicate TODO sections are both preserved.
+
+The incoming save-replacement fixture omitted the new warning UI method; its unchanged blocked-import/reset assertions failed RED, then passed after completing that adapter contract. No product behavior or assertion was relaxed. Incoming input/save verification passes 33/33. Final `npm run verify` passes lint, all 472/472 tests (zero failures, cancellations or skips), build and 401,750 / 512,000 bytes gzip JavaScript. Evidence: `latest-main-fixture-red.log`, `latest-main-focused-green.log` and `latest-main-full-verify.log`. This is reconciliation of existing work, not an additional counted iteration. No browser attempt, workflow trigger or remote mutation was made locally. Exact-source mobile EN/AR screenshots, physical interaction/audio, native live-region announcements and 4× CPU performance remain unverified; the draft is not visually accepted.
+
 ## 2026-10-04 / Iteration 1 — Earned rituals and restoration
 Twenty ideas and selected design: specs/2026-10-04-living-house-expansion.md.
 Baseline: main efc04ee; npm run verify passes 83 tests and build.

@@ -1,5 +1,16 @@
 # TODO
 
+## Reliability review — 2026-10-08, cycles 35–40
+
+Twenty alternatives, IDEAL and the 5Ws for each bounded cycle are recorded in `docs/superpowers/iteration-ledger.md`.
+- [x] 35: Deliver existing first-calm and first-night announcements through the notice queue.
+- [x] 36: Cancel the returning camera on canvas/HUD interaction, including its delayed reset.
+- [x] 37: Keep save failure observable after rituals and through UI/language changes, preserve ordinary notice timing, and clear it after a successful retry.
+- [x] 38: Preserve the current house and work when importing cannot be saved.
+- [x] 39: Make placement/refund leave care-earned comfort intact across relocation and clamping.
+- [x] 40: Ignore older file-read results after a newer import or reset.
+- [x] Reconcile PR #46 with main `72535fd6d4c27877666d520986e4027f907b3a3f`, preserving both newer-main batches and all audit histories; complete the cycle 37 warning-visibility correction after review. The warning/cycle group passes 42 checks, incoming input/save cases pass 33 checks, and the final lint/472-test/build gate passes. This is integration of cycles 35–40, not additional cycles.
+- [ ] Inspect exact-source mobile EN/AR originals and record measured performance before merge; source checks do not establish rendered acceptance.
 ## Six bounded corrections — 2026-10-08
 
 Twenty candidates, IDEAL/5Ws, RED/GREEN outcomes and evidence limits for each pass are recorded under B1–B6 in `docs/superpowers/iteration-ledger.md`.
