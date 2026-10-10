@@ -54,26 +54,31 @@ function buildSpill(presentation){
  return spill;
 }
 
-// Open vessels, target engravings and liquid surfaces share one bounded cup builder.
-function buildTeaCups(presentation,brass,cream){
- const cupViews=[];
- for(let i=0;i<3;i++){
-  const cup=group(presentation,`tea-cup-${i}`);
-  const r=TEA_TABLE.cupOuterRadius,inner=TEA_TABLE.cupRadius,h=TEA_TABLE.cupHeight;
-  const profile=[[.09,0],[.105,.015],[r,h-.02],[r,h],[inner,h],[inner-.008,.03],[.08,
-    .018],[0,.018]].map(([x,y])=>new T.Vector2(x,y));
-  const vessel=mesh(cup,new T.LatheGeometry(profile,20),cream);vessel.name='tea-open-cup';
-  const handle=torus(cup,.058,.010,brass,[i===0?-.16:.16,.13,0]);handle.scale.y=1.18;
-  torus(cup,r-.004,.006,brass,[0,h-.006,0],true);
-  // A second interior engraving remains legible where the surface meets it.
-  const band=torus(cup,inner-.005,.0028,brass.clone(),[0,fillY(.7),0],true);
-  band.name='tea-target-band';band.material.emissiveIntensity=0;
-  const liquid=cylinder(cup,inner-.009,.008,amber,[0,fillY(0)-.004,0]);liquid.name='tea-liquid-surface';
-  cupViews.push({root:cup,vessel,band,liquid,handle});
- }
- return cupViews;
+function buildTray(presentation,brass){
+ const tray=group(presentation,'tea-serving-tray');
+ const trayShape=new T.Shape();trayShape.absellipse(0,0,.525,.25,0,Math.PI*2,false,0);
+ const plate=mesh(tray,new T.ExtrudeGeometry(trayShape,{depth:.012,bevelEnabled:false,curveSegments:20}),
+   brass,[0,.014,.18]);plate.rotation.x=-Math.PI/2;
+ const lip=torus(tray,.51,.009,brass,[0,.029,.18],true);lip.scale.y=.49;
+ // A projecting brass handle is a distinct serving affordance in front of cups.
+ mesh(tray,new T.BoxGeometry(.64,.018,.20),brass,[0,.024,.42]);
+ const insert=mesh(tray,new T.PlaneGeometry(.88,.32),mat(P.mint),[0,.028,.16]);insert.rotation.x=-Math.PI/2;
+ batch(tray);
 }
-
+function buildCup(presentation,i,{brass,cream}){
+ const cup=group(presentation,`tea-cup-${i}`);
+ const r=TEA_TABLE.cupOuterRadius,inner=TEA_TABLE.cupRadius,h=TEA_TABLE.cupHeight;
+ const profile=[[.09,0],[.105,.015],[r,h-.02],[r,h],[inner,h],[inner-.008,.03],[.08,
+   .018],[0,.018]].map(([x,y])=>new T.Vector2(x,y));
+ const vessel=mesh(cup,new T.LatheGeometry(profile,20),cream);vessel.name='tea-open-cup';
+ const handle=torus(cup,.058,.010,brass,[i===0?-.16:.16,.13,0]);handle.scale.y=1.18;
+ torus(cup,r-.004,.006,brass,[0,h-.006,0],true);
+ // A second interior engraving remains legible where the surface meets it.
+ const band=torus(cup,inner-.005,.0028,brass.clone(),[0,fillY(.7),0],true);
+ band.name='tea-target-band';band.material.emissiveIntensity=0;
+ const liquid=cylinder(cup,inner-.009,.008,amber,[0,fillY(0)-.004,0]);liquid.name='tea-liquid-surface';
+ return {root:cup,vessel,band,liquid,handle};
+}
 // Presentation-only cup response; the simulation supplies readiness and landing.
 function updateTeaCupFeedback(v,c,tea,state,served){
   if(c.ready&&!v.wasReady)v.readyAt=state.elapsed;v.wasReady=c.ready;
@@ -100,6 +105,17 @@ function retireTeaTable(stream,cupViews,actual){
    stream:{...actual.stream,visible:false}};
 }
 
+// What the table actually shows, for visual checks: never read back into the game.
+function tableSnapshot({tea,served,presentation,pot,stream,start,end,cupViews,spill}){
+ const offset=presentation.position;
+ return {active:true,served,presentation:{offset:offset.toArray()},
+  pot:{position:pot.position.toArray(),rotation:pot.rotation.z,spout:start.toArray()},
+  stream:{visible:stream.visible,start:start.toArray(),end:end.toArray()},
+  cups:tea.cups.map((c,i)=>({id:c.id,x:cupViews[i].root.position.x+offset.x,z:cupViews[i].root.position.z+offset.z,
+   surfaceY:cupViews[i].liquid.position.y+.004,bandY:cupViews[i].band.position.y,visible:cupViews[i].root.visible})),
+  spillVisible:spill.visible};
+}
+
 export function createTeaTable(parent){
  const root=new T.Group();root.name='physical-tea-table';root.visible=false;
  const room=ROOMS.find(r=>r.id===TEA_TABLE.room);
@@ -107,16 +123,8 @@ export function createTeaTable(parent){
  const brass=mat(P.gold),cream=glaze(P.cream),mint=glaze(P.mint);
  // One presentation root moves the complete served set and its real targets.
  const presentation=group(root,'tea-presented-service');
- const tray=group(presentation,'tea-serving-tray');
- const trayShape=new T.Shape();trayShape.absellipse(0,0,.525,.25,0,Math.PI*2,false,0);
- const plate=mesh(tray,new T.ExtrudeGeometry(trayShape,{depth:.012,bevelEnabled:false,curveSegments:20}),
-   brass,[0,.014,.18]);plate.rotation.x=-Math.PI/2;
- const lip=torus(tray,.51,.009,brass,[0,.029,.18],true);lip.scale.y=.49;
- // A projecting brass handle is a distinct serving affordance in front of cups.
- mesh(tray,new T.BoxGeometry(.64,.018,.20),brass,[0,.024,.42]);
- const insert=mesh(tray,new T.PlaneGeometry(.88,.32),mat(P.mint),[0,.028,.16]);insert.rotation.x=-Math.PI/2;
- batch(tray);
- const cupViews=buildTeaCups(presentation,brass,cream);
+ buildTray(presentation,brass);
+ const cupViews=[0,1,2].map(i=>buildCup(presentation,i,{brass,cream}));
  const {pot,tipOffset,spout}=buildPot(root,{brass,cream,mint});
  const stream=mesh(root,new T.CylinderGeometry(.007,.012,1,8),amber);
  stream.name='tea-pouring-stream';stream.visible=false;stream.receiveShadow=false;
@@ -154,13 +162,7 @@ export function createTeaTable(parent){
   spill.visible=tea.spills>0;spill.scale.setScalar(Math.min(1.2,.35+tea.spills*.7));
   servedGlow.visible=served;
   potHit.visible=true;trayHit.visible=true;
-  actual={active:true,served,presentation:{offset:presentation.position.toArray()},
-    pot:{position:pot.position.toArray(),rotation:pot.rotation.z,
-    spout:start.toArray()},stream:{visible:stream.visible,start:start.toArray(),
-      end:end.toArray()},cups:tea.cups.map((c,i)=>({id:c.id,
-    x:cupViews[i].root.position.x+presentation.position.x,z:cupViews[i].root.position.z+presentation.position.z,
-    surfaceY:cupViews[i].liquid.position.y+.004,bandY:cupViews[i].band.position.y,
-      visible:cupViews[i].root.visible})),spillVisible:spill.visible};
+  actual=tableSnapshot({tea,served,presentation,pot,stream,start,end,cupViews,spill});
  },status(){return structuredClone(actual)},points(){if(!root.visible)return [];root.updateWorldMatrix(true,true);
  const result=targets.filter(t=>t.visible).map(t=>({key:t.userData.tea,local:localPoint(t).toArray(),
    world:t.getWorldPosition(new T.Vector3()).toArray()}));

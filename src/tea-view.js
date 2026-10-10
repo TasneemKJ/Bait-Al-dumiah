@@ -2,6 +2,7 @@ import {restorationReady} from './simulation.js';
 import {teaPercent as percent} from './readouts.js';
 import {translate,number} from './i18n.js';
 import {icon} from './icons.js';
+import {setText,setAttribute} from './dom-sync.js';
 
 const fill=(text,values)=>text.replace(/\{(\w+)\}/g,(_,key)=>values[key]??'');
 
@@ -59,4 +60,13 @@ export function mountTeaSurface(host){
    strip:root.querySelector('.tea-work-strip'),exit:root.querySelector('[data-tea-action="exit"]'),
      cups:root.querySelector('#tea-cup-readout'),announcement:root.querySelector('#tea-work-announcement')};
  return {root,parts};
+}
+
+// Writes the computed view into the work strip.
+export function paintTeaView(parts,view,t){
+ setText(parts.title,view.title);setText(parts.progress,view.progress);parts.progress.hidden=!view.progress;
+ setText(parts.full,view.instructions);setText(parts.short,view.shortInstructions);setText(parts.status,view.status);
+ setText(parts.detail,view.detail);parts.detail.hidden=!view.detail;
+ setAttribute(parts.strip,'aria-label',t('teaWorkRegion'));setText(parts.exit.querySelector('span'),t('teaWorkExit'));
+ setAttribute(parts.cups,'aria-label',t('teaCupList'));setText(parts.cups,view.cups.join('. '));
 }

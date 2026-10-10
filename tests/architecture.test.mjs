@@ -13,7 +13,8 @@ import {fileURLToPath} from 'node:url';
 //   main        composition root
 const LAYERS=['shared','data','simulation','render','ui','main'];
 const LAYER_OF={
- 'event-bindings.js':'shared','content.js':'data','locale-data.js':'data','i18n.js':'data','icons.js':'data',
+ 'event-bindings.js':'shared','content.js':'data','locale-data.js':'data','locale-rituals.js':'data','locale-story.js':'data',
+ 'locale-house.js':'data','locale-keepsakes.js':'data','i18n.js':'data','icons.js':'data',
  'simulation.js':'simulation','home-session.js':'simulation','return-greeting.js':'simulation',
  'stitch-path.js':'simulation','sim-util.js':'simulation','sim-core.js':'simulation','sim-tea.js':'simulation','sim-stitch.js':'simulation','sim-chimes.js':'simulation','sim-story.js':'simulation','sim-queries.js':'simulation','sim-state.js':'simulation','save-codec.js':'simulation','lullaby-score.js':'simulation','night-score.js':'simulation',
  'tea-input.js':'simulation','stitch-input.js':'simulation','chime-input.js':'simulation',
@@ -21,23 +22,16 @@ const LAYER_OF={
  'resident-portraits.js':'simulation',
  'ui.js':'ui','activities-ui.js':'ui','chime-ui.js':'ui','home-ui.js':'ui','object-ui.js':'ui',
  'stitch-ui.js':'ui','stitch-view.js':'ui','canvas-aria.js':'ui','chime-input-bindings.js':'ui','chime-view.js':'ui','objective-ui.js':'ui','shell-markup.js':'ui','hud-sync.js':'ui','dom-sync.js':'ui','readouts.js':'ui','ui-events.js':'ui','save-transfer.js':'ui','panels-ui.js':'ui','stitch-input-bindings.js':'ui','tea-input-bindings.js':'ui','tea-view.js':'ui','story-ui.js':'ui','tea-ui.js':'ui','audio.js':'ui','gift-art.js':'ui',
- 'object-controls.js':'ui','room-views.js':'ui','resident-label.js':'ui','placement-keys.js':'ui','playfield-layout.js':'ui',
+ 'object-controls.js':'ui','room-views.js':'ui','resident-label.js':'ui','placement-keys.js':'ui','playfield-layout.js':'ui','placement-flow.js':'ui',
  'app-feedback.js':'ui','app-view.js':'ui','app-commands.js':'ui','cmd-home.js':'ui','cmd-camera.js':'ui','cmd-story.js':'ui','cmd-activities.js':'ui','cmd-house.js':'ui','cmd-save.js':'ui','app-loop.js':'ui',
  'main.js':'main',
 };
 const MAX_LINES=500;
 // Long lines hide size: the code here is dense, so bytes, line width and function length are capped too.
+// There are no exceptions: split a module, a table or a function instead.
 const MAX_BYTES=40000;
 const MAX_LINE_CHARS=120;
-const MAX_FUNCTION_LINES=80;
-// Modules allowed past the cap, each with the reason.
-const SIZE_EXCEPTIONS={
- 'locale-data.js':'bilingual copy table, data only',
-};
-// Modules allowed past the byte cap.
-const BYTE_EXCEPTIONS={
- 'locale-data.js':'bilingual copy table, data only',
-};
+const MAX_FUNCTION_LINES=60;
 
 const srcDir=resolve(dirname(fileURLToPath(import.meta.url)),'../src');
 function listModules(dir=srcDir){
@@ -83,35 +77,18 @@ test('render modules never import the ui or main layers',()=>{
  assert.deepEqual(offenders,[]);
 });
 
-test('modules stay under the size cap unless listed',()=>{
+test('modules stay under the size cap',()=>{
  const lines=text=>text.split('\n').length-(text.endsWith('\n')?1:0);
- const over=modules.filter(m=>lines(m.text)>MAX_LINES&&!(m.rel in SIZE_EXCEPTIONS)).map(m=>`${m.rel}: ${lines(m.text)} lines`);
- assert.deepEqual(over,[],`split the module or list it in SIZE_EXCEPTIONS with a reason (cap ${MAX_LINES})`);
- for(const rel of Object.keys(SIZE_EXCEPTIONS)){
-  const m=modules.find(x=>x.rel===rel);
-  assert.ok(m&&lines(m.text)>MAX_LINES,`${rel} no longer needs its size exception`);
- }
+ const over=modules.filter(m=>lines(m.text)>MAX_LINES).map(m=>`${m.rel}: ${lines(m.text)} lines`);
+ assert.deepEqual(over,[],`split the module (cap ${MAX_LINES})`);
 });
 
-// Exceptions may only shrink: the listed width must stay within 20 characters of the real longest line.
-const WIDTH_EXCEPTIONS={
- 'locale-data.js':452,
-};
-
-test('modules stay under the byte and line-width caps unless listed',()=>{
- const heavy=modules.filter(m=>Buffer.byteLength(m.text)>MAX_BYTES&&!(m.rel in BYTE_EXCEPTIONS)).map(m=>`${m.rel}: ${Buffer.byteLength(m.text)} bytes`);
- assert.deepEqual(heavy,[],`split the module or list it in BYTE_EXCEPTIONS (cap ${MAX_BYTES})`);
+test('modules stay under the byte and line-width caps',()=>{
+ const heavy=modules.filter(m=>Buffer.byteLength(m.text)>MAX_BYTES).map(m=>`${m.rel}: ${Buffer.byteLength(m.text)} bytes`);
+ assert.deepEqual(heavy,[],`split the module (cap ${MAX_BYTES} bytes)`);
  const longest=m=>Math.max(...m.text.split('\n').map(l=>l.length));
- const wide=modules.filter(m=>longest(m)>(WIDTH_EXCEPTIONS[m.rel]??MAX_LINE_CHARS)).map(m=>`${m.rel}: ${longest(m)} characters`);
+ const wide=modules.filter(m=>longest(m)>MAX_LINE_CHARS).map(m=>`${m.rel}: ${longest(m)} characters`);
  assert.deepEqual(wide,[],`break up lines over ${MAX_LINE_CHARS} characters`);
- for(const rel of Object.keys(BYTE_EXCEPTIONS)){
-  const m=modules.find(x=>x.rel===rel);
-  assert.ok(m&&Buffer.byteLength(m.text)>MAX_BYTES,`${rel} no longer needs its byte exception`);
- }
- for(const [rel,allowed] of Object.entries(WIDTH_EXCEPTIONS)){
-  const actual=longest(modules.find(x=>x.rel===rel));
-  assert.ok(actual>MAX_LINE_CHARS&&allowed-actual<20,`${rel}: lower its width exception to ${actual}`);
- }
 });
 
 test('top-level functions stay under the length cap',()=>{

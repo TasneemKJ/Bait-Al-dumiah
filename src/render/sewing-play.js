@@ -103,15 +103,14 @@ function updateSewingFeedback(stitch,state,guideBead,spoolBody,feedback){
   spoolBody.material.emissive.set(0xf0c28a);spoolBody.material.emissiveIntensity=stitch.loose?.18:0;
 }
 
-export function createSewingPlay(parent){
- const table=STITCH_TABLE,room=ROOMS.find(r=>r.id===table.room),root=new T.Group();
- root.name='physical-sewing-table';root.visible=false;
- root.position.set(room.x+table.x,room.y+table.y,table.z);parent.add(root);
- const cream=new T.MeshStandardMaterial({color:P.cream,roughness:.86}),wood=mat(P.wood),brass=mat(P.gold);
- const linen=new T.MeshStandardMaterial({color:0xffffff,map:texture('fabric',['#f1e1c7',
-   '#dccbab']),roughness:1,side:T.DoubleSide});
- const threadMaterial=new T.MeshStandardMaterial({color:0xa74345,roughness:.60,side:T.DoubleSide});
- const guideMaterial=new T.MeshStandardMaterial({color:0x947989,roughness:1,side:T.DoubleSide});
+// The bead marks the next point the needle should reach, until the pattern is complete.
+function placeGuideBead(bead,point,complete,scale){
+ bead.visible=Boolean(point)&&!complete;
+ if(point)bead.position.set(point.x*scale,.021,point.y*scale);
+}
+
+// The fixed board, front supports, hoop and clamp: drawn once and batched.
+function buildWorkboard(root,table,{cream,wood,brass}){
  const staticArt=group(root,'stitch-static-workboard');
  box(staticArt,table.boardSize,cream,[0,-.041,0],'stitch-working-board');
  // These feet support the forward extension without hiding the old machine.
@@ -122,6 +121,28 @@ export function createSewingPlay(parent){
  box(staticArt,[.075,.025,.10],brass,[0,.006,-table.hoopRadius-.012],'stitch-hoop-clamp');
  cylinder(staticArt,.025,.037,brass,[0,.024,-table.hoopRadius-.012]);
  batch(staticArt);
+}
+// What the cloth actually shows, for visual checks: never read back into the game.
+function sewingSnapshot({stitch,table,finish,tip,grip,spool,finishCenter}){
+ return {active:true,phase:stitch.phase,patternId:stitch.patternId,
+  needle:{x:stitch.needle.x,y:stitch.needle.y,pressed:stitch.pressed,tip,grip},loose:stitch.loose,
+  section:stitch.section,completedSections:stitch.completedSections,
+  trail:stitch.acceptedTrail.map(p=>[...p]),
+  nextGuidePoint:stitch.nextGuidePoint?{...stitch.nextGuidePoint}:null,finishedClothVisible:finish.visible,
+  board:{center:[0,-.041,0],size:[...table.boardSize]},spool:{center:spool,diameter:table.spoolDiameter},
+  finish:{center:finishCenter,size:[...table.finishSize],visible:finish.visible}};
+}
+
+export function createSewingPlay(parent){
+ const table=STITCH_TABLE,room=ROOMS.find(r=>r.id===table.room),root=new T.Group();
+ root.name='physical-sewing-table';root.visible=false;
+ root.position.set(room.x+table.x,room.y+table.y,table.z);parent.add(root);
+ const cream=new T.MeshStandardMaterial({color:P.cream,roughness:.86}),wood=mat(P.wood),brass=mat(P.gold);
+ const linen=new T.MeshStandardMaterial({color:0xffffff,map:texture('fabric',['#f1e1c7',
+   '#dccbab']),roughness:1,side:T.DoubleSide});
+ const threadMaterial=new T.MeshStandardMaterial({color:0xa74345,roughness:.60,side:T.DoubleSide});
+ const guideMaterial=new T.MeshStandardMaterial({color:0x947989,roughness:1,side:T.DoubleSide});
+ buildWorkboard(root,table,{cream,wood,brass});
  const cloth=mesh(root,new T.CircleGeometry(table.hoopRadius-.025,48),linen,[0,0,0],
    'stitch-working-cloth');cloth.rotation.x=-Math.PI/2;
  const mendPatch=mesh(root,new T.CircleGeometry(.20,24),
@@ -130,13 +151,13 @@ export function createSewingPlay(parent){
  const guide=mesh(root,emptyGeometry(),guideMaterial,[0,0,0],'stitch-contour-guide');
  const trail=mesh(root,emptyGeometry(),threadMaterial,[0,0,0],'stitch-accepted-thread');
  const guideBead=mesh(root,new T.SphereGeometry(.014,10,6),brass.clone(),[0,.021,0],'stitch-next-guide-point');
+ const feedback={section:null,at:-Infinity};
  const {needle,grip,tipAnchor}=buildNeedle(root,table,{cream,brass});
  const spoolBody=buildSpool(root,table);
  const looseLoop=mesh(root,new T.TorusGeometry(.047,.006,4,24),threadMaterial,[0,.022,0],
    'stitch-loose-loop');looseLoop.rotation.x=-Math.PI/2;
  const {finish,finishCloth,finishedThread}=buildFinish(root,table,{linen,brass,threadMaterial,trail});
  const targets=[grip,spoolBody,finishCloth];
- const feedback={section:null,at:-Infinity};
  let patternKey=null,trailKey=null,actual={active:false,phase:null,patternId:null,needle:null,
    loose:false,section:0,completedSections:0,trail:[],nextGuidePoint:null,finishedClothVisible:false};
  function localPoint(o){root.updateWorldMatrix(true,true);
@@ -161,18 +182,9 @@ export function createSewingPlay(parent){
   const complete=stitch.completedSections>=stitch.sections.length;
   finish.visible=complete||stitch.phase==='finished';looseLoop.visible=stitch.loose;
   looseLoop.position.set(needle.position.x+.030,.022,needle.position.z+.020);
-  guideBead.visible=Boolean(stitch.nextGuidePoint)&&!complete;
-  if(stitch.nextGuidePoint)guideBead.position.set(stitch.nextGuidePoint.x*table.clothScale,
-    .021,stitch.nextGuidePoint.y*table.clothScale);
-  actual={active:true,phase:stitch.phase,patternId:stitch.patternId,
-    needle:{x:stitch.needle.x,y:stitch.needle.y,pressed:stitch.pressed,
-    tip:localPoint(tipAnchor),grip:localPoint(grip)},loose:stitch.loose,
-      section:stitch.section,completedSections:stitch.completedSections,
-    trail:stitch.acceptedTrail.map(p=>[...p]),nextGuidePoint:stitch.nextGuidePoint?
-      {...stitch.nextGuidePoint}:null,finishedClothVisible:finish.visible,
-    board:{center:[0,-.041,0],size:[...table.boardSize]},
-      spool:{center:localPoint(spoolBody),diameter:table.spoolDiameter},
-    finish:{center:localPoint(finishCloth),size:[...table.finishSize],visible:finish.visible}};
+  placeGuideBead(guideBead,stitch.nextGuidePoint,complete,table.clothScale);
+  actual=sewingSnapshot({stitch,table,finish,tip:localPoint(tipAnchor),grip:localPoint(grip),
+   spool:localPoint(spoolBody),finishCenter:localPoint(finishCloth)});
  },points(){if(!root.visible)return [];root.updateWorldMatrix(true,true);
  const result=targets.filter(t=>{for(let o=t;o;o=o.parent)if(!o.visible)return false;
  return true}).map(t=>({key:t.userData.stitch,local:localPoint(t),

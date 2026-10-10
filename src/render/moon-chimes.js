@@ -32,12 +32,8 @@ function updateChimeHalo(c,a,state,i,selected,y){
    c.halo.position.y=y;
 }
 
-export function createMoonChimes(parent){
- const room=ROOMS.find(r=>r.id==='bedroom'),root=new T.Group();root.name='moon-chime-instrument';
- root.position.set(room.x,room.y+CHIME_LAYOUT.y,CHIME_LAYOUT.z);root.visible=false;parent.add(root);
- const brass=new T.MeshStandardMaterial({color:0xb99151,metalness:.55,roughness:.33});
- const wood=new T.MeshStandardMaterial({color:0x76574f,roughness:.77});
- const silk=new T.MeshStandardMaterial({color:0xffffff,map:texture('fabric',['#e7ceaa','#b99877']),roughness:.9});
+// The carved arch the charms hang from: drawn once and batched.
+function buildArch(root,{wood,brass}){
  const frame=new T.Group();frame.name='chime-carved-arch';root.add(frame);
  const arch=new T.CatmullRomCurve3([new T.Vector3(-1.46,.11,0),new T.Vector3(-1.46,1.88,
    0),new T.Vector3(-1.13,2.34,0),new T.Vector3(0,2.50,0),
@@ -48,35 +44,31 @@ export function createMoonChimes(parent){
  for(const x of [-1.05,-.70,0,.70,1.05]){const y=2.35-Math.abs(x)*.16;
  const jewel=add(frame,new T.SphereGeometry(.032,10,6),brass,[x,y,.02]);jewel.scale.y=1.8}
  batch(frame);
- const colors=[0xe7c989,0x95b7b3,0xeedac5,0xc78e91],charms=[],targets=[];
- for(let id=0;id<4;id++){
-  const x=CHIME_LAYOUT.x[id],rest=1.16+(id%2?.04:0),top=2.30-Math.abs(x)*.15;
-  const material=new T.MeshStandardMaterial({color:colors[id],emissive:colors[id],
-    emissiveIntensity:.05,roughness:.39,metalness:.15});
-  const string=add(root,new T.CylinderGeometry(.012,.012,1,8),silk,[x,0,0],`chime-string-${id}`);
-  const charm=new T.Group();charm.name=`chime-charm-${id}`;charm.position.set(x,rest,0);root.add(charm);
-  if(id===2){
-   const petals=new T.Group();charm.add(petals);
-   for(let k=0;k<5;k++){const a=k*Math.PI*2/5,petal=add(petals,new T.SphereGeometry(.12,14,9),material,
-     [Math.sin(a)*.18,Math.cos(a)*.18,.025]);petal.scale.set(.8,1.24,.34);petal.rotation.z=-a}
-   add(petals,new T.SphereGeometry(.085,12,8),brass,[0,0,.05]);batch(petals);
-  }else add(charm,relief(id===0?moonShape():id===1?starShape():heartShape()),material,[0,0,0],`chime-silhouette-${id}`);
-  const crown=add(charm,new T.TorusGeometry(.036,.010,6,16),brass,[0,.34,.025]);
-  const clapper=add(charm,new T.SphereGeometry(.038,12,8),brass,[0,-.35,.035]);
-  const halo=add(root,new T.RingGeometry(.32,.35,48),new T.MeshBasicMaterial({color:0xffe3aa,
-    transparent:true,opacity:0,depthWrite:false}),[x,rest,-.07],`chime-note-halo-${id}`);
-  const hit=add(charm,new T.SphereGeometry(CHIME_LAYOUT.diameter/2,12,8),
-    new T.MeshBasicMaterial({visible:false}),[0,0,.035],`chime-grab-${id}`);hit.userData.chime=id;targets.push(hit);
-  charms.push({charm,string,material,halo,hit,rest,top,clapper,crown});
- }
- const winder=new T.Group();winder.name='chime-wind-up-moon';winder.position.set(0,2.13,.09);root.add(winder);
- const dial=add(winder,new T.CylinderGeometry(.31,.31,.08,32),brass,[0,0,0]);
- dial.rotation.x=Math.PI/2;dial.userData.chime='moon';targets.push(dial);
- const inset=add(winder,relief(moonShape()),new T.MeshStandardMaterial({color:0xeee0bb,emissive:0xe7c784,
-   emissiveIntensity:.18,roughness:.6}),[0,0,.05]);inset.scale.setScalar(.60);
- const light=new T.PointLight(0xffd7a3,0,3.6,2);light.name='chime-practical-light';
- light.position.set(0,1.68,.40);root.add(light);
- // This earned object stays in the bedroom after leaving the instrument.
+}
+const CHARM_COLORS=[0xe7c989,0x95b7b3,0xeedac5,0xc78e91];
+// One hanging charm: its string, silhouette, crown, clapper, note halo and an invisible grab target.
+function buildCharm(root,id,{silk,brass},targets){
+ const x=CHIME_LAYOUT.x[id],rest=1.16+(id%2?.04:0),top=2.30-Math.abs(x)*.15;
+ const material=new T.MeshStandardMaterial({color:CHARM_COLORS[id],emissive:CHARM_COLORS[id],
+   emissiveIntensity:.05,roughness:.39,metalness:.15});
+ const string=add(root,new T.CylinderGeometry(.012,.012,1,8),silk,[x,0,0],`chime-string-${id}`);
+ const charm=new T.Group();charm.name=`chime-charm-${id}`;charm.position.set(x,rest,0);root.add(charm);
+ if(id===2){
+  const petals=new T.Group();charm.add(petals);
+  for(let k=0;k<5;k++){const a=k*Math.PI*2/5,petal=add(petals,new T.SphereGeometry(.12,14,9),material,
+    [Math.sin(a)*.18,Math.cos(a)*.18,.025]);petal.scale.set(.8,1.24,.34);petal.rotation.z=-a}
+  add(petals,new T.SphereGeometry(.085,12,8),brass,[0,0,.05]);batch(petals);
+ }else add(charm,relief(id===0?moonShape():id===1?starShape():heartShape()),material,[0,0,0],`chime-silhouette-${id}`);
+ const crown=add(charm,new T.TorusGeometry(.036,.010,6,16),brass,[0,.34,.025]);
+ const clapper=add(charm,new T.SphereGeometry(.038,12,8),brass,[0,-.35,.035]);
+ const halo=add(root,new T.RingGeometry(.32,.35,48),new T.MeshBasicMaterial({color:0xffe3aa,
+   transparent:true,opacity:0,depthWrite:false}),[x,rest,-.07],`chime-note-halo-${id}`);
+ const hit=add(charm,new T.SphereGeometry(CHIME_LAYOUT.diameter/2,12,8),
+   new T.MeshBasicMaterial({visible:false}),[0,0,.035],`chime-grab-${id}`);hit.userData.chime=id;targets.push(hit);
+ return {charm,string,material,halo,hit,rest,top,clapper,crown};
+}
+// The stars earned by lullaby mastery stay in the bedroom after leaving the instrument.
+function buildConstellation(parent,room){
  const constellation=new T.Group();constellation.name='earned-moon-constellation';
  constellation.position.set(room.x,room.y+2.30,-.95);parent.add(constellation);
  const stars=[];for(let i=0;i<4;i++){
@@ -84,6 +76,26 @@ export function createMoonChimes(parent){
     new T.MeshStandardMaterial({color:0xe4c28e,emissive:0xc4a168,emissiveIntensity:.2,
     roughness:.6}),[(i-1.5)*.32,Math.sin(i*Math.PI/3)*.07,0],`earned-moon-star-${i}`);stars.push(star);
  }
+ return {constellation,stars};
+}
+
+export function createMoonChimes(parent){
+ const room=ROOMS.find(r=>r.id==='bedroom'),root=new T.Group();root.name='moon-chime-instrument';
+ root.position.set(room.x,room.y+CHIME_LAYOUT.y,CHIME_LAYOUT.z);root.visible=false;parent.add(root);
+ const brass=new T.MeshStandardMaterial({color:0xb99151,metalness:.55,roughness:.33});
+ const wood=new T.MeshStandardMaterial({color:0x76574f,roughness:.77});
+ const silk=new T.MeshStandardMaterial({color:0xffffff,map:texture('fabric',['#e7ceaa','#b99877']),roughness:.9});
+ buildArch(root,{wood,brass});
+ const charms=[],targets=[];
+ for(let id=0;id<4;id++)charms.push(buildCharm(root,id,{silk,brass},targets));
+ const winder=new T.Group();winder.name='chime-wind-up-moon';winder.position.set(0,2.13,.09);root.add(winder);
+ const dial=add(winder,new T.CylinderGeometry(.31,.31,.08,32),brass,[0,0,0]);
+ dial.rotation.x=Math.PI/2;dial.userData.chime='moon';targets.push(dial);
+ const inset=add(winder,relief(moonShape()),new T.MeshStandardMaterial({color:0xeee0bb,emissive:0xe7c784,
+   emissiveIntensity:.18,roughness:.6}),[0,0,.05]);inset.scale.setScalar(.60);
+ const light=new T.PointLight(0xffd7a3,0,3.6,2);light.name='chime-practical-light';
+ light.position.set(0,1.68,.40);root.add(light);
+ const {constellation,stars}=buildConstellation(parent,room);
  let view={active:false};
  return {root,targets,constellation,update(state,selected=-1){
   const a=chimeStatus(state),earned=[1,3,6,9].filter(n=>state.activities.mastery.lullaby>=n).length;

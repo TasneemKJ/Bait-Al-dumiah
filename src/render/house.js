@@ -150,15 +150,10 @@ export function makeFurniture(id){const g=new T.Group();
  g.name=`furniture-${id}`;
  return g;
 }
-export function createHouse(scene){
- const root=new T.Group();root.position.y=.26;scene.add(root);const staticRoot=new T.Group();
- root.add(staticRoot);const lights=[];let originalTeaSet=null,studioChair=null;
- // The ceiling and its front lip cross the raised sewing grip's sightline.
- // Keep their original shapes/finishes in a local batch that can be restored.
- const workCeiling=new T.Group();workCeiling.name='sewing-ceiling-cutaway';root.add(workCeiling);
- for(let j=0;j<2;j++)box(staticRoot,0,j*3.2,0,9.85,.19,3.65,P.wood);
- box(workCeiling,0,6.4,-.02,9.85,.16,3.65,P.cream).name='work-ceiling-slab';
- for(const room of ROOMS){const g=new T.Group();g.position.set(room.x,room.y,0);staticRoot.add(g);
+// One room's shell: back wall, wainscot, floor, rug, authored furniture and its own warm light.
+function buildRoom(root,staticRoot,room,lights){
+ let originalTeaSet=null,studioChair=null;
+ const g=new T.Group();g.position.set(room.x,room.y,0);staticRoot.add(g);
  box(g,0,1.57,-1.75,4.76,3.10,.15,room.tint);
  const color={kitchen:'#dfd5b8',parlor:'#d5b99c',studio:'#d6c9b2',bedroom:'#dfcca9'}[room.id];
  texturedPlane(g,0,1.87,-1.665,4.70,2.45,texture('wall',[color,'#fff0dc']));
@@ -174,15 +169,10 @@ export function createHouse(scene){
  // Warm little pools of light, kept independent of decorative meshes.
  const light=new T.PointLight(0xffd4a0,1.7,5,2);light.position.set(room.x,room.y+2,-.3);
  light.userData.room=room.id;root.add(light);lights.push(light);
- }
- for(const x of [-4.84,0,4.84]){box(staticRoot,x,3.2,-1.70,.19,6.4,.28,P.cream);
- box(staticRoot,x,3.2,1.65,.14,6.4,.20,P.cream);
- for(const y of [.17,3.3,6.35])box(staticRoot,x,y,1.65,.23,.20,.26,P.cream,true)}
- // Side walls are deliberately cut back: the front and near corners stay open for play.
- for(const x of [-4.83,4.83])box(staticRoot,x,3.2,-.99,.14,6.4,1.35,0xd4c2b0);
- for(const y of [0,3.2,6.4]){const assembly=y===6.4?workCeiling:staticRoot;
- const cream=box(assembly,0,y+.03,1.77,9.91,.15,.10,P.cream),gold=box(assembly,0,y-.065,1.80,9.87,.03,.04,P.gold);
- if(y===6.4){cream.name='work-ceiling-cream-fascia';gold.name='work-ceiling-gold-fascia'}}
+ return {originalTeaSet,studioChair};
+}
+// The gabled tile roof with its cream and gold ridge lines.
+function buildRoof(staticRoot){
  const roofShape=new T.Shape();roofShape.moveTo(-4.90,6.4);roofShape.lineTo(0,8.20);
  roofShape.lineTo(4.90,6.4);roofShape.closePath();
  const gable=new T.Mesh(new T.ExtrudeGeometry(roofShape,{depth:.15,bevelEnabled:false}),
@@ -196,6 +186,27 @@ export function createHouse(scene){
  line(staticRoot,[0,8.30,1.99],[sign*5.17,6.37,1.99],.095,P.cream);
  line(staticRoot,[0,8.36,-2.05],[sign*5.17,6.44,-2.05],.07,P.cream)}
  line(staticRoot,[0,8.31,-2.08],[0,8.31,2.0],.07,P.gold);
+}
+
+export function createHouse(scene){
+ const root=new T.Group();root.position.y=.26;scene.add(root);const staticRoot=new T.Group();
+ root.add(staticRoot);const lights=[];let originalTeaSet=null,studioChair=null;
+ // The ceiling and its front lip cross the raised sewing grip's sightline.
+ // Keep their original shapes/finishes in a local batch that can be restored.
+ const workCeiling=new T.Group();workCeiling.name='sewing-ceiling-cutaway';root.add(workCeiling);
+ for(let j=0;j<2;j++)box(staticRoot,0,j*3.2,0,9.85,.19,3.65,P.wood);
+ box(workCeiling,0,6.4,-.02,9.85,.16,3.65,P.cream).name='work-ceiling-slab';
+ for(const room of ROOMS){const built=buildRoom(root,staticRoot,room,lights);
+  originalTeaSet??=built.originalTeaSet;studioChair??=built.studioChair}
+ for(const x of [-4.84,0,4.84]){box(staticRoot,x,3.2,-1.70,.19,6.4,.28,P.cream);
+ box(staticRoot,x,3.2,1.65,.14,6.4,.20,P.cream);
+ for(const y of [.17,3.3,6.35])box(staticRoot,x,y,1.65,.23,.20,.26,P.cream,true)}
+ // Side walls are deliberately cut back: the front and near corners stay open for play.
+ for(const x of [-4.83,4.83])box(staticRoot,x,3.2,-.99,.14,6.4,1.35,0xd4c2b0);
+ for(const y of [0,3.2,6.4]){const assembly=y===6.4?workCeiling:staticRoot;
+ const cream=box(assembly,0,y+.03,1.77,9.91,.15,.10,P.cream),gold=box(assembly,0,y-.065,1.80,9.87,.03,.04,P.gold);
+ if(y===6.4){cream.name='work-ceiling-cream-fascia';gold.name='work-ceiling-gold-fascia'}}
+ buildRoof(staticRoot);
  box(staticRoot,-3.02,7.63,-1.06,.52,.86,.60,0xe1ccb4);box(staticRoot,-3.02,8.08,-1.06,.69,.13,.77,P.cream);
  // Hanging moon over the roof's open triangular recess.
  line(staticRoot,[0,8.10,1.72],[0,7.66,1.72],.008,P.gold);

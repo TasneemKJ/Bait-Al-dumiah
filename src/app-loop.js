@@ -13,7 +13,7 @@ export function installLoop(app){
   if(app.notices.length&&now>=app.noticeAt&&!app.physicalActivity())app.showNotice(now);
   app.world?.render(app.state,dt,app.ui.selected);
   app.residentLabel.update(app.state,app.ui.selected,app.host.dataset.focusRoom||
-    (app.host.dataset.focusDoll?app.state.dolls.find(d=>d.id===app.host.dataset.focusDoll)?.room:''),
+    (sim.dollRoom(app.state,app.host.dataset.focusDoll)??''),
     app.world?.project(app.ui.selected,.05),Boolean(app.ui.panel||app.ui.placement||
       app.state.paused||app.storyUI?.selected||app.physicalActivity()));
   if(app.physicalActivity()!=='lullaby')app.audio.tick(sim.isNight(app.state));

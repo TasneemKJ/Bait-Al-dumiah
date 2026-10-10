@@ -32,22 +32,25 @@ function skirt(parent,color){
  createLaceHem(parent,color);return pivot;
 }
 const ribbon=fabricBow;
+// One articulated leg: sock, knee, ankle band, foot and, for Sami, a tailored trouser leg.
+function createLeg(body,def,sign,skin){
+ const leg=new T.Group();leg.name='articulated-leg';leg.position.set(sign*.12,.40,0);body.add(leg);
+ const hosiery=createSock(leg,skin);leg.sock=hosiery.sock;leg.knee=hosiery.knee;
+ ring(leg,0,-.095,0,.063,.008,def.color,true);
+ leg.foot=createFoot(leg,def,sign);
+ if(def.id==='sami'){const trousers=new T.Mesh(trouserLegGeometry(sign),
+   dollFabric(def.id));trousers.name='tailored-trouser-leg';
+ trousers.castShadow=trousers.receiveShadow=true;leg.add(trousers);leg.trousers=trousers;}
+ const shin=new T.Group();shin.name='articulated-shin';shin.userData.noBatch=true;
+ shin.position.y=-.058;leg.add(shin);leg.shin=shin;
+ for(const child of [leg.sock,leg.foot]){child.position.y+=.058;shin.add(child)}batch(leg);
+ return leg;
+}
+
 function makeDoll(def){
  const root=new T.Group(),body=new T.Group();root.add(body);
  const skin=bisqueMaterial();
- const legs=[];
- for(const sign of [-1,1]){
-  const leg=new T.Group();leg.name='articulated-leg';leg.position.set(sign*.12,.40,0);body.add(leg);legs.push(leg);
-  const hosiery=createSock(leg,skin);leg.sock=hosiery.sock;leg.knee=hosiery.knee;
-  ring(leg,0,-.095,0,.063,.008,def.color,true);
-  leg.foot=createFoot(leg,def,sign);
-  if(def.id==='sami'){const trousers=new T.Mesh(trouserLegGeometry(sign),
-    dollFabric(def.id));trousers.name='tailored-trouser-leg';
-  trousers.castShadow=trousers.receiveShadow=true;leg.add(trousers);leg.trousers=trousers;}
-  const shin=new T.Group();shin.name='articulated-shin';shin.userData.noBatch=true;
-  shin.position.y=-.058;leg.add(shin);leg.shin=shin;
-  for(const child of [leg.sock,leg.foot]){child.position.y+=.058;shin.add(child)}batch(leg);
- }
+ const legs=[-1,1].map(sign=>createLeg(body,def,sign,skin));
  const clothSkirt=def.id!=='sami'?skirt(body,def.id):null;
  const torso=new T.Mesh(bodiceGeometry(),shirtFabric(def.id));
  torso.name='tailored-bodice';torso.castShadow=torso.receiveShadow=true;body.add(torso);
