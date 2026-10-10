@@ -30,6 +30,13 @@ Soft porcelain and cream paper, rose, mint and gold accents, terracotta roof, wa
 - Phone landscape collapses room tabs into an icon grid; verify at 844x390.
 - Check every change at 360x640, 390x844, 412x915, 844x390 in English and Arabic before shipping.
 
+## First-launch intro, 2026-10-10
+A first launch opens with about 8.4 s of the real house, not a video: the camera rises out of a cream paper veil low and far (approach), sweeps up across the rooms (reveal), then settles into the kitchen exactly where play begins. One short line per beat, in English and Arabic (RTL): "A little house, waiting with its lamps lit." / "Three little souls live behind these walls." / "Start in the kitchen. Lina has the kettle on." The HUD waits behind the intro and the simulation holds still; nothing is saved but the claim that the intro was seen.
+
+Motion follows springs, not keyframes: beats one and two are one continuous path that eases out of rest and never stops between beats; the settle beat is the play camera's own critically damped spring, started from the path's live pose and velocity, so play begins inside that glide. One tap, any key or the 44px Skip control in the thumb zone (bottom right, bottom left in Arabic, safe-area aware) skips from the first frame: the camera glides to the kitchen from where it is, carrying its velocity. Dragging the scene instead catches the camera where it is and turns it under the finger. The layer, its vignette and the returning HUD cross-fade over about half a second; a room's lamp eases its focus brightness, so nothing jumps.
+
+Reduced motion shows three still shots, each changed under a soft rise of the paper veil; the fades are driven per frame so they stay fades. Sound, when on, is a quiet synthesized room-tone bed and music box with one or two house sounds per beat and a soft D-major roll into play; Skip fades it over 200 ms. It starts only from the Play or Watch intro tap and plays at or below the lullaby's levels; reduced motion does not mute it. The intro plays once (`introSeen` in the save; older saves never see it) and Settings has Watch intro. Each beat has a slot for an optional narration clip; none ships yet.
+
 ## Material sound, 2026-10-05
 The existing mint-tin touch uses a short, quiet synthesized metal resonance; returning or replaying Noor's earned bear uses a soft filtered cloth rustle. These are successful-object responses, not a new reward or story loop. They remain silent until the player's sound gesture and respect pause, mute and disposal. Enamel/cloth mesh refinements remain deferred until rendered baseline and after-images can be reviewed.
 

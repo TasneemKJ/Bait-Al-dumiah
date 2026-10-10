@@ -8,6 +8,7 @@ Static site, no bundler at runtime: `scripts/build.mjs` copies `index.html`, `sr
 - `src/render/`: Three.js world (`world.js`, `house.js`, dolls, props, cameras, `visual-policy.js` for lighting, detail and framing). Reads state, never mutates it.
 - `src/ui.js`, `*-ui.js`, `object-controls.js`, `room-views.js`, `resident-label.js`: DOM shell, panels, ribbons, ritual overlays. Styles in `src/*.css`.
 - `src/home-session.js`: cold-entry and safe persistence boundary; `src/home-ui.js`/`home.css`: inactive Home and flat preferences.
+- `src/intro-ui.js` (overlay, skip, grab), `src/intro-sound.js` (score player) with `src/intro-score.js` (pure cue table) and `src/render/intro-camera.js` (path, veil, velocity): the first-launch intro. While it plays the loop renders without stepping the simulation; the settle beat and every skip hand off to the play camera spring in `src/render/camera-motion.js`.
 - `src/main.js`: runs the gated loop and wires everything; `?debug=1` exposes `window.dollhouse`.
 
 ## Rules

@@ -1,4 +1,5 @@
 // Commands: Home screen and entering play, sound and settings.
+import * as sim from './simulation.js';
 import {DOLLS} from './content.js';
 import {returnGreeting,waveSchedule,waveRoom} from './return-greeting.js';
 
@@ -15,14 +16,30 @@ function greetReturningPlayer(app){
  if(!app.state.settings.reducedMotion)app.world?.welcomeBack(waveSchedule(DOLLS.length,app.state.elapsed));
  welcomeGlance(app);
 }
+// The intro owns the camera and the screen: the HUD is inert and direct camera input is off until it ends.
+// A renderer that cannot play it ends the intro at once, through the same 'intro-done' landing.
+function startIntro(app){
+ if(!app.world||app.fatal||!app.intro||app.intro.active)return false;
+ app.host.inert=true;app.world.setEnabled(false);return app.intro.start();
+}
+// Play begins inside the intro's last motion: the camera is already gliding into the kitchen on the play spring,
+// so asking for the kitchen keeps that glide. A skip starts the glide from the live pose and velocity; a grab
+// leaves the camera in the player's hands where they caught it.
+function finishIntro(app,{skipped=false,grab=false,seconds=0,still=false}={}){
+ app.host.inert=false;app.world?.setEnabled(!app.panelOpen&&!app.manualPause&&!app.carrying&&!app.fatal);
+ if(grab){app.host.dataset.focusRoom='';app.host.dataset.focusDoll='';app.roomViews?.update()}
+ else{if(skipped)app.world?.introSkip(seconds,still);app.dispatch('focus-room','kitchen')}
+ app.last=performance.now();if(!grab)app.canvas.focus({preventScroll:true});
+}
 function enterPlay(app){
  if(app.fatal||!app.world)return;
  if(!app.session.enter()){if(!app.session.entered&&
    app.session.entryIssue)app.homeUI.requireReload(app.session.entryIssue==='changed'?
      'homeEntryChanged':'homeEntryUnreadable');return}
  showPlayShell(app);
- if(!app.session.canContinue)app.dispatch('focus-room','kitchen');
  app.last=performance.now();app.lastSave=app.last;app.canvas.focus({preventScroll:true});
+ // First launch only: claiming the intro is saved with the entry write below, so a reload never replays it.
+ if(!(sim.claimIntro(app.state)&&startIntro(app))&&!app.session.canContinue)app.dispatch('focus-room','kitchen');
  let entrySaved=false;
  if(!app.state.settings.muted&&!app.audio.enabled)void app.audio.enable().then(ok=>{if(!ok)app.ui.toast((entrySaved?
    '':app.ui.t('savingFailed')+' ')+app.ui.t('audioUnavailable'));app.audio.setPaused(app.state.paused)});
@@ -44,6 +61,13 @@ function welcomeGlance(app){
 }
 export const homeCommands={
 'home-play':app=>enterPlay(app),
+'intro-done':(app,value)=>finishIntro(app,value),
+// Settings: Watch intro. Rituals keep their scene; anything held or being placed is put down first.
+'watch-intro':app=>{if(app.intro?.active||app.physicalActivity())return;app.ui.close();
+  if(app.ui.placement){app.ui.clearPlacement();app.world?.setPlacement(null)}
+  app.storyUI?.clear();app.world?.clearObjectSelection();
+  // This tap is the gesture that may unlock sound, so the score can play when sound is on.
+  if(!app.state.settings.muted&&!app.audio.enabled)void app.audio.enable();startIntro(app);return;},
 'home-reload':(app,value,origin)=>{if(!app.session.entered&&app.session.entryIssue)location.reload();return;},
 'home-language':(app,value,origin)=>{if(!app.session.entered&&['en',
   'ar'].includes(value)){app.state.settings.locale=value;app.refreshUI();app.saveSettings()}return;},

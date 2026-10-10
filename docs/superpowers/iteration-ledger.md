@@ -1,5 +1,17 @@
 # Improvement ledger
 
+## 2026-10-10 — Cycle 41: a first-launch intro
+
+**Identify / define, 5Ws:** who: a new phone player who just tapped Play; what: they should feel they are arriving at a small, slightly uncanny house and know where to start; when: once, at the very first entry; where: over the real 3D house, before the HUD; why: the first seconds decide whether the house reads as a place, and the kitchen start must be legible. The owner asked for an intro; it must be in-engine, skippable from frame 1 and short.
+
+**Research (sources):** skippable intros and short openings (Sakurai via Automaton; Game Developer, "How to create immersive game intros"; Feed Me Design, "The problem with mandatory cutscenes"); make it worth watching rather than only skippable (Warhorse via Gamereactor); onboarding time budgets of roughly 60 to 90 s, so an 8 s intro spends little of it (Clutch; Affective); establishing shots hold two to five seconds (SpotlightFX, Morphic); calm comes through every system, not art alone (urgametips); bypassable non-core content and no sudden movement (Game Accessibility Guidelines); reduced motion via `prefers-reduced-motion` (W3C, Understanding SC 2.3.3; Deque). Motion audit: Apple, Designing Fluid Interfaces (springs, velocity handoff, interruptibility, reduced motion as cross-fades).
+
+**Explore — 20 ideas:** 1. camera approach, reveal, settle over the real house (**chosen**); 2. pre-rendered video (rejected: owner and size); 3. title card before Home (rejected: Home already titles); 4. one line per beat in EN/AR (**chosen**); 5. narrator voice (deferred: owner deciding; slot added); 6. doll close-ups (rejected: longer, portrait framing cost); 7. lamps switching on in sequence (deferred: lighting state belongs to the clock); 8. ghost glimpse in a window (rejected: a jump-scare risk on first launch); 9. paper veil lift from Home (**chosen**); 10. letterbox bars (rejected: black bars fight the cream palette; a paper vignette instead); 11. Skip button plus tap and key (**chosen**); 12. drag to grab the camera (**chosen**); 13. spring handoff into play (**chosen**); 14. replay from Settings (**chosen**); 15. replay every launch (rejected: retention cost); 16. progress dots (rejected: chrome); 17. synthesized music box and room tone (**chosen**); 18. haptics on beats (rejected: no Vibration API on iOS Safari, little value); 19. still-shot reduced-motion version (**chosen**); 20. intro analytics (rejected: no analytics).
+
+**Act:** `src/render/intro-camera.js` (path, veil, velocity), `src/render/camera-motion.js` (critically damped spring with carried velocity), `src/intro-ui.js`, `src/intro-sound.js`, `src/intro-score.js`, `introSeen` in the save, Watch intro in Settings. Tests: `tests/intro.test.mjs`, `tests/intro-ui.test.mjs`.
+
+**Look back:** browser evidence and screenshots are recorded in the batch report; phone-hardware timing remains unmeasured.
+
 ## 2026-10-08 — Reliability and direct interaction, cycles 35–40
 
 These are new review cycles, not historical ledger entries. Baseline: `912737900ba232c2ed1041c8374c9095e3a90dd2`. No new dependencies, save key/version changes, art, remote services, or additional menu surfaces. Every cycle uses a production behavior regression before its fix. Runtime browser/visual acceptance is still pending until evidence is recorded below.

@@ -1,5 +1,6 @@
 import * as T from 'three';
 import {isNight,stitchStatus} from '../simulation.js';
+import {ROOMS} from '../content.js';
 import {detail} from './visual-policy.js';
 import {applyLighting} from './world-lighting.js';
 
@@ -24,8 +25,13 @@ export function renderFrame(w,state,dt,selected){
  // Exponential interpolation is frame-rate independent; reduced motion switches instantly.
  const night=isNight(state);
  st.nightMix=state.settings.reducedMotion?Number(night):T.MathUtils.damp(st.nightMix,Number(night),2.2,dt);
+ // A room's focus lamp eases like the night does, so landing in a room (or the intro clearing focus) never
+ // switches its brightness in one frame.
+ const focusRoom=working()?null:st.focusedRoom;st.lampFocus??={};
+ for(const {id:room} of ROOMS)st.lampFocus[room]=state.settings.reducedMotion?
+   Number(room===focusRoom):T.MathUtils.damp(st.lampFocus[room]??0,Number(room===focusRoom),3,dt);
  applyLighting({renderer,depthFog,hemi,key,fill,house,courtyard},{state,
-   nightMix:st.nightMix,focusedRoom:st.focusedRoom});
+   nightMix:st.nightMix,focusedRoom:st.focusedRoom,lampFocus:st.lampFocus});
  details.update(st.nightMix);atmosphere.update(state,st.nightMix,st.quality);
  roomEffects.update(state,st.nightMix);restoration.update(state,st.nightMix);
  storyProps.update(state,st.nightMix);teaTable.update(state);sewingPlay.update(state);

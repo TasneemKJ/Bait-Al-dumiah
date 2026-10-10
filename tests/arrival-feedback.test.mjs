@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import * as sim from '../src/simulation.js';
 import {createState,step} from '../src/simulation.js';
 import {DOLLS} from '../src/content.js';
 import {installFeedback} from '../src/app-feedback.js';
@@ -24,7 +25,7 @@ test('the first calm moment and first night reach the player in both languages',
 
 // Execute the real entry commands with a deterministic browser timer boundary.
 function returningHome(){
- const state=createState();state.cares=1;state.settings.muted=true;
+ const state=createState();state.cares=1;state.settings.muted=true;state.introSeen=true;
  const timers=new Map(),actions=[];let nextTimer=1;
  const canvas=new EventTarget(),host=new EventTarget();host.dataset={};
  Object.assign(canvas,{removeAttribute(){},setAttribute(){},focus(){}});
@@ -33,8 +34,8 @@ function returningHome(){
   audio:{},playfieldLayout:{measure:noop},syncPause:noop,refreshUI:noop,save:()=>true,say:noop,
   dispatch(action,room){actions.push([action,room]);if(action==='focus-room')host.dataset.focusRoom=room;else delete host.dataset.focusRoom}};
  const source=readFileSync(new URL('../src/cmd-home.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'').replace(/^export /gm,'');
- const commands=new Function('DOLLS','returnGreeting','waveSchedule','waveRoom','document','performance','setTimeout','clearTimeout',
-  source+'\nreturn homeCommands;')(DOLLS,returnGreeting,waveSchedule,waveRoom,{querySelector:()=>({dataset:{}})},
+ const commands=new Function('sim','DOLLS','returnGreeting','waveSchedule','waveRoom','document','performance','setTimeout','clearTimeout',
+  source+'\nreturn homeCommands;')(sim,DOLLS,returnGreeting,waveSchedule,waveRoom,{querySelector:()=>({dataset:{}})},
   {now:()=>0},callback=>{const id=nextTimer++;timers.set(id,callback);return id},id=>timers.delete(id));
  commands['home-play'](app);
  return {app,actions,pending:()=>timers.size,runNext(){const first=timers.entries().next().value;if(first){timers.delete(first[0]);first[1]()}}};
