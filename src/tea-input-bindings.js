@@ -74,14 +74,14 @@ function teaKeys(ctx){
 }
 
 export function bindTeaInput(ctx){
- const {active,stop,invoke,cancel,update,keyboard,canvas,setLost,parts}=ctx;
+ const {active,stop,invoke,cancel,update,keyboard,gesture,canvas,setLost,parts}=ctx;
  const {pointerdown,pointermove,pointerup,pointercancel}=teaPointer(ctx),{keydown,keyup}=teaKeys(ctx);
  function consumeClick(e){if(active()&&!ctx.blocked())stop(e)}
  function contextmenu(e){if(active()){stop(e);cancel()}}
  function exit(){cancel();invoke('tea-exit');update(0)}
  function visibility(){if(document.hidden)cancel()}
  function contextLost(){setLost();cancel()}
- function focusout(){if(keyboard.active)cancel()}
+ function focusout(){if(keyboard.active||gesture.pointerId!==null)cancel()}
  return bindAll([
   [canvas,'pointerdown',pointerdown,true],[canvas,'pointermove',pointermove,true],
   [canvas,'pointerup',pointerup,true],[canvas,'pointercancel',pointercancel,true],[canvas,

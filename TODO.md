@@ -1,5 +1,37 @@
 # TODO
 
+## Reliability review — 2026-10-08, cycles 35–40
+
+Twenty alternatives, IDEAL and the 5Ws for each bounded cycle are recorded in `docs/superpowers/iteration-ledger.md`.
+- [x] 35: Deliver existing first-calm and first-night announcements through the notice queue.
+- [x] 36: Cancel the returning camera on canvas/HUD interaction, including its delayed reset.
+- [x] 37: Keep save failure observable after rituals and through UI/language changes, preserve ordinary notice timing, and clear it after a successful retry.
+- [x] 38: Preserve the current house and work when importing cannot be saved.
+- [x] 39: Make placement/refund leave care-earned comfort intact across relocation and clamping.
+- [x] 40: Ignore older file-read results after a newer import or reset.
+- [x] Reconcile PR #46 with main `72535fd6d4c27877666d520986e4027f907b3a3f`, preserving both newer-main batches and all audit histories; complete the cycle 37 warning-visibility correction after review. The warning/cycle group passes 42 checks, incoming input/save cases pass 33 checks, and the final lint/472-test/build gate passes. This is integration of cycles 35–40, not additional cycles.
+- [ ] Inspect exact-source mobile EN/AR originals and record measured performance before merge; source checks do not establish rendered acceptance.
+## Six bounded corrections — 2026-10-08
+
+Twenty candidates, IDEAL/5Ws, RED/GREEN outcomes and evidence limits for each pass are recorded under B1–B6 in `docs/superpowers/iteration-ledger.md`.
+- [x] B1: Release held tea on focus transfer; 13/13 tea-input behavior tests pass. Native acceptance remains below.
+- [x] B2: One physical Space press toggles pause once; preserve modified browser shortcuts; 10/10 focused/main behavior tests pass.
+- [x] B3: Returning-player welcome camera yields to canvas input; 18/18 focused/greeting/Home integration tests pass.
+- [x] B4: Latest save import/reset intent owns asynchronous completion; 20/20 focused/save-safety/Home identity tests pass.
+- [x] B5: Failed replacement persistence preserves the current run and reports failure; 34/34 focused/save-safety/Home checks pass, including later retry.
+- [x] B6: Secondary fingers cannot initiate a held-story item drag; 25/25 carry, pointer and story behavior tests pass.
+- [x] Fresh `npm run verify`: lint, all 430 behavior tests and static build pass; JavaScript is 392.0 KiB gzip against the 500 KiB budget.
+- [ ] Exact-source browser journey and inspected EN/AR phone/landscape screenshots with 4× CPU measurements; source tests alone do not close native acceptance.
+
+## Audit 2026-10-08 — B1: first-session event delivery
+IDEAL: identify missing notices, define the event-to-player contract, explore failure paths, restore only proven missing handlers, look back through behavioral regression. 5Ws: a new EN/AR phone player; the first calm interval and first night; in the existing house notice; guidance is needed to make the intended quiet and visitor legible.
+Twenty audit candidates: 1 first-night event delivery; 2 calm-line delivery; 3 repeated-frame suppression; 4 returning-save hint suppression; 5 paused clock; 6 manual night switch; 7 Arabic notice text; 8 unchanged English text; 9 queue ordering; 10 reward notice coexistence; 11 muted guidance; 12 reduced-motion guidance; 13 day-one prerequisite care; 14 later-day exclusion; 15 saved one-time flags; 16 empty-queue behavior; 17 hint timing boundaries; 18 no automatic new panel; 19 notice visibility over the house; 20 short-phone target reachability.
+Selected: 1–3 and 7–10 as a focused bug regression; existing suites cover timing/persistence. The other candidates are audit questions, not new features or completed iterations.
+- [x] Reproduce four missing EN/AR notices through real simulation events and the production notice adapter.
+- [x] Restore the two existing handlers and verify affected/full source gates (29 focused; 416 full-suite checks plus lint/build).
+- [x] Correct B1 after independent review: cover candidates 9, 10, 16, 17 and 19 during tea/sewing/chimes. Seven new cases reproduced hidden-toast consumption; a central dequeue guard now defers delivery until ritual exit. All 11 notice cases pass in EN/AR with reward ordering, the eight-notice cap, immediate house delivery and the existing 2.4-second interval preserved. Final full verify passes 423 tests plus lint/build. This is a B1 correction, not an additional counted audit round.
+- [ ] Inspect exact-source mobile notice screenshots; native rendering availability remains a separate gate.
+
 ## Done this iteration
 - [x] play_check honours `PORT`; CI fast gate, failure-only trimmed artifacts, weekly full suite.
 - [x] Objective step counter no longer wraps on narrow landscape cards (test: `tests/mobile-hud.test.mjs`).
@@ -96,3 +128,13 @@ Chosen: **golden hour at dusk** (shipped). Shortlist, not built: (a) soft lamp l
 - Brainstorm 3 follow-up: lamp pools and kettle steam shipped. Sunbeam motes NOT built: the frame-cost check is too noisy under SwiftShader to prove it free (see the PR); revisit with a real-device measurement.
 
 - Cloud shadows skipped: the backdrop is a procedural shader, not a texture on a mesh, so a scrolling cloud term would add per-pixel shader work over the whole screen; not a cheap texture offset. Sunbeam motes still wait for a real-device frame-cost check.
+
+## Audit 2026-10-08 — B2 through B6
+Twenty candidates, IDEAL/5Ws and selected boundaries for each source/behavior round are recorded in `docs/audits/2026-10-08-review.md`: persistence/cold entry; tea; sewing; moon chimes; story/economy/mobile contracts. No speculative features are selected.
+- [x] Execute B2–B6 focused source/behavior groups (55/42/49/29/76 checks); latest full verify after the B1 review correction passes 423 tests plus lint/build.
+- [ ] Complete required native screenshots and performance; source checks do not close these gates.
+
+## Browser readiness correction — 2026-10-08
+- [x] Diagnose the story smoke's stale sewing coordinates under software WebGL: its fixed delay sampled an unfinished room-camera flight.
+- [x] Reuse read-only scene readiness before aiming; require the same destination to remain fixed and exposed during the real drag. No gameplay or design changes.
+- [x] Re-run the core browser journey: 56 checks and story smoke pass; inspect desktop night and phone portrait/landscape originals. Results retained in the workspace readiness evidence; extended ritual/performance suites remain separate.

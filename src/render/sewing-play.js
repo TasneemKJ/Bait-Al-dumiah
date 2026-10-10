@@ -89,6 +89,26 @@ function buildNeedle(root,table,{cream,brass}){
  return {needle,grip,tipAnchor};
 }
 
+// Feedback remembers renderer events only; contours and repairs remain simulation-owned.
+function updateSewingFeedback(stitch,state,guideBead,spoolBody,feedback){
+ if(!stitch){feedback.section=null;feedback.at=-Infinity;guideBead.scale.setScalar(1);
+   spoolBody.material.emissiveIntensity=0;return;}
+  if(feedback.section!==null&&stitch.completedSections<feedback.section)feedback.at=-Infinity;
+  if(feedback.section!==null&&stitch.completedSections>feedback.section)feedback.at=state.elapsed;
+  feedback.section=stitch.completedSections;
+  const arrived=state.settings.reducedMotion?0:
+    Math.max(0,1-(state.elapsed-feedback.at)/.6);
+  guideBead.scale.setScalar(1+arrived*.6);guideBead.material.emissive.set(0xe0bc7c);
+  guideBead.material.emissiveIntensity=.08+arrived*.35;
+  spoolBody.material.emissive.set(0xf0c28a);spoolBody.material.emissiveIntensity=stitch.loose?.18:0;
+}
+
+// The bead marks the next point the needle should reach, until the pattern is complete.
+function placeGuideBead(bead,point,complete,scale){
+ bead.visible=Boolean(point)&&!complete;
+ if(point)bead.position.set(point.x*scale,.021,point.y*scale);
+}
+
 // The fixed board, front supports, hoop and clamp: drawn once and batched.
 function buildWorkboard(root,table,{cream,wood,brass}){
  const staticArt=group(root,'stitch-static-workboard');
@@ -130,7 +150,8 @@ export function createSewingPlay(parent){
    'stitch-bear-mending-patch');mendPatch.rotation.x=-Math.PI/2;mendPatch.scale.set(1.45,.70,1);
  const guide=mesh(root,emptyGeometry(),guideMaterial,[0,0,0],'stitch-contour-guide');
  const trail=mesh(root,emptyGeometry(),threadMaterial,[0,0,0],'stitch-accepted-thread');
- const guideBead=mesh(root,new T.SphereGeometry(.014,10,6),brass,[0,.021,0],'stitch-next-guide-point');
+ const guideBead=mesh(root,new T.SphereGeometry(.014,10,6),brass.clone(),[0,.021,0],'stitch-next-guide-point');
+ const feedback={section:null,at:-Infinity};
  const {needle,grip,tipAnchor}=buildNeedle(root,table,{cream,brass});
  const spoolBody=buildSpool(root,table);
  const looseLoop=mesh(root,new T.TorusGeometry(.047,.006,4,24),threadMaterial,[0,.022,0],
@@ -143,6 +164,7 @@ export function createSewingPlay(parent){
  return root.worldToLocal(o.getWorldPosition(new T.Vector3())).toArray()}
  return {root,targets,update(state){
   const stitch=stitchStatus(state);root.visible=Boolean(stitch);
+  updateSewingFeedback(stitch,state,guideBead,spoolBody,feedback);
   if(!stitch){actual={...actual,active:false,phase:null,patternId:null,needle:null,loose:false,trail:[],
     nextGuidePoint:null,finishedClothVisible:false};return}
   const key=JSON.stringify([stitch.patternId,stitch.sections]);
@@ -160,9 +182,7 @@ export function createSewingPlay(parent){
   const complete=stitch.completedSections>=stitch.sections.length;
   finish.visible=complete||stitch.phase==='finished';looseLoop.visible=stitch.loose;
   looseLoop.position.set(needle.position.x+.030,.022,needle.position.z+.020);
-  guideBead.visible=Boolean(stitch.nextGuidePoint)&&!complete;
-  if(stitch.nextGuidePoint)guideBead.position.set(stitch.nextGuidePoint.x*table.clothScale,
-    .021,stitch.nextGuidePoint.y*table.clothScale);
+  placeGuideBead(guideBead,stitch.nextGuidePoint,complete,table.clothScale);
   actual=sewingSnapshot({stitch,table,finish,tip:localPoint(tipAnchor),grip:localPoint(grip),
    spool:localPoint(spoolBody),finishCenter:localPoint(finishCloth)});
  },points(){if(!root.visible)return [];root.updateWorldMatrix(true,true);

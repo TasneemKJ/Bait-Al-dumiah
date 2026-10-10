@@ -74,10 +74,37 @@ function buildCup(presentation,i,{brass,cream}){
  const handle=torus(cup,.058,.010,brass,[i===0?-.16:.16,.13,0]);handle.scale.y=1.18;
  torus(cup,r-.004,.006,brass,[0,h-.006,0],true);
  // A second interior engraving remains legible where the surface meets it.
- const band=torus(cup,inner-.005,.0028,brass.clone(),[0,fillY(.7),0],true);band.name='tea-target-band';
+ const band=torus(cup,inner-.005,.0028,brass.clone(),[0,fillY(.7),0],true);
+ band.name='tea-target-band';band.material.emissiveIntensity=0;
  const liquid=cylinder(cup,inner-.009,.008,amber,[0,fillY(0)-.004,0]);liquid.name='tea-liquid-surface';
  return {root:cup,vessel,band,liquid,handle};
 }
+// Presentation-only cup response; the simulation supplies readiness and landing.
+function updateTeaCupFeedback(v,c,tea,state,served){
+  if(c.ready&&!v.wasReady)v.readyAt=state.elapsed;v.wasReady=c.ready;
+  const pulse=state.settings.reducedMotion?0:Math.max(0,1-(state.elapsed-v.readyAt)/.65);
+  v.band.material.emissive.set(0xe0bc7c);v.band.material.emissiveIntensity=c.ready?.12+pulse*.35:0;
+  const contact=!served&&tea.aimedCup===c.id&&tea.flow>0&&c.fill>0;
+  const ripple=contact&&!state.settings.reducedMotion?Math.sin(state.elapsed*18)*.014*Math.min(1,tea.flow/.55):0;
+  v.liquid.scale.set(1+ripple,1,1+ripple);
+}
+
+// Both endpoints are table-local; flow changes visible weight without changing simulation.
+function updateTeaStream(stream,start,end,flow,served){
+ stream.visible=!served&&flow>0;
+ stream.position.copy(start).add(end).multiplyScalar(.5);
+ stream.scale.y=start.distanceTo(end);
+ const weight=.45+.55*Math.min(1,Math.max(0,flow/.55));
+ stream.scale.x=stream.scale.z=weight;
+}
+
+function retireTeaTable(stream,cupViews,actual){
+ stream.visible=false;
+ cupViews.forEach(v=>{v.wasReady=false;v.readyAt=-Infinity;v.band.material.emissiveIntensity=0;});
+ return {...actual,active:false,served:false,cups:[],spillVisible:false,
+   stream:{...actual.stream,visible:false}};
+}
+
 // What the table actually shows, for visual checks: never read back into the game.
 function tableSnapshot({tea,served,presentation,pot,stream,start,end,cupViews,spill}){
  const offset=presentation.position;
@@ -119,21 +146,21 @@ export function createTeaTable(parent){
    end:[0,0,0]},cups:[],spillVisible:false};
  function localPoint(o){root.updateWorldMatrix(true,true);return root.worldToLocal(o.getWorldPosition(new T.Vector3()))}
  return {root,targets,update(state){
-  const tea=teaStatus(state);root.visible=Boolean(tea);if(!tea){stream.visible=false;
-  actual={...actual,active:false,served:false,cups:[],spillVisible:false,
-    stream:{...actual.stream,visible:false}};return}
+  const tea=teaStatus(state);root.visible=Boolean(tea);if(!tea){actual=retireTeaTable(stream,cupViews,actual);return;}
   const served=tea.phase==='served',tilt=served?0:tea.tilt*.75;pot.rotation.z=-tilt;
   presentation.position.set(served?.12:0,served?.024:0,served?.05:0);
   const aimPoint=new T.Vector3(tea.aim*TEA_TABLE.aimSpan,.48,TEA_TABLE.cupZ),
     rotated=tipOffset.clone().applyQuaternion(pot.quaternion);pot.position.copy(aimPoint).sub(rotated);
   cupViews.forEach((v,i)=>{const c=tea.cups[i];v.root.visible=Boolean(c);cupHits[i].visible=Boolean(c);if(!c)return;
   v.root.position.set(c.x,0,TEA_TABLE.cupZ);v.band.position.y=fillY(c.target);
-  v.liquid.position.y=fillY(c.fill)-.004;v.liquid.visible=c.fill>0;v.band.material.color.set(c.ready?0xc9b57a:P.gold)});
+  v.liquid.position.y=fillY(c.fill)-.004;v.liquid.visible=c.fill>0;
+  v.band.material.color.set(c.ready?0xc9b57a:P.gold);
+  updateTeaCupFeedback(v,c,tea,state,served);});
   const start=localPoint(spout),cup=tea.cups.find(c=>c.id===tea.aimedCup),surface=cup?
     fillY(cup.fill):.035,end=new T.Vector3(start.x,surface,start.z);
-  stream.visible=!served&&tea.flow>0;const length=start.distanceTo(end);
-  stream.position.copy(start).add(end).multiplyScalar(.5);stream.scale.y=length;
-  spill.visible=tea.spills>0;spill.scale.setScalar(Math.min(1.2,.35+tea.spills*.7));servedGlow.visible=served;
+  updateTeaStream(stream,start,end,tea.flow,served);
+  spill.visible=tea.spills>0;spill.scale.setScalar(Math.min(1.2,.35+tea.spills*.7));
+  servedGlow.visible=served;
   potHit.visible=true;trayHit.visible=true;
   actual=tableSnapshot({tea,served,presentation,pot,stream,start,end,cupViews,spill});
  },status(){return structuredClone(actual)},points(){if(!root.visible)return [];root.updateWorldMatrix(true,true);

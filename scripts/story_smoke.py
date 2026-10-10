@@ -5,6 +5,7 @@ Serves dist/ (run `npm run build` first). Honours PORT (default 4413) and CHROMI
 import os,subprocess,sys,time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from scene_gestures import scene_ready
 
 ROOT=Path(__file__).resolve().parent.parent
 PORT=os.environ.get('PORT','4413')
@@ -35,15 +36,19 @@ def main():
    assert state(page)['story']['lastAction']=='prop:mint-tin','activating the tin advances the story'
    assert page.locator('.held-item').count()==1,'the red thread is carried'
    page.locator('[data-room=studio]').click()
-   # Software WebGL can run at about one frame a second, so the room glide may outlast any fixed wait:
-   # aim only once the camera has settled.
-   page.wait_for_function('window.dollhouse.visual()?.cameraMoving===false',timeout=60000)
+   # Software WebGL advances the flight by rendered frames, not wall time.
+   # Wait for measured HUD/camera stability before choosing the one drop point.
+   scene_ready(page)
    target=[o for o in page.evaluate('window.dollhouse.objects()') if o['key']=='prop:sewing-machine'][0]
+   assert page.evaluate('p=>document.elementFromPoint(p.x,p.y)?.id === "world"',target),'the sewing destination is exposed'
    token=page.locator('.held-item').bounding_box()
    page.mouse.move(token['x']+token['width']/2,token['y']+token['height']/2);page.mouse.down()
    page.mouse.move(token['x']+token['width']/2+10,token['y']+token['height']/2-10,steps=3)
    page.mouse.move(target['x'],target['y'],steps=8)
    assert page.evaluate("!document.querySelector('.carry-ghost').hidden"),'the carried item follows the pointer'
+   current=page.evaluate('window.dollhouse.objects().find(o=>o.key==="prop:sewing-machine")')
+   assert abs(current['x']-target['x'])<.25 and abs(current['y']-target['y'])<.25,'the sewing destination stays fixed throughout the drag'
+   assert page.evaluate('p=>document.elementFromPoint(p.x,p.y)?.id === "world"',target),'the sewing destination stays exposed throughout the drag'
    page.mouse.up();page.wait_for_timeout(800)
    assert page.evaluate('Boolean(window.dollhouse.stitch())'),'dropping the thread on the sewing machine starts mending'
    browser.close()

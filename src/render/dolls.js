@@ -127,7 +127,7 @@ export function createDolls(parent){
    {const k=wishGlowStrength(state,d.id),o=wishGlowOpacity(k,t,!motion);
    v.wishGlow.visible=k>0;v.wishGlow.material.opacity=o}
    v.halo.visible=selected===d.id;v.tea.visible=d.action==='tea';v.steam.update(t,d.action==='tea',!motion);
-   v.comfortHearts.update(t,d.action==='soothe',!motion);
+   v.comfortHearts.update(t,d.action==='soothe',!motion,d.lastCare);
    v.sleepCrescent.update(t,d.action==='rest',!motion);v.sparkles.visible=d.action==='play';
    v.sparkles.rotation.y=motion?t*.7:0;
    v.body.position.y=motion?(d.action==='play'?Math.abs(Math.sin(t*4.6))*.065:0):0;

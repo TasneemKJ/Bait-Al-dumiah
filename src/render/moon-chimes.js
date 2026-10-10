@@ -18,6 +18,20 @@ s.absarc(.13,0,.245,Math.PI*2-.67,.67,true);s.closePath();return s}
 const relief=shape=>new T.ExtrudeGeometry(shape,{depth:.065,bevelEnabled:true,bevelSize:.018,
   bevelThickness:.012,bevelSegments:2,steps:1,curveSegments:20});
 
+// Echo acknowledgement is a view of the real phrase state, never a judge.
+function updateChimeHalo(c,a,state,i,selected,y){
+ const finished=a.phase==='finished',held=a.held===i,lit=a.sounding===i||finished,
+   still=state.settings.reducedMotion;
+   const feedbackAge=state.elapsed-a.lastPluck;
+   const recent=a.lastTone===i&&a.toneSerial>0&&feedbackAge>=0&&feedbackAge<.7;
+   const accepted=recent&&(a.phase==='echo'||finished),recovery=recent&&a.phase==='listen';
+   const response=still?1:Math.max(0,1-feedbackAge/.7);
+   c.halo.scale.setScalar(accepted?1+.18*response:recovery?1-.14*response:1);
+   c.halo.material.color.set(recovery?0xb5c6cc:0xffe3aa);
+   c.halo.material.opacity=recovery?.30:lit?.70:accepted?.5*response:held?.32:a.phase==='echo'&&selected===i?.38:0;
+   c.halo.position.y=y;
+}
+
 // The carved arch the charms hang from: drawn once and batched.
 function buildArch(root,{wood,brass}){
  const frame=new T.Group();frame.name='chime-carved-arch';root.add(frame);
@@ -95,7 +109,7 @@ export function createMoonChimes(parent){
    const age=Math.max(0,state.elapsed-a.lastPluck),ring=a.lastTone===i&&age<1;
    c.charm.rotation.z=still?0:ring?Math.sin(age*17)*Math.exp(-age*4)*.12:0;
    c.material.emissiveIntensity=lit?.55:held?.20:.05;
-   c.halo.material.opacity=lit?.70:held?.32:a.phase==='echo'&&selected===i?.38:0;c.halo.position.y=y;
+   updateChimeHalo(c,a,state,i,selected,y);
   }
   winder.rotation.z=still?0:a.phase==='listen'?Math.sin(a.listenTime*2)*.055:0;
   light.intensity=finished?.9:.36;

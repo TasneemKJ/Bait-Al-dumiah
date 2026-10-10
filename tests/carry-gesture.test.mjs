@@ -30,3 +30,14 @@ test('cancel, invalid input, and secondary buttons cannot drop or preserve a sta
  assert.equal(g.up(point(Infinity,20)),null);
  assert.equal(g.down(point(3,4)),true);
 });
+
+test('a secondary finger cannot start a carry while the primary finger is elsewhere',()=>{
+ const g=createCarryGesture(),secondary={...point(30,40,2),isPrimary:false};
+ assert.equal(g.down(secondary),false,'a second finger must not pick up the held story item');
+ assert.equal(g.move({...secondary,clientX:200,clientY:240}),false);
+ assert.equal(g.up({...secondary,clientX:200,clientY:240}),null);
+ assert.equal(g.down({...point(30,40),isPrimary:true}),true);
+ g.move({...point(100,120),isPrimary:true});
+ assert.deepEqual(g.up({...point(200,240),isPrimary:true}),{x:200,y:240},
+  'rejecting the secondary finger must leave the next deliberate drag available');
+});

@@ -3,14 +3,6 @@
 Living summary; details in `README.md` and `docs/superpowers/specs/`.
 
 ## Loop
-
-### Reliable visits and reversible decoration
-
-The first calm stretch and first night deliver their existing one-time lines through the same queue as other house notices. A welcome camera gesture yields immediately to touch, keyboard or zoom on the miniature or its controls; it never resets the view after the player takes over.
-
-Save warnings persist on the existing notice surface until a successful save, including after leaving a ritual or changing language. Ordinary notices keep their usual timing, then return to the unresolved warning; recovery preserves any unrelated message already showing. Open sheets mirror the warning. Successful visits keep their quiet interface. Import and reset replace the visible house only after the replacement saves successfully. When overlapping file reads finish out of order, the latest import or reset remains authoritative.
-
-Decoration benefits are ongoing: placed keepsakes raise house coziness, ease comfort decay and help a resident feel content near a favorite item. Placing or packing an object does not directly change care-earned comfort. Packing still returns its full price, including for older saves; moving residents or furniture cannot turn a reversible purchase into free comfort or a comfort penalty.
 Look into the four-room house, care for three dolls (tea, play, rest, reassure), fulfil daily wishes for buttons, decorate with six keepsakes, deepen closeness, perform three physical rituals (tea, sewing, moon chimes), follow three object stories, restore rooms, and greet the visitor after dark to collect six whispers and open the closed door. A four-minute day/night cycle drives atmosphere.
 
 ## Visual language
@@ -52,19 +44,32 @@ Later days (4+): the wish ring is half as strong, daylight only, and appears onl
 ## Golden hour
 Clock 96-126 (the last half minute before night): a warm peach band at the sky's horizon, an amber key light and warm window glow, peaking near clock 112 and handing over to the night look at 120. Zero for the rest of the day, so noon and night are unchanged.
 
-## Bounded play and recovery corrections, 2026-10-08
 
-Moving focus from the tea canvas to another control puts the pot down. Returning focus does not resume the interrupted pour; a fresh deliberate grab does. The physical pot, cup tolerance, rewards, art and existing bilingual work instructions remain the same.
+### Juice B1: Care sounds belong to little household objects (2026-10-08)
+Successful tea answers with a quiet ceramic and tin touch, play with two wooden taps, rest with cloth friction and reassurance with cloth then a soft toy tap. Reward melodies remain reserved for progression. Gesture, mute, pause and cleanup stay authoritative.
+Checked against DESIGN_RULES.md; no design-rule violation found. Native phone visual and listening acceptance pending.
 
-In house play, one deliberate Space press toggles pause once; holding the key keeps that pause state. Browser/system shortcuts using Alt, Control or Command stay with the browser. Physical rituals retain their existing held-Space controls.
 
-The brief returning-player camera glance yields to input on the house itself as well as the HUD. A touch or key action before the glance suppresses it; an action during the glance suppresses its automatic return. An untouched house retains the existing welcome.
+### Juice B2: Comfort rises once from a real reassurance (2026-10-08)
+The three existing porcelain-heart accents start with the actual reassurance event and rise in one bounded cascade, then retire. Reduced motion shows one still emblem for the same finite period. Reassurance pose and care rewards are unchanged.
+Checked against DESIGN_RULES.md; no design-rule violation found. Native phone visual and listening acceptance pending.
 
-During save recovery, the latest chosen file or confirmed reset owns the outcome. A slower earlier file cannot replace that choice or display a stale failure afterward. This request identity is transient and changes no save fields.
 
-Import and reset commit their candidate through the existing protected save boundary before replacing the visible house. If storage refuses the write or another tab has changed the save, the current house, pause state and recovery controls remain available with the existing saving-failed message. Import success is announced only after that commit.
+### Juice B3: The tea line catches warm light when ready (2026-10-08)
+The existing interior gold engraving gains one bounded warm response when the actual cup enters its target band, then settles to a quiet readiness glint. Overfill and exit remove it immediately. Reduced motion uses the steady signal; fill tolerance and reward stay unchanged.
+Checked against DESIGN_RULES.md; no design-rule violation found. Native phone visual and listening acceptance pending.
 
-A held story item starts carrying only from the primary pointer. A second finger resting or moving elsewhere cannot begin an accidental handoff; rejecting it leaves the next deliberate primary drag available. The existing targets, wrong-drop recovery and keyboard alternative remain intact.
 
-## Existing first-session notices, 2026-10-08 audit
-The first-night pointer and the quiet day-one line reach the existing paced notice queue in both languages when their simulation events occur. While tea, sewing or moon chimes hide the house toast, notices stay queued until the player leaves the ritual; their order, eight-notice cap and 2.4-second display interval stay the same. Their one-time flags, timing, copy and rewards remain owned by the existing simulation. Checked against `DESIGN_RULES.md`; no design-rule violations found.
+### Juice B4: Pouring has weight and a local landing (2026-10-08)
+The existing stream becomes thin at low flow and full at high flow, while only its actual receiving cup carries a bounded impact ripple in the existing liquid surface. Release resets it; reduced motion leaves surfaces still. Spout alignment, cup fill and the simulation stay unchanged, with no added geometry or lights.
+Checked against DESIGN_RULES.md; no design-rule violation found. Native phone visual and listening acceptance pending.
+
+
+### Juice B5: Thread arrives at a section and points to its repair (2026-10-08)
+A completed section briefly warms the next real guide bead, then settles. A loose thread quietly lights the actual repair spool, retiring immediately when repaired. The same existing meshes and authored contour remain, with no change to accepted coverage, assistance, scoring or inventory.
+Checked against DESIGN_RULES.md; no design-rule violation found. Native phone visual and listening acceptance pending.
+
+
+### Juice B6: Moon charms distinguish an echo from recovery (2026-10-08)
+A correctly echoed charm briefly opens a warm halo; a wrong-note recovery contracts into a quieter cool ring before the existing free demonstration. Both settle within 0.7 seconds, and reduced motion uses a still response. Phrase order, pull threshold, replay, mastery and rewards remain unchanged.
+Checked against DESIGN_RULES.md; no design-rule violation found. Native phone visual and listening acceptance pending.

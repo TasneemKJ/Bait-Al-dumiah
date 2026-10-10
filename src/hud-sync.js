@@ -69,20 +69,30 @@ export function syncClue(host,t,expanded,readClue){
  return read;
 }
 
-// A short message in the toast, mirrored into an open sheet so it is not hidden behind the dialog.
-export function createToaster(host){
- let timer;
+// Transient notices return to an unresolved save warning; both mirror into an open sheet.
+export function createToaster(host,panelOpen=()=>false){
+ let timer,transient='',warning='';
+ function render(){
+  const message=transient||warning,el=host.querySelector('#toast');
+  if(el.textContent!==message)el.textContent=message;el.classList.toggle('visible',Boolean(message));
+  if(panelOpen()&&message){
+   let note=host.querySelector('.panel-notice');
+   if(!note){note=document.createElement('p');note.className='panel-notice';
+   note.setAttribute('role','status');host.querySelector('#sheet-content').prepend(note)}
+   if(note.textContent!==message)note.textContent=message;
+   note.dataset.saveWarning=String(!transient&&Boolean(warning));
+  }
+ }
  return {
-  show(message,panelOpen){
-   if(panelOpen){
-    let note=host.querySelector('.panel-notice');
-    if(!note){note=document.createElement('p');note.className='panel-notice';
-    note.setAttribute('role','status');host.querySelector('#sheet-content').prepend(note)}
-    note.textContent=message;
-   }
-   const el=host.querySelector('#toast');clearTimeout(timer);
-   el.textContent=message;el.classList.add('visible');timer=setTimeout(()=>el.classList.remove('visible'),4500);
+  show(message){
+   clearTimeout(timer);transient=message;render();
+   timer=setTimeout(()=>{transient='';render()},4500);
   },
+  setWarning(message){warning=message||'';
+   if(!warning){const note=host.querySelector('.panel-notice');if(note?.dataset.saveWarning==='true')note.remove()}
+   render();
+  },
+  refresh:render,
   dispose(){clearTimeout(timer)},
  };
 }

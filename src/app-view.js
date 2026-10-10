@@ -17,7 +17,7 @@ export function installView(app){
   app.lastChimeTone=chime?.tone??null;
  }
  // Reattach scene controls synchronously; a slow graphics frame must not hide the UI.
- function refreshUI(){app.ui.refresh();app.roomViews.update();
+ function refreshUI(){app.ui.refresh();app.updateSaveStatus?.();app.roomViews.update();
  app.objectControls?.update();app.storyUI?.update();updateWorkUI();app.homeUI?.refresh()}
  function syncPause(){app.state.paused=!session.entered||app.manualPause||
    Boolean(app.panelOpen&&app.panelOpen!=='activities')||
