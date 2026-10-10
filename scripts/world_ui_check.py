@@ -1,7 +1,10 @@
 """World-first phone UI check: the house fills the screen, controls are 44px, nothing scrolls sideways.
 
 Serves dist/ (run `npm run build` first) and walks a first session at 390x844 with touch, in English and
-Arabic: Home, the house, a room, a selected keepsake, the carried thread, the tools dock and a sheet.
+Arabic: Home, the first-launch intro, the house, a room, a selected keepsake, the carried thread, the tools dock
+and a sheet. The intro is captured beat by beat; English lets it reach play on its own, Arabic skips it with a
+tap on the scene, and both reload to prove it never replays. A landscape 844x390 pass and a reduced-motion pass
+capture the intro too.
 For every state it saves a screenshot and measures:
   - every visible, enabled control is at least 44x44 CSS px (Apple HIG 44pt; Material 48dp);
   - the page never scrolls sideways;
@@ -63,7 +66,9 @@ def journey(page,locale,shoot):
   page.locator('[data-home-action=language]').click()
   page.locator('[data-home-action=back]').click()
  shoot('home')
- page.locator('[data-home-action=play]').click();page.wait_for_selector('.dock',timeout=30000)
+ page.locator('[data-home-action=play]').click()
+ watch_intro(page,shoot,skip=locale=='ar')
+ page.wait_for_selector('.dock',timeout=30000)
  page.wait_for_function('window.dollhouse.objects()?.length>0',timeout=60000);settle(page,800)
  shoot('house',True)
  page.locator('[data-room=kitchen]').tap();settle(page)
@@ -77,6 +82,54 @@ def journey(page,locale,shoot):
  page.locator('.tools-toggle').tap();page.wait_for_timeout(500);shoot('tools')
  page.locator('[data-action="panel-household"]:visible').first.tap();page.wait_for_selector('#sheet[open]')
  page.wait_for_timeout(500);shoot('sheet')
+ no_replay(page)
+
+INTRO='window.dollhouse.intro()'
+def watch_intro(page,shoot,skip=False,prefix='intro'):
+ """Captures each beat of the intro; then either taps the scene to skip or lets it hand into play."""
+ page.wait_for_function(f'{INTRO}.active',timeout=30000)
+ shoot(f'{prefix}-0')
+ page.wait_for_function(f'{INTRO}.beat>=1',timeout=60000);page.wait_for_timeout(700);shoot(f'{prefix}-1')
+ if skip:
+  # A plain tap on the scene (not the button) skips; it must land in the kitchen with no cut.
+  box=page.viewport_size;page.touchscreen.tap(box['width']//2,box['height']//3)
+  page.wait_for_function(f'!{INTRO}.active',timeout=10000)
+  page.wait_for_function('!document.querySelector(".intro-layer:not([hidden])")',timeout=20000)
+ else:
+  page.wait_for_function(f'{INTRO}.beat>=2',timeout=60000);page.wait_for_timeout(700);shoot(f'{prefix}-2')
+  page.wait_for_function(f'!{INTRO}.active',timeout=60000)
+ page.wait_for_function('window.dollhouse.visual()?.focusedRoom==="kitchen"',timeout=20000)
+ if not page.evaluate('window.dollhouse.state().introSeen'):raise AssertionError('the intro was not recorded')
+
+def no_replay(page):
+ """A reload goes straight to play: the intro is first-launch only."""
+ page.reload();page.wait_for_selector('[data-home-action=play]:not([disabled])',timeout=90000)
+ page.locator('[data-home-action=play]').click();page.wait_for_selector('.dock',timeout=30000)
+ page.wait_for_timeout(600)
+ if page.evaluate(f'{INTRO}.active') or page.locator('.intro-layer:not([hidden])').count():
+  raise AssertionError('the intro replayed after a reload')
+
+def intro_pass(browser,name,shoot_into,viewport,reduced=False,locale='en'):
+ """A fresh first launch in another shape: landscape, or reduced motion (still shots under the veil)."""
+ context=browser.new_context(viewport=viewport,device_scale_factor=1,has_touch=True,is_mobile=True,
+  reduced_motion='reduce' if reduced else 'no-preference')
+ page=context.new_page();errors=[]
+ page.on('pageerror',lambda e:errors.append(str(e)))
+ page.on('console',lambda m:errors.append(m.text) if m.type=='error' else None)
+ page.goto(f'http://127.0.0.1:{PORT}/?debug=1')
+ page.wait_for_selector('[data-home-action=play]:not([disabled])',timeout=90000)
+ if locale=='ar':
+  page.locator('[data-home-action=preferences]').click();page.locator('[data-home-action=language]').click()
+  page.locator('[data-home-action=back]').click()
+ page.locator('[data-home-action=play]').click()
+ if reduced and not page.evaluate('window.dollhouse.state().settings.reducedMotion'):
+  raise AssertionError('reduced motion was not picked up for a first launch')
+ watch_intro(page,lambda shot:shoot_into(page,f'{name}-{shot}'),prefix='intro')
+ # Software WebGL draws a few frames a second here, and the glide advances per frame, so allow it time to land.
+ page.wait_for_selector('.dock',timeout=30000)
+ page.wait_for_function('!window.dollhouse?.visual()?.cameraMoving',timeout=180000);page.wait_for_timeout(600)
+ shoot_into(page,f'{name}-play')
+ context.close();return errors
 
 def main():
  SHOTS.mkdir(parents=True,exist_ok=True)
@@ -111,6 +164,14 @@ def main():
      failures.append(f'{locale}: page meta is incomplete {meta}')
     failures.extend(f'{locale}: console error {e}' for e in errors)
     context.close()
+   def shoot_into(page,name):
+    page.screenshot(path=str(SHOTS/f'{name}.png'),timeout=120000)
+    m=page.evaluate(MEASURE);report[name]=m
+    for c in m['small']:failures.append(f'{name}: "{c["label"]}" is {c["w"]}x{c["h"]} px')
+    if m['overflow']:failures.append(f'{name}: the page scrolls sideways')
+   for name,viewport,reduced,locale in [('landscape-en',{'width':844,'height':390},False,'en'),
+     ('still-ar',{'width':390,'height':844},True,'ar')]:
+    failures.extend(f'{name}: console error {e}' for e in intro_pass(browser,name,shoot_into,viewport,reduced,locale))
    browser.close()
  finally:
   server.terminate()

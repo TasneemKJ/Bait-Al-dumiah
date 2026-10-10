@@ -116,3 +116,11 @@ export const STORY_CHAPTERS=[
   {object:'doorstep',gives:null,icon:'ghost'},
  ]},
 ];
+// The first-launch intro: three camera beats over the real house, one short line each (copy in i18n.js).
+// Seconds per beat; the last beat ends on the kitchen framing where play begins. `voice` is the slot for an
+// optional narration clip per beat (none yet: the owner is still deciding on a narrator).
+export const INTRO_BEATS=[
+ {id:'approach',seconds:3,line:'introApproach',voice:null},
+ {id:'reveal',seconds:2.8,line:'introReveal',voice:null},
+ {id:'settle',seconds:2.6,line:'introSettle',voice:null},
+];

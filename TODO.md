@@ -1,5 +1,17 @@
 # TODO
 
+## First-launch intro — 2026-10-10
+Twenty ideas, IDEAL and the 5Ws are in `docs/superpowers/iteration-ledger.md` (Cycle 41).
+- [x] In-engine three-beat camera intro (8.4 s) over the real house, ending on the kitchen framing where play begins.
+- [x] One short EN/AR line per beat; `{beat, en, ar, voice}` line table with an empty narration slot.
+- [x] Skip from frame 1: tap, any key or a 44px thumb-zone Skip; a drag grabs the camera instead.
+- [x] Springs with velocity handoff (path to settle spring to play), no dead stops, no overshoot; eased lamp focus and fades.
+- [x] First launch only (`introSeen`, whitelisted; older saves never replay); Settings: Watch intro.
+- [x] Reduced motion: still shots under the paper veil; WebGL loss skips; sound only after a gesture, fades on skip.
+- [ ] Owner decision: a narrator voice per beat (the line table already has a `voice` slot).
+- [ ] Native Arabic reader review of the three intro lines (`docs/NATIVE-REVIEW.md`).
+- [ ] Measure the intro under 4x CPU throttle on a real phone; SwiftShader timing is not phone evidence.
+
 ## Reliability review — 2026-10-08, cycles 35–40
 
 Twenty alternatives, IDEAL and the 5Ws for each bounded cycle are recorded in `docs/superpowers/iteration-ledger.md`.

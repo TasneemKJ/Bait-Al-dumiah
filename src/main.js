@@ -10,6 +10,8 @@ import {createWorld} from './render/world.js';
 import {createUI} from './ui.js';
 import {createResidentLabel} from './resident-label.js';
 import {createRoomViews} from './room-views.js';
+import {createIntroUI} from './intro-ui.js';
+import {createIntroSound} from './intro-sound.js';
 import {DollhouseAudio} from './audio.js';
 import {installFeedback} from './app-feedback.js';
 import {installView} from './app-view.js';
@@ -23,7 +25,7 @@ const app={
   session,audio:new DollhouseAudio(),canvas:document.querySelector('#world'),host:document.querySelector('#ui'),
   state:session.state,world:null,ui:null,homeUI:null,objectControls:null,storyUI:null,
     teaUI:null,stitchUI:null,chimeUI:null,
-  roomViews:null,residentLabel:null,playfieldLayout:null,
+  roomViews:null,residentLabel:null,playfieldLayout:null,intro:null,
   manualPause:false,panelOpen:false,fatal:false,saveWarning:false,carrying:false,lastChimeTone:null,
 };
 
@@ -51,6 +53,11 @@ function buildViews(){
     app.world.setEnabled(false);app.homeUI.ready();document.querySelector('#loading')?.remove();
   }catch(error){console.error('Dollhouse renderer could not start:',error);app.showError('webgl')}
   const world=()=>app.world;
+  const sound=createIntroSound(app.audio);
+  app.intro=createIntroUI(document.querySelector('#app'),{getState,onStart:()=>sound.start(),
+    frame:(seconds,still)=>{const shot=world()?.introFrame(seconds,still)??null;if(shot)sound.advance(seconds);
+      return shot},orbit:amount=>world()?.orbit(amount),
+    onFinish:result=>{sound.finish(result);dispatch('intro-done',result)}});
   app.objectControls=createObjectControls(host,getState,key=>dispatch('select-object',key));
   app.storyUI=createStoryUI(host,getState,dispatch,key=>world()?.objectPositions().find(point=>point.key===key));
   app.teaUI=createTeaUI(host,canvas,getState,dispatch,{pick:(x,y)=>world()?.teaAt(x,y),

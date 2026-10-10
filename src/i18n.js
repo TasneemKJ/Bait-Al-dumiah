@@ -1,8 +1,13 @@
 // Stable locale data is kept verbatim; new physical-play copy stays in this
 // entry point. Existing imports, locale IDs and fallback behavior are unchanged.
-import {strings} from './locale-data.js';
+import {strings,translate} from './locale-data.js';
+import {INTRO_BEATS} from './content.js';
 export {strings,translate,number} from './locale-data.js';
 Object.assign(strings.en,{
+ introApproach:'A little house, waiting with its lamps lit.',introReveal:'Three little souls live behind these walls.',
+   introSettle:'Start in the kitchen. Lina has the kettle on.',
+ introSkip:'Skip',introSkipLabel:'Skip the intro',introSetting:'Opening scene',watchIntro:'Watch intro',
+   introSettingHelp:'Replay the short opening over the house.',
  homeEntryChanged:'Your saved house changed in another tab. Reload to open the latest save.',
    homeEntryUnreadable:'Your saved house could not be checked. Reload before continuing. Nothing was replaced.',
  homePlay:'Play',homeContinue:'Continue',homePreferences:'Preferences',homeBack:'Back',
@@ -60,6 +65,10 @@ Object.assign(strings.en,{
  'activityRule-lullaby':'Watch and listen. Pull the hanging charms in reverse order; the little moon repeats the song.',
 });
 Object.assign(strings.ar,{
+ introApproach:'بيت صغير، قناديله مضوية وناطرك.',introReveal:'ورا هالحيطان ساكنين تلات أرواح صغار.',
+   introSettle:'ابدأ من المطبخ. لينا حاطّة الإبريق عالنار.',
+ introSkip:'تخطّى',introSkipLabel:'تخطّى المقدّمة',introSetting:'مشهد البداية',watchIntro:'شوف المقدّمة',
+   introSettingHelp:'رجّع المشهد القصير اللي بيفتح عالبيت.',
  homeEntryChanged:'حفظ بيتك تغيّر بتبويب تاني. حمّل الصفحة من جديد لتفتح آخر حفظ.',
    homeEntryUnreadable:'ما قدرنا نتأكّد من حفظ بيتك. حمّل الصفحة من جديد قبل ما تكمّل. ما استبدلنا شي.',
  homePlay:'العب',homeContinue:'كمّل',homePreferences:'تفضيلات',homeBack:'رجوع',
@@ -118,3 +127,10 @@ Object.assign(strings.ar,{
  'activity-lullabyIntro':'اسحب زينة القمر واتركها ترنّ. اسمع الأغنية وردّها من الآخر للأول.',
  'activityRule-lullaby':'شوف واسمع. اسحب القطع من آخر نغمة للأولى؛ القمر الصغير بيعيد الأغنية.',
 });
+
+// The intro's line table: one short line per beat in English and Arabic, plus the line in the playing language.
+// `voice` is an optional recorded or synthesized narration for the beat; none ships yet.
+export function introLines(locale){
+ return INTRO_BEATS.map(beat=>({beat:beat.id,en:strings.en[beat.line],ar:strings.ar[beat.line],
+   text:translate(locale,beat.line),voice:beat.voice??null}));
+}

@@ -137,6 +137,25 @@ export class DollhouseAudio{
     783.991,659.255]:kind==='mobile'?[392,493.883,587.33]:[440,523.251];
   notes.forEach((f,i)=>this.tone(f,t+i*.16,1.2,.035));
  }
+ get ready(){return Boolean(this.context&&this.enabled&&!this.paused&&!this.disposed)}
+ // The intro plays on its own bus under the master, so a skip fades it instead of cutting it.
+ introCue(cue,delay=0){
+  if(!this.ready||!cue)return null;const ctx=this.context,at=ctx.currentTime+Math.max(0,delay);
+  if(!this.introBus){this.introBus=ctx.createGain();this.introBus.gain.value=1;this.introBus.connect(this.master)}
+  const bus=this.introBus,record=cue.kind==='pluck'?playPluck(ctx,bus,cue.frequency,at,cue.length,cue.volume):
+   cue.kind==='drone'?voice(ctx,bus,cue.frequency,at,cue.length,cue.volume,'sine',900,cue.attack):
+   cue.kind==='wood'?playWoodTap(ctx,bus,at,cue.volume):cue.kind==='tin'?playTinTouch(ctx,bus,at):null;
+  if(record){record.intro=true;this.track(record)}return record;
+ }
+ // Skip: ramp the intro bus to silence over `seconds` (never a hard cut), then release its voices.
+ introFade(seconds=.2){
+  const bus=this.introBus;this.introBus=null;if(!bus||!this.context)return;const t=this.context.currentTime;
+  bus.gain.cancelScheduledValues(t);bus.gain.setValueAtTime(bus.gain.value,t);
+  bus.gain.linearRampToValueAtTime(0,t+seconds);
+  setTimeout(()=>{for(const n of [...this.nodes])if(n.intro)n.stop();bus.disconnect()},seconds*1000+40);
+ }
+ // The lullaby waits for the resolve chord to breathe before its first note.
+ holdLullaby(seconds){if(this.context)this.next=Math.max(this.next,this.context.currentTime+seconds)}
  dispose(){if(this.disposed)return;this.disposed=true;this.enableGeneration++;this.enabled=false;
  this.stopVoices();this.context?.close().catch(()=>{})}
 }

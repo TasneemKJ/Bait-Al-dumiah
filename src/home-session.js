@@ -1,5 +1,5 @@
 import {SAVE_KEY} from './content.js';
-import {readSave,step} from './simulation.js';
+import {claimIntro,readSave,step} from './simulation.js';
 
 // Preferences can change before entry without replacing the player's house.
 export const HOME_PREFERENCES_KEY=SAVE_KEY+'.preferences';
@@ -38,6 +38,8 @@ export function createHomeSession({storage,reducedMotion=false}={}){
   return true;
  }
  if(!valid)state.settings.reducedMotion=Boolean(reducedMotion);
+ // An unreadable earlier save still means a returning player; only a first launch earns the intro.
+ if(raw!==null&&!loaded.empty)claimIntro(state);
  const preferenceBase=valid?JSON.stringify(state.settings):null;
  // An overlay applies only to the save settings it was edited against. A
  // newer canonical save remains authoritative after a partial storage failure.

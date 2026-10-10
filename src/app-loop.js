@@ -8,7 +8,10 @@ export function installLoop(app){
  function frame(now){if(stopped)return;const dt=Math.min(.1,Math.max(0,(now-app.last)/1000));app.last=now;
   if(!document.hidden&&!app.fatal&&!app.session.entered&&
     app.homeUI?.previewVisible){app.world?.render(app.state,0,null)}
-  if(!document.hidden&&!app.fatal&&app.session.entered){app.updateWorkUI(dt);app.session.advance(app.state,dt);
+  // The intro holds the house still: no simulation, saves or notices until play begins where it lands.
+  if(!document.hidden&&!app.fatal&&app.session.entered)app.intro?.update(now);
+  if(!document.hidden&&!app.fatal&&app.session.entered&&app.intro?.active)app.world?.render(app.state,dt,null);
+  else if(!document.hidden&&!app.fatal&&app.session.entered){app.updateWorkUI(dt);app.session.advance(app.state,dt);
   if(app.state.events.length)for(const event of app.state.events.splice(0))app.announce(event);
   if(app.notices.length&&now>=app.noticeAt&&!app.physicalActivity())app.showNotice(now);
   app.world?.render(app.state,dt,app.ui.selected);
@@ -56,6 +59,7 @@ export function installDebug(app){
     teaObjects:()=>app.world?.teaPositions(),stitch:()=>sim.stitchStatus(app.state),
       stitchObjects:()=>app.world?.stitchPositions(),projectStitch:(x,y,
     height)=>app.world?.projectStitch(x,y,height),chimes:()=>sim.chimeStatus(app.state),
-      chimeObjects:()=>app.world?.chimePositions(),chimePullSpan:()=>app.world?.chimePullSpan()};
+      chimeObjects:()=>app.world?.chimePositions(),chimePullSpan:()=>app.world?.chimePullSpan(),
+      intro:()=>({active:Boolean(app.intro?.active),beat:app.intro?.beat??-1})};
  }
 }
