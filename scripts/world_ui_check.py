@@ -10,12 +10,14 @@ For every state it saves a screenshot and measures:
   - the page never scrolls sideways;
   - routine house states leave most of the screen touching the 3D house (world coverage);
   - the carried item's drag handle is uncovered and no resident tag sits on story paper;
+  - the intro caption reaches WCAG AA (4.5:1) against the pixels rendered behind its text, at every beat;
   - no console errors.
 Honours PORT (default 4715), CHROMIUM_PATH and SHOTS_DIR (default artifacts/world-ui).
 """
 import json,os,subprocess,sys,time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+import caption_contrast
 
 ROOT=Path(__file__).resolve().parent.parent
 PORT=os.environ.get('PORT','4715')
@@ -58,7 +60,21 @@ META='''()=>({viewport:document.querySelector('meta[name=viewport]')?.content??'
 def settle(page,ms=400):
  page.wait_for_function('!window.dollhouse?.visual()?.cameraMoving',timeout=60000);page.wait_for_timeout(ms)
 
-def journey(page,locale,shoot):
+CAPTION_IN='''()=>{const l=document.querySelector('.intro-layer:not([hidden]) .intro-line');
+ return !l||!window.dollhouse.intro().active||Number(getComputedStyle(l).opacity)>=.99}'''
+def caption_check(report,failures):
+ """Shoots a beat once its line has eased in, then measures the caption against what is behind it."""
+ def check(page,name,shoot):
+  try:page.wait_for_function(CAPTION_IN,timeout=20000)
+  except Exception:pass
+  shoot()
+  m=caption_contrast.measure(page);report[f'{name}-caption']=m
+  if m is None:failures.append(f'{name}: no intro caption to measure')
+  elif m['ratio']<caption_contrast.AA:
+   failures.append(f'{name}: caption contrast {m["ratio"]}:1 is below {caption_contrast.AA}:1 (ink {m["ink"]} on {m["worst"]})')
+ return check
+
+def journey(page,locale,shoot,caption):
  page.goto(f'http://127.0.0.1:{PORT}/?debug=1')
  page.wait_for_selector('[data-home-action=play]:not([disabled])',timeout=90000)
  if locale=='ar':
@@ -67,7 +83,7 @@ def journey(page,locale,shoot):
   page.locator('[data-home-action=back]').click()
  shoot('home')
  page.locator('[data-home-action=play]').click()
- watch_intro(page,shoot,skip=locale=='ar')
+ watch_intro(page,shoot,skip=locale=='ar',caption=lambda n,go:caption(page,f'{locale}-{n}',go))
  page.wait_for_selector('.dock',timeout=30000)
  page.wait_for_function('window.dollhouse.objects()?.length>0',timeout=60000);settle(page,800)
  shoot('house',True)
@@ -85,18 +101,22 @@ def journey(page,locale,shoot):
  no_replay(page)
 
 INTRO='window.dollhouse.intro()'
-def watch_intro(page,shoot,skip=False,prefix='intro'):
- """Captures each beat of the intro; then either taps the scene to skip or lets it hand into play."""
+def watch_intro(page,shoot,skip=False,prefix='intro',caption=None):
+ """Captures each beat of the intro (checking its caption); then taps the scene to skip or lets it reach play."""
+ def beat(n):
+  name=f'{prefix}-{n}'
+  if caption:caption(name,lambda:shoot(name))
+  else:shoot(name)
  page.wait_for_function(f'{INTRO}.active',timeout=30000)
- shoot(f'{prefix}-0')
- page.wait_for_function(f'{INTRO}.beat>=1',timeout=60000);page.wait_for_timeout(700);shoot(f'{prefix}-1')
+ beat(0)
+ page.wait_for_function(f'{INTRO}.beat>=1',timeout=60000);page.wait_for_timeout(700);beat(1)
  if skip:
   # A plain tap on the scene (not the button) skips; it must land in the kitchen with no cut.
   box=page.viewport_size;page.touchscreen.tap(box['width']//2,box['height']//3)
   page.wait_for_function(f'!{INTRO}.active',timeout=10000)
   page.wait_for_function('!document.querySelector(".intro-layer:not([hidden])")',timeout=20000)
  else:
-  page.wait_for_function(f'{INTRO}.beat>=2',timeout=60000);page.wait_for_timeout(700);shoot(f'{prefix}-2')
+  page.wait_for_function(f'{INTRO}.beat>=2',timeout=60000);page.wait_for_timeout(700);beat(2)
   page.wait_for_function(f'!{INTRO}.active',timeout=60000)
  page.wait_for_function('window.dollhouse.visual()?.focusedRoom==="kitchen"',timeout=20000)
  if not page.evaluate('window.dollhouse.state().introSeen'):raise AssertionError('the intro was not recorded')
@@ -109,7 +129,7 @@ def no_replay(page):
  if page.evaluate(f'{INTRO}.active') or page.locator('.intro-layer:not([hidden])').count():
   raise AssertionError('the intro replayed after a reload')
 
-def intro_pass(browser,name,shoot_into,viewport,reduced=False,locale='en'):
+def intro_pass(browser,name,shoot_into,viewport,reduced=False,locale='en',caption=None):
  """A fresh first launch in another shape: landscape, or reduced motion (still shots under the veil)."""
  context=browser.new_context(viewport=viewport,device_scale_factor=1,has_touch=True,is_mobile=True,
   reduced_motion='reduce' if reduced else 'no-preference')
@@ -124,7 +144,8 @@ def intro_pass(browser,name,shoot_into,viewport,reduced=False,locale='en'):
  page.locator('[data-home-action=play]').click()
  if reduced and not page.evaluate('window.dollhouse.state().settings.reducedMotion'):
   raise AssertionError('reduced motion was not picked up for a first launch')
- watch_intro(page,lambda shot:shoot_into(page,f'{name}-{shot}'),prefix='intro')
+ watch_intro(page,lambda shot:shoot_into(page,f'{name}-{shot}'),prefix='intro',
+  caption=lambda n,go:caption(page,f'{name}-{n}',go))
  # Software WebGL draws a few frames a second here, and the glide advances per frame, so allow it time to land.
  page.wait_for_selector('.dock',timeout=30000)
  page.wait_for_function('!window.dollhouse?.visual()?.cameraMoving',timeout=180000);page.wait_for_timeout(600)
@@ -141,7 +162,7 @@ def main():
    options={'headless':True,'args':['--no-sandbox','--enable-webgl','--use-gl=angle','--use-angle=swiftshader',
     '--enable-unsafe-swiftshader']}
    if os.environ.get('CHROMIUM_PATH'):options['executable_path']=os.environ['CHROMIUM_PATH']
-   browser=p.chromium.launch(**options)
+   browser=p.chromium.launch(**options);caption=caption_check(report,failures)
    for locale in ['en','ar']:
     context=browser.new_context(viewport={'width':390,'height':844},device_scale_factor=1,has_touch=True,
      is_mobile=True)
@@ -158,7 +179,7 @@ def main():
      if m['handle'] is False:failures.append(f'{locale}-{name}: the carried item is covered')
      if m['tagOverPaper']:failures.append(f'{locale}-{name}: a resident tag covers story paper')
      if locale=='ar' and name!='home' and m['dir']!='rtl':failures.append(f'{locale}-{name}: not right-to-left')
-    journey(page,locale,shoot)
+    journey(page,locale,shoot,caption)
     meta=page.evaluate(META);report[f'{locale}-meta']=meta
     if 'viewport-fit=cover' not in meta['viewport'] or not meta['theme'] or not meta['icon'] or not meta['manifest']:
      failures.append(f'{locale}: page meta is incomplete {meta}')
@@ -171,13 +192,14 @@ def main():
     if m['overflow']:failures.append(f'{name}: the page scrolls sideways')
    for name,viewport,reduced,locale in [('landscape-en',{'width':844,'height':390},False,'en'),
      ('still-ar',{'width':390,'height':844},True,'ar')]:
-    failures.extend(f'{name}: console error {e}' for e in intro_pass(browser,name,shoot_into,viewport,reduced,locale))
+    failures.extend(f'{name}: console error {e}' for e in intro_pass(browser,name,shoot_into,viewport,reduced,locale,caption))
    browser.close()
  finally:
   server.terminate()
  (SHOTS/'report.json').write_text(json.dumps(report,indent=1,ensure_ascii=False))
  for key,m in report.items():
-  if 'world' in m:print(f'{key:16} world {m["world"]:.0%}  small {len(m["small"])}  overflow {m["overflow"]}')
+  if key.endswith('-caption') and m:print(f'{key:24} contrast {m["ratio"]}:1 over {m["pixels"]} px, ink {m["ink"]} worst {m["worst"]}')
+  if m and 'world' in m:print(f'{key:16} world {m["world"]:.0%}  small {len(m["small"])}  overflow {m["overflow"]}')
  if failures:
   print('FAILED:\n '+'\n '.join(failures));sys.exit(1)
  print('world UI check passed')

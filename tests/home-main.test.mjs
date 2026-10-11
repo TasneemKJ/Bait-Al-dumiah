@@ -31,6 +31,6 @@ test('a failed initial save read never replaces unknown progress after Play or p
 });
 
 test('failed sound activation reports the problem on visible Home Preferences',async()=>{
- const game=bootHome({audioSucceeds:false});game.button('preferences').click();game.button('sound').click();await Promise.resolve();await Promise.resolve();
+ const game=bootHome({audioSucceeds:false,preferences:JSON.stringify({muted:true,_base:null})});game.button('preferences').click();game.button('sound').click();await Promise.resolve();await Promise.resolve();
  const notice=game.home.all().find(node=>node.className==='home-notice');assert.equal(notice.hidden,false);assert.match(notice.textContent,/sound|audio/i);assert.equal(game.state().settings.muted,true);assert.equal(game.writes.some(write=>write.key===SAVE_KEY),false);
 });

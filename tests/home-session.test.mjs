@@ -64,3 +64,14 @@ test('an older Home preference record cannot override newer canonical saved sett
  const newer=createState();newer.settings.quality='low';storage.data.set(SAVE_KEY,JSON.stringify(newer));
  assert.deepEqual(create({storage}).state.settings,newer.settings);
 });
+test('a first launch starts with sound on; saved choices and older saves keep theirs',()=>{
+ assert.equal(create({storage:memory()}).state.settings.muted,false,'a new player hears the intro after Play');
+ const mutedFirst=memory({[prefKey]:JSON.stringify({muted:true,_base:null})});
+ assert.equal(create({storage:mutedFirst}).state.settings.muted,true,'a Home Preferences choice made before entry wins');
+ const quiet=createState();quiet.settings.muted=true;
+ assert.equal(create({storage:memory({[SAVE_KEY]:JSON.stringify(quiet)})}).state.settings.muted,true);
+ const legacy=createState();delete legacy.settings;
+ assert.equal(create({storage:memory({[SAVE_KEY]:JSON.stringify(legacy)})}).state.settings.muted,true,
+  'a save without a sound setting stays muted');
+ assert.equal(create({storage:memory({[SAVE_KEY]:'{broken'})}).state.settings.muted,true,'an unreadable save is not a first launch');
+});

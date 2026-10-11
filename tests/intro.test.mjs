@@ -179,9 +179,12 @@ test('main: a grab leaves the camera where the player caught it',()=>{
 });
 
 test('main: the Play tap unlocks sound in the same gesture that starts the intro, only when sound is on',()=>{
+ const fresh=bootHome({introHolds:true});assert.equal(fresh.state().settings.muted,false,'a first launch has sound on');
+ assert.equal(fresh.audioEvents.includes('enable'),false,'nothing sounds before the Play tap');
+ fresh.button('play').click();assert.equal(fresh.intro().starts,1);assert.ok(fresh.audioEvents.includes('enable'));
  const on=bootHome({introHolds:true,preferences:JSON.stringify({muted:false,_base:null})});
  on.button('play').click();assert.equal(on.intro().starts,1);assert.ok(on.audioEvents.includes('enable'));
- const off=bootHome({introHolds:true});off.button('play').click();
+ const off=bootHome({introHolds:true,preferences:JSON.stringify({muted:true,_base:null})});off.button('play').click();
  assert.equal(off.intro().starts,1);assert.equal(off.audioEvents.includes('enable'),false,'muted stays silent');
 });
 
