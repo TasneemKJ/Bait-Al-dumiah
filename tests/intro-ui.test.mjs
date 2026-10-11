@@ -169,3 +169,25 @@ test('the stylesheet keeps Skip a 44px thumb-zone target clear of the safe areas
  assert.doesNotMatch(css,/@keyframes|animation:/,'opacity is eased per frame, so reduced motion cannot turn it to a cut');
  assert.match(readFileSync(new URL('../index.html',import.meta.url),'utf8'),/src\/intro\.css/);
 });
+
+// WCAG relative luminance and contrast; a plate of alpha a over a backdrop blends per sRGB channel, as browsers do.
+const lum=([r,g,b])=>[r,g,b].map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4})
+  .reduce((sum,v,i)=>sum+v*[.2126,.7152,.0722][i],0);
+const contrast=(a,b)=>{const [hi,lo]=[lum(a),lum(b)].sort((x,y)=>y-x);return (hi+.05)/(lo+.05)};
+const hex=value=>{const h=value.slice(1);return {rgb:[0,2,4].map(i=>parseInt(h.slice(i,i+2),16)),
+  alpha:h.length===8?parseInt(h.slice(6),16)/255:1}};
+test('the caption reads at WCAG AA over any part of the house: its paper plate covers the text, day and night',()=>{
+ const css=readFileSync(new URL('../src/intro.css',import.meta.url),'utf8');
+ const rule=selector=>css.match(new RegExp(`(?:^|\\n)${selector.replace(/\./g,'\\.')}\\{([^}]*)\\}`))?.[1]??'';
+ for(const [selector,inherits] of [['.intro-line',null],['.night .intro-line','.intro-line']]){
+  const own=rule(selector),base=inherits?rule(inherits):'';
+  const prop=name=>(own.match(new RegExp(`(?:^|[;{\\s])${name}:([^;]+)`))??base.match(new RegExp(`(?:^|[;{\\s])${name}:([^;]+)`)))?.[1].trim();
+  const ink=hex(prop('color')),plate=prop('background');
+  assert.match(plate,/^#[0-9a-f]{8}$/i,`${selector}: the plate is one solid paper colour, not a gradient that thins at the line ends`);
+  const paper=hex(plate);assert.ok(paper.alpha>=.85,`${selector}: the plate is firm enough to carry the ink`);
+  // The worst backdrop for dark ink is black; for light ink, white.
+  const worst=lum(ink.rgb)<lum(paper.rgb)?[0,0,0]:[255,255,255];
+  const behind=paper.rgb.map((v,i)=>Math.round(paper.alpha*v+(1-paper.alpha)*worst[i]));
+  assert.ok(contrast(ink.rgb,behind)>=4.5,`${selector}: ${contrast(ink.rgb,behind).toFixed(2)}:1 over ${worst}`);
+ }
+});
