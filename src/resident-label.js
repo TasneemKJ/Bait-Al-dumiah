@@ -2,7 +2,7 @@ import {translate} from './i18n.js';
 
 // Paper the player reads or drags. A resident's name tag never sits on top of it: on a phone the carried
 // item and its note share the lower playfield with the residents, and a tag over the drag handle hides it.
-const PAPER='.held-item,.scene-response,.object-ribbon,.objective';
+const PAPER='.held-item,.scene-response,.object-ribbon,.objective,.dock[data-expanded=true],.placement';
 const overlaps=(a,b)=>a.left<b.right&&b.left<a.right&&a.top<b.bottom&&b.top<a.bottom;
 
 export function createResidentLabel(host){

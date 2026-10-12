@@ -1,5 +1,11 @@
 # TODO
 
+## Visual pass — 2026-10-12
+- [x] Lina's name tag no longer paints over the open House Tools drawer (it covered "Little rituals" at 390x844): the drawer stacks above it and both the drawer and the placement card count as paper the tag avoids.
+- [x] Phone-portrait clue chip measures against the 66px icon-only time card, so the time card keeps its compact width beside a long clue instead of stretching to 126px with a blank left half.
+- [x] Placement card's Cancel (X) keeps its full 44px target (it shrank to 40px beside the long title).
+- [ ] Landscape 844x390: the room switcher wraps into a 2x2 icon grid at the bottom leading corner; consider one row.
+
 ## First-launch intro — 2026-10-10
 Twenty ideas, IDEAL and the 5Ws are in `docs/superpowers/iteration-ledger.md` (Cycle 41).
 - [x] In-engine three-beat camera intro (8.4 s) over the real house, ending on the kitchen framing where play begins.
