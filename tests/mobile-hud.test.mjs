@@ -54,3 +54,8 @@ test('the open House Tools drawer stacks above the resident name tag',()=>{
  const upgrade=readFileSync(new URL('../src/visual-upgrade.css',import.meta.url),'utf8');
  assert.match(upgrade,/\.resident-name\{[^}]*z-index:1/);
 });
+test('the placement card cancel keeps a 44px target on phones',()=>{
+ const css=readFileSync(new URL('../src/styles.css',import.meta.url),'utf8');
+ assert.doesNotMatch(css,/\.placement \.icon-button\{width:(?:[0-3]\d|4[0-3])px\}/);
+ assert.match(css,/\.placement-head>\.icon-button\{[^}]*flex:none/);
+});
