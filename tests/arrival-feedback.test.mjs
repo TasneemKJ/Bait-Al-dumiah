@@ -62,3 +62,17 @@ test('an untouched returning house still glances at the residents and returns ho
  const h=returningHome();h.runNext();h.runNext();
  assert.deepEqual(h.actions,[['focus-room','kitchen'],['camera',undefined]]);assert.equal(h.pending(),0);
 });
+
+test('first-day quiet after actual care reaches its bilingual line once',()=>{
+ for(const locale of ['en','ar']){
+  const state=createState();state.settings.locale=locale;const shown=[];
+  const app={state,session:{entered:true,save:()=>true},audio:{effect(){}},host:{querySelector:()=>null},
+   ui:{t:key=>translate(locale,key),n:String,toast:message=>shown.push(message)}};
+  installFeedback(app);installView(app);
+  assert.equal(sim.care(state,'lina','tea').ok,true);
+  const advance=seconds=>{for(let i=0;i<seconds;i++){step(state,1);for(const event of state.events.splice(0))app.announce(event)}
+   while(app.notices.length)app.showNotice(performance.now()+100000)};
+  advance(90);assert.ok(shown.includes(translate(locale,'calmDayOne')));
+  advance(20);assert.equal(shown.filter(m=>m===translate(locale,'calmDayOne')).length,1);
+ }
+});

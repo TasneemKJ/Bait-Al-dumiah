@@ -75,3 +75,21 @@ A held story item starts carrying only from the primary pointer. A second finger
 
 ## Existing first-session notices, 2026-10-08 audit
 The first-night pointer and the quiet day-one line reach the existing paced notice queue in both languages when their simulation events occur. While tea, sewing or moon chimes hide the house toast, notices stay queued until the player leaves the ritual; their order, eight-notice cap and 2.4-second display interval stay the same. Their one-time flags, timing, copy and rewards remain owned by the existing simulation. Checked against `DESIGN_RULES.md`; no design-rule violations found.
+
+## First-night invitation delivery, 2026-10-08
+The existing once-only first-night event reaches the localized notice queue, pointing to Greet the visitor without opening a sheet, acting on the visitor, or changing rewards.
+
+## Quiet first day, 2026-10-08
+After the already-authored first care and ninety-second day-one threshold, the existing calm sentence reaches the queued notice. This repairs presentation of the existing paced beat; time, needs, income and later days keep their current rules.
+
+## Player-owned welcome camera, 2026-10-08
+A scene pointer or keyboard action cancels the pending automatic welcome glance, just as HUD input does. The doll wave and welcome line remain, with no additional controls.
+
+## Interrupted welcome, 2026-10-08
+Both halves of the welcome camera sequence yield while hidden, paused, in a sheet or ritual, after fatal graphics failure, after motion preference changes, or after the current house is replaced. No delayed camera reset interrupts these states.
+
+## Saving recovery feedback, 2026-10-08
+After a failed write, the next successful owned write restores the existing saved note and retires the persistent warning without a separate saved toast (main's save-warning boundary). A later failure can warn again. Unknown or changed save identities still require Reload; recovery is never claimed without a successful write.
+
+## Import ownership, 2026-10-08
+The latest file selection or confirmed reset owns the current house. Older pending file reads are silently retired and cannot replace the newer choice or show stale import feedback. The token belongs to the page lifecycle, never to save v1.
