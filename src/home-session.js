@@ -1,5 +1,5 @@
 import {SAVE_KEY} from './content.js';
-import {readSave,step} from './simulation.js';
+import {claimIntro,readSave,step} from './simulation.js';
 
 // Preferences can change before entry without replacing the player's house.
 export const HOME_PREFERENCES_KEY=SAVE_KEY+'.preferences';
@@ -38,6 +38,11 @@ export function createHomeSession({storage,reducedMotion=false}={}){
   return true;
  }
  if(!valid)state.settings.reducedMotion=Boolean(reducedMotion);
+ // A first launch starts with sound on, so the intro's score can play; audio still waits for the Play tap,
+ // and a saved choice (the save or Home Preferences below) always wins. Older saves keep their own setting.
+ const firstLaunch=raw===null||loaded.empty;if(firstLaunch)state.settings.muted=false;
+ // An unreadable earlier save still means a returning player; only a first launch earns the intro.
+ if(!firstLaunch)claimIntro(state);
  const preferenceBase=valid?JSON.stringify(state.settings):null;
  // An overlay applies only to the save settings it was edited against. A
  // newer canonical save remains authoritative after a partial storage failure.

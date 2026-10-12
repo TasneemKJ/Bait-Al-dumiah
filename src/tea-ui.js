@@ -2,25 +2,36 @@ import {teaStatus} from './simulation.js';
 import {teaPercent as percent} from './readouts.js';
 import {translate} from './i18n.js';
 import {setText,setAttribute} from './dom-sync.js';
-import {captureCanvas} from './canvas-aria.js';
+import {captureCanvas,claimCanvas,releasePointer,surfaceBlocked} from './canvas-aria.js';
 import {bindTeaInput} from './tea-input-bindings.js';
 import {createTeaGesture,createTeaKeyboard} from './tea-input.js';
-import {teaView,mountTeaSurface} from './tea-view.js';
+import {teaView,mountTeaSurface,paintTeaView} from './tea-view.js';
 export {teaView};
+
+const TEA_SHORTCUTS='ArrowLeft ArrowRight Space E Enter Escape';
+const TEA_READOUTS=['tea-work-instructions','tea-work-status','tea-cup-readout'];
+function markTeaSurface(root,tea,inputMode,holding){
+ setAttribute(root,'data-phase',tea.phase);setAttribute(root,'data-mode',tea.mode);
+ setAttribute(root,'data-input',inputMode);setAttribute(root,'data-ready',String(tea.ready));
+ root.classList.toggle('tea-holding',holding);
+}
+// Input still advances every frame. Rebuild number formatting and visible
+// text only when something a player can read has actually changed.
+const teaViewKey=(s,tea,inputMode,feedback)=>JSON.stringify([s.settings.locale,tea.phase,tea.mode,inputMode,
+ tea.aimedCup,tea.ready,tea.cups.map(c=>[c.id,percent(c.fill),percent(c.target),c.ready,c.overfilled]),
+ tea.result,tea.best,s.activities.mastery.tea,s.restoration,feedback]);
+const teaAnnouncementKey=(s,tea,inputMode,feedback)=>JSON.stringify([s.settings.locale,tea.phase,inputMode,
+ tea.aimedCup,tea.ready,tea.cups.map(c=>[Math.floor(c.fill*10),c.ready,c.overfilled]),feedback]);
 
 export function createTeaUI(host,canvas,getState,dispatch,{pick,aimAt}){
  const {root,parts}=mountTeaSurface(host);
  const gesture=createTeaGesture(),keyboard=createTeaKeyboard();
  let session=null,previousPhase=null,inputMode='pointer',feedback=null,feedbackAge=0,announcementAge=Infinity,
    announcementSignature='',viewSignature='',cachedView=null,lost=false,disposed=false;
- const original=captureCanvas(canvas),originalDescription=original.description;
- const t=key=>translate(getState().settings.locale,key);
- const active=()=>teaStatus(getState());
- const blocked=()=>getState().paused||document.hidden||lost||
-   Boolean(host.querySelector('dialog[open],.error-screen'))||host.querySelector('.placement')?.hidden===false;
- const stop=e=>{e.preventDefault();e.stopImmediatePropagation()};
- function releaseCapture(id){if(id!==null){try{
-   if(canvas.hasPointerCapture(id))canvas.releasePointerCapture(id)}catch{}}}
+ const original=captureCanvas(canvas);
+ const t=key=>translate(getState().settings.locale,key),active=()=>teaStatus(getState());
+ const blocked=()=>lost||surfaceBlocked(host,getState());
+ const stop=e=>{e.preventDefault();e.stopImmediatePropagation()},releaseCapture=id=>releasePointer(canvas,id);
  function invoke(action,value){const result=dispatch(action,value);
  if(result?.ok===false&&result.reason)respond(result.reason);return result}
  function cancel(){
@@ -39,7 +50,7 @@ export function createTeaUI(host,canvas,getState,dispatch,{pick,aimAt}){
   if(!hasTea){if(session){cancel();session=null;previousPhase=null;restoreCanvas();clearFeedback();
   parts.announcement.textContent=''}root.hidden=true;return}
   const nextSession=getState().activities.active,newSession=session!==nextSession;
-  if(newSession){cancel();session=nextSession;clearFeedback();announcementSignature='';
+  if(newSession){cancel();session=nextSession;previousPhase=null;clearFeedback();announcementSignature='';
   viewSignature='';announcementAge=Infinity}
   const unavailable=blocked();root.hidden=unavailable;
   if(unavailable){cancel();return}
@@ -51,30 +62,13 @@ export function createTeaUI(host,canvas,getState,dispatch,{pick,aimAt}){
   const seconds=Number.isFinite(dt)?Math.max(0,Math.min(dt,.25)):0;feedbackAge+=seconds;announcementAge+=seconds;
   if(feedbackAge>4)clearFeedback();
   const s=getState();
-  setAttribute(root,'data-phase',tea.phase);setAttribute(root,'data-mode',tea.mode);
-  setAttribute(root,'data-input',inputMode);setAttribute(root,'data-ready',String(tea.ready));
-  root.classList.toggle('tea-holding',gesture.target==='pot'&&tea.phase==='pour');
-  setAttribute(canvas,'aria-label',t('teaCanvasLabel'));
-  setAttribute(canvas,'role','application');
-  setAttribute(canvas,'aria-keyshortcuts','ArrowLeft ArrowRight Space E Enter Escape');
-  setAttribute(canvas,'aria-describedby',[originalDescription,'tea-work-instructions',
-    'tea-work-status','tea-cup-readout'].filter(Boolean).join(' '));
-  // Input still advances every frame. Rebuild number formatting and visible
-  // text only when something a player can read has actually changed.
-  const nextView=JSON.stringify([s.settings.locale,tea.phase,tea.mode,inputMode,
-    tea.aimedCup,tea.ready,tea.cups.map(c=>[c.id,percent(c.fill),
-    percent(c.target),c.ready,c.overfilled]),tea.result,tea.best,s.activities.mastery.tea,s.restoration,feedback]);
-  if(nextView!==viewSignature){
-   const view=cachedView=teaView(s,tea,{inputMode,reason:feedback});viewSignature=nextView;
-   setText(parts.title,view.title);setText(parts.progress,view.progress);parts.progress.hidden=!view.progress;
-   setText(parts.full,view.instructions);setText(parts.short,view.shortInstructions);setText(parts.status,view.status);
-   setText(parts.detail,view.detail);parts.detail.hidden=!view.detail;
-   setAttribute(parts.strip,'aria-label',t('teaWorkRegion'));setText(parts.exit.querySelector('span'),t('teaWorkExit'));
-   setAttribute(parts.cups,'aria-label',t('teaCupList'));setText(parts.cups,view.cups.join('. '));
-  }
-  const view=cachedView;
-  const signature=JSON.stringify([s.settings.locale,tea.phase,inputMode,tea.aimedCup,tea.ready,
-    tea.cups.map(c=>[Math.floor(c.fill*10),c.ready,c.overfilled]),feedback]);
+  markTeaSurface(root,tea,inputMode,gesture.target==='pot'&&tea.phase==='pour');
+  claimCanvas(canvas,{label:t('teaCanvasLabel'),shortcuts:TEA_SHORTCUTS,
+   describedBy:[original.description,...TEA_READOUTS]});
+  const nextView=teaViewKey(s,tea,inputMode,feedback);
+  if(nextView!==viewSignature){cachedView=teaView(s,tea,{inputMode,reason:feedback});viewSignature=nextView;
+   paintTeaView(parts,cachedView,t)}
+  const view=cachedView,signature=teaAnnouncementKey(s,tea,inputMode,feedback);
   if(signature!==announcementSignature&&announcementAge>=1.25){
    setText(parts.announcement,(newSession?view.instructions+' ':'')+view.status+(tea.ready?' '+view.instructions:''));
    announcementSignature=signature;announcementAge=0;

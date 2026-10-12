@@ -12,18 +12,23 @@ sys.path.insert(0, 'scripts')
 assert importlib.util.find_spec('game_entry'), 'a separate genuine Home activation helper is required'
 from game_entry import enter_game
 class Page:
- def __init__(self, fail=False): self.calls=[]; self.fail=fail
+ def __init__(self, fail=False, intro=False): self.calls=[]; self.fail=fail; self.intro=intro
  def wait_for_function(self, expression, **kwargs): self.calls.append(('wait', expression, kwargs))
  def locator(self, selector): self.calls.append(('locator', selector)); return self
+ def count(self): self.calls.append(('count',)); return 1 if self.intro else 0
  def click(self, **kwargs):
   self.calls.append(('click', kwargs))
   if self.fail: raise RuntimeError('real click blocked')
 page=Page(); enter_game(page)
-assert [call[0] for call in page.calls] == ['wait','locator','click','wait'], page.calls
+assert [call[0] for call in page.calls] == ['wait','locator','click','wait','locator','count','wait'], page.calls
 assert page.calls[1][1] == '#home [data-home-action="play"]'
 assert '#loading' in page.calls[0][1]
-assert 'play' in page.calls[-1][1] and '#ui' in page.calls[-1][1]
+assert 'play' in page.calls[-1][1] and '#ui' in page.calls[-1][1] and 'intro' in page.calls[-1][1]
 assert all(call[-1].get('timeout') == 60000 for call in page.calls if call[0] in ('wait','click'))
+# A first launch: the player's real Skip control is tapped once, never state injection.
+first=Page(intro=True); enter_game(first)
+assert [call[0] for call in first.calls].count('click')==2, first.calls
+assert ('locator','.intro-layer .intro-skip') in first.calls
 blocked=Page(True)
 try: enter_game(blocked)
 except RuntimeError as error: assert str(error)=='real click blocked'

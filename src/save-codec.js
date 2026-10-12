@@ -68,6 +68,8 @@ function restoreValid(v){
  s.milestones=ids(v.milestones);s.achieved=ids([...ids(v.achieved),...s.milestones]);
  // Veterans have already met the night: no first-night hint for a save with history.
  s.hints={night:v.hints?.night===true||s.day>1||s.journal.length>0,calm:v.hints?.calm===true||s.day>1||s.clock>=90};
+ // A save from before the intro existed belongs to a player who has already arrived: never replay it.
+ s.introSeen=typeof v.introSeen==='boolean'?v.introSeen:true;
  if(v.settings&&typeof v.settings==='object'){s.settings.locale=v.settings.locale==='ar'?
    'ar':'en';s.settings.muted=v.settings.muted!==false;
  s.settings.reducedMotion=v.settings.reducedMotion===true;s.settings.largeText=v.settings.largeText===true;

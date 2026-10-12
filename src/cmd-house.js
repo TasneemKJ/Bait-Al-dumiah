@@ -7,7 +7,7 @@ export const houseCommands={
    const result=sim.care(app.state,value.id,value.action);
    if(result.ok){app.ui.close();
    app.say(app.ui.t(value.action+'Success')+(result.reward?
-     ` +${app.ui.n(result.reward)} ${app.ui.t('reward')}`:''));app.audio.effect('care');
+     ` +${app.ui.n(result.reward)} ${app.ui.t('reward')}`:''));app.audio.effect('care:'+value.action);
    app.save();app.ui.tick()}else app.say(app.ui.t(result.reason));return;
   },
 'objective':(app,value,origin)=>{
@@ -24,8 +24,7 @@ export const houseCommands={
   },
 'mend-door':(app,value,origin)=>{
    const result=sim.mendDoor(app.state);
-   if(result.ok){app.say(app.ui.t(sim.doorOpen(app.state)?
-     'doorOpenedNote':'doorStepDone'));app.audio.effect('secret');app.save();
+   if(result.ok){app.say(app.ui.t(result.opened?'doorOpenedNote':'doorStepDone'));app.audio.effect('secret');app.save();
    app.ui.tick()}else app.say(result.needs?app.ui.t('needs_'+result.needs):app.ui.t(result.reason));return;
   },
 'gift':(app,value,origin)=>{

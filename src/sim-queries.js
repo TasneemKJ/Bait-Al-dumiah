@@ -3,6 +3,10 @@ import {clamp} from './sim-util.js';
 
 // Read-only questions about a house: time, bonds, wishes, comfort and the rules the interface asks about.
 export const isNight=s=>s.clock>=120;
+// The physical rituals own a work surface in the house instead of the activity sheet.
+export const PHYSICAL_ACTIVITIES=Object.freeze(['tea','stitch','lullaby']);
+export const physicalActivity=s=>PHYSICAL_ACTIVITIES.includes(s.activities.active?.id)?s.activities.active.id:null;
+export const dollRoom=(s,id)=>s.dolls.find(d=>d.id===id)?.room??null;
 export const hour=s=>(8+s.clock/10)%24;
 // Day one keeps each resident's authored wish; later days rotate through their personal wish list.
 export function wishFor(s,id){const i=DOLLS.findIndex(d=>d.id===id);if(i<0)return null;

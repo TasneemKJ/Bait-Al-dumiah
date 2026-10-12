@@ -1,5 +1,5 @@
 import {STORY_ITEMS,INTERACTIVE_PROPS} from './content.js';
-import {storyStatus} from './simulation.js';
+import {storyStatus,physicalActivity} from './simulation.js';
 import {objectInfo,sceneObjectAction} from './object-ui.js';
 import {translate,number} from './i18n.js';
 import {icon} from './icons.js';
@@ -95,29 +95,55 @@ function storyMarkup(s,{t,held,object,action,feedback}){
   ${object?'':response}`;
 }
 
+// Drag-and-drop of the carried story item: one deliberate pointer lifts it, a ghost follows the finger,
+// and the release point is handed to the game to resolve against the house.
+function createCarryDrag(root,ghost,dispatch){
+ const gesture=createCarryGesture();
+ let pointer=null,token=null,skipClick=false;
+ function cancel(){
+  gesture.cancel();ghost.hidden=true;root.classList.remove('carrying');
+  const held=token,id=pointer;pointer=null;token=null;
+  if(held&&id!==null){try{held.releasePointerCapture(id)}catch{}}
+  if(id!==null)dispatch('carry-end');
+ }
+ root.addEventListener('pointerdown',e=>{
+  const item=e.target.closest('.held-item');if(!item||root.hidden||!gesture.down(e))return;
+  pointer=e.pointerId;token=item;item.setPointerCapture(e.pointerId);skipClick=false;dispatch('carry-start');
+  ghost.innerHTML=item.querySelector('.held-art').innerHTML;e.stopPropagation();
+ });
+ root.addEventListener('pointermove',e=>{
+  if(!gesture.move(e))return;ghost.hidden=false;root.classList.add('carrying');
+  ghost.style.left=e.clientX+'px';ghost.style.top=e.clientY+'px';e.preventDefault();
+ });
+ root.addEventListener('pointerup',e=>{
+  if(e.pointerId!==pointer)return;
+  const point=gesture.up(e);skipClick=Boolean(point);cancel();
+  if(point){e.preventDefault();dispatch('drop-story-item',point)}
+ });
+ root.addEventListener('pointercancel',cancel);
+ root.addEventListener('lostpointercapture',e=>{if(e.pointerId===pointer)cancel()});
+ return {cancel,get active(){return pointer!==null},
+  // A drop ends with a click on the token; that click is the drag, not a request for a hint.
+  consumeClick(){const skip=skipClick;skipClick=false;return skip}};
+}
+
 export function createStoryUI(host,getState,dispatch,project=()=>null){
  const root=document.createElement('section');root.className='story-playfield';
  const ghost=document.createElement('div');ghost.className='carry-ghost';
  ghost.hidden=true;ghost.setAttribute('aria-hidden','true');
- const gesture=createCarryGesture();
- let selected=null,signature='',feedback=null,previousFocus=null,dragPointer=null,dragToken=null,skipClick=false;
+ const drag=createCarryDrag(root,ghost,dispatch),cancelDrag=drag.cancel;
+ let selected=null,signature='',feedback=null,previousFocus=null;
  const t=key=>translate(getState().settings.locale,key);
  const current=()=>objectInfo(getState(),selected);
  function placeRibbon(){
-  if(dragPointer!==null)return; // Never move paper or a drop target mid-gesture.
+  if(drag.active)return; // Never move paper or a drop target mid-gesture.
   layoutRibbon(root,host,()=>project(selected));
- }
- function cancelDrag(){
-  gesture.cancel();ghost.hidden=true;root.classList.remove('carrying');
-  const token=dragToken,pointer=dragPointer;dragPointer=null;dragToken=null;
-  if(token&&pointer!==null){try{token.releasePointerCapture(pointer)}catch{}}
-  if(pointer!==null)dispatch('carry-end');
  }
  function update(){
   if(!root.isConnected)host.append(root);if(!ghost.isConnected)host.append(ghost);
   const s=getState(),status=storyStatus(s),
-    hidden=Boolean(host.querySelector('dialog[open],.error-screen'))||s.paused||['tea','stitch',
-    'lullaby'].includes(s.activities.active?.id)||host.querySelector('.placement')?.hidden===false;
+    hidden=Boolean(host.querySelector('dialog[open],.error-screen'))||s.paused||
+    Boolean(physicalActivity(s))||host.querySelector('.placement')?.hidden===false;
   root.hidden=hidden;if(hidden)cancelDrag();
   if(selected&&!current())selected=null;
   host.dataset.objectSelected=selected??'';
@@ -126,7 +152,7 @@ export function createStoryUI(host,getState,dispatch,project=()=>null){
     action?.disabled,object?.active,object?.rotation,object?.tendedDay,feedback]);
   if(signature===next){placeRibbon();return}
   // A state change cannot leave a stale item image being dragged after use/reset.
-  if(dragPointer!==null)cancelDrag();
+  if(drag.active)cancelDrag();
   const focused=root.contains(document.activeElement)?document.activeElement.dataset.sceneAction:null;
   signature=next;
   root.innerHTML=storyMarkup(s,{t,held,object,action,feedback});
@@ -136,27 +162,11 @@ export function createStoryUI(host,getState,dispatch,project=()=>null){
  root.addEventListener('click',e=>{
   const button=e.target.closest('[data-scene-action]');if(!button||button.disabled)return;
   e.stopPropagation();
-  if(button.dataset.sceneAction==='held'){if(skipClick){skipClick=false;return}dispatch('story-hint');return}
+  if(button.dataset.sceneAction==='held'){if(!drag.consumeClick())dispatch('story-hint');return}
   if(button.dataset.sceneAction==='activate')dispatch('activate-object',selected);
   if(button.dataset.sceneAction==='inspect')dispatch('inspect-object',selected);
   if(button.dataset.sceneAction==='close')dispatch('deselect-object');
  });
- root.addEventListener('pointerdown',e=>{
-  const token=e.target.closest('.held-item');if(!token||root.hidden||!gesture.down(e))return;
-  dragPointer=e.pointerId;dragToken=token;token.setPointerCapture(e.pointerId);skipClick=false;dispatch('carry-start');
-  ghost.innerHTML=token.querySelector('.held-art').innerHTML;e.stopPropagation();
- });
- root.addEventListener('pointermove',e=>{
-  if(!gesture.move(e))return;ghost.hidden=false;root.classList.add('carrying');
-  ghost.style.left=e.clientX+'px';ghost.style.top=e.clientY+'px';e.preventDefault();
- });
- root.addEventListener('pointerup',e=>{
-  if(e.pointerId!==dragPointer)return;
-  const point=gesture.up(e);skipClick=Boolean(point);cancelDrag();
-  if(point){e.preventDefault();dispatch('drop-story-item',point)}
- });
- root.addEventListener('pointercancel',cancelDrag);
- root.addEventListener('lostpointercapture',e=>{if(e.pointerId===dragPointer)cancelDrag()});
  update();
  return {
   get selected(){return selected},

@@ -109,7 +109,7 @@ test('an uncollected basket stops sewing at its cap and reloads without losing b
  const s=fresh();for(let day=0;day<4;day++){for(let i=0;i<130;i++){for(const d of s.dolls)d.hunger=d.energy=d.comfort=100;sim.step(s,1)}sim.changeLight(s);if(sim.isNight(s))sim.changeLight(s)}
  assert.equal(s.basket,BASKET_MAX);assert.equal(sim.restore(JSON.stringify(s)).basket,BASKET_MAX);
 });
-test('packing a keepsake away returns the comfort it gave, so place/refund loops earn nothing',()=>{
+test('packing a keepsake away preserves comfort, so place/refund loops earn nothing',()=>{
  const s=fresh();s.dolls[0].comfort=10;for(let i=0;i<5;i++){sim.place(s,'musicbox','kitchen',0);sim.remove(s,s.decor[0].id)}
  assert.equal(s.dolls[0].comfort,10);assert.equal(s.buttons,36);
 });

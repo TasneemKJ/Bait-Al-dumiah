@@ -148,7 +148,8 @@ export function settingsMarkup(s,{t,button,resetConfirm}){
         ><select data-field="quality">${['auto',
     'low','high'].map(q=>`<option value="${q}" ${s.settings.quality===q?
     'selected':''}>${t(q)}</option>`).join('')}</select></label><p>${t('qualityHelp')}</p
-      ></div><details><summary>${t('helpTitle')}</summary><p
+      ><div class="setting-row"><span>${t('introSetting')}</span>${button('watch-intro',t('watchIntro'),
+    'play')}</div><p>${t('introSettingHelp')}</p></div><details><summary>${t('helpTitle')}</summary><p
     >${t('help')}</p><p>${t('controlsHelp')}</p></details><p
       class="privacy-note">${t('privacyNote')} <a href="./credits.txt" target="_blank"
     rel="noopener">${t('creditsLink')}</a></p><div

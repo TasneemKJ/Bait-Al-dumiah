@@ -15,12 +15,32 @@ import {chimeFraming} from './chime-camera.js';
 import {createCameraMove} from './camera-motion.js';
 import {createRoomPresentation} from './room-presentation.js';
 
+// The camera pose for what the player is looking at: a ritual table, a resident, a room or the whole house.
+function focusPoseFor(st,canvas,residents,house,presentation){
+ const w=canvas.clientWidth,h=canvas.clientHeight;
+ if(st.chimeActive)return chimeFraming(w,h);if(st.teaActive)return teaFraming(w,h);
+ if(st.stitchActive)return stitchFraming(w,h);
+ const p=st.focusedDoll?residents.position(st.focusedDoll):null;
+ if(p){p.add(house.root.position);return portraitFraming(w,h,p.toArray())}
+ return houseFraming(w,h,st.focusedRoom,presentation.value);
+}
+// The story object under a screen point, or null outside the canvas.
+function pickObject({canvas,camera,ray,mouse,objects},x,y){
+ const rect=canvas.getBoundingClientRect();
+ if(!Number.isFinite(x)||!Number.isFinite(y)||x<rect.left||x>rect.right||y<rect.top||y>rect.bottom)return null;
+ mouse.set((x-rect.left)/rect.width*2-1,-(y-rect.top)/rect.height*2+1);ray.setFromCamera(mouse,camera);
+ return ray.intersectObjects(objects.targets,false)[0]?.object.userData.object??null;
+}
+function fitViewport(canvas,camera,renderer,height){
+ const w=canvas.clientWidth,h=canvas.clientHeight,aspect=w/Math.max(1,h);
+ camera.left=-height*aspect/2;camera.right=height*aspect/2;camera.top=height/2;camera.bottom=-height/2;
+ camera.updateProjectionMatrix();renderer.setSize(w,h,false);
+}
+
 export function createWorld(canvas,{onPick,onError}){
- const {renderer,scene,camera,depthFog,controls,hemi,key,fill,house,residents,ghost,
-   courtyard,portraitCache,details,atmosphere,
-   roomEffects,roomFrame,preview,restoration,objects,storyProps,teaTable,sewingPlay,
-     moonChimes,decorSync,slots}=buildScene(canvas);
- 
+ const parts=buildScene(canvas);
+ const {renderer,scene,camera,controls,house,residents,ghost,portraitCache,preview,objects,
+   teaTable,sewingPlay,moonChimes,slots}=parts;
  const st={focusedRoom:null,focusedDoll:null,reducedMotion:false,teaActive:false,stitchActive:false,
    chimeActive:false,chimeSelection:-1,requestedEnabled:true,
    previewPose:null,stitchSections:[],placement:null,disposed:false,lost:false,quality:'',nightMix:0};
@@ -30,39 +50,23 @@ export function createWorld(canvas,{onPick,onError}){
  const presentation=createRoomPresentation(resized=>{if(st.focusedRoom&&
    !st.focusedDoll)cameraMove.moveTo(focusPose(),st.reducedMotion||resized)},
    ()=>Boolean(objects.selected)||!st.requestedEnabled||scenePointers.size>0);
- function focusPose(){if(st.chimeActive)return chimeFraming(canvas.clientWidth,canvas.clientHeight);
- if(st.teaActive)return teaFraming(canvas.clientWidth,canvas.clientHeight);
- if(st.stitchActive)return stitchFraming(canvas.clientWidth,canvas.clientHeight);
- const p=st.focusedDoll?residents.position(st.focusedDoll):null;if(p){p.add(house.root.position);
- return portraitFraming(canvas.clientWidth,canvas.clientHeight,
-   p.toArray())}return houseFraming(canvas.clientWidth,canvas.clientHeight,st.focusedRoom,presentation.value)}
+ function focusPose(){return focusPoseFor(st,canvas,residents,house,presentation)}
  function applyFraming(){cameraMove.moveTo(focusPose(),true)}
  function home(){if(working())return;st.focusedRoom=null;st.focusedDoll=null;applyFraming()}
  home();
  const ray=new T.Raycaster(),mouse=new T.Vector2();
- function objectAt(x,y){
-  const rect=canvas.getBoundingClientRect();
-  if(!Number.isFinite(x)||!Number.isFinite(y)||x<rect.left||x>rect.right||y<rect.top||
-    y>rect.bottom||st.lost||working())return null;
-  mouse.set((x-rect.left)/rect.width*2-1,-(y-rect.top)/rect.height*2+1);ray.setFromCamera(mouse,camera);
-  return ray.intersectObjects(objects.targets,false)[0]?.object.userData.object??null;
- }
+ const objectAt=(x,y)=>st.lost||working()?null:pickObject({canvas,camera,ray,mouse,objects},x,y);
  const tapGesture=createTapGesture();
  const setWorkActivity=id=>applyWorkActivity(w,id);
- function setTeaActive(active){if(active)setWorkActivity('tea');else if(st.teaActive)setWorkActivity(null)}
- function setStitchActive(active){if(active)setWorkActivity('stitch');else if(st.stitchActive)setWorkActivity(null)}
- function setChimeActive(active){if(active)setWorkActivity('lullaby');else if(st.chimeActive)setWorkActivity(null)}
+ const workSwitch=(id,flag)=>active=>{if(active)setWorkActivity(id);else if(st[flag])setWorkActivity(null)};
+ const setTeaActive=workSwitch('tea','teaActive'),setStitchActive=workSwitch('stitch','stitchActive');
+ const setChimeActive=workSwitch('lullaby','chimeActive');
  const picking=createWorkPicking({canvas,camera,house,ray,mouse,teaTable,sewingPlay,
    moonChimes,isActive:id=>id==='tea'?st.teaActive:id==='stitch'?
    st.stitchActive:st.chimeActive,isLost:()=>st.lost,sections:()=>st.stitchSections});
- const {teaAt,teaAimAt,teaPositions,stitchAt,stitchPointAt,stitchPositions,projectStitch,
-   chimeAt,chimePositions,chimePullSpan}=picking;
  const unbindPointers=bindScenePointers({st,canvas,camera,controls,ray,mouse,residents,objects,ghost,
    slots,tapGesture,scenePointers},{onPick,onError});
- function resize(){const w=canvas.clientWidth,h=canvas.clientHeight;
- const aspect=w/Math.max(1,h),height=focusPose().height;
- camera.left=-height*aspect/2;camera.right=height*aspect/2;camera.top=height/2;camera.bottom=-height/2;
- camera.updateProjectionMatrix();renderer.setSize(w,h,false)}
+ const resize=()=>fitViewport(canvas,camera,renderer,focusPose().height);
  let viewportWidth=0,viewportHeight=0;
  function syncViewport(){
   const w=canvas.clientWidth,h=canvas.clientHeight;if(w===viewportWidth&&h===viewportHeight)return false;
@@ -70,16 +74,11 @@ export function createWorld(canvas,{onPick,onError}){
   if(st.focusedRoom||st.focusedDoll)applyFraming();return true;
  }
  syncViewport();
- const w={st,canvas,renderer,scene,camera,controls,depthFog,hemi,key,fill,house,residents,
-   ghost,courtyard,details,atmosphere,roomEffects,roomFrame,
-   preview,restoration,objects,storyProps,teaTable,sewingPlay,moonChimes,decorSync,slots,
-     portraitCache,cameraMove,presentation,picking,working,
+ const w={...parts,st,canvas,cameraMove,presentation,picking,working,
    setWorkActivity,resize,focusPose,applyFraming,tapGesture};
  return {
-  renderer,camera,scene,home,syncViewport,setChimeActive,chimeAt,chimePositions,chimePullSpan,
+  ...picking,renderer,camera,scene,home,syncViewport,setTeaActive,setStitchActive,setChimeActive,
     setChimeSelection(index){st.chimeSelection=Number.isInteger(index)&&index>=0&&index<4?index:-1},
-      setTeaActive,teaAt,teaAimAt,teaPositions,setStitchActive,
-    stitchAt,stitchPointAt,stitchPositions,projectStitch,
   welcomeBack(times){residents.greetAll(times)},
     selectObject(key){return objects.select(key)},clearObjectSelection(){objects.clear()},objectAt,
     objectPositions(){return objects.project(camera,canvas.clientWidth,canvas.clientHeight)},

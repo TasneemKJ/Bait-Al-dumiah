@@ -20,62 +20,66 @@ function steppedLozenge(c,x,y,rx,ry,steps=4){
  c.lineTo(x+rx*(1-t),y+ry*t)}for(let i=1;i<=steps;i++){const t=i/steps;
  c.lineTo(x-rx*t,y+ry*(1-t))}for(let i=1;i<=steps;i++){const t=i/steps;c.lineTo(x-rx*(1-t),y-ry*t)}c.closePath();
 }
+// Quiet limewashed field with an original geometric frieze and sparse jasmine.
+function paintWall(c,colors){
+ // Keep the wall subordinate to residents and furniture at miniature scale.
+ c.globalAlpha=.18;c.strokeStyle=colors[1];c.lineWidth=1.1;
+ for(const y of [66,446]){
+  c.beginPath();c.moveTo(0,y);c.lineTo(512,y);c.stroke();
+  c.globalAlpha=.34;c.fillStyle=colors[1];
+  for(let x=18;x<512;x+=32){steppedLozenge(c,x,y,7,5,2);c.fill()}
+  c.globalAlpha=.18;
+ }
+ for(const [x,y,flip] of [[92,258,1],[256,218,-1],[416,286,1]]){
+  c.strokeStyle=colors[1];c.globalAlpha=.30;c.lineWidth=1.25;
+  c.beginPath();c.moveTo(x,y+54);c.bezierCurveTo(x+flip*20,y+28,x-flip*12,y-6,x+flip*5,y-48);c.stroke();
+  for(let j=0;j<4;j++){
+   const yy=y+34-j*24,xx=x+flip*(j%2?9:-5);c.fillStyle=colors[1];c.globalAlpha=.25;
+   c.beginPath();c.ellipse(xx+flip*8,yy,8.5,3.2,flip*.58,0,Math.PI*2);c.fill();
+  }
+  c.globalAlpha=.52;flower(c,x+flip*4,y-48,5.5,colors[1]);
+ }
+}
+// Eight-point stone stars in a two-tone checker.
+function paintTile(c,colors){
+ const size=64;
+ for(let y=0;y<512;y+=size)for(let x=0;x<512;x+=size){
+  c.globalAlpha=.12;c.fillStyle='#40373a';c.fillRect(x,y,size,size);c.globalAlpha=1;
+  c.fillStyle=(x/64+y/64)%2?colors[0]:'#ead8bd';c.fillRect(x+1.5,y+1.5,size-3,size-3);
+  c.fillStyle=colors[1];c.globalAlpha=.72;star8(c,x+32,y+32,25,10);c.fill();
+  c.fillStyle='#f0dfc5';c.globalAlpha=.92;star8(c,x+32,y+32,14,6);c.fill();
+  c.strokeStyle=colors[1];c.globalAlpha=.7;c.lineWidth=1.4;diamond(c,x+32,y+32,29);c.stroke();
+  c.fillStyle=colors[1];c.globalAlpha=.65;c.fillRect(x+29,y+29,6,6);
+ }
+}
+// A woven border of stepped lozenges around three medallions.
+function paintRug(c,colors){
+ c.fillStyle=colors[1];c.fillRect(5,5,502,502);c.fillStyle=colors[0];c.fillRect(14,14,484,484);
+ c.strokeStyle=colors[1];c.lineWidth=3;for(const inset of [22,49,66])c.strokeRect(inset,inset,512-2*inset,512-2*inset);
+ c.fillStyle=colors[1];for(let i=0;i<18;i++){const x=36+i*26;
+ for(const [a,b] of [[x,35],[x,477],[35,x],[477,x]]){steppedLozenge(c,a,b,7,7,2);c.fill()}}
+ c.globalAlpha=.34;for(let y=103;y<430;y+=58)for(let x=101;x<430;x+=58){star8(c,x,y,8,
+   3.5);c.fillStyle=colors[1];c.fill()}
+ c.globalAlpha=1;for(const [cx,scale] of [[170,.82],[256,1.0],[342,.82]]){
+  steppedLozenge(c,cx,256,66*scale,118*scale,5);c.fillStyle=colors[1];c.fill();
+  steppedLozenge(c,cx,256,48*scale,86*scale,5);c.fillStyle=colors[0];c.fill();
+  star8(c,cx,256,28*scale,11*scale);c.fillStyle=colors[1];c.fill();
+ }
+ c.strokeStyle=colors[1];c.globalAlpha=.8;c.lineWidth=2;for(const y of [82,430]){c.beginPath();
+ for(let x=78;x<=434;x+=18)c.lineTo(x,y+((x/18)%2?7:-7));c.stroke()}
+}
+// A fine weave with scattered flowers.
+function paintFabric(c,colors){
+ c.globalAlpha=.18;c.strokeStyle=colors[1];for(let i=0;i<512;i+=4){c.beginPath();c.moveTo(i,0);
+ c.lineTo(i,512);c.moveTo(0,i);c.lineTo(512,i);c.stroke()}
+ c.globalAlpha=.2;for(let y=24;y<512;y+=64)for(let x=24;x<512;x+=64)flower(c,x,y,9,colors[1]);
+}
+const PAINTERS={wall:paintWall,tile:paintTile,rug:paintRug,fabric:paintFabric};
+
 export function paintedTexture(kind,colors){
  if(kind==='wood')return walnutColor(colors[0]);
  const [image,c]=canvas();c.fillStyle=colors[0];c.fillRect(0,0,512,512);c.lineWidth=1.2;
- if(kind==='wall'){
-  // Quiet limewashed field with an original geometric frieze and sparse jasmine.
-  // Keep the wall subordinate to residents and furniture at miniature scale.
-  c.globalAlpha=.18;c.strokeStyle=colors[1];c.lineWidth=1.1;
-  for(const y of [66,446]){
-   c.beginPath();c.moveTo(0,y);c.lineTo(512,y);c.stroke();
-   c.globalAlpha=.34;c.fillStyle=colors[1];
-   for(let x=18;x<512;x+=32){steppedLozenge(c,x,y,7,5,2);c.fill()}
-   c.globalAlpha=.18;
-  }
-  for(const [x,y,flip] of [[92,258,1],[256,218,-1],[416,286,1]]){
-   c.strokeStyle=colors[1];c.globalAlpha=.30;c.lineWidth=1.25;
-   c.beginPath();c.moveTo(x,y+54);c.bezierCurveTo(x+flip*20,y+28,x-flip*12,y-6,x+flip*5,y-48);c.stroke();
-   for(let j=0;j<4;j++){
-    const yy=y+34-j*24,xx=x+flip*(j%2?9:-5);c.fillStyle=colors[1];c.globalAlpha=.25;
-    c.beginPath();c.ellipse(xx+flip*8,yy,8.5,3.2,flip*.58,0,Math.PI*2);c.fill();
-   }
-   c.globalAlpha=.52;flower(c,x+flip*4,y-48,5.5,colors[1]);
-  }
- }else if(kind==='tile'){
-  const size=64;
-  for(let y=0;y<512;y+=size)for(let x=0;x<512;x+=size){
-   c.globalAlpha=.12;c.fillStyle='#40373a';c.fillRect(x,y,size,size);c.globalAlpha=1;
-   c.fillStyle=(x/64+y/64)%2?colors[0]:'#ead8bd';c.fillRect(x+1.5,y+1.5,size-3,size-3);
-   c.fillStyle=colors[1];c.globalAlpha=.72;star8(c,x+32,y+32,25,10);c.fill();
-   c.fillStyle='#f0dfc5';c.globalAlpha=.92;star8(c,x+32,y+32,14,6);c.fill();
-   c.strokeStyle=colors[1];c.globalAlpha=.7;c.lineWidth=1.4;diamond(c,x+32,y+32,29);c.stroke();
-   c.fillStyle=colors[1];c.globalAlpha=.65;c.fillRect(x+29,y+29,6,6);
-  }
- }else if(kind==='rug'){
-  c.fillStyle=colors[1];c.fillRect(5,5,502,502);c.fillStyle=colors[0];c.fillRect(14,14,484,484);
-  c.strokeStyle=colors[1];c.lineWidth=3;for(const inset of [22,49,66])c.strokeRect(inset,inset,512-2*inset,512-2*inset);
-  c.fillStyle=colors[1];for(let i=0;i<18;i++){const x=36+i*26;
-  for(const [a,b] of [[x,35],[x,477],[35,x],[477,x]]){steppedLozenge(c,a,b,7,7,2);c.fill()}}
-  c.globalAlpha=.34;for(let y=103;y<430;y+=58)for(let x=101;x<430;x+=58){star8(c,x,y,8,
-    3.5);c.fillStyle=colors[1];c.fill()}
-  c.globalAlpha=1;for(const [cx,scale] of [[170,.82],[256,1.0],[342,.82]]){
-   steppedLozenge(c,cx,256,66*scale,118*scale,5);c.fillStyle=colors[1];c.fill();
-   steppedLozenge(c,cx,256,48*scale,86*scale,5);c.fillStyle=colors[0];c.fill();
-   star8(c,cx,256,28*scale,11*scale);c.fillStyle=colors[1];c.fill();
-  }
-  c.strokeStyle=colors[1];c.globalAlpha=.8;c.lineWidth=2;for(const y of [82,430]){c.beginPath();
-  for(let x=78;x<=434;x+=18)c.lineTo(x,y+((x/18)%2?7:-7));c.stroke()}
- }else if(kind==='wood'){
-  for(let i=0;i<160;i++){c.globalAlpha=.07+seeded(i)*.10;
-  c.strokeStyle=i%3?'#50372f':'#f7d0a2';c.lineWidth=.5+seeded(i+2)*2;c.beginPath();
-  const y=i*3.3;c.moveTo(0,y);for(let x=0;x<=512;x+=16)c.lineTo(x,y+Math.sin(x*.025+i)*1.5);c.stroke()}
-  for(let i=0;i<4;i++){c.globalAlpha=.17;c.strokeStyle='#513c32';c.strokeRect(0,i*128,512,128)}
- }else if(kind==='fabric'){
-  c.globalAlpha=.18;c.strokeStyle=colors[1];for(let i=0;i<512;i+=4){c.beginPath();c.moveTo(i,0);
-  c.lineTo(i,512);c.moveTo(0,i);c.lineTo(512,i);c.stroke()}
-  c.globalAlpha=.2;for(let y=24;y<512;y+=64)for(let x=24;x<512;x+=64)flower(c,x,y,9,colors[1]);
- }
+ PAINTERS[kind]?.(c,colors);
  // Fine paper/fibre variation is baked once rather than animated screen noise.
  for(let i=0;i<4500;i++){c.globalAlpha=.028;c.fillStyle=i%2?'#fff8e6':'#312332';
  c.fillRect(seeded(i)*512,seeded(i+77)*512,1+seeded(i+3)*2,1)}

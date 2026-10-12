@@ -1,5 +1,6 @@
 import {ACTIVITIES,ROOMS,ACTIVITY_THRESHOLDS,ACTIVITY_COOLDOWN,ACTIVITY_DAILY_CAP} from './content.js';
-import {activityLevel,activityReward,activityRewardReady,restorationReady,canAfford} from './simulation.js';
+import {activityLevel,activityReward,activityRewardReady,restorationReady,canAfford,
+  physicalActivity} from './simulation.js';
 import {icon} from './icons.js';
 
 function rewardNote(s,a,t,n){const ready=activityRewardReady(s,a.id),
@@ -21,9 +22,8 @@ export function updateActivityStatus(host,s,t,n){
 }
 
 export function activityMarkup(s,t,n,button,result){
- const active=s.activities.active;
  // All three rituals own real scene surfaces, including from this catalog.
- if(['tea','stitch','lullaby'].includes(active?.id))return '';
+ if(physicalActivity(s))return '';
  const outcome=result?.complete?
    `<div class="ritual-result" role="status">${icon('check')}<h3>${t('activityFinished')}</h3><p>${result.practice?
    t('activityPractice'):t('activityReward')+' +'+n(result.reward+result.bonus)+' '+t('buttons')}</p

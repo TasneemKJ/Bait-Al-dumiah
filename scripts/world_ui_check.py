@@ -1,0 +1,207 @@
+"""World-first phone UI check: the house fills the screen, controls are 44px, nothing scrolls sideways.
+
+Serves dist/ (run `npm run build` first) and walks a first session at 390x844 with touch, in English and
+Arabic: Home, the first-launch intro, the house, a room, a selected keepsake, the carried thread, the tools dock
+and a sheet. The intro is captured beat by beat; English lets it reach play on its own, Arabic skips it with a
+tap on the scene, and both reload to prove it never replays. A landscape 844x390 pass and a reduced-motion pass
+capture the intro too.
+For every state it saves a screenshot and measures:
+  - every visible, enabled control is at least 44x44 CSS px (Apple HIG 44pt; Material 48dp);
+  - the page never scrolls sideways;
+  - routine house states leave most of the screen touching the 3D house (world coverage);
+  - the carried item's drag handle is uncovered and no resident tag sits on story paper;
+  - the intro caption reaches WCAG AA (4.5:1) against the pixels rendered behind its text, at every beat;
+  - no console errors.
+Honours PORT (default 4715), CHROMIUM_PATH and SHOTS_DIR (default artifacts/world-ui).
+"""
+import json,os,subprocess,sys,time
+from pathlib import Path
+from playwright.sync_api import sync_playwright
+import caption_contrast
+
+ROOT=Path(__file__).resolve().parent.parent
+PORT=os.environ.get('PORT','4715')
+SHOTS=Path(os.environ.get('SHOTS_DIR',ROOT/'artifacts'/'world-ui'))
+# Routine house states keep at least this share of a sample grid on the house itself.
+MIN_WORLD={'house':.80,'room':.80,'selected':.62,'carrying':.70}
+
+MEASURE='''()=>{
+ const controls='button,a[href],input,select,textarea,summary,[role=button],[data-action],[data-object],[data-room]';
+ const shown=e=>{
+  if(e.closest('[hidden],[inert]'))return false;
+  for(let n=e;n&&n.nodeType===1;n=n.parentElement){const s=getComputedStyle(n);
+   if(s.display==='none'||s.visibility==='hidden'||Number(s.opacity)===0)return false}
+  const r=e.getBoundingClientRect();
+  return r.width>0&&r.height>0&&r.right>0&&r.bottom>0&&r.left<innerWidth&&r.top<innerHeight;
+ };
+ const label=e=>(e.getAttribute('aria-label')||e.dataset.action||e.dataset.homeAction||e.dataset.object||
+  e.dataset.room||e.dataset.sceneAction||e.textContent||e.className).trim().replace(/\\s+/g,' ').slice(0,40);
+ const small=[...document.querySelectorAll(controls)].filter(e=>!e.disabled&&shown(e)).map(e=>{
+  const r=e.getBoundingClientRect();return {label:label(e),w:Math.round(r.width),h:Math.round(r.height)}})
+  .filter(c=>c.w<44||c.h<44);
+ const world=document.querySelector('#world');let hits=0,total=0;
+ for(let y=6;y<innerHeight;y+=12)for(let x=6;x<innerWidth;x+=12){total++;if(document.elementFromPoint(x,y)===world)hits++}
+ // The carried item is a drag handle: its centre must reach it, and no resident tag may sit on paper.
+ const token=document.querySelector('.held-item');let handle=null;
+ if(token&&shown(token)){const r=token.getBoundingClientRect();
+  handle=token.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2))}
+ const tag=document.querySelector('.resident-name');let tagOverPaper=false;
+ if(tag&&shown(tag)){const t=tag.getBoundingClientRect();
+  tagOverPaper=[...document.querySelectorAll('.held-item,.scene-response,.object-ribbon,.objective')].filter(shown)
+   .some(e=>{const r=e.getBoundingClientRect();return t.left<r.right&&r.left<t.right&&t.top<r.bottom&&r.top<t.bottom})}
+ return {handle,tagOverPaper,small,overflow:document.documentElement.scrollWidth>innerWidth||document.body.scrollWidth>innerWidth,
+  world:hits/total,dir:document.documentElement.dir,lang:document.documentElement.lang};
+}'''
+META='''()=>({viewport:document.querySelector('meta[name=viewport]')?.content??'',
+ theme:document.querySelector('meta[name=theme-color]')?.content??'',
+ icon:Boolean(document.querySelector('link[rel=icon]')),touchIcon:Boolean(document.querySelector('link[rel=apple-touch-icon]')),
+ manifest:Boolean(document.querySelector('link[rel=manifest]')),title:document.title})'''
+
+def settle(page,ms=400):
+ page.wait_for_function('!window.dollhouse?.visual()?.cameraMoving',timeout=60000);page.wait_for_timeout(ms)
+
+CAPTION_IN='''()=>{const l=document.querySelector('.intro-layer:not([hidden]) .intro-line');
+ return !l||!window.dollhouse.intro().active||Number(getComputedStyle(l).opacity)>=.99}'''
+def caption_check(report,failures):
+ """Shoots a beat once its line has eased in, then measures the caption against what is behind it."""
+ def check(page,name,shoot):
+  try:page.wait_for_function(CAPTION_IN,timeout=20000)
+  except Exception:pass
+  shoot()
+  m=caption_contrast.measure(page);report[f'{name}-caption']=m
+  if m is None:failures.append(f'{name}: no intro caption to measure')
+  elif m['ratio']<caption_contrast.AA:
+   failures.append(f'{name}: caption contrast {m["ratio"]}:1 is below {caption_contrast.AA}:1 (ink {m["ink"]} on {m["worst"]})')
+ return check
+
+def journey(page,locale,shoot,caption):
+ page.goto(f'http://127.0.0.1:{PORT}/?debug=1')
+ page.wait_for_selector('[data-home-action=play]:not([disabled])',timeout=90000)
+ if locale=='ar':
+  page.locator('[data-home-action=preferences]').click()
+  page.locator('[data-home-action=language]').click()
+  page.locator('[data-home-action=back]').click()
+ shoot('home')
+ page.locator('[data-home-action=play]').click()
+ watch_intro(page,shoot,skip=locale=='ar',caption=lambda n,go:caption(page,f'{locale}-{n}',go))
+ page.wait_for_selector('.dock',timeout=30000)
+ page.wait_for_function('window.dollhouse.objects()?.length>0',timeout=60000);settle(page,800)
+ shoot('house',True)
+ page.locator('[data-room=kitchen]').tap();settle(page)
+ shoot('room',True)
+ if not page.locator('[data-object="prop:mint-tin"]').is_visible():page.locator('[data-object-toggle]').tap()
+ shoot('objects')
+ page.locator('[data-object="prop:mint-tin"]').tap();page.wait_for_selector('[data-scene-action="activate"]')
+ settle(page);shoot('selected',True)
+ page.locator('[data-scene-action="activate"]').tap();page.wait_for_selector('.held-item');settle(page,800)
+ shoot('carrying',True)
+ page.locator('.tools-toggle').tap();page.wait_for_timeout(500);shoot('tools')
+ page.locator('[data-action="panel-household"]:visible').first.tap();page.wait_for_selector('#sheet[open]')
+ page.wait_for_timeout(500);shoot('sheet')
+ no_replay(page)
+
+INTRO='window.dollhouse.intro()'
+def watch_intro(page,shoot,skip=False,prefix='intro',caption=None):
+ """Captures each beat of the intro (checking its caption); then taps the scene to skip or lets it reach play."""
+ def beat(n):
+  name=f'{prefix}-{n}'
+  if caption:caption(name,lambda:shoot(name))
+  else:shoot(name)
+ page.wait_for_function(f'{INTRO}.active',timeout=30000)
+ beat(0)
+ page.wait_for_function(f'{INTRO}.beat>=1',timeout=60000);page.wait_for_timeout(700);beat(1)
+ if skip:
+  # A plain tap on the scene (not the button) skips; it must land in the kitchen with no cut.
+  box=page.viewport_size;page.touchscreen.tap(box['width']//2,box['height']//3)
+  page.wait_for_function(f'!{INTRO}.active',timeout=10000)
+  page.wait_for_function('!document.querySelector(".intro-layer:not([hidden])")',timeout=20000)
+ else:
+  page.wait_for_function(f'{INTRO}.beat>=2',timeout=60000);page.wait_for_timeout(700);beat(2)
+  page.wait_for_function(f'!{INTRO}.active',timeout=60000)
+ page.wait_for_function('window.dollhouse.visual()?.focusedRoom==="kitchen"',timeout=20000)
+ if not page.evaluate('window.dollhouse.state().introSeen'):raise AssertionError('the intro was not recorded')
+
+def no_replay(page):
+ """A reload goes straight to play: the intro is first-launch only."""
+ page.reload();page.wait_for_selector('[data-home-action=play]:not([disabled])',timeout=90000)
+ page.locator('[data-home-action=play]').click();page.wait_for_selector('.dock',timeout=30000)
+ page.wait_for_timeout(600)
+ if page.evaluate(f'{INTRO}.active') or page.locator('.intro-layer:not([hidden])').count():
+  raise AssertionError('the intro replayed after a reload')
+
+def intro_pass(browser,name,shoot_into,viewport,reduced=False,locale='en',caption=None):
+ """A fresh first launch in another shape: landscape, or reduced motion (still shots under the veil)."""
+ context=browser.new_context(viewport=viewport,device_scale_factor=1,has_touch=True,is_mobile=True,
+  reduced_motion='reduce' if reduced else 'no-preference')
+ page=context.new_page();errors=[]
+ page.on('pageerror',lambda e:errors.append(str(e)))
+ page.on('console',lambda m:errors.append(m.text) if m.type=='error' else None)
+ page.goto(f'http://127.0.0.1:{PORT}/?debug=1')
+ page.wait_for_selector('[data-home-action=play]:not([disabled])',timeout=90000)
+ if locale=='ar':
+  page.locator('[data-home-action=preferences]').click();page.locator('[data-home-action=language]').click()
+  page.locator('[data-home-action=back]').click()
+ page.locator('[data-home-action=play]').click()
+ if reduced and not page.evaluate('window.dollhouse.state().settings.reducedMotion'):
+  raise AssertionError('reduced motion was not picked up for a first launch')
+ watch_intro(page,lambda shot:shoot_into(page,f'{name}-{shot}'),prefix='intro',
+  caption=lambda n,go:caption(page,f'{name}-{n}',go))
+ # Software WebGL draws a few frames a second here, and the glide advances per frame, so allow it time to land.
+ page.wait_for_selector('.dock',timeout=30000)
+ page.wait_for_function('!window.dollhouse?.visual()?.cameraMoving',timeout=180000);page.wait_for_timeout(600)
+ shoot_into(page,f'{name}-play')
+ context.close();return errors
+
+def main():
+ SHOTS.mkdir(parents=True,exist_ok=True)
+ server=subprocess.Popen(['node','scripts/serve.mjs','dist'],cwd=ROOT,env={**os.environ,'PORT':PORT},
+  stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
+ time.sleep(2);failures=[];report={}
+ try:
+  with sync_playwright() as p:
+   options={'headless':True,'args':['--no-sandbox','--enable-webgl','--use-gl=angle','--use-angle=swiftshader',
+    '--enable-unsafe-swiftshader']}
+   if os.environ.get('CHROMIUM_PATH'):options['executable_path']=os.environ['CHROMIUM_PATH']
+   browser=p.chromium.launch(**options);caption=caption_check(report,failures)
+   for locale in ['en','ar']:
+    context=browser.new_context(viewport={'width':390,'height':844},device_scale_factor=1,has_touch=True,
+     is_mobile=True)
+    page=context.new_page();errors=[]
+    page.on('pageerror',lambda e,errors=errors:errors.append(str(e)))
+    page.on('console',lambda m,errors=errors:errors.append(m.text) if m.type=='error' else None)
+    def shoot(name,routine=False,page=page,locale=locale):
+     page.screenshot(path=str(SHOTS/f'{locale}-{name}.png'),timeout=120000)
+     m=page.evaluate(MEASURE);report[f'{locale}-{name}']=m
+     for c in m['small']:failures.append(f'{locale}-{name}: "{c["label"]}" is {c["w"]}x{c["h"]} px')
+     if m['overflow']:failures.append(f'{locale}-{name}: the page scrolls sideways')
+     if routine and m['world']<MIN_WORLD[name]:
+      failures.append(f'{locale}-{name}: only {m["world"]:.0%} of the screen reaches the house')
+     if m['handle'] is False:failures.append(f'{locale}-{name}: the carried item is covered')
+     if m['tagOverPaper']:failures.append(f'{locale}-{name}: a resident tag covers story paper')
+     if locale=='ar' and name!='home' and m['dir']!='rtl':failures.append(f'{locale}-{name}: not right-to-left')
+    journey(page,locale,shoot,caption)
+    meta=page.evaluate(META);report[f'{locale}-meta']=meta
+    if 'viewport-fit=cover' not in meta['viewport'] or not meta['theme'] or not meta['icon'] or not meta['manifest']:
+     failures.append(f'{locale}: page meta is incomplete {meta}')
+    failures.extend(f'{locale}: console error {e}' for e in errors)
+    context.close()
+   def shoot_into(page,name):
+    page.screenshot(path=str(SHOTS/f'{name}.png'),timeout=120000)
+    m=page.evaluate(MEASURE);report[name]=m
+    for c in m['small']:failures.append(f'{name}: "{c["label"]}" is {c["w"]}x{c["h"]} px')
+    if m['overflow']:failures.append(f'{name}: the page scrolls sideways')
+   for name,viewport,reduced,locale in [('landscape-en',{'width':844,'height':390},False,'en'),
+     ('still-ar',{'width':390,'height':844},True,'ar')]:
+    failures.extend(f'{name}: console error {e}' for e in intro_pass(browser,name,shoot_into,viewport,reduced,locale,caption))
+   browser.close()
+ finally:
+  server.terminate()
+ (SHOTS/'report.json').write_text(json.dumps(report,indent=1,ensure_ascii=False))
+ for key,m in report.items():
+  if key.endswith('-caption') and m:print(f'{key:24} contrast {m["ratio"]}:1 over {m["pixels"]} px, ink {m["ink"]} worst {m["worst"]}')
+  if m and 'world' in m:print(f'{key:16} world {m["world"]:.0%}  small {len(m["small"])}  overflow {m["overflow"]}')
+ if failures:
+  print('FAILED:\n '+'\n '.join(failures));sys.exit(1)
+ print('world UI check passed')
+
+if __name__=='__main__':main()

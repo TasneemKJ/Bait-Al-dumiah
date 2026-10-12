@@ -1,7 +1,7 @@
 import {earn,emit,checkMilestones,growBond,activityDef,activityLevel,completeActivity} from './sim-core.js';
 import {createTea,stepTea,releaseTea} from './sim-tea.js';
 import {stitchActive,stitchSections,createStitch,releaseStitch} from './sim-stitch.js';
-import {stepChimes,cancelChime} from './sim-chimes.js';
+import {stepChimes,cancelChime,replayChimes} from './sim-chimes.js';
 import {clamp,has,fail} from './sim-util.js';
 import {isNight,wishFor,bondLevel,wishReward,currentStreak,inFavoriteRoom,isContent,
   secretCozyNeeded,coziness} from './sim-queries.js';
@@ -19,6 +19,8 @@ export {activityLevel,activityReward,activityRewardReady,checkMilestones,storySt
 export {controlTea,emptyTeaCup,releaseTea,serveTea,teaStatus} from './sim-tea.js';
 export {interactStory,playStoryKeepsake} from './sim-story.js';
 export {SAVE_VERSION,migrate,readSave,restore} from './save-codec.js';
+// The first-launch intro plays once: true the first time a house claims it, false ever after.
+export function claimIntro(s){if(s.introSeen)return false;s.introSeen=true;return true}
 export const unclaimed=s=>MILESTONES.filter(m=>s.achieved.includes(m.id)&&!s.milestones.includes(m.id));
 export function claim(s,id){
  const m=MILESTONES.find(x=>x.id===id);
@@ -91,15 +93,13 @@ export function place(s,item,room,slot){
  if(s.buttons<entry.price)return fail('funds');
  s.buttons-=entry.price;
  s.decor.push({id:s.nextId++,item,room,slot,rotation:0,originRoom:room,active:false,tendedDay:0,lastUse:-10});
- for(const d of s.dolls)if(d.room===room)d.comfort=clamp(d.comfort+entry.cozy);
  const loved=s.dolls.filter(d=>d.room===room&&DOLLS.find(x=>x.id===d.id).favItem===item).map(d=>d.id);
  checkMilestones(s);
  return {ok:true,cost:entry.price,loved};
 }
-// Packing away returns the price and the comfort that placing gave, so a place/refund loop earns nothing.
+// Furniture benefits come from what is placed, never a one-time comfort credit to refund.
 export function remove(s,id){const index=s.decor.findIndex(d=>d.id===id);if(index<0)return fail('invalid');
 const item=s.decor.splice(index,1)[0],entry=CATALOG.find(i=>i.id===item.item),refund=entry.price;
-for(const d of s.dolls)if(d.room===(item.originRoom??item.room))d.comfort=clamp(d.comfort-entry.cozy);
 s.buttons=Math.min(9999,s.buttons+refund);return {ok:true,refund}}
 export function moveDecor(s,id,room,slot){
  const item=s.decor.find(d=>d.id===id);
@@ -109,17 +109,18 @@ export function moveDecor(s,id,room,slot){
 }
 export function rotateDecor(s,id){const item=s.decor.find(d=>d.id===id);if(!item)return fail('invalid');
 item.rotation=((item.rotation??0)+1)%4;return {ok:true}}
+// A used keepsake reports what it is and where it stands, so the interface can answer without a lookup.
 export function useDecor(s,id){
  const item=s.decor.find(d=>d.id===id);if(!item)return fail('invalid');
  if(!['plant','lamp','musicbox','mobile'].includes(item.item))return fail('notInteractive');
+ const done=(effect,extra={})=>({ok:true,id,item:item.item,room:item.room,effect,...extra});
  if(item.item==='plant'){
   if(item.tendedDay===s.day)return fail('alreadyTended');
-  item.tendedDay=s.day;item.lastUse=s.elapsed;return {ok:true,id,effect:'water'};
+  item.tendedDay=s.day;item.lastUse=s.elapsed;return done('water');
  }
  item.tendedDay=s.day;item.lastUse=s.elapsed;
- if(item.item==='lamp'){item.active=!item.active;
- return {ok:true,id,effect:item.active?'light':'dim',active:item.active}}
- return {ok:true,id,effect:item.item==='musicbox'?'wind':'rock'};
+ if(item.item==='lamp'){item.active=!item.active;return done(item.active?'light':'dim',{active:item.active})}
+ return done(item.item==='musicbox'?'wind':'rock');
 }
 export function moveDoll(s,id,room){const doll=s.dolls.find(d=>d.id===id);
 if(!doll||!has(ROOMS,room))return fail('invalid');doll.room=room;return {ok:true,favorite:inFavoriteRoom(doll)}}
@@ -143,7 +144,7 @@ export function mendDoor(s){
  if(!doorReady(s,step))return fail('doorNeeds',{needs:step.needs});
  if(s.buttons<step.cost)return fail('funds');
  s.buttons-=step.cost;s.door++;s.unease=clamp(s.unease-6);checkMilestones(s);
- return {ok:true,step:step.id,cost:step.cost};
+ return {ok:true,step:step.id,cost:step.cost,opened:doorOpen(s)};
 }
 // Gifts cycle through the visitor's keepsakes in order, one a night, once the door is open.
 export function leaveGift(s){
@@ -173,7 +174,23 @@ export function beginActivity(s,id){
  s.activities.active={id,cursor:0,pattern:activityPattern(s,id),phase:id==='stitch'?
    'study':'play',hint:false};return {ok:true};
 }
-export function endActivity(s){releaseTea(s);releaseStitch(s);cancelChime(s);s.activities.active=null;return {ok:true}}
+// Ending a run hands back any story beat it completed, so callers never read the finished run.
+export function endActivity(s){
+ const storyResult=s.activities.active?.result?.storyResult??null;
+ releaseTea(s);releaseStitch(s);cancelChime(s);s.activities.active=null;return {ok:true,storyResult};
+}
+// Replay a physical ritual from its own surface: a finished run restarts; a lullaby still being played
+// replays its phrase for free instead.
+const REPLAY_PHASE={tea:'served',stitch:'finished',lullaby:'finished'};
+export function replayActivity(s,id){
+ const active=s.activities.active;if(s.paused)return fail('pausedActivity');
+ if(!REPLAY_PHASE[id]||active?.id!==id)return fail('invalid');
+ if(active.phase!==REPLAY_PHASE[id]){
+  if(id!=='lullaby')return fail('invalid');
+  const phrase=replayChimes(s);return phrase.ok?{ok:true,restarted:false}:phrase;
+ }
+ endActivity(s);const begun=beginActivity(s,id);return begun.ok?{ok:true,restarted:true}:begun;
+}
 export function startRecall(s){const a=s.activities.active;if(s.paused)return fail('pausedActivity');
 if(a?.id!=='stitch'||a.phase!=='study')return fail('invalid');a.phase='recall';return {ok:true}}
 export function toggleActivityHint(s){const a=s.activities.active;if(s.paused)return fail('pausedActivity');

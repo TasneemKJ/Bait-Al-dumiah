@@ -4,8 +4,7 @@ import {ACTIVITY_ROOM} from './content.js';
 
 export function installView(app){
  const {session,audio,canvas,host}=app;
- const physicalActivity=()=>['tea','stitch',
-   'lullaby'].includes(app.state.activities.active?.id)?app.state.activities.active.id:null;
+ const physicalActivity=()=>sim.physicalActivity(app.state);
  function cancelWorkInput(){app.teaUI?.cancel();app.stitchUI?.cancel();app.chimeUI?.cancel()}
  // Inactive adapters restore their canvas attributes before the active owner
  // updates them. A rapid tea/sewing transition must keep the correct shortcuts.
@@ -18,13 +17,13 @@ export function installView(app){
   app.lastChimeTone=chime?.tone??null;
  }
  // Reattach scene controls synchronously; a slow graphics frame must not hide the UI.
- function refreshUI(){app.ui.refresh();app.roomViews.update();
+ function refreshUI(){app.ui.refresh();app.updateSaveStatus?.();app.roomViews.update();
  app.objectControls?.update();app.storyUI?.update();updateWorkUI();app.homeUI?.refresh()}
  function syncPause(){app.state.paused=!session.entered||app.manualPause||
    Boolean(app.panelOpen&&app.panelOpen!=='activities')||
    document.hidden||app.fatal;if(app.state.paused)cancelWorkInput();audio.setPaused(app.state.paused)}
  function enterWork(id){
-  if(!['tea','stitch','lullaby'].includes(id))return;
+  if(!sim.PHYSICAL_ACTIVITIES.includes(id))return;
   if(id==='lullaby')audio.stopVoices();
   if(app.ui.panel)app.ui.close();app.ui.collapseTools();app.storyUI?.clear();
   app.objectControls?.collapse();app.world?.clearObjectSelection();
@@ -33,10 +32,10 @@ export function installView(app){
   app.world?.setChimeActive(id==='lullaby');app.world?.setEnabled(!app.state.paused);
   updateWorkUI();app.roomViews.update();app.objectControls?.update();canvas.focus({preventScroll:true});app.save();
  }
- function leaveWork(){
-  const id=physicalActivity();if(!id)return;
-  const storyResult=app.state.activities.active?.result?.storyResult;
-  cancelWorkInput();sim.endActivity(app.state);app.world?.setTeaActive(false);
+ // Leaves the active ritual; a surface that names its ritual only leaves its own.
+ function leaveWork(only=null){
+  const id=physicalActivity();if(!id||(only&&only!==id))return;
+  cancelWorkInput();const {storyResult}=sim.endActivity(app.state);app.world?.setTeaActive(false);
   app.world?.setStitchActive(false);app.world?.setChimeActive(false);
   app.world?.setEnabled(!app.panelOpen&&!app.manualPause&&!app.fatal);updateWorkUI();
   host.dataset.focusRoom=ACTIVITY_ROOM[id];host.dataset.focusDoll='';app.storyUI?.clear();

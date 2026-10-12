@@ -18,7 +18,7 @@ app.world?.clearObjectSelection();app.objectControls?.collapse()}return;},
 'camera':(app,value,origin)=>{app.storyUI?.clear();app.world?.clearObjectSelection();app.world?.home();
 app.host.dataset.focusRoom='';app.host.dataset.focusDoll='';app.roomViews.update();
 app.objectControls?.update();return;},
-'focus-doll':(app,value,origin)=>{if(app.state.dolls.some(d=>d.id===value)){app.ui.close();
+'focus-doll':(app,value,origin)=>{if(sim.dollRoom(app.state,value)){app.ui.close();
 if(app.world?.focusDoll(value)){app.host.dataset.focusDoll=value;
 app.host.dataset.focusRoom='';app.roomViews.update()}}return;},
 'focus-room':(app,value,origin)=>{if(app.world?.focusRoom(value)){if(objectInfo(app.state,

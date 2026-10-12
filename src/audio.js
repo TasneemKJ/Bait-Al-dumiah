@@ -115,6 +115,21 @@ export class DollhouseAudio{
  }
  effect(kind){
   if(!this.enabled||!this.context||this.paused||this.disposed)return;
+  const care=kind?.startsWith('care:')?kind.slice(5):null;
+  if(care){
+   const now=this.context.currentTime;
+   if(care==='tea'){
+    this.track(voice(this.context,this.master,640,now,.22,.023,'sine',2200));
+    this.track(playTinTouch(this.context,this.master,now+.13));
+   }else if(care==='play'){
+    this.track(playWoodTap(this.context,this.master,now,.026));
+    this.track(playWoodTap(this.context,this.master,now+.19,.018));
+   }else if(care==='rest'||care==='soothe'){
+    this.track(playClothTouch(this.context,this.master,now));
+    if(care==='soothe')this.track(playWoodTap(this.context,this.master,now+.16,.012));
+   }
+   return;
+  }
   if(kind==='mint-tin')return this.track(playTinTouch(this.context,this.master,this.context.currentTime));
   if(kind==='moon-bed')return this.track(playClothTouch(this.context,this.master,this.context.currentTime));
   const t=this.context.currentTime,notes=kind==='secret'?[293.665,311.127,
@@ -122,6 +137,25 @@ export class DollhouseAudio{
     783.991,659.255]:kind==='mobile'?[392,493.883,587.33]:[440,523.251];
   notes.forEach((f,i)=>this.tone(f,t+i*.16,1.2,.035));
  }
+ get ready(){return Boolean(this.context&&this.enabled&&!this.paused&&!this.disposed)}
+ // The intro plays on its own bus under the master, so a skip fades it instead of cutting it.
+ introCue(cue,delay=0){
+  if(!this.ready||!cue)return null;const ctx=this.context,at=ctx.currentTime+Math.max(0,delay);
+  if(!this.introBus){this.introBus=ctx.createGain();this.introBus.gain.value=1;this.introBus.connect(this.master)}
+  const bus=this.introBus,record=cue.kind==='pluck'?playPluck(ctx,bus,cue.frequency,at,cue.length,cue.volume):
+   cue.kind==='drone'?voice(ctx,bus,cue.frequency,at,cue.length,cue.volume,'sine',900,cue.attack):
+   cue.kind==='wood'?playWoodTap(ctx,bus,at,cue.volume):cue.kind==='tin'?playTinTouch(ctx,bus,at):null;
+  if(record){record.intro=true;this.track(record)}return record;
+ }
+ // Skip: ramp the intro bus to silence over `seconds` (never a hard cut), then release its voices.
+ introFade(seconds=.2){
+  const bus=this.introBus;this.introBus=null;if(!bus||!this.context)return;const t=this.context.currentTime;
+  bus.gain.cancelScheduledValues(t);bus.gain.setValueAtTime(bus.gain.value,t);
+  bus.gain.linearRampToValueAtTime(0,t+seconds);
+  setTimeout(()=>{for(const n of [...this.nodes])if(n.intro)n.stop();bus.disconnect()},seconds*1000+40);
+ }
+ // The lullaby waits for the resolve chord to breathe before its first note.
+ holdLullaby(seconds){if(this.context)this.next=Math.max(this.next,this.context.currentTime+seconds)}
  dispose(){if(this.disposed)return;this.disposed=true;this.enableGeneration++;this.enabled=false;
  this.stopVoices();this.context?.close().catch(()=>{})}
 }

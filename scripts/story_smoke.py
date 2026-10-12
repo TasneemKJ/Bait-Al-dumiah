@@ -5,6 +5,8 @@ Serves dist/ (run `npm run build` first). Honours PORT (default 4413) and CHROMI
 import os,subprocess,sys,time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from scene_gestures import scene_ready
+from game_entry import skip_intro
 
 ROOT=Path(__file__).resolve().parent.parent
 PORT=os.environ.get('PORT','4413')
@@ -24,7 +26,7 @@ def main():
    page.on('console',lambda m:errors.append(m.text) if m.type=='error' else None)
    page.goto(f'http://127.0.0.1:{PORT}/?debug=1')
    page.wait_for_selector('[data-home-action=play]:not([disabled])',timeout=60000)
-   page.click('[data-home-action=play]');page.wait_for_selector('.dock',timeout=30000)
+   page.click('[data-home-action=play]');skip_intro(page);page.wait_for_selector('.dock',timeout=30000)
    page.wait_for_function('window.dollhouse.objects()?.length>0',timeout=30000)
    page.keyboard.press('Space');page.wait_for_timeout(300);assert state(page)['paused'] is True,'Space pauses'
    page.keyboard.press('Space');page.wait_for_timeout(300);assert state(page)['paused'] is False,'Space resumes'
@@ -34,13 +36,20 @@ def main():
    page.locator('[data-scene-action="activate"]').click();page.wait_for_timeout(800)
    assert state(page)['story']['lastAction']=='prop:mint-tin','activating the tin advances the story'
    assert page.locator('.held-item').count()==1,'the red thread is carried'
-   page.locator('[data-room=studio]').click();page.wait_for_timeout(1200)
+   page.locator('[data-room=studio]').click()
+   # Software WebGL advances the flight by rendered frames, not wall time.
+   # Wait for measured HUD/camera stability before choosing the one drop point.
+   scene_ready(page)
    target=[o for o in page.evaluate('window.dollhouse.objects()') if o['key']=='prop:sewing-machine'][0]
+   assert page.evaluate('p=>document.elementFromPoint(p.x,p.y)?.id === "world"',target),'the sewing destination is exposed'
    token=page.locator('.held-item').bounding_box()
    page.mouse.move(token['x']+token['width']/2,token['y']+token['height']/2);page.mouse.down()
    page.mouse.move(token['x']+token['width']/2+10,token['y']+token['height']/2-10,steps=3)
    page.mouse.move(target['x'],target['y'],steps=8)
    assert page.evaluate("!document.querySelector('.carry-ghost').hidden"),'the carried item follows the pointer'
+   current=page.evaluate('window.dollhouse.objects().find(o=>o.key==="prop:sewing-machine")')
+   assert abs(current['x']-target['x'])<.25 and abs(current['y']-target['y'])<.25,'the sewing destination stays fixed throughout the drag'
+   assert page.evaluate('p=>document.elementFromPoint(p.x,p.y)?.id === "world"',target),'the sewing destination stays exposed throughout the drag'
    page.mouse.up();page.wait_for_timeout(800)
    assert page.evaluate('Boolean(window.dollhouse.stitch())'),'dropping the thread on the sewing machine starts mending'
    browser.close()

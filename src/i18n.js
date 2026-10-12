@@ -1,8 +1,13 @@
 // Stable locale data is kept verbatim; new physical-play copy stays in this
 // entry point. Existing imports, locale IDs and fallback behavior are unchanged.
-import {strings} from './locale-data.js';
+import {strings,translate} from './locale-data.js';
+import {INTRO_BEATS} from './content.js';
 export {strings,translate,number} from './locale-data.js';
 Object.assign(strings.en,{
+ introApproach:'A little house, waiting with its lamps lit.',introReveal:'Three little souls live behind these walls.',
+   introSettle:'Start in the kitchen. Lina has the kettle on.',
+ introSkip:'Skip',introSkipLabel:'Skip the intro',introSetting:'Opening scene',watchIntro:'Watch intro',
+   introSettingHelp:'Replay the short opening over the house.',
  homeEntryChanged:'Your saved house changed in another tab. Reload to open the latest save.',
    homeEntryUnreadable:'Your saved house could not be checked. Reload before continuing. Nothing was replaced.',
  homePlay:'Play',homeContinue:'Continue',homePreferences:'Preferences',homeBack:'Back',
@@ -27,6 +32,7 @@ Object.assign(strings.en,{
  saveExported:'A copy of your house was saved.',saveExportFailed:'This browser could not save a copy.',
    saveImported:'Your house came back from the copy.',
      saveImportFailed:'That file is not a house this game can open. Nothing changed.',
+ saveImportNotSaved:'Browser storage could not keep this copy. Your current house is unchanged.',
  saveRecovered:'Your last save could not be read, so a fresh house opened. '+
   'The old save is kept safely in this browser.',
  'object-moon-mobileStory':'Noor’s hanging moons remember a little song. Touch them again to listen and play.',
@@ -59,6 +65,10 @@ Object.assign(strings.en,{
  'activityRule-lullaby':'Watch and listen. Pull the hanging charms in reverse order; the little moon repeats the song.',
 });
 Object.assign(strings.ar,{
+ introApproach:'بيت صغير، قناديله مضوية وناطرك.',introReveal:'ورا هالحيطان ساكنين تلات أرواح صغار.',
+   introSettle:'ابدأ من المطبخ. لينا حاطّة الإبريق عالنار.',
+ introSkip:'تخطّى',introSkipLabel:'تخطّى المقدّمة',introSetting:'مشهد البداية',watchIntro:'شوف المقدّمة',
+   introSettingHelp:'رجّع المشهد القصير اللي بيفتح عالبيت.',
  homeEntryChanged:'حفظ بيتك تغيّر بتبويب تاني. حمّل الصفحة من جديد لتفتح آخر حفظ.',
    homeEntryUnreadable:'ما قدرنا نتأكّد من حفظ بيتك. حمّل الصفحة من جديد قبل ما تكمّل. ما استبدلنا شي.',
  homePlay:'العب',homeContinue:'كمّل',homePreferences:'تفضيلات',homeBack:'رجوع',
@@ -86,6 +96,7 @@ Object.assign(strings.ar,{
    saveExport:'احفظ نسخة',saveImport:'افتح نسخة',
  saveExported:'انحفظت نسخة من بيتك.',saveExportFailed:'هالمتصفح ما قدر يحفظ نسخة.',
    saveImported:'رجع بيتك من النسخة.',saveImportFailed:'هالملف مش بيت بتعرف اللعبة تفتحه. ما تغيّر شي.',
+ saveImportNotSaved:'تخزين المتصفح ما قدر يحفظ هالنسخة. بيتك الحالي ما تغيّر.',
  saveRecovered:'ما قدرنا نقرا آخر حفظ، فانفتح بيت جديد. الحفظ القديم محفوظ بأمان بهالمتصفح.',
  'object-moon-mobileStory':'قميرات نور المعلّقة حافظين أغنية صغيرة. المسهن كمان مرة لتسمع وتعزف.',
  "stitchFinished":"هالخياطة خلصت. المس القماش جنب الطوق لترجع لغرفة الخياطة.",
@@ -116,3 +127,10 @@ Object.assign(strings.ar,{
  'activity-lullabyIntro':'اسحب زينة القمر واتركها ترنّ. اسمع الأغنية وردّها من الآخر للأول.',
  'activityRule-lullaby':'شوف واسمع. اسحب القطع من آخر نغمة للأولى؛ القمر الصغير بيعيد الأغنية.',
 });
+
+// The intro's line table: one short line per beat in English and Arabic, plus the line in the playing language.
+// `voice` is an optional recorded or synthesized narration for the beat; none ships yet.
+export function introLines(locale){
+ return INTRO_BEATS.map(beat=>({beat:beat.id,en:strings.en[beat.line],ar:strings.ar[beat.line],
+   text:translate(locale,beat.line),voice:beat.voice??null}));
+}

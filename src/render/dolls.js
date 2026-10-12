@@ -32,22 +32,25 @@ function skirt(parent,color){
  createLaceHem(parent,color);return pivot;
 }
 const ribbon=fabricBow;
+// One articulated leg: sock, knee, ankle band, foot and, for Sami, a tailored trouser leg.
+function createLeg(body,def,sign,skin){
+ const leg=new T.Group();leg.name='articulated-leg';leg.position.set(sign*.12,.40,0);body.add(leg);
+ const hosiery=createSock(leg,skin);leg.sock=hosiery.sock;leg.knee=hosiery.knee;
+ ring(leg,0,-.095,0,.063,.008,def.color,true);
+ leg.foot=createFoot(leg,def,sign);
+ if(def.id==='sami'){const trousers=new T.Mesh(trouserLegGeometry(sign),
+   dollFabric(def.id));trousers.name='tailored-trouser-leg';
+ trousers.castShadow=trousers.receiveShadow=true;leg.add(trousers);leg.trousers=trousers;}
+ const shin=new T.Group();shin.name='articulated-shin';shin.userData.noBatch=true;
+ shin.position.y=-.058;leg.add(shin);leg.shin=shin;
+ for(const child of [leg.sock,leg.foot]){child.position.y+=.058;shin.add(child)}batch(leg);
+ return leg;
+}
+
 function makeDoll(def){
  const root=new T.Group(),body=new T.Group();root.add(body);
  const skin=bisqueMaterial();
- const legs=[];
- for(const sign of [-1,1]){
-  const leg=new T.Group();leg.name='articulated-leg';leg.position.set(sign*.12,.40,0);body.add(leg);legs.push(leg);
-  const hosiery=createSock(leg,skin);leg.sock=hosiery.sock;leg.knee=hosiery.knee;
-  ring(leg,0,-.095,0,.063,.008,def.color,true);
-  leg.foot=createFoot(leg,def,sign);
-  if(def.id==='sami'){const trousers=new T.Mesh(trouserLegGeometry(sign),
-    dollFabric(def.id));trousers.name='tailored-trouser-leg';
-  trousers.castShadow=trousers.receiveShadow=true;leg.add(trousers);leg.trousers=trousers;}
-  const shin=new T.Group();shin.name='articulated-shin';shin.userData.noBatch=true;
-  shin.position.y=-.058;leg.add(shin);leg.shin=shin;
-  for(const child of [leg.sock,leg.foot]){child.position.y+=.058;shin.add(child)}batch(leg);
- }
+ const legs=[-1,1].map(sign=>createLeg(body,def,sign,skin));
  const clothSkirt=def.id!=='sami'?skirt(body,def.id):null;
  const torso=new T.Mesh(bodiceGeometry(),shirtFabric(def.id));
  torso.name='tailored-bodice';torso.castShadow=torso.receiveShadow=true;body.add(torso);
@@ -124,7 +127,7 @@ export function createDolls(parent){
    {const k=wishGlowStrength(state,d.id),o=wishGlowOpacity(k,t,!motion);
    v.wishGlow.visible=k>0;v.wishGlow.material.opacity=o}
    v.halo.visible=selected===d.id;v.tea.visible=d.action==='tea';v.steam.update(t,d.action==='tea',!motion);
-   v.comfortHearts.update(t,d.action==='soothe',!motion);
+   v.comfortHearts.update(t,d.action==='soothe',!motion,d.lastCare);
    v.sleepCrescent.update(t,d.action==='rest',!motion);v.sparkles.visible=d.action==='play';
    v.sparkles.rotation.y=motion?t*.7:0;
    v.body.position.y=motion?(d.action==='play'?Math.abs(Math.sin(t*4.6))*.065:0):0;

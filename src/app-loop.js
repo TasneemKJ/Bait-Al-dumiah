@@ -8,12 +8,15 @@ export function installLoop(app){
  function frame(now){if(stopped)return;const dt=Math.min(.1,Math.max(0,(now-app.last)/1000));app.last=now;
   if(!document.hidden&&!app.fatal&&!app.session.entered&&
     app.homeUI?.previewVisible){app.world?.render(app.state,0,null)}
-  if(!document.hidden&&!app.fatal&&app.session.entered){app.updateWorkUI(dt);app.session.advance(app.state,dt);
+  // The intro holds the house still: no simulation, saves or notices until play begins where it lands.
+  if(!document.hidden&&!app.fatal&&app.session.entered)app.intro?.update(now);
+  if(!document.hidden&&!app.fatal&&app.session.entered&&app.intro?.active)app.world?.render(app.state,dt,null);
+  else if(!document.hidden&&!app.fatal&&app.session.entered){app.updateWorkUI(dt);app.session.advance(app.state,dt);
   if(app.state.events.length)for(const event of app.state.events.splice(0))app.announce(event);
   if(app.notices.length&&now>=app.noticeAt&&!app.physicalActivity())app.showNotice(now);
   app.world?.render(app.state,dt,app.ui.selected);
   app.residentLabel.update(app.state,app.ui.selected,app.host.dataset.focusRoom||
-    (app.host.dataset.focusDoll?app.state.dolls.find(d=>d.id===app.host.dataset.focusDoll)?.room:''),
+    (sim.dollRoom(app.state,app.host.dataset.focusDoll)??''),
     app.world?.project(app.ui.selected,.05),Boolean(app.ui.panel||app.ui.placement||
       app.state.paused||app.storyUI?.selected||app.physicalActivity()));
   if(app.physicalActivity()!=='lullaby')app.audio.tick(sim.isNight(app.state));
@@ -28,7 +31,7 @@ export function installLoop(app){
  bindPlacementEscape(window,()=>{if(!app.ui.placement)return false;app.ui.clearPlacement();
  app.world?.setPlacement(null);app.roomViews.update();return true});
  window.addEventListener('keydown',event=>{
-  if(!app.session.entered||event.defaultPrevented)return;
+  if(!app.session.entered||event.defaultPrevented||event.altKey||event.ctrlKey||event.metaKey)return;
   if(app.physicalActivity())return;
   if(event.key==='Escape'&&!app.ui.panel&&!app.ui.placement&&(app.storyUI?.selected||
     app.carrying)){event.preventDefault();app.dispatch('deselect-object');return}
@@ -36,7 +39,7 @@ export function installLoop(app){
   if(event.key==='Escape'){if(app.ui.placement){app.ui.clearPlacement();
   app.world?.setPlacement(null)}else if(app.ui.panel)app.ui.close();return}
   if(app.panelOpen)return;
-  if(event.code==='Space'){event.preventDefault();app.dispatch('pause')}
+  if(event.code==='Space'){event.preventDefault();if(!event.repeat)app.dispatch('pause')}
   if(event.key==='h'||event.key==='H'){event.preventDefault();app.dispatch('camera')}
   if(event.key==='+'||event.key==='='){event.preventDefault();app.dispatch('zoom-in')}
   if(event.key==='-'){event.preventDefault();app.dispatch('zoom-out')}
@@ -56,6 +59,7 @@ export function installDebug(app){
     teaObjects:()=>app.world?.teaPositions(),stitch:()=>sim.stitchStatus(app.state),
       stitchObjects:()=>app.world?.stitchPositions(),projectStitch:(x,y,
     height)=>app.world?.projectStitch(x,y,height),chimes:()=>sim.chimeStatus(app.state),
-      chimeObjects:()=>app.world?.chimePositions(),chimePullSpan:()=>app.world?.chimePullSpan()};
+      chimeObjects:()=>app.world?.chimePositions(),chimePullSpan:()=>app.world?.chimePullSpan(),
+      intro:()=>({active:Boolean(app.intro?.active),beat:app.intro?.beat??-1})};
  }
 }

@@ -28,9 +28,11 @@ export function practicalLight(roomId,mix,lamps,cue=1,focused=false){
  const practical=roomLighting(roomId,mix),energy=Number.isFinite(lamps)?Math.max(0,
    lamps):0,gain=Number.isFinite(cue)?Math.max(0,cue):1;
  return {color:practical.color,distance:practical.distance,
-   intensity:(energy*PRACTICAL_SHARE+practical.intensity)*gain*(focused?1.12:1)};
+   intensity:(energy*PRACTICAL_SHARE+practical.intensity)*gain*(1+.12*focusWeight(focused))};
 }
 const PRACTICAL_SHARE=.22;
+// A focused room's lamp lifts 12%; a weight between 0 and 1 eases it so focus changes never jump in brightness.
+const focusWeight=f=>f===true?1:Number.isFinite(f)?Math.min(1,Math.max(0,f)):0;
 export function detail(width,height,preference='auto',dpr=1){
  const level=preference==='high'?'high':preference==='low'?'low':Math.min(width,height)<700?'low':'high';
  return {level,pixelRatio:clamp(dpr,1,level==='low'?1.25:1.75),shadows:level==='high'};

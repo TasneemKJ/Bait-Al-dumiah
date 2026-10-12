@@ -2,6 +2,7 @@
 Each merged batch adds an entry and a `vX.Y.Z` tag.
 
 ## Unreleased
+- Onboarding: a first launch opens with an 8.4 s in-engine intro over the real house (approach, reveal, settle into the kitchen), one EN/AR line per beat, skippable from frame 1 by tap, key or a 44px Skip; dragging grabs the camera. Springs carry velocity from the intro into play; still shots under reduced motion; optional synthesized score after the Play gesture. Saved as `introSeen` (older saves never replay it); Settings has Watch intro. Room camera glides are now critically damped springs that keep their velocity when retargeted.
 - Atmosphere: the kitchen kettle now breathes soft grey-blue steam puffs that drift toward the spout side (the old thin tubes were invisible); static under reduced motion. Docs: `docs/NATIVE-REVIEW.md` lists the Arabic lines still awaiting a native reader.
 - Atmosphere: a CSS-only vignette and paper-grain layer between the canvas and the HUD (hidden under prefers-contrast and reduced-transparency), a slightly stronger kettle steam, and brighter night windows.
 - Atmosphere: soft warm light pools on the floor under the parlor lamp and every owned lamp (brightness follows the lamp), and a faint steam wisp from the kitchen kettle while Lina is idle. No new lights; steam is static under reduced motion and hidden when paused.

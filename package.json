@@ -13,7 +13,8 @@
     "verify": "npm run lint && npm test && npm run build",
     "preview": "node scripts/serve.mjs dist",
     "test:browser": "python scripts/play_check.py && python scripts/story_smoke.py",
-    "lint": "eslint src tests scripts eslint.config.js"
+    "lint": "eslint src tests scripts eslint.config.js",
+    "test:ui": "python scripts/ui_check.py && python scripts/tools_ui_checks.py"
   },
   "dependencies": {
     "three": "0.180.0"
