@@ -37,3 +37,16 @@ test('hidden paper does not hide the name tag',async()=>{
  label.update(s,'lina',lina.room,{x:245,y:600},false);
  assert.equal(label.node.hidden,false);
 });
+
+test('a resident name tag hides rather than cover the open House Tools drawer or the placement card',async()=>{
+ const {createResidentLabel}=await import('../src/resident-label.js');
+ const s=createState(),lina=s.dolls.find(d=>d.id==='lina');
+ const drawer=element({left:12,right:378,top:560,bottom:830});
+ globalThis.document={createElement:()=>element()};globalThis.innerWidth=390;globalThis.innerHeight=844;
+ const selectors=[];
+ const host={append(){},querySelectorAll(selector){selectors.push(selector);return [drawer]}};
+ const label=createResidentLabel(host);
+ label.update(s,'lina',lina.room,{x:240,y:600},false);
+ assert.equal(label.node.hidden,true,'the drawer stays readable');
+ assert.ok(selectors.every(sel=>sel.includes('.dock[data-expanded=true]')&&sel.includes('.placement')),'the drawer and the placement card count as paper');
+});
