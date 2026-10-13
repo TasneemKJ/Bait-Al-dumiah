@@ -35,7 +35,7 @@ export function createUI(host,getState,dispatch){
   if(notice)prependNotice(root,notice);toaster.refresh();
  }
  function tick(){syncHud(host,getState(),{t,n,panel,placement:placer.item,selected});setClue(clueExpanded)}
- const toaster=createToaster(host,()=>Boolean(panel)),toast=message=>toaster.show(message);
+ const toaster=createToaster(host,()=>panel),toast=message=>toaster.show(message);
  function refresh(){if(panel)host.querySelector('#sheet')?.close();build()}
  function setTools(expanded){toolsExpanded=expanded;setDock(host,expanded);dispatch('tools-state',expanded)}
  // Phone portrait shows the clue as a compact chip; the copy opens on demand and a dot marks an unread clue.

@@ -78,3 +78,28 @@ test('private film pose grounds rendered feet despite detached semantic sole ref
  assert.deepEqual(root.position,before);assert.equal(doll.wishGlow.visible,false);
  assert.equal(doll.halo.visible,false);
 });
+
+test('merged loop paces Home while film blocks game work and prevents catch-up time',async()=>{
+ const {installLoop}=await import('../src/app-loop.js');
+ const keys=['window','document','requestAnimationFrame'];
+ const prior=keys.map(key=>Object.getOwnPropertyDescriptor(globalThis,key));
+ let frame,renders=0;const deltas=[],noop=()=>{},uiAdapter={update:noop};
+ globalThis.window={addEventListener:noop};
+ globalThis.document={hidden:false,addEventListener:noop};
+ globalThis.requestAnimationFrame=fn=>{frame=fn;};
+ const app={filmActive:false,session:{entered:false,advance:(state,dt)=>deltas.push(dt)},
+  homeUI:{previewVisible:true},world:{render:()=>renders++,project:()=>null},
+  state:{events:[],paused:false},notices:[],host:{dataset:{focusRoom:'kitchen'}},
+  ui:{tick:noop},residentLabel:uiAdapter,roomViews:uiAdapter,objectControls:uiAdapter,
+  storyUI:uiAdapter,audio:{tick:noop},updateWorkUI:noop,physicalActivity:()=>null};
+ try{
+  installLoop(app);for(const time of [0,16,32,70])frame(time);
+  assert.equal(renders,2,'Home paints at most every 66.7ms');
+  app.session.entered=true;app.filmActive=true;frame(140);frame(1000);
+  assert.equal(renders,2);assert.deepEqual(deltas,[]);
+  app.filmActive=false;frame(1016);
+  assert.equal(renders,3);assert.deepEqual(deltas,[.016]);
+ }finally{keys.forEach((key,index)=>{
+  if(prior[index])Object.defineProperty(globalThis,key,prior[index]);else delete globalThis[key];
+ });}
+});

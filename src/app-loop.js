@@ -2,14 +2,17 @@
 import * as sim from './simulation.js';
 import {bindPlacementEscape} from './placement-keys.js';
 
+const HOME_FRAME_MS=1000/15;
+
 export function installLoop(app){
  app.last=performance.now();app.lastSave=0;
- let lastUI=0,stopped=false;
+ let lastUI=0,lastHomePaint=-Infinity,stopped=false;
  function frame(now){if(stopped)return;
   if(app.filmActive){app.last=now;requestAnimationFrame(frame);return;}
   const dt=Math.min(.1,Math.max(0,(now-app.last)/1000));app.last=now;
   if(!document.hidden&&!app.fatal&&!app.session.entered&&
-    app.homeUI?.previewVisible){app.world?.render(app.state,0,null)}
+    app.homeUI?.previewVisible&&now-lastHomePaint>=HOME_FRAME_MS){lastHomePaint=now;
+    app.world?.render(app.state,0,null)}
   // The intro holds the house still: no simulation, saves or notices until play begins where it lands.
   if(!document.hidden&&!app.fatal&&app.session.entered)app.intro?.update(now);
   if(!document.hidden&&!app.fatal&&app.session.entered&&app.intro?.active)app.world?.render(app.state,dt,null);

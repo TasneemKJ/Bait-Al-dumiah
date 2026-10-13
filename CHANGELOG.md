@@ -2,6 +2,7 @@
 Each merged batch adds an entry and a `vX.Y.Z` tag.
 
 ## Unreleased
+- Visual: on phones the open House Tools drawer sits above the resident name tag (the tag hid "Little rituals"), the portrait time card keeps its compact 66px width in every state, and the placement card's Cancel keeps its 44px target.
 - Onboarding: a first launch opens with an 8.4 s in-engine intro over the real house (approach, reveal, settle into the kitchen), one EN/AR line per beat, skippable from frame 1 by tap, key or a 44px Skip; dragging grabs the camera. Springs carry velocity from the intro into play; still shots under reduced motion; optional synthesized score after the Play gesture. Saved as `introSeen` (older saves never replay it); Settings has Watch intro. Room camera glides are now critically damped springs that keep their velocity when retargeted.
 - Atmosphere: the kitchen kettle now breathes soft grey-blue steam puffs that drift toward the spout side (the old thin tubes were invisible); static under reduced motion. Docs: `docs/NATIVE-REVIEW.md` lists the Arabic lines still awaiting a native reader.
 - Atmosphere: a CSS-only vignette and paper-grain layer between the canvas and the HUD (hidden under prefers-contrast and reduced-transparency), a slightly stronger kettle steam, and brighter night windows.

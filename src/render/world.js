@@ -43,7 +43,8 @@ export function createWorld(canvas,{onPick,onError}){
    teaTable,sewingPlay,moonChimes,slots}=parts;
  const st={focusedRoom:null,focusedDoll:null,reducedMotion:false,teaActive:false,stitchActive:false,
    chimeActive:false,chimeSelection:-1,requestedEnabled:true,
-   previewPose:null,stitchSections:[],placement:null,disposed:false,lost:false,quality:'',nightMix:0};
+   previewPose:null,stitchSections:[],placement:null,disposed:false,lost:false,quality:'',pixelRatio:0,
+   nightMix:0,lightingReady:false};
  const working=()=>st.teaActive||st.stitchActive||st.chimeActive;const cameraMove=createCameraMove(camera,controls);
  const cancelCameraMove=()=>cameraMove.cancel();controls.addEventListener('start',cancelCameraMove);
  const scenePointers=new Set();

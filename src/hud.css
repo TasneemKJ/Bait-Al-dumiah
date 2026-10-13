@@ -1,5 +1,7 @@
 /* HUD rhythm: one gutter between floating paper cards; on phone portrait the clue folds into a chip so the house stays the focal point. */
 #ui{--hud-gutter:10px;--time-w:126px}
+/* Phone portrait shows the icon-only 66px time card (story.css), so the clue row measures against that width whether or not a room is focused. */
+@media(max-width:680px) and (orientation:portrait){#ui{--time-w:66px}}
 .objective-toggle{display:none}
 .objective-row{display:flex;align-items:center;gap:6px;min-width:0}
 .objective-row>#objective-action{min-width:0}
@@ -64,14 +66,18 @@ html[lang=ar] .time-tools>button{white-space:nowrap;font-size:11px;gap:5px;max-w
    pointer input so touching paper cannot activate a doll behind the drawer. */
 #ui .dock[data-expanded=true]{
  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;
- width:min(440px,calc(100% - 24px));max-width:calc(100% - 24px);
+ /* Physical insets do not swap with the language of the drawer. */
+ width:min(440px,calc(100% - max(12px,env(safe-area-inset-left)) - max(12px,env(safe-area-inset-right))));
+ max-width:calc(100% - max(12px,env(safe-area-inset-left)) - max(12px,env(safe-area-inset-right)));
  max-height:calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
  box-sizing:border-box;overflow-y:auto;overscroll-behavior:contain;
- left:50%;right:auto;transform:translateX(-50%);
+ left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));
+ margin-inline:auto;transform:none;
  bottom:max(12px,env(safe-area-inset-bottom));padding:12px;
  border:1px solid var(--line);border-radius:16px 16px 8px 8px;
  background:var(--paper);color:var(--ink);box-shadow:0 12px 40px #23162438;
  backdrop-filter:none;pointer-events:auto;touch-action:pan-y;
+ z-index:2;/* above the resident name tag, which otherwise paints over the drawer */
 }
 #ui .dock[data-expanded=true]>.dock-divider{display:none}
 #ui .dock[data-expanded=true]>button{

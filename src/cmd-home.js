@@ -52,11 +52,13 @@ function welcomeGlance(app){
  const cancel=()=>{clearTimeout(glanceTimer);clearTimeout(returnTimer);listeners.abort()};
  for(const target of [app.canvas,app.host])for(const type of ['pointerdown','keydown','wheel','click'])
   target.addEventListener(type,cancel,{capture:true,signal:listeners.signal});
+ // Both delayed boundaries recheck that the house is still visible, idle and the same run.
+ const state=app.state,allowed=()=>!document.hidden&&!app.ui.panel&&!app.state.paused&&!app.fatal&&
+  !app.physicalActivity?.()&&!app.state.settings.reducedMotion&&app.state===state;
  glanceTimer=setTimeout(()=>{
-  if(app.ui.panel||app.state.paused||app.state.settings.reducedMotion){cancel();return}
+  if(!allowed()){cancel();return}
   app.dispatch('focus-room',room);
-  returnTimer=setTimeout(()=>{if(app.host.dataset.focusRoom===room&&!app.ui.panel&&!app.state.paused)
-   app.dispatch('camera');cancel()},2600);
+  returnTimer=setTimeout(()=>{if(allowed()&&app.host.dataset.focusRoom===room)app.dispatch('camera');cancel()},2600);
  },700);
 }
 export const homeCommands={

@@ -42,3 +42,20 @@ test('Arabic flips the objective arrow and short landscape cards keep a gutter',
  assert.match(css,/\[dir=rtl\] #objective-action \.icon:last-child\{transform:scaleX\(-1\)\}/);
  assert.match(css,/max-height:560px\) and \(orientation:landscape\)\{[^}]*\.objective\{top:52px\}[^}]*\.time-tools\{top:72px\}/);
 });
+test('phone portrait measures the clue row against the icon-only time card',()=>{
+ const css=readFileSync(new URL('../src/hud.css',import.meta.url),'utf8');
+ assert.match(css,/@media\(max-width:680px\) and \(orientation:portrait\)\{#ui\{--time-w:66px\}\}/);
+ const story=readFileSync(new URL('../src/story.css',import.meta.url),'utf8');
+ assert.match(story,/\.time-tools,#ui\[data-focus-room\]:not\(\[data-focus-room=""\]\) \.time-tools\{[^}]*width:66px/);
+});
+test('the open House Tools drawer stacks above the resident name tag',()=>{
+ const css=readFileSync(new URL('../src/hud.css',import.meta.url),'utf8');
+ assert.match(css,/#ui \.dock\[data-expanded=true\]\{[^}]*z-index:2/);
+ const upgrade=readFileSync(new URL('../src/visual-upgrade.css',import.meta.url),'utf8');
+ assert.match(upgrade,/\.resident-name\{[^}]*z-index:1/);
+});
+test('the placement card cancel keeps a 44px target on phones',()=>{
+ const css=readFileSync(new URL('../src/styles.css',import.meta.url),'utf8');
+ assert.doesNotMatch(css,/\.placement \.icon-button\{width:(?:[0-3]\d|4[0-3])px\}/);
+ assert.match(css,/\.placement-head>\.icon-button\{[^}]*flex:none/);
+});
