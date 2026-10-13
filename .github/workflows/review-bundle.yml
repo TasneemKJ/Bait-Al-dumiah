@@ -1,0 +1,67 @@
+name: Temporary public-game review bundle
+on:
+  push:
+    branches: [review/verification-transport-2026-10-13]
+permissions:
+  contents: read
+concurrency:
+  group: public-game-review-transport
+  cancel-in-progress: true
+jobs:
+  bundle:
+    name: Review ${{ matrix.game }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - game: Bait-Al-dumiah
+            sha: f1e761d766cf339be4fbf9269b5ff4a23cc2f938
+          - game: Almo7areboon
+            sha: 62e241af10138b6e037710ecb007f2b09cf1089f
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          repository: TasneemKJ/${{ matrix.game }}
+          ref: ${{ matrix.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Restore lockfile dependencies
+        run: npm ci --ignore-scripts
+      - name: Package reproducible local review inputs
+        env:
+          EXPECTED_SHA: ${{ matrix.sha }}
+        run: |
+          set -eu
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          mkdir -p /tmp/game-review
+          git archive --format=tar.gz HEAD > /tmp/game-review/source.tar.gz
+          tar -czf /tmp/game-review/dependencies.tar.gz node_modules
+          printf '%s\n' "$EXPECTED_SHA" > /tmp/game-review/source-sha.txt
+          node --version > /tmp/game-review/node-version.txt
+          npm --version > /tmp/game-review/npm-version.txt
+          (cd /tmp/game-review && sha256sum *.tar.gz > SHA256SUMS)
+          test "$(du -sm /tmp/game-review | cut -f1)" -lt 160
+      - name: Native verification
+        run: |
+          set -o pipefail
+          if node -e 'process.exit(JSON.parse(require("fs").readFileSync("package.json")).scripts.verify ? 0 : 1)'; then
+            npm run verify 2>&1 | tee /tmp/game-review/verify.log
+          else
+            (npm test && npm run build) 2>&1 | tee /tmp/game-review/verify.log
+          fi
+      # Evidence-only transport for the network-isolated reviewer. No secrets,
+      # git credentials, private repositories or production deployment inputs.
+      # This branch is temporary; it must never be merged into the game.
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: review-${{ matrix.game }}-${{ matrix.sha }}
+          path: /tmp/game-review/
+          retention-days: 1
+          if-no-files-found: error
+          compression-level: 0
