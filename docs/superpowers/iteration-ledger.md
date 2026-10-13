@@ -531,3 +531,10 @@ Look-back evidence so far: `npm run verify` passed 529 tests, lint and build; Ja
 
 
 YouTube extension: the owner requested strong publishing material, so the same story gained a genuine 16:9 Three camera and separate native 1920×1080 typography. Root inspected full-size English/Arabic native prototypes and the 1280-world comparison, then approved the selected 1280×720 world with native 1920×1080 composition and the corrected closed-door camera. Bilingual 1280×720 covers and upload copy/credits accompany four UTF-8 SRT files generated from the actual seven-shot timeline. No YouTube publication, commit, push or deployment occurred.
+
+## 2026-10-13 — film grounding correction (one review pass)
+IDEAL / 5Ws: a first-time mobile viewer watches the kitchen close-up; unsupported rounded props weaken the handmade-home illusion. Ground them within the separate screening tableau, then inspect original full-size frames and validate sole bounds before regenerating exports.
+
+Twenty candidates: centered kettle burner; flat kettle foot; ceramic vase bases; sole-to-floor alignment; localized contact shadows; kettle-aligned steam; remove wish rings; reduce lamp glare; stronger cabinet occlusion; deeper curtain folds; floor grain; slower camera easing; caption shadow; longer final title; quiet score tail; film close focus; touch target spacing; reduced-motion stills; atomic export replacement; frame-count validation. Selected: first seven plus atomic replacement/frame counts. Other candidates remain unchanged or existing contracts, not completed iterations.
+
+Source evidence: original wide kitchen frame `/tmp/dumiah-wide-1280/en-15.jpg` inspected at 1920×1080; rounded bottoms/burner alignment and ground contact motivated private-film additions. Gameplay mesh factories and simulation remain unchanged. Behavioral sole-bound regression exercises actual Three geometry. Final render review and production verification remain pending.

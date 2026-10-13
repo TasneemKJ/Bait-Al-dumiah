@@ -107,7 +107,7 @@ function bakeTableau(root){
 // Ground only the private screening tableau; play retains its authored rig and props.
 export function groundFilmResident(doll,floorY){
  doll.root.updateWorldMatrix(true,true);
- const minimum=Math.min(...doll.legs.map(leg=>new T.Box3().setFromObject(leg.foot.sole).min.y));
+ const minimum=Math.min(...doll.legs.map(leg=>new T.Box3().setFromObject(leg.foot).min.y));
  const floor=doll.root.localToWorld(new T.Vector3(0,floorY,0)).y;
  doll.body.position.y+=(floor-minimum)/doll.root.getWorldScale(new T.Vector3()).y;
  doll.wishGlow.visible=false;doll.halo.visible=false;

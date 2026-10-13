@@ -155,3 +155,9 @@ Twenty candidates, IDEAL/5Ws and selected boundaries for each source/behavior ro
 Twenty-idea exploration, IDEAL/5Ws, source plan and selected scope: `docs/cinema/2026-10-12-size-of-memory.md`.
 - [ ] 12-second opening, optional 60-second live film and EN/AR standalone exports.
 - [ ] Repository verification, mobile bilingual matrix, lifecycle and rendered-frame review.
+
+## Film grounding follow-up — 2026-10-13
+- [x] Inspect full-size kitchen proof and implement private-film support/contact corrections.
+- [x] Verify resident sole bounds through a geometric regression; preserve gameplay source geometry.
+- [x] Encode through ignored temporary files; publish local filenames only after full-length/frame-count validation.
+- [ ] Inspect all regenerated full-size frames, complete both aspect-ratio exports and verify their actual media streams.
