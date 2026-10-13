@@ -2,7 +2,7 @@
 Browser rendering yields the shared GPU lock between configurable short batches.
 """
 from pathlib import Path
-import os,base64,subprocess,time,fcntl,json,io
+import os,base64,subprocess,time,fcntl,json,io,sys
 from PIL import Image
 from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parents[2]
@@ -15,7 +15,7 @@ QUERY_SUFFIX='&wide' if WIDE else ''
 BATCH=int(os.environ.get('FILM_BATCH','24'))
 score=ROOT/'film'/'score.wav';score_source=ROOT/'scripts/film/score.py'
 if not score.exists() or score.stat().st_mtime<score_source.stat().st_mtime:
- subprocess.run(['python3',str(score_source)],check=True)
+ subprocess.run([sys.executable,str(score_source)],check=True)
 errors=[]
 with sync_playwright() as p,open('/tmp/browser.lock','w') as lock:
  fcntl.flock(lock,fcntl.LOCK_EX)

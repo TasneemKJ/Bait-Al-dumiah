@@ -65,7 +65,7 @@ test('muting while audio unlock is pending keeps the screening silent',async()=>
  finally{globalThis.AudioContext=original;}
 });
 
-test('private film pose grounds sole geometry at its room floor without moving the rig root',async()=>{
+test('private film pose grounds rendered feet despite detached semantic sole references',async()=>{
  const T=await import('three');const {groundFilmResident}=await import('../src/render/film-scene.js');
  const root=new T.Group(),body=new T.Group();root.position.set(-1.6,.38,.88);root.add(body);
  const sole=new T.Mesh(new T.BoxGeometry(.2,.03,.3));sole.position.y=.07;

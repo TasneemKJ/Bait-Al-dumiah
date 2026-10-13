@@ -65,9 +65,9 @@ function compose(ctx,canvas,shot,locale){
  ctx.strokeStyle='#c5a575';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(500,1450);ctx.lineTo(580,1450);ctx.stroke();
  ctx.fillStyle='#fbf4e9';caption(ctx,translate(locale,'filmLine'+shot.index),880,1540,ar?66:57,font);
  if(shot.index===6){ctx.fillStyle='#d1b589';ctx.font=`${ar?86:78}px ${font}`;
-  ctx.fillText(translate(locale,'title'),540,1740);
+  ctx.fillText(translate(locale,'title'),540,260);
   ctx.font=`${ar?38:32}px ${font}`;
-  ctx.fillText(translate(locale,'filmEnd'),540,1820);}
+  ctx.fillText(translate(locale,'filmEnd'),540,350);}
 
  const fade=Math.max(0,1-shot.time/1.2,(shot.time-59)/1);
  if(fade>0){ctx.fillStyle=`rgba(28,21,34,${Math.min(1,fade)})`;ctx.fillRect(0,0,1080,1920);}
@@ -107,6 +107,7 @@ function bakeTableau(root){
 // Ground only the private screening tableau; play retains its authored rig and props.
 export function groundFilmResident(doll,floorY){
  doll.root.updateWorldMatrix(true,true);
+ // Rig compaction may detach semantic sole references; the rendered foot remains authoritative.
  const minimum=Math.min(...doll.legs.map(leg=>new T.Box3().setFromObject(leg.foot).min.y));
  const floor=doll.root.localToWorld(new T.Vector3(0,floorY,0)).y;
  doll.body.position.y+=(floor-minimum)/doll.root.getWorldScale(new T.Vector3()).y;
