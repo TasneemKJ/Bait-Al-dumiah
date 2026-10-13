@@ -64,3 +64,14 @@ test('muting while audio unlock is pending keeps the screening silent',async()=>
   assert.equal(await unlock,false);sound.tick(3);sound.dispose();}
  finally{globalThis.AudioContext=original;}
 });
+
+test('private film pose grounds sole geometry at its room floor without moving the rig root',async()=>{
+ const T=await import('three');const {groundFilmResident}=await import('../src/render/film-scene.js');
+ const root=new T.Group(),body=new T.Group();root.position.set(-1.6,.38,.88);root.add(body);
+ const sole=new T.Mesh(new T.BoxGeometry(.2,.03,.3));sole.position.y=.07;body.add(sole);
+ const doll={root,body,legs:[{foot:{sole}}],wishGlow:{visible:true},halo:{visible:true}};
+ const before=root.position.clone();groundFilmResident(doll,-.019);root.updateMatrixWorld(true);
+ assert.ok(Math.abs(new T.Box3().setFromObject(sole).min.y-.361)<1e-7);
+ assert.deepEqual(root.position,before);assert.equal(doll.wishGlow.visible,false);
+ assert.equal(doll.halo.visible,false);
+});

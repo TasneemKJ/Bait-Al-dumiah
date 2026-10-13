@@ -25,14 +25,15 @@ with sync_playwright() as p,open('/tmp/browser.lock','w') as lock:
  page.goto(f'http://127.0.0.1:{PORT}/scripts/film/preview.html?width={WIDTH}&height={HEIGHT}{QUERY_SUFFIX}',timeout=180000)
  page.wait_for_function('window.filmReady',timeout=180000)
  fcntl.flock(lock,fcntl.LOCK_UN)
- encoders=[];logs=[]
+ encoders=[];logs=[];pending=[]
  for lang in ['en','ar']:
   log=open(OUT/f'{TAG}{lang}-encode.log','w');logs.append(log)
+  pending.append((OUT/f'.{lang}-{SIZE}.rendering.mp4',OUT/f'bait-al-dumiah-{lang}-{SIZE}.mp4'))
   encoders.append(subprocess.Popen(['ffmpeg','-y','-v','error','-f','image2pipe','-vcodec','mjpeg',
    '-r',str(FPS),'-i','pipe:0','-i',str(score),'-c:v','libx264','-preset','fast','-crf','23',
    '-threads','1','-vf','fps=24','-pix_fmt','yuv420p','-c:a','aac','-b:a','160k','-af',
    'loudnorm=I=-16:TP=-1.8:LRA=9','-ar','48000','-t','60','-movflags','+faststart',
-   str(OUT/f'bait-al-dumiah-{lang}-{SIZE}.mp4')],stdin=subprocess.PIPE,stderr=log))
+   str(pending[-1][0])],stdin=subprocess.PIPE,stderr=log))
  try:
   start=time.monotonic()
   for begin in range(0,FRAMES,BATCH):
@@ -64,6 +65,12 @@ with sync_playwright() as p,open('/tmp/browser.lock','w') as lock:
   browser.close()
  assert statuses==[0,0],statuses
  assert not errors,errors
+ # Never replace publishing files with interrupted or short encodes.
+ for temporary,final in pending:
+  info=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_streams','-show_format','-of','json',str(temporary)]))
+  video=next(s for s in info['streams'] if s['codec_type']=='video')
+  assert int(video['nb_frames'])==1440 and abs(float(info['format']['duration'])-60)<.05
+ for temporary,final in pending:temporary.replace(final)
 (OUT/f'{TAG}production.json').write_text(json.dumps({'seconds':60,'capture_fps':12,'fps':24,'cadence':'each captured 3D frame held twice','width':1920 if WIDE else 1080,'height':1080 if WIDE else 1920,
  'world_width':WIDTH,'world_height':HEIGHT,'source':'actual local Three house and dolls',
  'captions':'native browser canvas shaping','sound':'original procedural music box; no narration'},indent=2))

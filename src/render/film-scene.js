@@ -7,6 +7,7 @@ import {createDolls} from './dolls.js';
 import {createCraftDetails,createGarden} from './ornaments.js';
 import {createState} from '../simulation.js';
 import {translate} from '../i18n.js';
+import {softTexture} from './textiles.js';
 
 export const FILM_SECONDS=60;
 const SHOTS=[
@@ -43,7 +44,7 @@ function steam(parent){
   parent.add(puff);puffs.push(puff);
  }
  return time=>puffs.forEach((p,i)=>{const u=(time*.18+i/10)%1;
-  p.position.set(-2.97+Math.sin(u*8+i)*.07,1.05+u*.9,.15);
+  p.position.set(-1+Math.sin(u*8+i)*.07,1.43+u*.9,-1.13);
   p.scale.setScalar(.16+u*.28);p.material.opacity=Math.sin(u*Math.PI)*.14;});
 }
 function caption(ctx,text,width,y,size,font){
@@ -103,6 +104,40 @@ function bakeTableau(root){
  });
  compactStatic(root);
 }
+// Ground only the private screening tableau; play retains its authored rig and props.
+export function groundFilmResident(doll,floorY){
+ doll.root.updateWorldMatrix(true,true);
+ const minimum=Math.min(...doll.legs.map(leg=>new T.Box3().setFromObject(leg.foot.sole).min.y));
+ const floor=doll.root.localToWorld(new T.Vector3(0,floorY,0)).y;
+ doll.body.position.y+=(floor-minimum)/doll.root.getWorldScale(new T.Vector3()).y;
+ doll.wishGlow.visible=false;doll.halo.visible=false;
+}
+function groundTableau(house,residents){
+ const map=softTexture();
+ function contact(x,y,z,w,d,opacity=.4){
+  const pad=new T.Mesh(new T.PlaneGeometry(w,d),new T.MeshBasicMaterial({
+   map,color:0x30232d,transparent:true,opacity,depthWrite:false}));
+  pad.rotation.x=-Math.PI/2;pad.position.set(x,y,z);house.root.add(pad);
+ }
+ function base(x,y,z,r,h,color){
+  const mesh=new T.Mesh(new T.CylinderGeometry(r,r,h,32),new T.MeshPhongMaterial({color,shininess:18}));
+  mesh.position.set(x,y,z);house.root.add(mesh);
+ }
+ // The kettle's rounded bowl meets a flat foot on a burner directly beneath it.
+ base(-1,1.029,-1.13,.15,.028,0x51454d);
+ base(-1,1.061,-1.13,.088,.042,0x987782);
+ contact(-1,1.046,-1.13,.41,.36,.55);
+ // Flat ceramic feet meet the counter, mantel and sewing cabinet.
+ for(const [x,y,z,color] of [[-2.1,1.03,-1.13,0xc48488],
+   [1.43,1.28,-1.26,0x9eaba1],[-.86,3.945,-.66,0xc391a8]]){
+  base(x,y+.018,z,.067,.036,color);contact(x,y+.002,z,.32,.27,.4);
+ }
+ for(const doll of residents.dolls){
+  const floor=doll.id==='lina'?.101:.111;
+  groundFilmResident(doll,floor-.12);
+  contact(doll.root.position.x,doll.root.position.y-.12+floor+.003,.94,.62,.42,.55);
+ }
+}
 export function createFilmScene(output,{width=1080,height=1920,outputWidth=1080,landscape=false}={}){
  const canvas=document.createElement('canvas');
  const renderer=new T.WebGLRenderer({canvas,antialias:true,preserveDrawingBuffer:true});
@@ -115,6 +150,7 @@ export function createFilmScene(output,{width=1080,height=1920,outputWidth=1080,
  createCraftDetails(house.root);createGarden(house.root);createLevantineSetting(house.root);
  const mist=steam(house.root);
  state.settings.reducedMotion=true;residents.update(state,0,null,0);
+ groundTableau(house,residents);
  studioMaterials(scene);bakeTableau(house.root);
  output.width=outputWidth;output.height=Math.round(outputWidth*(landscape?9/16:16/9));
  const ctx=output.getContext('2d');ctx.scale(output.width/(landscape?1920:1080),output.height/(landscape?1080:1920));

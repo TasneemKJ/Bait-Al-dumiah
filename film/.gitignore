@@ -6,3 +6,4 @@ exports/ar-[0-9][0-9].jpg
 exports/wide-en-[0-9][0-9].jpg
 exports/wide-ar-[0-9][0-9].jpg
 __pycache__/
+exports/.*.rendering.mp4

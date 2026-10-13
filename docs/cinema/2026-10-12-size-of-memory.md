@@ -16,3 +16,6 @@ Implementation: retain the existing save-compatible first-launch intro and its g
 
 ## YouTube extension
 The owner added a publishing-quality widescreen deliverable. Same seven-shot story and source assets, genuinely recomposed with a 16:9 perspective camera, closer establishing/final cameras and a dedicated readable lower third. Native 1920×1080 world/output is measured before selecting production resolution; no portrait padding or crop. EN/AR 1280×720 covers and upload copy accompany the files, without publishing. The existing 20-idea exploration remains this iteration's basis; distribution budget, save ownership, localization and all approved portrait work remain intact.
+
+## Grounding review, 2026-10-13
+Actual full-size wide kitchen proof showed visually weak contact under the rounded kettle/vase and residents. This is one focused corrective pass, not multiple manufactured iterations. Selected private-tableau fixes: matching burner under kettle, ceramic bases under three vases, sole-bound floor placement, localized contact shadows, remove gameplay wish/selection rings, and attach steam to the kettle lid. Gameplay geometry is preserved. Render and media checks remain pending until regenerated from this source.
