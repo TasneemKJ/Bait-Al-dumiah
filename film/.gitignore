@@ -1,0 +1,8 @@
+# Reproducible intermediates and local review frames; release files stay visible.
+score.wav
+exports/*-encode.log
+exports/en-[0-9][0-9].jpg
+exports/ar-[0-9][0-9].jpg
+exports/wide-en-[0-9][0-9].jpg
+exports/wide-ar-[0-9][0-9].jpg
+__pycache__/

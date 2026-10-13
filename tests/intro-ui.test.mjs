@@ -45,9 +45,9 @@ test('frame 1 is posed before the first render and the lines follow the beats to
  assert.equal(h.root.dataset.intro,'playing');assert.equal(h.veil.style.opacity,'1','starts under the paper veil');
  assert.equal(h.document.activeElement,h.skip,'Skip is focused for keyboard and screen-reader players');
  assert.equal(h.line.textContent,strings.en.introApproach);
- h.run(0,4000);assert.equal(h.line.textContent,strings.en.introReveal);
- h.run(4050,9000);assert.equal(h.intro.active,false);assert.equal(h.finished[0].skipped,false);
- assert.equal(h.finished.length,1);h.run(9050,10000);
+ h.run(0,4100);assert.equal(h.line.textContent,strings.en.introReveal);
+ h.run(4150,12500);assert.equal(h.intro.active,false);assert.equal(h.finished[0].skipped,false);
+ assert.equal(h.finished.length,1);h.run(12550,13500);
  assert.equal(h.layer.hidden,true,'the layer dissolved');assert.equal(h.root.dataset.intro,undefined);
 });
 

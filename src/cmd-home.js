@@ -61,6 +61,8 @@ function welcomeGlance(app){
 }
 export const homeCommands={
 'home-play':app=>enterPlay(app),
+'watch-film':app=>{if(app.intro?.active||app.physicalActivity())return;
+ app.ui.close();app.storyUI?.clear();app.world?.clearObjectSelection();void app.film?.open();},
 'intro-done':(app,value)=>finishIntro(app,value),
 // Settings: Watch intro. Rituals keep their scene; anything held or being placed is put down first.
 'watch-intro':app=>{if(app.intro?.active||app.physicalActivity())return;app.ui.close();

@@ -5,7 +5,9 @@ import {bindPlacementEscape} from './placement-keys.js';
 export function installLoop(app){
  app.last=performance.now();app.lastSave=0;
  let lastUI=0,stopped=false;
- function frame(now){if(stopped)return;const dt=Math.min(.1,Math.max(0,(now-app.last)/1000));app.last=now;
+ function frame(now){if(stopped)return;
+  if(app.filmActive){app.last=now;requestAnimationFrame(frame);return;}
+  const dt=Math.min(.1,Math.max(0,(now-app.last)/1000));app.last=now;
   if(!document.hidden&&!app.fatal&&!app.session.entered&&
     app.homeUI?.previewVisible){app.world?.render(app.state,0,null)}
   // The intro holds the house still: no simulation, saves or notices until play begins where it lands.
@@ -25,7 +27,8 @@ export function installLoop(app){
   requestAnimationFrame(frame);
  }
  requestAnimationFrame(frame);
- document.addEventListener('visibilitychange',()=>{if(document.hidden){app.storyUI?.cancelDrag();
+ document.addEventListener('visibilitychange',()=>{app.intro?.resetClock?.();
+ if(document.hidden){app.storyUI?.cancelDrag();
  app.cancelWorkInput()}app.syncPause();app.last=performance.now();if(document.hidden)app.save()});
  window.addEventListener('pagehide',()=>{app.cancelWorkInput();app.save()});
  bindPlacementEscape(window,()=>{if(!app.ui.placement)return false;app.ui.clearPlacement();
@@ -60,6 +63,7 @@ export function installDebug(app){
       stitchObjects:()=>app.world?.stitchPositions(),projectStitch:(x,y,
     height)=>app.world?.projectStitch(x,y,height),chimes:()=>sim.chimeStatus(app.state),
       chimeObjects:()=>app.world?.chimePositions(),chimePullSpan:()=>app.world?.chimePullSpan(),
+      film:()=>app.film?.status()??null,
       intro:()=>({active:Boolean(app.intro?.active),beat:app.intro?.beat??-1})};
  }
 }

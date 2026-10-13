@@ -134,3 +134,32 @@ export function introLines(locale){
  return INTRO_BEATS.map(beat=>({beat:beat.id,en:strings.en[beat.line],ar:strings.ar[beat.line],
    text:translate(locale,beat.line),voice:beat.voice??null}));
 }
+
+Object.assign(strings.en,{
+ filmLoading:'Opening the little house…',
+ filmTitle:'The size of memory',filmWatch:'Watch the film',filmLabel:'A one-minute visit',
+ filmClose:'Back to the house',filmPause:'Pause',filmPlay:'Play',filmReplay:'Watch again',
+ filmSound:'Sound',filmSilent:'Muted',filmError:'The film could not open. Your house is safe.',
+ filmEnd:'Welcome home.',filmChapter:'A LITTLE HOUSE, REMEMBERED',
+ filmLine0:'Some homes are the size of a memory.',
+ filmLine1:'Lina keeps the tea warm for someone.',
+ filmLine2:'Sami mends what time forgets.',
+ filmLine3:'Noor leaves a little light for the moon.',
+ filmLine4:'The house remembers every small kindness.',
+ filmLine5:'One door is still waiting for its story.',
+ filmLine6:'Three little souls. A place for you.',
+});
+Object.assign(strings.ar,{
+ filmLoading:'عم نفتح البيت الصغير…',
+ filmTitle:'بيت على قدّ الذكرى',filmWatch:'شوف الفيلم',filmLabel:'زيارة بدقيقة',
+ filmClose:'ارجع عالبيت',filmPause:'وقّف شوي',filmPlay:'كمّل',filmReplay:'شوفه كمان',
+ filmSound:'الصوت شغّال',filmSilent:'بلا صوت',filmError:'ما قدرنا نفتح الفيلم. بيتك بأمان.',
+ filmEnd:'أهلًا وسهلًا فيك.',filmChapter:'بيت صغير، وذكراه كبيرة',
+ filmLine0:'في بيوت على قدّ الذكرى.',
+ filmLine1:'لينا مخلّية الشاي دافي لحدا.',
+ filmLine2:'سامي بيرتّق اللي نسيه الوقت.',
+ filmLine3:'نور تاركة ضو صغير للقمر.',
+ filmLine4:'البيت بيتذكّر كل لمسة حنونة.',
+ filmLine5:'وباب واحد ناطر حكايته.',
+ filmLine6:'تلات أرواح صغيرة. ومحلّ إلك.',
+});

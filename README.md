@@ -135,3 +135,6 @@ xvfb-run -a python scripts/tea_check.py; xvfb-run -a python scripts/stitch_check
 ```
 
 The `Full suite` workflow runs the browser suite plus the chimes and expansion workflows every Monday on `main`, and on demand (`workflow_dispatch`, as do `chimes.yml` and `expansion.yml`). Failures upload one trimmed, 1-day evidence artifact (`scripts/trim-artifacts.py`).
+
+### A cinematic visit
+The first Play opens with a 12-second real-house introduction, skippable immediately and replayable from Settings. Older saves keep their existing entry behavior. Settings → **Watch the film** opens a 60-second bilingual live miniature portrait, with pause, sound, replay and immediate return. The house and its progress wait during the screening. Reduced motion holds the camera and residents still within each shot. Standalone English/Arabic 1080×1920 films and the reproducible local production workflow are described in [`film/README.md`](film/README.md).

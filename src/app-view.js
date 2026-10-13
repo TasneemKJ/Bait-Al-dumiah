@@ -21,7 +21,8 @@ export function installView(app){
  app.objectControls?.update();app.storyUI?.update();updateWorkUI();app.homeUI?.refresh()}
  function syncPause(){app.state.paused=!session.entered||app.manualPause||
    Boolean(app.panelOpen&&app.panelOpen!=='activities')||
-   document.hidden||app.fatal;if(app.state.paused)cancelWorkInput();audio.setPaused(app.state.paused)}
+   document.hidden||app.fatal||Boolean(app.filmActive);
+   if(app.state.paused)cancelWorkInput();audio.setPaused(app.state.paused)}
  function enterWork(id){
   if(!sim.PHYSICAL_ACTIVITIES.includes(id))return;
   if(id==='lullaby')audio.stopVoices();

@@ -150,3 +150,8 @@ Twenty candidates, IDEAL/5Ws and selected boundaries for each source/behavior ro
 - [x] Diagnose the story smoke's stale sewing coordinates under software WebGL: its fixed delay sampled an unfinished room-camera flight.
 - [x] Reuse read-only scene readiness before aiming; require the same destination to remain fixed and exposed during the real drag. No gameplay or design changes.
 - [x] Re-run the core browser journey: 56 checks and story smoke pass; inspect desktop night and phone portrait/landscape originals. Results retained in the workspace readiness evidence; extended ritual/performance suites remain separate.
+
+## Cinema iteration 2026-10-12
+Twenty-idea exploration, IDEAL/5Ws, source plan and selected scope: `docs/cinema/2026-10-12-size-of-memory.md`.
+- [ ] 12-second opening, optional 60-second live film and EN/AR standalone exports.
+- [ ] Repository verification, mobile bilingual matrix, lifecycle and rendered-frame review.

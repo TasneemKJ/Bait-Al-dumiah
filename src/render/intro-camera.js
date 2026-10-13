@@ -6,7 +6,7 @@ import {houseFraming} from './house-framing.js';
 // spring glide into the kitchen, started from the path's live pose and velocity at the handoff.
 export const INTRO_SECONDS=INTRO_BEATS.reduce((sum,beat)=>sum+beat.seconds,0);
 export const INTRO_HANDOFF=INTRO_SECONDS-INTRO_BEATS.at(-1).seconds;
-// Spring responses (seconds): the settle beat lands within its 2.6 s; a skip goes there briskly but softly.
+// Spring responses (seconds): the settle beat lands within its four seconds; a skip goes there briskly but softly.
 export const SETTLE_RESPONSE=2,SKIP_RESPONSE=.9;
 const PLAY_EYE=[5.8,5.6,24],RADIUS=Math.hypot(...PLAY_EYE);
 const PLAY_ANGLES=[Math.atan2(PLAY_EYE[0],PLAY_EYE[2]),Math.acos(PLAY_EYE[1]/RADIUS)];
@@ -33,7 +33,8 @@ const KEY_TIMES=[0,INTRO_BEATS[0].seconds,INTRO_HANDOFF,INTRO_SECONDS];
 // Catmull-Rom, so the path is velocity-continuous through beat one into beat two and still moving at the handoff.
 function pathAt(keys,seconds){
  const p=keys.map(flat),t=Math.min(INTRO_HANDOFF,Math.max(0,Number(seconds)||0)),seg=t<KEY_TIMES[1]?0:1;
- const tangent=i=>i===0?p[0].map(()=>0):p[i].map((_,c)=>(p[i+1][c]-p[i-1][c])/(KEY_TIMES[i+1]-KEY_TIMES[i-1]));
+ const tangent=i=>i===0?p[0].map(()=>0):p[i].map((_,c)=>i===2&&Math.abs(p[i+1][c]-p[i][c])<1e-6?0:
+   (p[i+1][c]-p[i-1][c])/(KEY_TIMES[i+1]-KEY_TIMES[i-1]));
  const t0=KEY_TIMES[seg],span=KEY_TIMES[seg+1]-t0,s=(t-t0)/span,m0=tangent(seg),m1=tangent(seg+1);
  const h00=2*s**3-3*s*s+1,h10=s**3-2*s*s+s,h01=-2*s**3+3*s*s,h11=s**3-s*s;
  return p[seg].map((v,c)=>h00*v+h10*span*m0[c]+h01*p[seg+1][c]+h11*span*m1[c]);

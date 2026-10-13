@@ -1,3 +1,4 @@
+import {createFilmUI} from './film-ui.js';
 import {createHomeSession} from './home-session.js';
 import {createHomeUI} from './home-ui.js';
 import {createStoryUI} from './story-ui.js';
@@ -76,4 +77,10 @@ function buildViews(){
 
 installFeedback(app);installView(app);installCommands(app);
 buildViews();
+app.film=createFilmUI(document.querySelector('#app'),{getState:()=>app.state,
+ onState:active=>{app.filmActive=active;app.cancelWorkInput();app.syncPause();
+  app.world?.setEnabled(!active&&!app.state.paused);},
+ onClose:()=>{app.ui.open('settings');
+  app.host.querySelector('[data-action="watch-film"]')?.focus({preventScroll:true});},
+});
 installLoop(app);installDebug(app);

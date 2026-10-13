@@ -101,6 +101,7 @@ export function createIntroUI(root,{getState,frame,orbit=()=>{},onStart,onFinish
    if(s.phase==='idle')return;const dt=s.last===null?0:Math.min(.25,Math.max(0,(now-s.last)/1000));s.last=now;
    if(s.phase==='playing'){s.elapsed+=dt;apply()}else leave(ui,s,dt);
   },
+  resetClock(){s.last=null;},
   skip,
  };
 }

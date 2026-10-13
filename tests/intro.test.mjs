@@ -15,9 +15,9 @@ import {bootHome} from './helpers/main-home-harness.mjs';
 const VIEWS=[[390,844],[360,640],[412,915],[844,390],[1280,800]];
 const speed=v=>Math.hypot(...v.slice(0,6));
 
-test('the intro is two or three beats lasting six to ten seconds, each with one short bilingual line',()=>{
+test('the intro is two or three beats lasting ten to twelve seconds, each with one short bilingual line',()=>{
  assert.ok(INTRO_BEATS.length>=2&&INTRO_BEATS.length<=3);
- assert.ok(INTRO_SECONDS>=6&&INTRO_SECONDS<=10,`${INTRO_SECONDS} s`);
+ assert.ok(INTRO_SECONDS>=10&&INTRO_SECONDS<=12,`${INTRO_SECONDS} s`);
  for(const beat of INTRO_BEATS)for(const locale of ['en','ar']){
   const line=strings[locale][beat.line];assert.ok(line?.trim(),locale+beat.line);
   assert.ok(line.length<=56,`one short line: ${line}`);assert.equal(/\n/.test(line),false);
@@ -125,7 +125,7 @@ test('the settle beat is the play spring: velocity carries across the handoff, n
   assert.ok(after>.6*before&&after<1.6*before,`no seam at the handoff: ${before} then ${after}`);
   const goal=framing(w,h,'kitchen',{}),end=[...goal.target,...goal.target.map((v,i)=>v+[5.8,5.6,24][i]),goal.zoom];
   for(let c=0;c<7;c++){const sign=Math.sign(frames[hand][c]-end[c]);
-   for(const f of frames.slice(hand))assert.ok(sign*(f[c]-end[c])>=-1e-6,`channel ${c} overshot at ${w}x${h}`)}
+   for(const f of frames.slice(hand))assert.ok(sign*(f[c]-end[c])>=-1e-6,`channel ${c} overshot at ${w}x${h}: hand=${frames[hand][c]} end=${end[c]} value=${f[c]}`)}
   assert.deepEqual(frames.at(-1).slice(0,7).map(v=>+v.toFixed(5)),end.map(v=>+v.toFixed(5)));
   assert.equal(r.cameraMove.active,false);
   r.api.focusRoom('kitchen');assert.equal(r.cameraMove.active,false,'asking for where it already is moves nothing');
