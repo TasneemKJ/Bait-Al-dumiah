@@ -26,3 +26,17 @@
  #home .home-back{margin-top:0}
  [dir=rtl] #app[data-screen="home"] #world{left:auto;right:0}
 }
+
+/* Home follows the saved house hour from its first painted frame. The controls
+   stay paper-like, but the surrounding surface belongs to the night house. */
+.night #app[data-screen="home"]{
+ background:radial-gradient(ellipse at 50% 40%,#403343 0%,#282635 48%,#171b29 100%);
+}
+.night #home{color:#ead8ca}
+.night #home .home-title{color:#f0cda9;text-shadow:0 2px 15px #0d1020aa}
+.night #home .home-play{background:#86536c;border-color:#b98789;color:#fff2df;box-shadow:0 10px 28px #080b1670}
+.night #home button.home-preferences,.night #home .home-sound,.night #home .home-language,.night #home .home-back{
+ color:#ead8ca;border-color:#9b7d89;background:#282431b8
+}
+.night #home .home-notice{background:#2b2635eb;color:#f0dfcf;border:1px solid #8e748566}
+.night #home .home-preferences-title{color:#f0dfcf}
