@@ -341,3 +341,8 @@ Twenty-idea exploration, IDEAL/5Ws, source plan and selected scope: `docs/cinema
 - [x] Verify resident sole bounds through a geometric regression; preserve gameplay source geometry.
 - [x] Encode through ignored temporary files; publish local filenames only after full-length/frame-count validation.
 - [ ] Inspect all regenerated full-size frames, complete both aspect-ratio exports and verify their actual media streams.
+
+## Desktop navigation legibility — 2026-10-13
+- [x] Record actual faint room/dock labels in combined-source desktop closeup; twenty ideas and 5Ws in the iteration ledger.
+- [x] Review paired EN/AR day/night compact paper backing and 12px desktop labels, preserving targets and phone layout.
+- [ ] Apply bounded accepted CSS and verify actual source; count only after native acceptance.

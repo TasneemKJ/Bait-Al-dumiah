@@ -103,3 +103,6 @@ The cinema adapts to costly software/mobile renderers: when a frame exceeds 180 
 
 The optional film's private tableau gives the kettle a centered burner and flat ceramic foot, seats flower vases on small glazed bases, and places residents' actual sole bounds on their room floors with soft contact shadows. Steam begins at the kettle lid. Gameplay furnishings and rigs keep their authored positions; selection/wish rings do not appear in the film.
 The portrait film's final card places the game title and welcome line in the existing plum sky above the roof, while its final narrative line stays below the house. This separates the closing identity from the story caption without shrinking the miniature. Widescreen retains its dedicated lower third.
+
+### Desktop navigation readability — 2026-10-13
+The room strip and collapsed House tools should remain compact but readable over a furnished room closeup. On desktop viewports wider than 680px and taller than 560px, their labels use 12px type and an opaque miniature-paper backing (cream by day, plum at night), retaining the existing room underline and control targets. The phone edge treatment and film composition are unchanged. Native paired EN/AR day/night acceptance is required before marking this refinement complete.

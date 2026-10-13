@@ -107,6 +107,9 @@
 .dock[data-expanded=false]>button>.icon{color:var(--edge-ink)}
 @media(min-height:561px) and (min-width:681px){
  .room-views{bottom:76px}.object-controls{bottom:76px}.camera-tools{bottom:76px}
+ /* Furnished closeups need a quiet, opaque reading surface at the house edge. */
+ .room-views,.night .room-views,.dock[data-expanded=false],.night .dock[data-expanded=false]{background:var(--edge-paper);border-radius:8px;box-shadow:0 2px 8px #38232518}
+ .room-views button,.dock[data-expanded=false]>.tools-toggle{font-size:12px}
 }
 @media(max-width:680px) and (orientation:portrait){
  #ui:before{content:"";position:absolute;inset-inline:0;bottom:0;height:calc(122px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--edge-paper) 66%);border-block-end:3px solid #8d654b66;pointer-events:none}
