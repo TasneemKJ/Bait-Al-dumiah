@@ -69,24 +69,27 @@ export function syncClue(host,t,expanded,readClue){
  return read;
 }
 
-// Transient notices return to an unresolved save warning; both mirror into an open sheet.
+// Transient notices belong to the sheet that caused them; unresolved save warnings are global.
 export function createToaster(host,panelOpen=()=>false){
- let timer,transient='',warning='';
+ let timer,transient='',warning='',transientPanel='';
+ const panelKey=()=>{const panel=panelOpen();return typeof panel==='string'?panel:panel?'*':''};
  function render(){
   const message=transient||warning,el=host.querySelector('#toast');
   if(el.textContent!==message)el.textContent=message;el.classList.toggle('visible',Boolean(message));
-  if(panelOpen()&&message){
+  const panel=panelKey(),scoped=transient&&(transientPanel==='*'||transientPanel===panel);
+  const panelMessage=panel?(scoped?transient:warning):'';
+  if(panel&&panelMessage){
    let note=host.querySelector('.panel-notice');
    if(!note){note=document.createElement('p');note.className='panel-notice';
    note.setAttribute('role','status');host.querySelector('#sheet-content').prepend(note)}
-   if(note.textContent!==message)note.textContent=message;
-   note.dataset.saveWarning=String(!transient&&Boolean(warning));
+   if(note.textContent!==panelMessage)note.textContent=panelMessage;
+   note.dataset.saveWarning=String(!scoped&&Boolean(warning));
   }
  }
  return {
   show(message){
-   clearTimeout(timer);transient=message;render();
-   timer=setTimeout(()=>{transient='';render()},4500);
+   clearTimeout(timer);transient=message;transientPanel=panelKey();render();
+   timer=setTimeout(()=>{transient='';transientPanel='';render()},4500);
   },
   setWarning(message){warning=message||'';
    if(!warning){const note=host.querySelector('.panel-notice');if(note?.dataset.saveWarning==='true')note.remove()}

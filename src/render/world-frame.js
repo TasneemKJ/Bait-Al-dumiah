@@ -16,7 +16,8 @@ export function renderFrame(w,state,dt,selected){
  st.stitchSections=st.stitchActive?(stitchStatus(state)?.sections??[]):[];
  if(!state.paused)cameraMove.tick(dt,st.reducedMotion);
  const budget=detail(canvas.clientWidth,canvas.clientHeight,state.settings.quality,window.devicePixelRatio||1);
- if(st.quality!==budget.level){st.quality=budget.level;
+ const densityChanged=st.pixelRatio!==budget.pixelRatio;
+ if(st.quality!==budget.level||densityChanged){st.quality=budget.level;st.pixelRatio=budget.pixelRatio;
  renderer.setPixelRatio(budget.pixelRatio);renderer.shadowMap.enabled=budget.shadows;resize()}
  decorSync.add(state);
  decorSync.place(state,{reducedMotion:st.reducedMotion,nightMix:st.nightMix,hiddenId:st.previewPose?.moveId});
@@ -24,7 +25,8 @@ export function renderFrame(w,state,dt,selected){
  decorSync.prune(state);slots.refresh(state,st.previewPose?.moveId);
  // Exponential interpolation is frame-rate independent; reduced motion switches instantly.
  const night=isNight(state);
- st.nightMix=state.settings.reducedMotion?Number(night):T.MathUtils.damp(st.nightMix,Number(night),2.2,dt);
+ if(!st.lightingReady){st.nightMix=Number(night);st.lightingReady=true}
+ else st.nightMix=state.settings.reducedMotion?Number(night):T.MathUtils.damp(st.nightMix,Number(night),2.2,dt);
  // A room's focus lamp eases like the night does, so landing in a room (or the intro clearing focus) never
  // switches its brightness in one frame.
  const focusRoom=working()?null:st.focusedRoom;st.lampFocus??={};
