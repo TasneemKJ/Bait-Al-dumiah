@@ -5,7 +5,7 @@ import {DOLLS,ROOMS,CATALOG,SECRETS,ACTIONS,MILESTONES,DOOR_STEPS,GIFT_COST,VISI
 import {isNight,coziness,wishFor,wishReward,bondLevel,nextBond,isContent,contentThreshold,
   delighted,inFavoriteRoom,currentStreak,secretCozyNeeded,doorOpen,nextDoorStep,doorReady,
   canAfford,wishGranted,hasBasket,secretsLeft,giftReady,isNewestGift,slotTaken,restingNote,
-  huggedToday,moodOf,tuckedIn,chatterFor} from './simulation.js';
+  huggedToday,moodOf,tuckedIn,chatterFor,specialItem,itemPrice} from './simulation.js';
 import {giftArt} from './gift-art.js';
 import {icon} from './icons.js';
 import {todayMarkup,heartsMarkup,tasteNotebook,requestsMarkup,lettersMarkup,
@@ -101,10 +101,12 @@ export function householdMarkup(s,{t,n,button,avatar,selected}){
 export function decorateMarkup(s,{t,n,button}){
   return `<h2 id="sheet-title">${t('decorate')}</h2><p
     class="sheet-intro">${t('catalogNote')}</p><div class="catalog">${CATALOG.map(c=>`<button
-    type="button" data-action="choose-item" data-id="${c.id}" class="catalog-item" ${!canAfford(s,c.price)?
+    type="button" data-action="choose-item" data-id="${c.id}" class="catalog-item${specialItem(s)===c.id?' special':''
+    }" ${!canAfford(s,itemPrice(s,c.id))?
     'disabled':''}><span class="item-art ${c.id}">${icon(c.icon)}</span><strong>${t(c.id)}</strong><span
     class="item-description">${t(c.id+'Desc')}</span><span
-    class="item-price">${icon('button')}${n(c.price)}<small
+    class="item-price">${icon('button')}${specialItem(s)===c.id?`<s>${n(c.price)}</s> <b class="special-tag"
+    >${t('todaysSpecial')}</b> `:''}${n(itemPrice(s,c.id))}<small
       >+${n(c.cozy)} ${t('cozy')}</small></span></button>`).join('')}</div><h3
     class="section-heading">${t('yourKeepsakes')}</h3><p
       class="sheet-intro">${t('refundNote')}</p><div class="inventory">${s.decor.length?
@@ -112,7 +114,7 @@ export function decorateMarkup(s,{t,n,button}){
   return `<div class="inventory-row">${icon(c.icon)}<div><strong>${t(d.item)}</strong
     ><small>${t(d.room)}</small></div><button type="button"
     data-action="remove"
-      data-id="${d.id}">${t('refund')}<small>+${n(c.price)}</small></button></div
+      data-id="${d.id}">${t('refund')}<small>+${n(d.paid??c.price)}</small></button></div
         >`}).join(''):`<p class="empty-note">${t('emptyDecor')}</p>`}</div>${charmMarkup(s,t,n)}${paintMarkup(s,t)}`;
 }
 
@@ -190,7 +192,7 @@ export const sheetMarkup=(panel,s,ctx)=>SHEETS[panel](s,ctx);
 export function placementMarkup(s,{t,n,button,placement,moveId,room,slot}){
  const entry=CATALOG.find(c=>c.id===placement);
  return `<div class="placement-head">${icon(entry.icon)}<div><strong>${t(placement)} · ${moveId!==null?
-   t('moveObject'):n(entry.price)+' '+t('buttons')}</strong><p>${t('placeHint')}</p></div
+   t('moveObject'):n(itemPrice(s,placement))+' '+t('buttons')}</strong><p>${t('placeHint')}</p></div
      >${button('placement-cancel',t('cancel'),'close',
    'class="icon-button"')}</div><div class="placement-fields"><label class="sr-only"
      for="place-room">${t('room')}</label><select id="place-room"

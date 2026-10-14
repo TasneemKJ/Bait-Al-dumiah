@@ -111,6 +111,7 @@ export default {
    'He asked for the colour of a good morning.”',
   'mailFrom-musician':'From the oud player','mail-musician':'“I heard a music box through your window and learned '+
    'its tune. I play it badly, with love.”',
+  todaysSpecial:'Today’s special',
   roomCharm:'Room charm',charmStars:'{count} of 5 stars',
   roomCharmIntro:'Stars for keepsakes, a treasured piece, a lit lamp, new paper and a restored room.',
   wallPaint:'Wall paper',wallPaintIntro:'Repaper a room in another colour. Free, and you can always change it back.',
@@ -229,6 +230,7 @@ export default {
   'mailFrom-seamstress':'من الخيّاطة','mail-seamstress':'«بكرة خيط أحمر لسامي. طلب لون الصبحيّة الحلوة.»',
   'mailFrom-musician':'من عازف العود','mail-musician':'«سمعت علبة موسيقى من شبّاككن وتعلّمت لحنها. بعزفها غلط، بس '+
    'بمحبّة.»',
+  todaysSpecial:'عرض اليوم',
   roomCharm:'دفا الأوضة',charmStars:'نجوم: {count} من ٥',
   roomCharmIntro:'نجوم للتذكارات، والتذكار الغالي، والضوّ المضوّي، والورق الجديد، والأوضة المرمّمة.',
   wallPaint:'ورق الحيطان',wallPaintIntro:'لبّس الأوضة ورق بلون تاني. ببلاش، وبتقدر ترجّعه متى ما بدّك.',

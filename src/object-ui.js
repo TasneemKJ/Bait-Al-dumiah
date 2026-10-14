@@ -18,7 +18,7 @@ export function objectInfo(s,key){
  return {...prop,prop:true,title:'object-'+prop.id+(earned&&prop.id==='music-cabinet'?'Restored':''),
    story:'object-'+prop.id+(earned?'RestoredStory':'Story')}};
  const decor=s.decor.find(d=>'decor:'+d.id===key);if(decor){const c=CATALOG.find(c=>c.id===decor.item);
- return {...decor,prop:false,title:decor.item,story:decor.item+'Desc',icon:c.icon,price:c.price}}
+ return {...decor,prop:false,title:decor.item,story:decor.item+'Desc',icon:c.icon,price:decor.paid??c.price}}
  return null;
 }
 // One source for the physical second-touch action and its accessible equivalent.

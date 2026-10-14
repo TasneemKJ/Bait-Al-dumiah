@@ -41,7 +41,7 @@ Plan and analysis: `docs/research/REFERENCE-GAMES-2026-10-14.md`; ledger: `docs/
 - [x] 37 (AC) Room charm stars in the decorate sheet
 - [x] 38 (AC) Morning letter under the door on each fresh day
 - [x] 39 (AC) Resident birthdays by the calendar: bunting and a birthday errand
-- [ ] 40 (AC) Today's special: one keepsake a day at a kinder price
+- [x] 40 (AC) Today's special: one keepsake a day at a kinder price
 
 
 ## Visual pass — 2026-10-12

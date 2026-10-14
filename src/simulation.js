@@ -10,7 +10,7 @@ import {ROOMS,DOLLS,CATALOG,SLOTS,SECRETS,ACTIONS,MILESTONES,SEW_SECONDS,DOOR_ST
   VISITOR_GIFTS,ACTIVITIES,RESTORATION_COSTS,RESTORATION_MASTERY,WISH_REFRESH_SECONDS,
     SEW_DAILY,BASKET_MAX} from './content.js';
 import {createState} from './sim-state.js';
-import {noteErrand,rollErrands,answerVisit} from './sim-grove.js';
+import {noteErrand,rollErrands,answerVisit,itemPrice} from './sim-grove.js';
 export {trinketProp,foundToday,nextTrinket,trinketHere,findTrinket} from './sim-finds.js';
 export {hug,huggedToday,careDay,cook,cookedToday,arcStatus,fulfilRequest,ARC_REWARD,
   arcComplete,letters,moodOf,MOODS,tuckIn,tuckedIn,houseHushed,chatterFor,
@@ -26,7 +26,7 @@ export {interactStory,playStoryKeepsake} from './sim-story.js';
 export {errandDef,errandsDone,errandsReady,collectErrand,ERRAND_EMBERS,
   lanternLevel,nextLantern,tendLantern,tomorrowErrand,daySettled,
   lanternWonders,seasonFor,currentEvent,setMonth,errandEmbers,
-  rainyDay,VISIT_REWARD,mailWaiting,readMail,birthdayToday} from './sim-grove.js';
+  rainyDay,VISIT_REWARD,mailWaiting,readMail,birthdayToday,specialItem,itemPrice} from './sim-grove.js';
 export {SAVE_VERSION,migrate,readSave,restore} from './save-codec.js';
 // The first-launch intro plays once: true the first time a house claims it, false ever after.
 export function claimIntro(s){if(s.introSeen)return false;s.introSeen=true;return true}
@@ -99,16 +99,18 @@ export function place(s,item,room,slot){
  const entry=CATALOG.find(x=>x.id===item);
  if(!entry||!has(ROOMS,room)||!Number.isInteger(slot)||slot<0||slot>=SLOTS.length)return fail('invalid');
  if(s.decor.some(d=>d.room===room&&d.slot===slot))return fail('occupied');
- if(s.buttons<entry.price)return fail('funds');
- s.buttons-=entry.price;
- s.decor.push({id:s.nextId++,item,room,slot,rotation:0,originRoom:room,active:false,tendedDay:0,lastUse:-10});
+ const price=itemPrice(s,item);if(s.buttons<price)return fail('funds');
+ s.buttons-=price;
+ // A keepsake remembers what it cost, so packing a bargain away refunds the bargain, never more.
+ s.decor.push({id:s.nextId++,item,room,slot,rotation:0,originRoom:room,active:false,tendedDay:0,lastUse:-10,
+   paid:price});
  const loved=s.dolls.filter(d=>d.room===room&&DOLLS.find(x=>x.id===d.id).favItem===item).map(d=>d.id);
  noteErrand(s,'place');checkMilestones(s);
- return {ok:true,cost:entry.price,loved};
+ return {ok:true,cost:price,loved};
 }
 // Furniture benefits come from what is placed, never a one-time comfort credit to refund.
 export function remove(s,id){const index=s.decor.findIndex(d=>d.id===id);if(index<0)return fail('invalid');
-const item=s.decor.splice(index,1)[0],entry=CATALOG.find(i=>i.id===item.item),refund=entry.price;
+const item=s.decor.splice(index,1)[0],entry=CATALOG.find(i=>i.id===item.item),refund=item.paid??entry.price;
 s.buttons=Math.min(9999,s.buttons+refund);return {ok:true,refund}}
 export function moveDecor(s,id,room,slot){
  const item=s.decor.find(d=>d.id===id);

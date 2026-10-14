@@ -40,7 +40,9 @@ function restoreValid(v){
  s.decor.push({id:s.nextId++,item:d.item,room:d.room,slot:d.slot,
    rotation:Number.isInteger(d.rotation)&&d.rotation>=0&&d.rotation<4?d.rotation:0,
    originRoom:has(ROOMS,d.originRoom)?d.originRoom:d.room,active:d.active===true,
-     tendedDay:integer(d.tendedDay,0,s.day),lastUse:Number.isFinite(d.lastUse)?clamp(d.lastUse,-10,s.elapsed):-10})}
+     tendedDay:integer(d.tendedDay,0,s.day),lastUse:Number.isFinite(d.lastUse)?clamp(d.lastUse,-10,s.elapsed):-10,
+     paid:Number.isFinite(d.paid)?integer(d.paid,0,CATALOG.find(c=>c.id===d.item).price):
+       CATALOG.find(c=>c.id===d.item).price})}
  s.wishes=Array.isArray(v.wishes)?DOLLS.filter(d=>v.wishes.includes(d.id)).map(d=>d.id):[];
  s.journal=Array.isArray(v.journal)?SECRETS.filter(id=>v.journal.includes(id)):[];
  s.lastSecretDay=integer(v.lastSecretDay,0,s.day);

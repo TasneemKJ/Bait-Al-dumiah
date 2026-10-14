@@ -1,7 +1,7 @@
 // Daily errands and the courtyard lantern: small, capped, explicitly collected. Pure rules, no DOM.
 import {ERRANDS,ERRANDS_PER_DAY,LANTERN_LEVELS,FIRST_DAY_ERRANDS,LANTERN_WONDERS,
   SEASONS,EVENTS,MAIL,MAIL_GIFT,BIRTHDAYS} from './content-grove.js';
-import {SECRETS,DOOR_STEPS,ROOMS} from './content.js';
+import {SECRETS,DOOR_STEPS,ROOMS,CATALOG} from './content.js';
 // Events are transient notices, capped like every other house event.
 const emit=(s,event)=>{if(s.events.length<24)s.events.push(event)};
 
@@ -104,3 +104,7 @@ export function readMail(s){
  s.earnedToday=Math.min(99999,s.earnedToday+MAIL_GIFT);
  return {ok:true,id:s.grove.mail.id,reward:MAIL_GIFT};
 }
+// Today's special: from the second day spent in the house, one keepsake a day costs a quarter less.
+export const specialItem=s=>s.grove.errandDay>1?CATALOG[mix(s.grove.errandDay,11)%CATALOG.length].id:null;
+export const itemPrice=(s,id)=>{const entry=CATALOG.find(c=>c.id===id);if(!entry)return null;
+ return specialItem(s)===id?Math.ceil(entry.price*.75):entry.price};

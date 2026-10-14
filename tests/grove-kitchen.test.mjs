@@ -77,3 +77,17 @@ test('room charm earns a star for each keepsake (up to three), a treasured piece
  const html=decorateMarkup(s,{t,n:String,button:()=>''});assert.match(html,/class="charm-list"/);
  assert.equal((html.match(/<i class="lit">/g)||[]).length,5);assert.match(strings.ar.charmStars,/\{count\}/);
 });
+import {CATALOG} from '../src/content.js';
+test('from the second day one keepsake is a kinder price, and packing it away refunds only what was paid',()=>{
+ const s=sim.createState();assert.equal(sim.specialItem(s),null,'no special on the first day');
+ sim.changeLight(s);s.dayTime=999;sim.changeLight(s);const id=sim.specialItem(s),entry=CATALOG.find(c=>c.id===id);
+ assert.ok(id);assert.equal(sim.itemPrice(s,id),Math.ceil(entry.price*.75));s.buttons=200;const b=s.buttons;
+ const r=sim.place(s,id,'kitchen',0);assert.equal(r.cost,sim.itemPrice(s,id));assert.equal(s.buttons,b-r.cost);
+ assert.equal(sim.remove(s,s.decor[0].id).refund,r.cost);assert.equal(s.buttons,b,'no profit from a bargain');
+ const other=CATALOG.find(c=>c.id!==id);assert.equal(sim.itemPrice(s,other.id),other.price);
+ sim.place(s,id,'kitchen',1);const raw=JSON.parse(JSON.stringify(s));raw.decor[0].paid=9999;
+ assert.equal(sim.restore(JSON.stringify(raw)).decor[0].paid,entry.price,'never more than the list price');
+ delete raw.decor[0].paid;assert.equal(sim.restore(JSON.stringify(raw)).decor[0].paid,entry.price,'older saves paid full price');
+ const html=decorateMarkup(s,{t,n:String,button:()=>''});assert.match(html,/catalog-item special/);assert.match(html,/special-tag/);
+ assert.match(strings.ar.todaysSpecial,/[؀-ۿ]/);
+});

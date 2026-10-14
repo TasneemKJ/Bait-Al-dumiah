@@ -142,3 +142,6 @@ html[lang=ar] .errand{font-size:14px}
 .mail-card small{font-size:10px;color:var(--muted)}
 .mail-card p{font-size:12px;line-height:1.8;font-style:italic;color:var(--ink)}
 .mail-card>button{font-size:11px;padding:8px 14px}
+.catalog-item.special{border-color:#c99a4a;background:#fbefd9}
+.item-price s{color:var(--muted);font-size:10px}
+.special-tag{font-weight:normal;font-size:8px;padding:1px 6px;border-radius:10px;background:#c99a4a;color:#fff8ea}
