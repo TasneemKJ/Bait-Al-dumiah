@@ -4,10 +4,10 @@ import {softTexture} from './textiles.js';
 // Seasonal drift over the courtyard from the device calendar: olive leaves in autumn, snow in winter,
 // almond petals in spring, jasmine flowers on summer nights. One point cloud; still under reduced motion.
 export const SEASON_LOOK={
- autumn:{color:0xc98a4a,size:.10,count:28,fall:.22,sway:.35,night:1},
- winter:{color:0xf6f3ee,size:.065,count:40,fall:.16,sway:.18,night:1},
- spring:{color:0xf2c3cf,size:.085,count:30,fall:.12,sway:.4,night:1},
- summer:{color:0xfff1d6,size:.06,count:16,fall:.05,sway:.25,night:.4},
+ autumn:{color:0xc98a4a,size:.15,count:28,fall:.22,sway:.35,night:1},
+ winter:{color:0xf6f3ee,size:.10,count:40,fall:.16,sway:.18,night:1},
+ spring:{color:0xf2c3cf,size:.13,count:30,fall:.12,sway:.4,night:1},
+ summer:{color:0xfff1d6,size:.09,count:16,fall:.05,sway:.25,night:.4},
 };
 const COUNT=40,TOP=5.2,BOTTOM=-.1;
 // Where flake i is at time t: it falls, wraps to the top and sways sideways. Pure, for tests.
