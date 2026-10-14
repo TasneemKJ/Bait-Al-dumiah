@@ -103,10 +103,11 @@ export function decorateMarkup(s,{t,n,button}){
     class="sheet-intro">${t('catalogNote')}</p><div class="catalog">${CATALOG.map(c=>`<button
     type="button" data-action="choose-item" data-id="${c.id}" class="catalog-item${specialItem(s)===c.id?' special':''
     }" ${!canAfford(s,itemPrice(s,c.id))?
-    'disabled':''}><span class="item-art ${c.id}">${icon(c.icon)}</span><strong>${t(c.id)}</strong><span
+    'disabled':''}><span class="item-art ${c.id}">${icon(c.icon)}</span>${specialItem(s)===c.id?`<b
+    class="special-tag">${t('todaysSpecial')}</b>`:''}<strong>${t(c.id)}</strong><span
     class="item-description">${t(c.id+'Desc')}</span><span
-    class="item-price">${icon('button')}${specialItem(s)===c.id?`<s>${n(c.price)}</s> <b class="special-tag"
-    >${t('todaysSpecial')}</b> `:''}${n(itemPrice(s,c.id))}<small
+    class="item-price">${icon('button')}${specialItem(s)===c.id?`<s>${n(c.price)}</s> `:''}${n(itemPrice(s,
+    c.id))}<small
       >+${n(c.cozy)} ${t('cozy')}</small></span></button>`).join('')}</div><h3
     class="section-heading">${t('yourKeepsakes')}</h3><p
       class="sheet-intro">${t('refundNote')}</p><div class="inventory">${s.decor.length?

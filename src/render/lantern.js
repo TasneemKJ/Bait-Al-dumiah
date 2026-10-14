@@ -21,7 +21,9 @@ function createMotes(parent){
  for(let i=0;i<MAX_MOTES;i++){
   p[i*3]=Math.sin(i*91.7)*4.6;p[i*3+1]=.3+((i*1.618)%1)*4.2;p[i*3+2]=2.2+Math.cos(i*37.3)*.9}
  const g=new T.BufferGeometry();g.setAttribute('position',new T.BufferAttribute(p,3));
- const motes=new T.Points(g,new T.PointsMaterial({map:softTexture(),color:0xffd79a,size:.07,transparent:true,
+ // Point sizes are screen pixels under the orthographic camera.
+ const motes=new T.Points(g,new T.PointsMaterial({map:softTexture(),color:0xffd79a,size:26,sizeAttenuation:false,
+   transparent:true,
    opacity:.8,depthWrite:false,blending:T.AdditiveBlending}));motes.name='returning-motes';parent.add(motes);
  return motes;
 }
@@ -52,7 +54,8 @@ export function createLantern(parent){
  const motes=createMotes(parent),status={level:-1,motes:0,flare:0};
  const sparks=new T.Points(new T.BufferGeometry().setAttribute('position',new T.BufferAttribute(new Float32Array(
    Array.from({length:12},(_,i)=>[Math.sin(i*2.4)*.07,.3+i*.035,Math.cos(i*2.4)*.07]).flat()),3)),
-   new T.PointsMaterial({map:softTexture(),color:0xffc978,size:.05,transparent:true,opacity:0,depthWrite:false,
+   new T.PointsMaterial({map:softTexture(),color:0xffc978,size:22,sizeAttenuation:false,transparent:true,opacity:0,
+   depthWrite:false,
    blending:T.AdditiveBlending}));sparks.name='lantern-sparks';sparks.visible=false;root.add(sparks);
  let flareAt=-Infinity,pendingFlare=false;
  return {root,hit,status,flare(){pendingFlare=true},update(state,night){

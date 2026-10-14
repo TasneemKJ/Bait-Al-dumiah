@@ -3,11 +3,13 @@ import {softTexture} from './textiles.js';
 
 // Seasonal drift over the courtyard from the device calendar: olive leaves in autumn, snow in winter,
 // almond petals in spring, jasmine flowers on summer nights. One point cloud; still under reduced motion.
+// Sizes are screen pixels (the soft sprite's visible core is about a fifth of it): points do not scale with
+// distance under the house's orthographic camera.
 export const SEASON_LOOK={
- autumn:{color:0xc98a4a,size:.15,count:28,fall:.22,sway:.35,night:1},
- winter:{color:0xf6f3ee,size:.10,count:40,fall:.16,sway:.18,night:1},
- spring:{color:0xf2c3cf,size:.13,count:30,fall:.12,sway:.4,night:1},
- summer:{color:0xfff1d6,size:.09,count:16,fall:.05,sway:.25,night:.4},
+ autumn:{color:0xc98a4a,size:36,count:28,fall:.22,sway:.35,night:1},
+ winter:{color:0xf6f3ee,size:26,count:40,fall:.16,sway:.18,night:1},
+ spring:{color:0xf2c3cf,size:32,count:30,fall:.12,sway:.4,night:1},
+ summer:{color:0xfff1d6,size:24,count:16,fall:.05,sway:.25,night:.4},
 };
 const COUNT=40,TOP=5.2,BOTTOM=-.1;
 // Where flake i is at time t: it falls, wraps to the top and sways sideways. Pure, for tests.
@@ -19,7 +21,7 @@ export function driftPoint(i,t,look,still){
 export function createSeasons(parent){
  const positions=new Float32Array(COUNT*3),geometry=new T.BufferGeometry();
  geometry.setAttribute('position',new T.BufferAttribute(positions,3));
- const points=new T.Points(geometry,new T.PointsMaterial({map:softTexture(),color:0xffffff,size:.08,
+ const points=new T.Points(geometry,new T.PointsMaterial({map:softTexture(),color:0xffffff,size:8,sizeAttenuation:false,
    transparent:true,opacity:.85,depthWrite:false}));points.name='season-drift';parent.add(points);
  const status={season:null,count:0};let season=null,stillDrawn=false;
  return {points,status,setSeason(value){if(!Object.hasOwn(SEASON_LOOK,value))value=null;season=value;
