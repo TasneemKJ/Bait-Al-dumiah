@@ -4,7 +4,7 @@ import {icon} from './icons.js';
 export const button=(action,label,ico,extra='')=>
   `<button type="button" data-action="${action}" ${extra}>`+`${ico?icon(ico):''}<span>${label}</span></button>`;
 
-const dockIcons={household:'souls',activities:'play',decorate:'leaf',journal:'book',settings:'settings'};
+const dockIcons={today:'lamp',household:'souls',activities:'play',decorate:'leaf',journal:'book',settings:'settings'};
 
 // The play shell: header, status, clue, time and camera tools, dock, overlays and the sheet dialog.
 export function shellMarkup(s,{t,n,button,clueExpanded,toolsExpanded}){

@@ -1,5 +1,6 @@
 // Shared rule helpers: earning buttons, notices, milestones, bonds and the economic close of an activity.
 import {clamp} from './sim-util.js';
+import {noteErrand} from './sim-grove.js';
 import {bondLevel,currentStreak,fullRooms,coziness} from './sim-queries.js';
 import {ROOMS,SECRETS,MILESTONES,DOOR_STEPS,VISITOR_GIFTS,ACTIVITIES,ACTIVITY_THRESHOLDS,
   STORY_CHAPTERS,ACTIVITY_DAILY_CAP,ACTIVITY_COOLDOWN} from './content.js';
@@ -48,7 +49,7 @@ export function completeActivity(s,id){
   reward=base;bonus=activityLevel(s,id)>before?10*(before+1):0;earn(s,reward+bonus);
   const d=s.dolls.find(d=>d.id===a.resident);growBond(s,d,3);d.comfort=clamp(d.comfort+8);s.unease=clamp(s.unease-3);
  }
- checkMilestones(s);
+ noteErrand(s,'ritual',id);checkMilestones(s);
  return {ok:true,complete:true,id,reward,bonus,level:activityLevel(s,id),practice:!rewarded};
 }
 

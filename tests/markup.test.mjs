@@ -15,7 +15,7 @@ test('the shell offers every sheet from the dock in both languages and never pri
  for(const locale of ['en','ar']){
   const s=createState();s.settings.locale=locale;
   const html=shellMarkup(s,{...view(s),clueExpanded:false,toolsExpanded:false});
-  for(const panel of ['household','activities','decorate','journal','settings'])assert.match(html,new RegExp(`data-action="panel-${panel}"`),`${locale} dock lacks ${panel}`);
+  for(const panel of ['today','household','activities','decorate','journal','settings'])assert.match(html,new RegExp(`data-action="panel-${panel}"`),`${locale} dock lacks ${panel}`);
   assert.match(html,/<dialog id="sheet"/);
   assert.match(html,new RegExp(view(s).t('title')));
   assert.doesNotMatch(html,/undefined|NaN|\[object/,`${locale} shell prints a missing value`);

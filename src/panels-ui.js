@@ -7,6 +7,7 @@ import {isNight,coziness,wishFor,wishReward,bondLevel,nextBond,isContent,content
   canAfford,wishGranted,hasBasket,secretsLeft,giftReady,isNewestGift,slotTaken,restingNote} from './simulation.js';
 import {giftArt} from './gift-art.js';
 import {icon} from './icons.js';
+import {todayMarkup} from './grove-ui.js';
 export const actionIcon={tea:'tea',play:'play',rest:'rest',soothe:'heart'};
 export const wishKey=(id,action)=>DOLLS.find(d=>d.id===id).wish===action?id+'Wish':id+'Wish_'+action;
 
@@ -169,6 +170,7 @@ export function settingsMarkup(s,{t,button,resetConfirm}){
 const SHEETS={
   object:(s,c)=>objectMarkup(s,c.selectedObject,c.t,c.n,c.button),
   activities:(s,c)=>activityMarkup(s,c.t,c.n,c.button,c.activityResult),
+  today:(s,c)=>todayMarkup(s,c),
   household:(s,c)=>householdMarkup(s,c),
   decorate:(s,c)=>decorateMarkup(s,c),
   journal:(s,c)=>journalMarkup(s,c),

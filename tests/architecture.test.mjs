@@ -14,14 +14,14 @@ import {fileURLToPath} from 'node:url';
 const LAYERS=['shared','data','simulation','render','ui','main'];
 const LAYER_OF={
  'event-bindings.js':'shared','content.js':'data','locale-data.js':'data','locale-rituals.js':'data','locale-story.js':'data',
- 'locale-house.js':'data','locale-keepsakes.js':'data','i18n.js':'data','icons.js':'data',
+ 'locale-house.js':'data','locale-keepsakes.js':'data','locale-grove.js':'data','content-grove.js':'data','i18n.js':'data','icons.js':'data',
  'simulation.js':'simulation','home-session.js':'simulation','return-greeting.js':'simulation',
- 'stitch-path.js':'simulation','sim-util.js':'simulation','sim-core.js':'simulation','sim-tea.js':'simulation','sim-stitch.js':'simulation','sim-chimes.js':'simulation','sim-story.js':'simulation','sim-queries.js':'simulation','sim-state.js':'simulation','save-codec.js':'simulation','lullaby-score.js':'simulation','intro-score.js':'simulation','night-score.js':'simulation',
+ 'stitch-path.js':'simulation','sim-util.js':'simulation','sim-core.js':'simulation','sim-tea.js':'simulation','sim-stitch.js':'simulation','sim-chimes.js':'simulation','sim-story.js':'simulation','sim-queries.js':'simulation','sim-state.js':'simulation','sim-grove.js':'simulation','save-grove.js':'simulation','save-codec.js':'simulation','lullaby-score.js':'simulation','intro-score.js':'simulation','night-score.js':'simulation',
  'tea-input.js':'simulation','stitch-input.js':'simulation','chime-input.js':'simulation',
  'carry-gesture.js':'simulation','pointer-gesture.js':'simulation','wish-glow.js':'simulation',
  'resident-portraits.js':'simulation',
  'ui.js':'ui','intro-ui.js':'ui','intro-sound.js':'ui','activities-ui.js':'ui','chime-ui.js':'ui','home-ui.js':'ui','object-ui.js':'ui',
- 'stitch-ui.js':'ui','stitch-view.js':'ui','canvas-aria.js':'ui','chime-input-bindings.js':'ui','chime-view.js':'ui','objective-ui.js':'ui','shell-markup.js':'ui','hud-sync.js':'ui','dom-sync.js':'ui','readouts.js':'ui','ui-events.js':'ui','save-transfer.js':'ui','panels-ui.js':'ui','stitch-input-bindings.js':'ui','tea-input-bindings.js':'ui','tea-view.js':'ui','story-ui.js':'ui','tea-ui.js':'ui','audio.js':'ui','gift-art.js':'ui',
+ 'stitch-ui.js':'ui','stitch-view.js':'ui','canvas-aria.js':'ui','chime-input-bindings.js':'ui','chime-view.js':'ui','objective-ui.js':'ui','shell-markup.js':'ui','hud-sync.js':'ui','dom-sync.js':'ui','readouts.js':'ui','ui-events.js':'ui','save-transfer.js':'ui','panels-ui.js':'ui','stitch-input-bindings.js':'ui','tea-input-bindings.js':'ui','tea-view.js':'ui','story-ui.js':'ui','tea-ui.js':'ui','audio.js':'ui','gift-art.js':'ui','grove-ui.js':'ui',
  'object-controls.js':'ui','room-views.js':'ui','resident-label.js':'ui','placement-keys.js':'ui','playfield-layout.js':'ui','placement-flow.js':'ui',
  'app-feedback.js':'ui','app-view.js':'ui','app-commands.js':'ui','cmd-home.js':'ui','cmd-camera.js':'ui','cmd-story.js':'ui','cmd-activities.js':'ui','cmd-house.js':'ui','cmd-save.js':'ui','app-loop.js':'ui',
  'film-ui.js':'ui','film-sound.js':'ui','main.js':'main',

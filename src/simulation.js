@@ -10,6 +10,7 @@ import {ROOMS,DOLLS,CATALOG,SLOTS,SECRETS,ACTIONS,MILESTONES,SEW_SECONDS,DOOR_ST
   VISITOR_GIFTS,ACTIVITIES,RESTORATION_COSTS,RESTORATION_MASTERY,WISH_REFRESH_SECONDS,
     SEW_DAILY,BASKET_MAX} from './content.js';
 import {createState} from './sim-state.js';
+import {noteErrand,rollErrands} from './sim-grove.js';
 export {createState};
 export * from './sim-queries.js';
 export {controlStitch,finishStitch,releaseStitch,stitchSectionProgress,stitchStatus,
@@ -18,6 +19,7 @@ export {cancelChime,chimeStatus,grabChime,pullChime,releaseChime,replayChimes} f
 export {activityLevel,activityReward,activityRewardReady,checkMilestones,storyStatus} from './sim-core.js';
 export {controlTea,emptyTeaCup,releaseTea,serveTea,teaStatus} from './sim-tea.js';
 export {interactStory,playStoryKeepsake} from './sim-story.js';
+export {errandDef,errandsDone} from './sim-grove.js';
 export {SAVE_VERSION,migrate,readSave,restore} from './save-codec.js';
 // The first-launch intro plays once: true the first time a house claims it, false ever after.
 export function claimIntro(s){if(s.introSeen)return false;s.introSeen=true;return true}
@@ -29,7 +31,7 @@ export function claim(s,id){
  s.milestones.push(id);earn(s,m.reward);return {ok:true,reward:m.reward};
 }
 export function collectBasket(s){if(s.basket<1)return fail('emptyBasket');
-const reward=s.basket;s.basket=0;earn(s,reward);return {ok:true,reward}}
+const reward=s.basket;s.basket=0;earn(s,reward);noteErrand(s,'basket');return {ok:true,reward}}
 export function care(s,id,action){
  const d=s.dolls.find(x=>x.id===id), a=Object.hasOwn(ACTIONS,action)?ACTIONS[action]:null;
  if(!d||!a)return fail('invalid');
@@ -52,14 +54,14 @@ export function care(s,id,action){
  }
  const brave=action==='soothe'&&isNight(s)?2:0;
  growBond(s,d,Math.round((4+(reward?4:0)+brave)*(inFavoriteRoom(d)?1.5:1)));
- checkMilestones(s);
+ noteErrand(s,'care',id);checkMilestones(s);
  return {ok:true,reward,bonus,cost:a.cost};
 }
 // Wishes and the sewing cap refresh only after a day actually spent in the house, so hurrying
 // dawn with the light control never farms rewards. Nothing is lost by hurrying either.
 function newDay(s){
  const wishes=s.wishes.length,fresh=s.dayTime>=WISH_REFRESH_SECONDS;s.day=Math.min(99999,s.day+1);s.dayTime=0;
- if(fresh){s.wishes=[];s.sewnToday=0;for(const a of ACTIVITIES)s.activities.completed[a.id]=0}
+ if(fresh){s.wishes=[];s.sewnToday=0;for(const a of ACTIVITIES)s.activities.completed[a.id]=0;rollErrands(s)}
  emit(s,{type:'dawn',day:s.day,wishes,fresh,earned:s.earnedToday,streak:currentStreak(s)});s.earnedToday=0;
 }
 export function step(s,dt){
@@ -94,7 +96,7 @@ export function place(s,item,room,slot){
  s.buttons-=entry.price;
  s.decor.push({id:s.nextId++,item,room,slot,rotation:0,originRoom:room,active:false,tendedDay:0,lastUse:-10});
  const loved=s.dolls.filter(d=>d.room===room&&DOLLS.find(x=>x.id===d.id).favItem===item).map(d=>d.id);
- checkMilestones(s);
+ noteErrand(s,'place');checkMilestones(s);
  return {ok:true,cost:entry.price,loved};
 }
 // Furniture benefits come from what is placed, never a one-time comfort credit to refund.
@@ -113,7 +115,8 @@ item.rotation=((item.rotation??0)+1)%4;return {ok:true}}
 export function useDecor(s,id){
  const item=s.decor.find(d=>d.id===id);if(!item)return fail('invalid');
  if(!['plant','lamp','musicbox','mobile'].includes(item.item))return fail('notInteractive');
- const done=(effect,extra={})=>({ok:true,id,item:item.item,room:item.room,effect,...extra});
+ const done=(effect,extra={})=>{noteErrand(s,'use',item.item);
+  return {ok:true,id,item:item.item,room:item.room,effect,...extra}};
  if(item.item==='plant'){
   if(item.tendedDay===s.day)return fail('alreadyTended');
   item.tendedDay=s.day;item.lastUse=s.elapsed;return done('water');
@@ -130,7 +133,7 @@ export function discover(s){
  if(s.lastSecretDay===s.day)return fail('tomorrow');
  const secret=SECRETS.find(x=>!s.journal.includes(x));if(!secret)return fail('complete');
  const needed=secretCozyNeeded(s);if(coziness(s)<needed)return fail('shy',{needed});
- s.journal.push(secret);s.lastSecretDay=s.day;earn(s,5);s.unease=clamp(s.unease+7);
+ s.journal.push(secret);s.lastSecretDay=s.day;earn(s,5);s.unease=clamp(s.unease+7);noteErrand(s,'whisper');
  checkMilestones(s);
  return {ok:true,secret,reward:5};
 }
@@ -155,6 +158,7 @@ export function leaveGift(s){
  const gift=VISITOR_GIFTS.find(g=>!s.gifts.includes(g))??VISITOR_GIFTS[s.day%VISITOR_GIFTS.length];
  s.buttons-=GIFT_COST;s.lastGiftDay=s.day;if(!s.gifts.includes(gift))s.gifts.push(gift);s.unease=clamp(s.unease-10);
  for(const d of s.dolls)d.comfort=clamp(d.comfort+6);
+ noteErrand(s,'gift');
  checkMilestones(s);
  return {ok:true,gift,cost:GIFT_COST};
 }

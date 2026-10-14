@@ -1,0 +1,12 @@
+/* Today: the day's errands on the paper sheet. */
+.errand-list{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:8px}
+.errand{display:flex;align-items:center;gap:12px;min-height:52px;padding:8px 12px;border:1px solid var(--line);
+ border-radius:12px;background:#f6eadf;font-size:12px}
+.errand>.icon{width:21px;height:21px;color:#a17d8b;flex-shrink:0}
+.errand>span{flex:1;line-height:1.5}
+.errand>em{font-style:normal;font-size:10px;color:var(--muted);display:flex;align-items:center;gap:4px;white-space:nowrap}
+.errand>em .icon{width:14px;height:14px;color:#6f9078}
+.errand.done{background:#eef0e2;border-color:#c6cfb4}
+html[lang=ar] .errand{font-size:14px}
+/* Today leads the House Tools drawer across its full width: it is where a short daily visit starts. */
+#ui .dock[data-expanded=true]>[data-action="panel-today"]{grid-column:1/-1}

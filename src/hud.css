@@ -96,9 +96,9 @@ html[lang=ar] .time-tools>button{white-space:nowrap;font-size:11px;gap:5px;max-w
  grid-column:1/-1;justify-content:flex-start;font-weight:700;min-height:48px;
  border:0;border-bottom:1px dashed var(--line);border-radius:0;padding-top:2px;
 }
-#ui .dock[data-expanded=true]>[data-action="panel-settings"]{grid-column:1;grid-row:4}
+#ui .dock[data-expanded=true]>[data-action="panel-settings"]{grid-column:1;grid-row:5}
 #ui .dock[data-expanded=true]>:is([data-action="sound"],[data-action="pause"]){
- grid-column:2;grid-row:4;width:56px;min-width:56px;justify-content:center;
+ grid-column:2;grid-row:5;width:56px;min-width:56px;justify-content:center;
 }
 #ui .dock[data-expanded=true]>[data-action="sound"]{justify-self:start}
 #ui .dock[data-expanded=true]>[data-action="pause"]{justify-self:end}
@@ -115,5 +115,5 @@ html[lang=ar] #ui .dock[data-expanded=true]>button{font-size:max(16px,1rem)}
 }
 /* Enlarged text gets a single readable column, not clipped words in half-width cells. */
 .large-text #ui .dock[data-expanded=true]{grid-template-columns:minmax(0,1fr)}
-.large-text #ui .dock[data-expanded=true]>[data-action="panel-settings"]{grid-column:1;grid-row:6}
-.large-text #ui .dock[data-expanded=true]>:is([data-action="sound"],[data-action="pause"]){grid-column:1;grid-row:7}
+.large-text #ui .dock[data-expanded=true]>[data-action="panel-settings"]{grid-column:1;grid-row:7}
+.large-text #ui .dock[data-expanded=true]>:is([data-action="sound"],[data-action="pause"]){grid-column:1;grid-row:8}

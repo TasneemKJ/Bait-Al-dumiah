@@ -40,7 +40,10 @@ for(const locale of ['en','ar'])for(const activity of ['tea','stitch','lullaby']
   assert.equal(beginActivity(state,activity).ok,true);
   assert.equal(app.physicalActivity(),activity,'use the production ritual visibility detector');
   announce();advance(125);
-  const expected=[`${tr('milestoneReached')} ${tr('ms-first-careTitle')} · +5 ${tr('buttons')}`,
+  // A day whose errands include caring for Lina also announces that errand, first, as it happened first.
+  const errand=state.grove.errands.some(e=>e.id==='care-lina')?
+   [tr('errandDone').replace('{name}',tr('errand-care-lina'))]:[];
+  const expected=[...errand,`${tr('milestoneReached')} ${tr('ms-first-careTitle')} · +5 ${tr('buttons')}`,
    tr('sewnHint'),tr('calmDayOne'),tr('firstNightHint')];
   assert.deepEqual(state.hints,{night:true,calm:true},'both one-time simulation events have occurred');
   assert.deepEqual(shown,[],'a hidden ritual toast must not consume notices');

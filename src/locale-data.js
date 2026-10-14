@@ -4,8 +4,9 @@ import rituals from './locale-rituals.js';
 import story from './locale-story.js';
 import house from './locale-house.js';
 import keepsakes from './locale-keepsakes.js';
+import grove from './locale-grove.js';
 
-const tables=[rituals,story,house,keepsakes];
+const tables=[rituals,story,house,keepsakes,grove];
 const merge=lang=>Object.assign({},...tables.map(table=>table[lang]));
 export const strings={en:merge('en'),ar:merge('ar')};
 export function translate(locale,key){return strings[locale]?.[key]??strings.en[key]??key}
