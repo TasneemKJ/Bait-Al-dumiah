@@ -39,3 +39,15 @@ test('the household notebook shows what each resident has shown about every dish
  assert.match(householdMarkup(s,{t,n:String,button:()=>'',avatar:()=>'',selected:'sami'}),/class="taste-list"/);
  for(const k of ['love','like','meh','unknown'])assert.match(strings.ar['taste-'+k],/[؀-ۿ]/);
 });
+import * as T from 'three';
+import {createSupper,supperLook,SUPPER_STEAM_SECONDS} from '../src/render/supper.js';
+import {textureCanvas} from './helpers/render-node.mjs';
+test('the day\'s dish waits on the kitchen table and steams for a while after cooking',t=>{
+ textureCanvas(t);const s=sim.createState(),parent=new T.Group(),supper=createSupper(parent);
+ supper.update(s);assert.equal(supper.status.shown,false);
+ s.elapsed=100;sim.cook(s,'knafeh');supper.update(s);assert.deepEqual(supper.status,{shown:true,steam:true});
+ s.elapsed=100+SUPPER_STEAM_SECONDS+1;supper.update(s);assert.deepEqual(supper.status,{shown:true,steam:false});
+ sim.changeLight(s);s.dayTime=999;sim.changeLight(s);supper.update(s);assert.equal(supper.status.shown,false,'a fresh day clears the table');
+ const raw=JSON.parse(JSON.stringify(s));raw.grove.dish='<img>';raw.grove.dishAt=1e12;const r=sim.restore(JSON.stringify(raw));
+ assert.equal(r.grove.dish,null);assert.ok(r.grove.dishAt<=r.elapsed);assert.equal(supperLook(r).shown,false);
+});

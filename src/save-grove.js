@@ -1,7 +1,7 @@
 // Restores the reference-game systems' record. Every field is whitelisted, clamped and defaulted.
 import {ERRANDS,LANTERN_LEVELS,DISHES} from './content-grove.js';
 import {rollErrands} from './sim-grove.js';
-import {integer} from './sim-util.js';
+import {integer,clamp} from './sim-util.js';
 
 const obj=v=>v&&typeof v==='object'&&!Array.isArray(v)?v:null;
 export function restoreGrove(s,raw){
@@ -17,6 +17,7 @@ export function restoreGrove(s,raw){
  g.errands=(Array.isArray(v.errands)?v.errands.slice(0,6):[]).filter(known)
    .map(e=>({id:e.id,done:e.done===true||e.collected===true,collected:e.collected===true}));
  g.dishDay=integer(v.dishDay,0,s.day);const tastes=obj(v.tastes)??{};
+ g.dish=DISHES.some(d=>d.id===v.dish)?v.dish:null;g.dishAt=Number.isFinite(v.dishAt)?clamp(v.dishAt,-99,s.elapsed):-99;
  for(const d of s.dolls){const known=obj(tastes[d.id]);if(!known)continue;
   for(const dish of DISHES)if(['love','like','meh'].includes(known[dish.id]))
    (g.tastes[d.id]??={})[dish.id]=known[dish.id]}

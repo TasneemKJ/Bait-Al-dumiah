@@ -23,7 +23,7 @@ export function cook(s,dishId){
  const dish=DISHES.find(d=>d.id===dishId);if(!dish)return {ok:false,reason:'invalid'};
  if(s.paused)return {ok:false,reason:'pausedActivity'};
  if(cookedToday(s))return {ok:false,reason:'cookedToday'};if(s.buttons<dish.cost)return {ok:false,reason:'funds'};
- s.buttons-=dish.cost;s.grove.dishDay=careDay(s);
+ s.buttons-=dish.cost;s.grove.dishDay=careDay(s);s.grove.dish=dish.id;s.grove.dishAt=s.elapsed;
  const reactions=s.dolls.map(d=>{const taste=TASTES[d.id]?.[dish.id]??'like',fx=TASTE_EFFECT[taste];
   d.hunger=clamp(d.hunger+fx.hunger);d.comfort=clamp(d.comfort+fx.comfort);if(fx.bond)growBond(s,d,fx.bond);
   (s.grove.tastes[d.id]??={})[dish.id]=taste;return {id:d.id,taste}});
