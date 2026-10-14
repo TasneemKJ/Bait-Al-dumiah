@@ -13,6 +13,29 @@ Save warnings persist on the existing notice surface until a successful save, in
 Decoration benefits are ongoing: placed keepsakes raise house coziness, ease comfort decay and help a resident feel content near a favorite item. Placing or packing an object does not directly change care-earned comfort. Packing still returns its full price, including for older saves; moving residents or furniture cannot turn a reversible purchase into free comfort or a comfort penalty.
 Look into the four-room house, care for three dolls (tea, play, rest, reassure), fulfil daily wishes for buttons, decorate with six keepsakes, deepen closeness, perform three physical rituals (tea, sewing, moon chimes), follow three object stories, restore rooms, and greet the visitor after dark to collect six whispers and open the closed door. A four-minute day/night cycle drives atmosphere.
 
+## Reference-games pass, 2026-10-14
+
+Analysis and ranked plan: `docs/research/REFERENCE-GAMES-2026-10-14.md` (Cozy Grove, Spiritfarer, Animal
+Crossing: New Horizons; mechanisms only). What the player meets:
+
+- **Today** (House Tools): three small errands a day drawn from real house actions. A finished errand is
+  collected for lantern embers; embers tend the brass lantern in the courtyard through five levels. Each level
+  brings something back: the lantern's flame, colour in the house, light motes at night. When the day's
+  errands are collected the sheet closes the day gently and teases tomorrow. Errands refresh only after a day
+  actually spent in the house, like wishes; nothing is lost by skipping.
+- **Care as a relationship**: closeness shows as hearts; one hug per resident per day; one comfort dish a day
+  for the whole house with discoverable tastes; three personal requests per resident unlocked by closeness,
+  ending in a ribbon ceremony and a letter (the doll stays, gilded like mended porcelain); mood words; a
+  goodnight round after dark.
+- **The player's own year**: device-calendar seasons in the courtyard and sky, seasonal events with an event
+  errand, soft rain days, resident birthdays.
+- **Small daily surprises**: a hidden trinket for the curio cabinet, a morning letter, a resident's chatter
+  and occasional request, a daily special in the catalogue.
+- **Decorating as expression**: wall paints per room, a tactile placement pop, room charm stars.
+
+All of it follows the rules: explicit collection, no decay, reduced motion keeps effects still, sound only after
+a gesture, English and Arabic for every line.
+
 ## Visual language
 Soft porcelain and cream paper, rose, mint and gold accents, terracotta roof, warm interior light by day, cool moonlight with practical lamps at night. Serif display type for titles and story text, folded cream paper with a red-thread edge, restrained brass hairlines and a warm presentation plinth. Procedural meshes and canvas textures only.
 

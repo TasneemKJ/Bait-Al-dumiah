@@ -1,5 +1,49 @@
 # TODO
 
+## Reference-games pass — 2026-10-14
+Plan and analysis: `docs/research/REFERENCE-GAMES-2026-10-14.md`; ledger: `docs/research/ITERATIONS-40.md`.
+- [ ] 01 (CG) Today sheet with three daily errands drawn from real house actions, refreshed only after a day actually spent
+- [ ] 02 (CG) Collect a finished errand for lantern embers (explicit collect, never automatic)
+- [ ] 03 (CG) Tend the courtyard lantern: spend embers, five warmth levels
+- [ ] 04 (CG) The lantern in the courtyard grows: brass fanous mesh whose flame and glow follow its level; touching it opens Today
+- [ ] 05 (CG) Colour returns to the house as the lantern grows (soft saturation lift on the scene)
+- [ ] 06 (CG) Light motes return at night, more of them with each lantern level
+- [ ] 07 (CG) Tending juice: flare, rising sparks and a warm two-note whoosh; still under reduced motion
+- [ ] 08 (CG) Day-one errands teach the house (tea for Lina, water a plant, collect the basket)
+- [ ] 09 (CG) Errand news dot and objective hand-off: a ready errand marks House Tools and the clue points to it
+- [ ] 10 (CG) "That's today" close with tomorrow's first errand as a teaser
+- [ ] 11 (CG) Lantern wonders list: what each level brought, shown as a little ledger
+- [ ] 12 (CG) Heart levels shown as hearts on resident tabs and the closeness row
+- [ ] 13 (SF) Daily hug, once per resident per day, free, small closeness and comfort
+- [ ] 14 (SF) Hug acting: the doll squeezes and lifts, hearts rise; still under reduced motion
+- [ ] 15 (SF) Hug sound: a soft cloth pat and a two-note hum
+- [ ] 16 (SF) Comfort food: cook one Levantine dish a day in the kitchen for the whole house
+- [ ] 17 (SF) Taste notebook: each resident's discovered loves and dislikes
+- [ ] 18 (SF) Dish aroma: warm steam and motes over the kitchen table after cooking
+- [ ] 19 (SF) Personal arcs: three small requests per resident, unlocked by closeness
+- [ ] 20 (SF) Ribbon ceremony: finishing an arc ties a ribbon and leaves a letter in the journal
+- [ ] 21 (SF) Kintsugi glow: a doll whose arc is complete wears a fine gold seam light
+- [ ] 22 (SF) Mood words on resident cards (cheerful, sleepy, peckish, wistful)
+- [ ] 23 (SF) Expressive idle: content dolls sway, tired dolls droop
+- [ ] 24 (SF) Goodnight round: tuck each doll in after dark; the house hushes when all three are tucked
+- [ ] 25 (SF) Hand-inked flourishes on paper sheets and section headings
+- [ ] 26 (AC) Real seasons from the device calendar: drifting leaves, snow, petals or jasmine in the courtyard
+- [ ] 27 (AC) Seasonal sky tint on the backdrop
+- [ ] 28 (AC) Seasonal events: olive harvest, winter lamps, almond blossom, jasmine nights, each with an event errand
+- [ ] 29 (AC) Daily weather: soft rain days, seeded by the day
+- [ ] 30 (AC) Rain sound bed on rain days, gesture-gated
+- [ ] 31 (AC) A hidden trinket each day: one prop glints; inspect it to find a small thing
+- [ ] 32 (AC) Curio cabinet: the trinket collection with art and a count
+- [ ] 33 (AC) Resident chatter: a personality line of the day when you open a resident
+- [ ] 34 (AC) Spontaneous requests: a resident asks to spend the day in a room; moving them is thanked
+- [ ] 35 (AC) Wall colours per room: four paints each, free and reversible
+- [ ] 36 (AC) Placement pop: squash, settle and a dust puff when a keepsake lands
+- [ ] 37 (AC) Room charm stars in the decorate sheet
+- [ ] 38 (AC) Morning letter under the door on each fresh day
+- [ ] 39 (AC) Resident birthdays by the calendar: bunting and a birthday errand
+- [ ] 40 (AC) Today's special: one keepsake a day at a kinder price
+
+
 ## Visual pass — 2026-10-12
 - [x] Lina's name tag no longer paints over the open House Tools drawer (it covered "Little rituals" at 390x844): the drawer stacks above it and both the drawer and the placement card count as paper the tag avoids.
 - [x] Phone-portrait clue chip measures against the 66px icon-only time card, so the time card keeps its compact width beside a long clue instead of stretching to 126px with a blank left half.
