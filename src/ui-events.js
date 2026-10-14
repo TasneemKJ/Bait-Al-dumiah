@@ -1,6 +1,6 @@
 // Routes clicks and field changes inside #ui to commands. The shell supplies the few
 // operations that touch its own state; everything else is forwarded to dispatch.
-const IDS=['focus-doll','begin-activity','restore-room','hug','cook','tuck-in'];
+const IDS=['focus-doll','begin-activity','restore-room','hug','cook','tuck-in','find-trinket'];
 const NUMBERS=['use-object','rotate-object','move-object','pack-object','remove'];
 const COLLECT=['claim','collect-basket','mend-door','gift','collect-errand','tend-lantern','fulfil-request'];
 

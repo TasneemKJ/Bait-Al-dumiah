@@ -33,6 +33,11 @@ export const groveCommands={
    app.ui.close();app.say(app.ui.t('tucked').replace('{name}',app.ui.t(value)));app.audio.effect('care:rest');
    app.save();app.ui.tick();
   },
+'find-trinket':(app,value)=>{
+   const result=sim.findTrinket(app.state,value);if(!result.ok){app.say(app.ui.t(result.reason));return}
+   app.ui.close();app.say(app.ui.t('trinketFound').replace('{name}',app.ui.t('trinket-'+result.trinket)));
+   app.audio.effect('musicbox');app.save();app.ui.tick();
+  },
 'tend-lantern':app=>{
    const result=sim.tendLantern(app.state);
    // The sheet folds away so the player sees the flame take the embers.

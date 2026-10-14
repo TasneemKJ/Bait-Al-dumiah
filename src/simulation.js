@@ -11,6 +11,7 @@ import {ROOMS,DOLLS,CATALOG,SLOTS,SECRETS,ACTIONS,MILESTONES,SEW_SECONDS,DOOR_ST
     SEW_DAILY,BASKET_MAX} from './content.js';
 import {createState} from './sim-state.js';
 import {noteErrand,rollErrands} from './sim-grove.js';
+export {trinketProp,foundToday,nextTrinket,trinketHere,findTrinket} from './sim-finds.js';
 export {hug,huggedToday,careDay,cook,cookedToday,arcStatus,fulfilRequest,ARC_REWARD,
   arcComplete,letters,moodOf,MOODS,tuckIn,tuckedIn,houseHushed} from './sim-care.js';
 export {createState};

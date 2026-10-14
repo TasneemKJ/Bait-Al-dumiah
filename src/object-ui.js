@@ -1,6 +1,6 @@
 import {INTERACTIVE_PROPS,CATALOG} from './content.js';
 import {icon} from './icons.js';
-import {storyStatus} from './simulation.js';
+import {storyStatus,trinketHere} from './simulation.js';
 const usable=new Set(['plant','lamp','musicbox','mobile']);
 function useLabel(o){return o.item==='lamp'?`use-lamp-${o.active?'off':'on'}`:'use-'+o.item}
 function statusLabel(s,o){
@@ -41,7 +41,9 @@ export function objectMarkup(s,key,t,n,button){
  const status=!o.prop&&statusLabel(s,o),story=storyStatus(s);
  const storyAction=o.prop&&story.next?.object===o.id?button('story-interact',
    t(`story-${story.chapter.id}-${story.step}-action`),story.next.icon,`data-object="${key}" class="primary"`):'';
- const propActions=`<div class="object-actions">${storyAction}${o.activity?
+ const glint=o.prop&&trinketHere(s,o.id)?button('find-trinket',t('trinketLook'),'spark',
+   `data-id="${o.id}" class="primary glint-action"`):'';
+ const propActions=`<div class="object-actions">${glint}${storyAction}${o.activity?
    button('begin-activity',t('activity-'+o.activity),'play',
    `data-id="${o.activity}"`):''}${o.care?button('care',t(o.care)+' · '+t(o.resident),o.icon,
      `data-id="${o.resident}" data-care="${o.care}"`):''}</div>`;

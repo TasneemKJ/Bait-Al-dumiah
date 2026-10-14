@@ -52,3 +52,6 @@ export const ARCS={
 // The player's own year: the device calendar picks the season (months 0-11, the Levant's northern year).
 export const SEASONS=['winter','winter','spring','spring','spring','summer','summer','summer','autumn','autumn',
   'autumn','winter'];
+// Small things the house hides, one a day, for the curio cabinet. The order they turn up in is fixed.
+export const TRINKETS=['blue-marble','old-stamp','tiny-spoon','glass-button','lavender-sachet','paper-star',
+  'copper-coin','seashell','hair-ribbon','olive-wood-bird','embroidered-patch','silver-bell'];

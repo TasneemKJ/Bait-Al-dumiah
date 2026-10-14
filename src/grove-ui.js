@@ -1,8 +1,10 @@
 // The Today sheet: the day's small errands (and, as the house grows, the lantern that they feed).
 import {letters,ARC_REWARD,arcStatus,cookedToday,lanternWonders,errandDef,errandsReady,tomorrowErrand,daySettled,
-  errandEmbers,currentEvent,rainyDay,lanternLevel,nextLantern} from './simulation.js';
+  errandEmbers,currentEvent,rainyDay,lanternLevel,nextLantern,foundToday,nextTrinket,
+  trinketProp} from './simulation.js';
 import {icon} from './icons.js';
 import {DISHES} from './content-grove.js';
+import {INTERACTIVE_PROPS} from './content.js';
 
 // Colour returns to the house as the lantern grows: a soft saturation lift, none at all at the top level.
 export const houseColour=level=>{const l=Math.max(0,Math.min(5,Number.isFinite(level)?level:0));
@@ -88,11 +90,16 @@ export function tasteNotebook(s,id,t){
    >${t('dish-'+d.id)}</span><small>${t('taste-'+(taste??'unknown'))}</small></li>`}).join('')}</ul>`;
 }
 // A seasonal event from the player's own calendar, with its extra errand in the list below.
+function findNote(s,t){
+ if(foundToday(s)||!nextTrinket(s))return '';const prop=INTERACTIVE_PROPS.find(p=>p.id===trinketProp(s));
+ return `<p class="weather-note find-note"><b aria-hidden="true">✦</b><span>${t('trinketHint').replace('{room}',
+   t(prop.room+'In'))}</span></p>`;
+}
 function eventCard(s,t){
  const rain=rainyDay(s)?`<p class="weather-note"><b aria-hidden="true">☂</b><span>${t('rainToday')}</span></p>`:'';
- const event=currentEvent(s);if(!event)return rain;
+ const event=currentEvent(s);if(!event)return rain+findNote(s,t);
  return `<section class="event-card" data-event="${event}"><strong>${t('event-'+event)}</strong><p
-   >${t('event-'+event+'Text')}</p></section>${rain}`;
+   >${t('event-'+event+'Text')}</p></section>${rain}${findNote(s,t)}`;
 }
 export function todayMarkup(s,c){
  const {t,n}=c;
