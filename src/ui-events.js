@@ -19,6 +19,7 @@ export function createUIEvents(host,ctx){
   'activity-input':el=>dispatch('activity-input',Number(el.dataset.choice)),
   'care':el=>dispatch('care',{id:el.dataset.id,action:el.dataset.care}),
   'reset-prompt':()=>ctx.askReset(true),
+  'paint-wall':el=>{dispatch('paint-wall',{room:el.dataset.room,paint:Number(el.dataset.paint)});ctx.renderPanel()},
   'reset-no':()=>ctx.askReset(false),
  };
  for(const action of IDS)routes[action]=el=>dispatch(action,el.dataset.id);

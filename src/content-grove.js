@@ -57,3 +57,8 @@ export const TRINKETS=['blue-marble','old-stamp','tiny-spoon','glass-button','la
   'copper-coin','seashell','hair-ribbon','olive-wood-bird','embroidered-patch','silver-bell'];
 // Personality chatter: one line a day per resident, in their own voice.
 export const CHATTER_LINES=5;
+// Wall paints per room: index 0 is the house's own paper; the others are free, reversible choices.
+export const WALL_PAINTS={
+ kitchen:['#dfd5b8','#cfe0d2','#f0d9c4','#d9d3e6'],parlor:['#d5b99c','#cdd9c5','#e8c6c9','#d6d3e6'],
+ studio:['#d6c9b2','#cfdcc9','#efd3c9','#d2cbe3'],bedroom:['#dfcca9','#cfe0d8','#f1d7d3','#d8d0e8'],
+};

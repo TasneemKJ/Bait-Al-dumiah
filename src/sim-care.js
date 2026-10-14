@@ -1,7 +1,7 @@
 // Relationship care beyond needs: daily hugs (and the comfort that follows). Pure rules, no DOM.
 import {clamp} from './sim-util.js';
 import {growBond} from './sim-core.js';
-import {DISHES,TASTES,TASTE_EFFECT,ARCS,CHATTER_LINES} from './content-grove.js';
+import {DISHES,TASTES,TASTE_EFFECT,ARCS,CHATTER_LINES,WALL_PAINTS} from './content-grove.js';
 import {bondLevel,isContent,isNight} from './sim-queries.js';
 import {noteErrand,lanternLevel} from './sim-grove.js';
 
@@ -82,3 +82,10 @@ export function tuckIn(s,id){
 // Today's line of chatter for a resident: fixed by the day spent in the house, different per resident.
 export const chatterFor=(s,id)=>{const i=s.dolls.findIndex(d=>d.id===id);if(i<0)return null;
  return `${id}-${(careDay(s)+i*2)%CHATTER_LINES}`};
+// Decorating as expression: paint a room's walls with one of its four papers, free and reversible.
+export const wallPaint=(s,room)=>s.grove.walls[room]??0;
+export function paintWall(s,room,paint){
+ const paints=WALL_PAINTS[room];
+ if(!paints||!Number.isInteger(paint)||paint<0||paint>=paints.length)return {ok:false,reason:'invalid'};
+ s.grove.walls[room]=paint;return {ok:true,room,paint};
+}

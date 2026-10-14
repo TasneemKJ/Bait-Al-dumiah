@@ -1,11 +1,11 @@
 // The Today sheet: the day's small errands (and, as the house grows, the lantern that they feed).
 import {letters,ARC_REWARD,arcStatus,cookedToday,lanternWonders,errandDef,errandsReady,tomorrowErrand,daySettled,
   errandEmbers,currentEvent,rainyDay,lanternLevel,nextLantern,foundToday,nextTrinket,
-  trinketProp} from './simulation.js';
+  trinketProp,wallPaint} from './simulation.js';
 import {icon} from './icons.js';
-import {DISHES,TRINKETS} from './content-grove.js';
+import {DISHES,TRINKETS,WALL_PAINTS} from './content-grove.js';
 import {curioArt} from './curio-art.js';
-import {INTERACTIVE_PROPS} from './content.js';
+import {INTERACTIVE_PROPS,ROOMS} from './content.js';
 
 // Colour returns to the house as the lantern grows: a soft saturation lift, none at all at the top level.
 export const houseColour=level=>{const l=Math.max(0,Math.min(5,Number.isFinite(level)?level:0));
@@ -83,6 +83,14 @@ export function curioMarkup(s,t,n){
  const count=`${n(s.grove.trinkets.length)}/${n(TRINKETS.length)}`;
  return `<h3 class="section-heading">${t('curioTitle')} <small>${count}</small></h3><p
    class="sheet-intro">${t('curioIntro')}</p><div class="curio-grid">${TRINKETS.map(cell).join('')}</div>`;
+}
+// Wall paints: four papers per room as swatches; the chosen one is pressed.
+export function paintMarkup(s,t){
+ return `<h3 class="section-heading">${t('wallPaint')}</h3><p class="sheet-intro">${t('wallPaintIntro')}</p><div
+   class="paint-rows">${ROOMS.map(r=>`<div class="paint-row"><span>${t(r.id)}</span><div class="swatches" role="group"
+   aria-label="${t('wallPaint')} · ${t(r.id)}">${WALL_PAINTS[r.id].map((c,i)=>`<button type="button" class="swatch"
+   data-action="paint-wall" data-room="${r.id}" data-paint="${i}" style="--paint:${c}" aria-pressed="${wallPaint(s,
+   r.id)===i}" aria-label="${t('paint'+i)}"></button>`).join('')}</div></div>`).join('')}</div>`;
 }
 // Letters left by residents whose requests are all done, kept in the journal.
 export function lettersMarkup(s,t){

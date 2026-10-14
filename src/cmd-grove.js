@@ -38,6 +38,10 @@ export const groveCommands={
    app.ui.close();app.say(app.ui.t('trinketFound').replace('{name}',app.ui.t('trinket-'+result.trinket)));
    app.audio.effect('musicbox');app.save();app.ui.tick();
   },
+'paint-wall':(app,value)=>{
+   const result=sim.paintWall(app.state,value?.room,value?.paint);
+   if(result.ok){app.audio.effect('place');app.save();app.ui.tick()}else app.say(app.ui.t(result.reason));
+  },
 'tend-lantern':app=>{
    const result=sim.tendLantern(app.state);
    // The sheet folds away so the player sees the flame take the embers.

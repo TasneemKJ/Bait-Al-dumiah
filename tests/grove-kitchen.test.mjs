@@ -51,3 +51,20 @@ test('the day\'s dish waits on the kitchen table and steams for a while after co
  const raw=JSON.parse(JSON.stringify(s));raw.grove.dish='<img>';raw.grove.dishAt=1e12;const r=sim.restore(JSON.stringify(raw));
  assert.equal(r.grove.dish,null);assert.ok(r.grove.dishAt<=r.elapsed);assert.equal(supperLook(r).shown,false);
 });
+import {WALL_PAINTS} from '../src/content-grove.js';
+import {decorateMarkup} from '../src/panels-ui.js';
+import {createWallPaint} from '../src/render/wall-paint.js';
+test('every room can be repapered in four colours, free and reversible, and the scene hangs only chosen papers',tc=>{
+ const s=sim.createState(),buttons=s.buttons;assert.equal(sim.paintWall(s,'parlor',2).ok,true);assert.equal(s.buttons,buttons);
+ assert.equal(sim.wallPaint(s,'parlor'),2);sim.paintWall(s,'parlor',0);assert.equal(sim.wallPaint(s,'parlor'),0);
+ for(const bad of [['attic',1],['parlor',4],['parlor',1.5],['parlor',-1]])assert.equal(sim.paintWall(s,...bad).ok,false);
+ sim.paintWall(s,'studio',3);const raw=JSON.parse(JSON.stringify(s));raw.grove.walls.kitchen=9;raw.grove.walls.attic=1;
+ assert.deepEqual(sim.restore(JSON.stringify(raw)).grove.walls,{studio:3});
+ const html=decorateMarkup(s,{t,n:String,button:()=>''});assert.equal((html.match(/data-action="paint-wall"/g)||[]).length,16);
+ assert.match(html,/data-room="studio" data-paint="3"[^>]*aria-pressed="true"/);
+ for(const room of Object.keys(WALL_PAINTS))assert.equal(WALL_PAINTS[room].length,4);
+ textureCanvas(tc);const parent=new T.Group(),walls=createWallPaint(parent);walls.update(s);
+ assert.equal(parent.children.length,1,'only the painted room adds a paper');assert.equal(parent.children[0].visible,true);
+ sim.paintWall(s,'studio',0);walls.update(s);assert.equal(parent.children[0].visible,false);
+ for(let i=0;i<4;i++)assert.match(strings.ar['paint'+i],/[؀-ۿ]/);
+});

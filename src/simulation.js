@@ -13,7 +13,8 @@ import {createState} from './sim-state.js';
 import {noteErrand,rollErrands,answerVisit} from './sim-grove.js';
 export {trinketProp,foundToday,nextTrinket,trinketHere,findTrinket} from './sim-finds.js';
 export {hug,huggedToday,careDay,cook,cookedToday,arcStatus,fulfilRequest,ARC_REWARD,
-  arcComplete,letters,moodOf,MOODS,tuckIn,tuckedIn,houseHushed,chatterFor} from './sim-care.js';
+  arcComplete,letters,moodOf,MOODS,tuckIn,tuckedIn,houseHushed,chatterFor,
+  wallPaint,paintWall} from './sim-care.js';
 export {createState};
 export * from './sim-queries.js';
 export {controlStitch,finishStitch,releaseStitch,stitchSectionProgress,stitchStatus,

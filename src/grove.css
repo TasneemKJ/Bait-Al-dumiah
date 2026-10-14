@@ -122,3 +122,9 @@ html[lang=ar] .errand{font-size:14px}
 [dir=rtl] .chatter{font-family:Tahoma,Arial,sans-serif;font-style:normal}
 .chatter:before{content:"";position:absolute;top:-7px;inset-inline-start:26px;width:12px;height:12px;background:#fffaf0;
  border-top:1px solid #e6d3bf;border-inline-start:1px solid #e6d3bf;transform:rotate(45deg)}
+.paint-rows{display:grid;gap:8px}
+.paint-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px}
+.swatches{display:flex;gap:6px}
+.swatch{width:44px;height:44px;min-height:44px;padding:0;border-radius:50%;border:2px solid #fff7ea;
+ background:radial-gradient(circle at 35% 30%,#fff8,transparent 60%),var(--paint);box-shadow:0 0 0 1px var(--line)}
+.swatch[aria-pressed=true]{box-shadow:0 0 0 2px var(--rose-dark)}
