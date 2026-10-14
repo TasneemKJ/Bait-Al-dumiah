@@ -5,7 +5,7 @@ import {DOLLS,ROOMS,CATALOG,SECRETS,ACTIONS,MILESTONES,DOOR_STEPS,GIFT_COST,VISI
 import {isNight,coziness,wishFor,wishReward,bondLevel,nextBond,isContent,contentThreshold,
   delighted,inFavoriteRoom,currentStreak,secretCozyNeeded,doorOpen,nextDoorStep,doorReady,
   canAfford,wishGranted,hasBasket,secretsLeft,giftReady,isNewestGift,slotTaken,restingNote,
-  huggedToday,moodOf} from './simulation.js';
+  huggedToday,moodOf,tuckedIn} from './simulation.js';
 import {giftArt} from './gift-art.js';
 import {icon} from './icons.js';
 import {todayMarkup,heartsMarkup,tasteNotebook,requestsMarkup,lettersMarkup} from './grove-ui.js';
@@ -76,7 +76,8 @@ export function householdMarkup(s,{t,n,button,avatar,selected}){
        >${t(key+'Effect')}</small></span><em>${action.cost?
      n(action.cost)+' '+t('buttons'):t('free')}</em></button>`).join('')}</div>
    ${button('hug',t(huggedToday(s,d.id)?'huggedToday':'hug'),'heart',`class="hug-button" data-id="${d.id}" ${
-     huggedToday(s,d.id)?'disabled':''}`)}
+     huggedToday(s,d.id)?'disabled':''}`)}${isNight(s)?button('tuck-in',t(tuckedIn(s,d.id)?'tuckedAlready':'tuckIn'),
+     'moon',`class="hug-button tuck-button" data-id="${d.id}" ${tuckedIn(s,d.id)?'disabled':''}`):''}
    <label class="room-select">${t('move')}<select data-field="doll-room"
      data-id="${d.id}">${ROOMS.map(r=>`<option value="${r.id}" ${r.id===d.room?
      'selected':''}>${t(r.id)}${r.id===def.favRoom?' ♡':''}</option>`).join('')}</select></label>

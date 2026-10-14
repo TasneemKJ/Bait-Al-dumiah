@@ -28,6 +28,11 @@ export const groveCommands={
     app.say(app.ui.t('ribbonTied').replace('{name}',app.ui.t(value)))}
    }else app.say(app.ui.t(result.reason));
   },
+'tuck-in':(app,value)=>{
+   const result=sim.tuckIn(app.state,value);if(!result.ok){app.say(app.ui.t(result.reason));return}
+   app.ui.close();app.say(app.ui.t('tucked').replace('{name}',app.ui.t(value)));app.audio.effect('care:rest');
+   app.save();app.ui.tick();
+  },
 'tend-lantern':app=>{
    const result=sim.tendLantern(app.state);
    // The sheet folds away so the player sees the flame take the embers.

@@ -35,6 +35,7 @@ export function installFeedback(app){
   if(event.type==='calm')say(t('calmDayOne'));
   if(event.type==='lantern')say(`${t('lanternUp')} ${t('lantern'+event.level)}`);
   if(event.type==='day-settled')say(t('daySettledTitle')+' '+t('daySettledText'));
+  if(event.type==='house-hush'){say(t('houseHush'));audio.duskSwell?.()}
   if(event.type==='errand')say(t('errandDone').replace('{name}',t('errand-'+event.id)));
  }
  function showError(kind){app.fatal=true;app.syncPause();save();app.homeUI?.hide();

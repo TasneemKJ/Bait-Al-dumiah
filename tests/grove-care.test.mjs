@@ -73,3 +73,15 @@ test('idle bodies show their mood: cheerful sways and bobs, sleepy and wistful d
  assert.match(dolls,/idleMood\(d\.action==='idle'\?moodOf\(state,d\.id\):null\)/);
  assert.match(dolls,/rotation\.x=d\.action==='rest'\?\.23:idle\.droop/);
 });
+test('after dark each resident is tucked in once; all three hush the house once',()=>{
+ const s=sim.createState();assert.equal(sim.tuckIn(s,'lina').reason,'tuckNight');sim.changeLight(s);
+ const e=s.dolls[0].energy;assert.equal(sim.tuckIn(s,'lina').ok,true);assert.ok(s.dolls[0].energy>e);
+ assert.equal(sim.tuckIn(s,'lina').reason,'tuckedAlready');sim.tuckIn(s,'noor');assert.equal(sim.houseHushed(s),false);
+ assert.equal(sim.tuckIn(s,'sami').hushed,true);assert.equal(s.events.filter(x=>x.type==='house-hush').length,1);
+ const raw=JSON.parse(JSON.stringify(s));raw.grove.tucks.lina=1e6;raw.grove.tucks.evil=1;
+ assert.deepEqual(sim.restore(JSON.stringify(raw)).grove.tucks,{lina:1,noor:1,sami:1});
+ const html=householdMarkup(sim.createState(),{t,n:String,button,avatar:()=>'',selected:'lina'});
+ assert.doesNotMatch(html,/tuck-in/,'no tuck button by day');
+ assert.match(householdMarkup(s,{t,n:String,button,avatar:()=>'',selected:'lina'}),/data-action="tuck-in"/);
+ for(const k of ['tuckIn','tuckedAlready','tuckNight','tucked','houseHush'])assert.match(strings.ar[k],/[؀-ۿ]/);
+});

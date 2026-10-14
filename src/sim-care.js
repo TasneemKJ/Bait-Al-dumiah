@@ -2,7 +2,7 @@
 import {clamp} from './sim-util.js';
 import {growBond} from './sim-core.js';
 import {DISHES,TASTES,TASTE_EFFECT,ARCS} from './content-grove.js';
-import {bondLevel,isContent} from './sim-queries.js';
+import {bondLevel,isContent,isNight} from './sim-queries.js';
 import {noteErrand,lanternLevel} from './sim-grove.js';
 
 // Daily things count by the last day actually spent in the house (when errands last refreshed),
@@ -66,4 +66,16 @@ export function moodOf(s,id){
  if(d.hunger<35)return 'peckish';if(d.energy<35)return 'sleepy';if(d.comfort<40)return 'wistful';
  if(isContent(s,d))return d.comfort>=80&&d.hunger>=60?'cheerful':'content';
  return 'calm';
+}
+// The goodnight round: after dark, each resident can be tucked in once; all three hush the house.
+export const tuckedIn=(s,id)=>s.grove.tucks[id]===careDay(s);
+export const houseHushed=s=>s.dolls.every(d=>tuckedIn(s,d.id));
+export function tuckIn(s,id){
+ const d=s.dolls.find(x=>x.id===id);if(!d)return {ok:false,reason:'invalid'};
+ if(s.paused)return {ok:false,reason:'pausedActivity'};if(!isNight(s))return {ok:false,reason:'tuckNight'};
+ if(tuckedIn(s,id))return {ok:false,reason:'tuckedAlready'};
+ s.grove.tucks[id]=careDay(s);d.energy=clamp(d.energy+8);d.comfort=clamp(d.comfort+5);growBond(s,d,1);
+ d.action='rest';d.lastCare=s.elapsed;d.actionUntil=s.elapsed+4;
+ const hushed=houseHushed(s);if(hushed&&s.events.length<24)s.events.push({type:'house-hush'});
+ return {ok:true,id,hushed};
 }

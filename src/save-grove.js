@@ -11,6 +11,8 @@ export function restoreGrove(s,raw){
  // colour never drains from a returning player's home.
  if(!obj(raw)&&s.cares>0)g.warmth=LANTERN_LEVELS[2];
  g.errandDay=integer(v.errandDay,0,s.day);
+ const tucks=obj(v.tucks)??{};
+ for(const d of s.dolls)if(Number.isFinite(tucks[d.id]))g.tucks[d.id]=integer(tucks[d.id],0,s.day);
  const hugs=obj(v.hugs)??{};
  for(const d of s.dolls)if(Number.isFinite(hugs[d.id]))g.hugs[d.id]=integer(hugs[d.id],0,s.day);
  const known=e=>obj(e)&&ERRANDS.some(x=>x.id===e.id)&&!seen.has(e.id)&&seen.add(e.id);
