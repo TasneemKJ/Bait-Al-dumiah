@@ -345,4 +345,4 @@ Twenty-idea exploration, IDEAL/5Ws, source plan and selected scope: `docs/cinema
 ## Desktop navigation legibility — 2026-10-13
 - [x] Record actual faint room/dock labels in combined-source desktop closeup; twenty ideas and 5Ws in the iteration ledger.
 - [x] Review paired EN/AR day/night compact paper backing and 12px desktop labels, preserving targets and phone layout.
-- [ ] Apply bounded accepted CSS and verify actual source; count only after native acceptance.
+- [x] Apply bounded accepted CSS; EN/AR wide day/night and 681×600 actual source inspected, targets/contrast/accessible names/side-control separation verified. One refinement accepted; final verify 546/546.
