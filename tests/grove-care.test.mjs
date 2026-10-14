@@ -55,3 +55,12 @@ test('a hug has its own soft sound: cloth pats and a rising hum, only once audio
  assert.equal(voices.filter(v=>v==='cloth').length,2);assert.equal(voices.filter(v=>v==='osc').length,4);
  assert.match(readFileSync(new URL('../src/cmd-grove.js',import.meta.url),'utf8'),/effect\('hug'\)/);
 });
+test('each resident shows one mood word: the lowest need speaks first, contentment reads warm',()=>{
+ const s=sim.createState(),d=s.dolls[0];
+ Object.assign(d,{hunger:20,energy:20,comfort:20});assert.equal(sim.moodOf(s,'lina'),'peckish');
+ d.hunger=90;assert.equal(sim.moodOf(s,'lina'),'sleepy');d.energy=90;assert.equal(sim.moodOf(s,'lina'),'wistful');
+ d.comfort=95;assert.equal(sim.moodOf(s,'lina'),'cheerful');d.comfort=60;assert.equal(sim.moodOf(s,'lina'),'content');
+ d.comfort=50;assert.equal(sim.moodOf(s,'lina'),'calm');assert.equal(sim.moodOf(s,'x'),null);
+ for(const m of sim.MOODS){assert.ok(strings.en['mood-'+m]);assert.match(strings.ar['mood-'+m],/[؀-ۿ]/)}
+ assert.match(householdMarkup(s,{t,n:String,button,avatar:()=>'',selected:'lina'}),/class="mood-chip"\s+data-mood="calm">Calm/);
+});

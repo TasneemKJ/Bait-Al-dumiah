@@ -32,6 +32,8 @@ export default {
    'When you go, the light stays, and so do I.',
   'letter-sami':'The eleventh key fits nothing yet. That is all right. '+
    'You taught me that a door can wait, and so can a friend.',
+  'mood-cheerful':'Cheerful','mood-content':'Content','mood-peckish':'Peckish','mood-sleepy':'Sleepy',
+  'mood-wistful':'Wistful','mood-calm':'Calm',
   tastesTitle:'Tastes','taste-love':'Favourite','taste-like':'Likes it','taste-meh':'Not for them',
   'taste-unknown':'Not tried yet',
   kitchenComfort:'Comfort food',
@@ -88,6 +90,8 @@ export default {
   'letter-lina':'دفّيت الفناجين وقرّبت الموسيقى. كنت حطّ أربع فناجين وارجّع واحد. هلّق بتركه. إلك.',
   'letter-noor':'الفانوس صار يوصل لشبّاكي. بطّلت عدّ العتمة. لمّا بتروح، الضوّ بيضلّ، وأنا كمان.',
   'letter-sami':'المفتاح الحادي عشر لسّا ما بيفتح شي. مش مشكلة. علّمتني إنّه الباب بيقدر يستنّى، والصاحب كمان.',
+  'mood-cheerful':'فرح','mood-content':'راحة بال','mood-peckish':'جوعة خفيفة','mood-sleepy':'نعس',
+  'mood-wistful':'حنين','mood-calm':'هدوء',
   tastesTitle:'الأذواق','taste-love':'المفضّلة','taste-like':'طيّبة','taste-meh':'مش هالقد',
   'taste-unknown':'لسّا ما انجرّبت',
   kitchenComfort:'أكل بيدفّي القلب',kitchenIntro:'اطبخ طبخة وحدة اليوم للبيت كلّه. كل روح صغيرة إلها طبختها المفضّلة.',

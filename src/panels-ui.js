@@ -5,7 +5,7 @@ import {DOLLS,ROOMS,CATALOG,SECRETS,ACTIONS,MILESTONES,DOOR_STEPS,GIFT_COST,VISI
 import {isNight,coziness,wishFor,wishReward,bondLevel,nextBond,isContent,contentThreshold,
   delighted,inFavoriteRoom,currentStreak,secretCozyNeeded,doorOpen,nextDoorStep,doorReady,
   canAfford,wishGranted,hasBasket,secretsLeft,giftReady,isNewestGift,slotTaken,restingNote,
-  huggedToday} from './simulation.js';
+  huggedToday,moodOf} from './simulation.js';
 import {giftArt} from './gift-art.js';
 import {icon} from './icons.js';
 import {todayMarkup,heartsMarkup,tasteNotebook,requestsMarkup,lettersMarkup} from './grove-ui.js';
@@ -54,8 +54,9 @@ export function householdMarkup(s,{t,n,button,avatar,selected}){
     bondLevel(s.dolls.find(v=>v.id===x.id).bond),t)}<small
     class="bond-tab">${t('bond'+bondLevel(s.dolls.find(v=>v.id===x.id).bond))}</small
       >${wishGranted(s,x.id)?icon('check'):''}</button>`).join('')}</div>
-   <div class="resident-heading">${avatar(d.id)}<div><h3>${t(d.id)}</h3><p
-     >${t(d.id+'Bio')}</p></div>${button('focus-doll',t('lookCloser'),'plus',
+   <div class="resident-heading">${avatar(d.id)}<div><h3>${t(d.id)}</h3><span class="mood-chip"
+     data-mood="${moodOf(s,d.id)}">${t('mood-'+moodOf(s,d.id))}</span><p>${t(d.id+'Bio')}</p></div>${button(
+     'focus-doll',t('lookCloser'),'plus',
      `class="doll-inspect" data-id="${d.id}" aria-label="${t('lookCloser')} · ${t(d.id)}"`)}</div>
    <div class="bond-row"><div><span>${t('closeness')}</span>${heartsMarkup(level,t)}<strong
      >${t('bond'+level)}</strong></div><meter min="0" max="100" value="${d.bond}"

@@ -2,7 +2,7 @@
 import {clamp} from './sim-util.js';
 import {growBond} from './sim-core.js';
 import {DISHES,TASTES,TASTE_EFFECT,ARCS} from './content-grove.js';
-import {bondLevel} from './sim-queries.js';
+import {bondLevel,isContent} from './sim-queries.js';
 import {noteErrand,lanternLevel} from './sim-grove.js';
 
 // Daily things count by the last day actually spent in the house (when errands last refreshed),
@@ -58,4 +58,12 @@ export function fulfilRequest(s,id){
  s.buttons=Math.min(9999,s.buttons+reward);s.earnedToday=Math.min(99999,s.earnedToday+reward);growBond(s,d,5);
  const finished=status.step+1>=status.total;if(finished)s.events.length<24&&s.events.push({type:'arc-complete',id});
  return {ok:true,id,request:status.next.id,reward,finished};
+}
+// One readable mood word per resident, from its needs (the lowest need speaks first).
+export const MOODS=['cheerful','content','peckish','sleepy','wistful','calm'];
+export function moodOf(s,id){
+ const d=s.dolls.find(x=>x.id===id);if(!d)return null;
+ if(d.hunger<35)return 'peckish';if(d.energy<35)return 'sleepy';if(d.comfort<40)return 'wistful';
+ if(isContent(s,d))return d.comfort>=80&&d.hunger>=60?'cheerful':'content';
+ return 'calm';
 }

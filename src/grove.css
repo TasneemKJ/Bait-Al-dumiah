@@ -91,3 +91,6 @@ html[lang=ar] .errand{font-size:14px}
 .letter p{font-size:12px;line-height:1.9;color:var(--ink);font-style:italic}
 .letter .ribbon{position:absolute;top:-6px;inset-inline-end:18px;width:14px;height:30px;background:#c9a14f;
  clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%)}
+.mood-chip{display:inline-block;margin-top:4px;padding:2px 10px;border-radius:20px;font-size:10px;background:#efe2d6;color:#7d5f6c}
+.mood-chip[data-mood=cheerful]{background:#f3dfe4;color:#94506d}.mood-chip[data-mood=content]{background:#e5ecdf;color:#56735f}
+.mood-chip[data-mood=peckish],.mood-chip[data-mood=sleepy],.mood-chip[data-mood=wistful]{background:#ece3ef;color:#6c5a7c}
