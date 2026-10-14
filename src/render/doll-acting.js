@@ -79,9 +79,12 @@ function aimArm(arm,target,weight=1){
  arm.quaternion.slerp(upper,weight);arm.forearm.quaternion.slerp(bend,weight);
 }
 const smooth=x=>{x=T.MathUtils.clamp(x,0,1);return x*x*(3-2*x)};
+// A hug: arms gather in a quarter second, hold, and let go by three seconds; still poses hold it whole.
+export const hugEnvelope=(age,still=false)=>!Number.isFinite(age)||age<0||age>3?0:still?1:
+  smooth(age/.25)*(1-smooth((age-2.2)/.8));
 export function carePose(v,d,t,still){
  for(const arm of v.arms){arm.forearm.rotation.set(0,0,0);arm.hand.rotation.set(0,0,0)}
- v.teaPhase=0;v.body.scale.y=1;
+ v.teaPhase=0;v.body.scale.set(1,1,1);
  if(d.action==='play'){
   const age=Math.max(0,t-(Number.isFinite(d.lastCare)?d.lastCare:0)),
     gap=still?.044:.028+.055*(.5+.5*Math.cos(age*Math.PI*3.2));
@@ -104,6 +107,12 @@ export function carePose(v,d,t,still){
       i===0?.65:-.65).multiply(new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),
     Math.PI));arm.hand.quaternion.copy(parent.invert()).multiply(palm)});
   v.head.rotation.x=.09+(still?0:Math.sin(t*1.2)*.012);
+ }
+ if(d.action==='hug'){
+  // Both arms gather to the chest and the porcelain body gives a small, soft squeeze.
+  const e=hugEnvelope(t-(Number.isFinite(d.lastCare)?d.lastCare:t),still);
+  aimArm(v.arms[0],[-.045,.80,.20],e);aimArm(v.arms[1],[.045,.80,.20],e);
+  v.body.scale.set(1+.035*e,1-.045*e,1+.035*e);v.head.rotation.x=.10*e;
  }
  if(d.action==='tea'){
   const age=Math.max(0,t-(Number.isFinite(d.lastCare)?d.lastCare:t)),lift=still?1:age<.85?

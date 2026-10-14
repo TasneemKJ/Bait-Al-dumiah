@@ -34,3 +34,13 @@ test('hugs survive a save and the restore clamps them; the sheet offers or marks
  assert.match(html,/data-action="hug"[^>]*>Hug</);
  for(const k of ['hug','huggedToday','hugged'])assert.match(strings.ar[k],/[؀-ۿ]/);
 });
+import {readFileSync} from 'node:fs';
+import {hugEnvelope} from '../src/render/doll-acting.js';
+test('a hug gathers, holds and lets go within three seconds; reduced motion holds a still embrace',()=>{
+ assert.equal(hugEnvelope(-1),0);assert.equal(hugEnvelope(3.1),0);assert.equal(hugEnvelope(NaN),0);
+ assert.ok(hugEnvelope(.1)<hugEnvelope(.3));assert.equal(hugEnvelope(1.5),1);assert.ok(hugEnvelope(2.8)<1);
+ assert.equal(hugEnvelope(.05,true),1);
+ const dolls=readFileSync(new URL('../src/render/dolls.js',import.meta.url),'utf8');
+ assert.match(dolls,/d\.action==='soothe'\|\|d\.action==='hug'/,'reassurance hearts rise for a hug too');
+ assert.match(readFileSync(new URL('../src/render/doll-acting.js',import.meta.url),'utf8'),/if\(d\.action==='hug'\)/);
+});
