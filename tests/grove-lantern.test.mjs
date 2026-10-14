@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import * as sim from '../src/simulation.js';
 import {LANTERN_LEVELS} from '../src/content-grove.js';
 import {strings} from '../src/i18n.js';
-import {todayMarkup} from '../src/grove-ui.js';
+import {todayMarkup,houseColour,syncHouseColour} from '../src/grove-ui.js';
+import {readFileSync} from 'node:fs';
 
 test('tending moves every held ember into the lantern and reports a level-up once',()=>{
  const s=sim.createState();assert.equal(sim.lanternLevel(s),0);
@@ -24,4 +25,18 @@ test('the lantern card names its level in both languages and disables Tend with 
  for(let i=0;i<LANTERN_LEVELS.length;i++){assert.ok(strings.en['lantern'+i]);assert.match(strings.ar['lantern'+i],/[؀-ۿ]/)}
  let html=todayMarkup(s,{t,n:String,button});assert.match(html,/data-level="0"/);assert.match(html,/data-action="tend-lantern" class="primary" disabled/);
  s.grove.embers=3;html=todayMarkup(s,{t,n:String,button});assert.doesNotMatch(html,/tend-lantern" class="primary" disabled/);
+});
+test('colour returns to the house with each lantern level and is untouched at the top',()=>{
+ for(let l=0;l<5;l++)assert.ok(houseColour(l+1)>houseColour(l));
+ assert.equal(houseColour(5),1);assert.ok(houseColour(0)>=.85,'a gentle start, never grey');assert.equal(houseColour(NaN),houseColour(0));
+ const vars={},root={style:{getPropertyValue:k=>vars[k]??'',setProperty:(k,v)=>{vars[k]=v}}},s=sim.createState();
+ syncHouseColour(root,s);assert.equal(vars['--house-colour'],`saturate(${houseColour(0)})`);
+ s.grove.warmth=99;syncHouseColour(root,s);assert.equal(vars['--house-colour'],'none');
+ assert.match(readFileSync(new URL('../src/grove.css',import.meta.url),'utf8'),/#world\{filter:var\(--house-colour,none\)/);
+});
+test('a house saved before the lantern starts warm; a fresh one starts cold',()=>{
+ const old=sim.createState();old.cares=12;const raw=JSON.parse(JSON.stringify(old));delete raw.grove;
+ assert.equal(sim.lanternLevel(sim.restore(JSON.stringify(raw))),2);
+ assert.equal(sim.lanternLevel(sim.restore(JSON.stringify(sim.createState()))),0);
+ raw.grove={warmth:1};assert.equal(sim.restore(JSON.stringify(raw)).grove.warmth,1,'a saved lantern is kept as it was');
 });

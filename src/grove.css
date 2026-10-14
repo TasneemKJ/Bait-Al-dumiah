@@ -36,3 +36,5 @@ html[lang=ar] .errand{font-size:14px}
 .lantern-card[data-level="1"]{--lantern:1}.lantern-card[data-level="2"]{--lantern:2}.lantern-card[data-level="3"]{--lantern:3}
 .lantern-card[data-level="4"]{--lantern:4}.lantern-card[data-level="5"]{--lantern:5}
 .lantern-card:not([data-level="0"]) .lantern-art{box-shadow:inset 0 0 0 3px #f2dfc4,0 0 calc(var(--lantern) * 5px) #f1b45c88}
+/* Colour returns to the house as the lantern grows (the variable is set from the lantern level). */
+#world{filter:var(--house-colour,none);transition:filter 2.4s ease}

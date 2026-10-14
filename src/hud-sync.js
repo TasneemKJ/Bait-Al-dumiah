@@ -3,6 +3,7 @@ import {daySweepDegrees} from './readouts.js';
 import {isNight,coziness,unclaimed,storyStatus,hasBasket,visitorWaiting} from './simulation.js';
 import {updateActivityStatus} from './activities-ui.js';
 import {icon} from './icons.js';
+import {syncHouseColour} from './grove-ui.js';
 
 // HTML serialization expands self-closing SVG tags; compare authored content.
 const authoredMarkup=new WeakMap();
@@ -21,7 +22,7 @@ export function applyDocumentState(s,t){
 
 // Per-frame HUD sync: night class, clock face, counters, next clue, light and pause buttons.
 export function syncHud(host,s,{t,n,panel,placement,selected}){
- document.body.classList.toggle('night',isNight(s));
+ document.body.classList.toggle('night',isNight(s));syncHouseColour(document.body,s);
  if(panel==='activities')updateActivityStatus(host,s,t,n);
  host.style.setProperty('--day-progress',daySweepDegrees(s)+'deg');
  const story=storyStatus(s),values={buttons:n(s.buttons),cozy:n(coziness(s))+'%',wishes:story.finished?

@@ -1,5 +1,5 @@
 // Restores the reference-game systems' record. Every field is whitelisted, clamped and defaulted.
-import {ERRANDS} from './content-grove.js';
+import {ERRANDS,LANTERN_LEVELS} from './content-grove.js';
 import {rollErrands} from './sim-grove.js';
 import {integer} from './sim-util.js';
 
@@ -7,6 +7,9 @@ const obj=v=>v&&typeof v==='object'&&!Array.isArray(v)?v:null;
 export function restoreGrove(s,raw){
  const v=obj(raw)??{},g=s.grove,seen=new Set();
  g.embers=integer(v.embers,0,999);g.warmth=integer(v.warmth,0,9999);
+ // A house saved before the lantern existed has already been cared for: its lantern starts warm, so
+ // colour never drains from a returning player's home.
+ if(!obj(raw)&&s.cares>0)g.warmth=LANTERN_LEVELS[2];
  g.errandDay=integer(v.errandDay,0,s.day);
  const known=e=>obj(e)&&ERRANDS.some(x=>x.id===e.id)&&!seen.has(e.id)&&seen.add(e.id);
  g.errands=(Array.isArray(v.errands)?v.errands.slice(0,6):[]).filter(known)

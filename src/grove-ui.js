@@ -2,6 +2,13 @@
 import {errandDef,ERRAND_EMBERS,lanternLevel,nextLantern} from './simulation.js';
 import {icon} from './icons.js';
 
+// Colour returns to the house as the lantern grows: a soft saturation lift, none at all at the top level.
+export const houseColour=level=>{const l=Math.max(0,Math.min(5,Number.isFinite(level)?level:0));
+ return Math.round((.88+.024*l)*1000)/1000};
+export function syncHouseColour(root,s){
+ const value=houseColour(lanternLevel(s)),text=value>=1?'none':`saturate(${value})`;
+ if(root.style.getPropertyValue('--house-colour')!==text)root.style.setProperty('--house-colour',text);
+}
 function errandRow(item,{t,n,button}){
  const e=errandDef(item.id),state=item.done?'done':'open';
  const end=item.collected?`<em>${icon('check')}${t('collected')}</em>`:item.done?button('collect-errand',
