@@ -31,7 +31,7 @@ Plan and analysis: `docs/research/REFERENCE-GAMES-2026-10-14.md`; ledger: `docs/
 - [x] 27 (AC) Seasonal sky tint on the backdrop
 - [x] 28 (AC) Seasonal events: olive harvest, winter lamps, almond blossom, jasmine nights, each with an event errand
 - [x] 29 (AC) Daily weather: soft rain days, seeded by the day
-- [ ] 30 (AC) Rain sound bed on rain days, gesture-gated
+- [x] 30 (AC) Rain sound bed on rain days, gesture-gated
 - [ ] 31 (AC) A hidden trinket each day: one prop glints; inspect it to find a small thing
 - [ ] 32 (AC) Curio cabinet: the trinket collection with art and a count
 - [ ] 33 (AC) Resident chatter: a personality line of the day when you open a resident

@@ -26,6 +26,7 @@ export function installLoop(app){
     app.world?.project(app.ui.selected,.05),Boolean(app.ui.panel||app.ui.placement||
       app.state.paused||app.storyUI?.selected||app.physicalActivity()));
   if(app.physicalActivity()!=='lullaby')app.audio.tick(sim.isNight(app.state));
+  app.audio.setRain?.(sim.rainyDay(app.state));
   if(now-lastUI>250){app.ui.tick();app.roomViews.update();app.objectControls.update();
   app.storyUI.update();lastUI=now}if(now-app.lastSave>8000){app.save();app.lastSave=now}}
   requestAnimationFrame(frame);

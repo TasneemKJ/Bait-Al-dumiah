@@ -143,6 +143,24 @@ export class DollhouseAudio{
     783.991,659.255]:kind==='mobile'?[392,493.883,587.33]:[440,523.251];
   notes.forEach((f,i)=>this.tone(f,t+i*.16,1.2,.035));
  }
+ // Soft rain: a quiet looping wash of filtered noise on rain days, faded in and out, never before a gesture.
+ setRain(on){
+  if(!on||!this.ready){if(this.rainVoice){this.rainVoice.fade();this.rainVoice=null}return}
+  if(this.rainVoice)return;
+  const ctx=this.context,length=ctx.sampleRate*2,buffer=ctx.createBuffer(1,length,ctx.sampleRate);
+  const data=buffer.getChannelData(0);let seed=913;
+  for(let i=0;i<length;i++){seed=(Math.imul(seed,1664525)+1013904223)>>>0;data[i]=(seed/4294967296)*2-1}
+  const source=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),gain=ctx.createGain(),now=ctx.currentTime;
+  source.buffer=buffer;source.loop=true;filter.type='lowpass';filter.frequency.value=900;filter.Q.value=.2;
+  gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime(.016,now+2.5);
+  source.connect(filter);filter.connect(gain);gain.connect(this.master);source.start(now);let closed=false;
+  const record={done:null,kind:'rain',stop(){if(closed)return;closed=true;try{source.stop()}catch{}
+   for(const n of [source,filter,gain])n.disconnect();record.done?.()},
+   fade(){const t=ctx.currentTime;gain.gain.cancelScheduledValues(t);gain.gain.setValueAtTime(gain.gain.value,t);
+    gain.gain.linearRampToValueAtTime(0,t+1.5);setTimeout(()=>record.stop(),1600)}};
+  this.rainVoice=this.track(record);const done=record.done;
+  record.done=()=>{done?.();if(this.rainVoice===record)this.rainVoice=null};
+ }
  get ready(){return Boolean(this.context&&this.enabled&&!this.paused&&!this.disposed)}
  // The intro plays on its own bus under the master, so a skip fades it instead of cutting it.
  introCue(cue,delay=0){

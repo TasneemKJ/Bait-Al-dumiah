@@ -48,3 +48,16 @@ test('soft rain falls on about one fresh day in four, never on day one or in sum
  assert.match(todayMarkup(s,{t:k=>strings.en[k]??k,n:String,button:()=>''}),/weather-note/);
  assert.match(strings.ar.rainToday,/[؀-ۿ]/);s.grove.errandDay=1;weather.update(s,0);assert.equal(weather.rain.visible,false);
 });
+import {DollhouseAudio} from '../src/audio.js';
+test('the rain bed starts only after a gesture on rain days, starts once, and fades away when rain stops or sound mutes',()=>{
+ const audio=new DollhouseAudio();audio.setRain(true);assert.equal(audio.rainVoice??null,null,'silent before a gesture');
+ let sources=0;const param=()=>({value:0,setValueAtTime(){},linearRampToValueAtTime(){},cancelScheduledValues(){},
+  exponentialRampToValueAtTime(){}});
+ const node=()=>({connect(){},disconnect(){},start(){},stop(){},gain:param(),frequency:{value:0},Q:{value:0},loop:false});
+ audio.context={currentTime:0,sampleRate:100,createBuffer:(c,n)=>({getChannelData:()=>new Float32Array(n)}),
+  createBufferSource:()=>{sources++;return node()},createBiquadFilter:node,createGain:node,suspend:async()=>{}};
+ audio.master=node();audio.enabled=true;audio.setRain(true);audio.setRain(true);assert.equal(sources,1);
+ assert.equal(audio.rainVoice.kind,'rain');audio.mute();assert.equal(audio.rainVoice,null,'mute stops the rain');
+ audio.enabled=true;audio.setRain(true);assert.equal(sources,2);audio.setRain(false);assert.equal(audio.rainVoice,null);
+ assert.match(readFileSync(new URL('../src/app-loop.js',import.meta.url),'utf8'),/audio\.setRain\?\.\(sim\.rainyDay\(app\.state\)\)/);
+});
