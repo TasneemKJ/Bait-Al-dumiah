@@ -11,7 +11,7 @@ Plan and analysis: `docs/research/REFERENCE-GAMES-2026-10-14.md`; ledger: `docs/
 - [x] 07 (CG) Tending juice: flare, rising sparks and a warm two-note whoosh; still under reduced motion
 - [x] 08 (CG) Day-one errands teach the house (tea for Lina, water a plant, collect the basket)
 - [x] 09 (CG) Errand news dot and objective hand-off: a ready errand marks House Tools and the clue points to it
-- [ ] 10 (CG) "That's today" close with tomorrow's first errand as a teaser
+- [x] 10 (CG) "That's today" close with tomorrow's first errand as a teaser
 - [ ] 11 (CG) Lantern wonders list: what each level brought, shown as a little ledger
 - [ ] 12 (CG) Heart levels shown as hearts on resident tabs and the closeness row
 - [ ] 13 (SF) Daily hug, once per resident per day, free, small closeness and comfort

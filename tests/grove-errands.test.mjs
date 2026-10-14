@@ -72,3 +72,15 @@ test('a ready errand or held embers mark Today and the clue hands off to it afte
  sim.tendLantern(s);assert.equal(todayNews(s),false);assert.notEqual(nextStep(s,t,String,'').value,'today');
  s.wishes=[];assert.equal(nextStep(s,t,String,'').action,'care','wishes still come first');
 });
+test('collecting the last errand settles the day once and peeks at tomorrow',()=>{
+ const s=sim.createState(),t=k=>strings.en[k]??k,button=()=>'';
+ for(const e of s.grove.errands)e.done=true;sim.collectErrand(s,s.grove.errands[0].id);
+ assert.equal(sim.daySettled(s),false);assert.doesNotMatch(todayMarkup(s,{t,n:String,button}),/day-settled/);
+ for(const e of s.grove.errands.slice(1))sim.collectErrand(s,e.id);assert.equal(sim.daySettled(s),true);
+ assert.equal(s.events.filter(e=>e.type==='day-settled').length,1);
+ const next=sim.tomorrowErrand(s);assert.ok(next);const html=todayMarkup(s,{t,n:String,button});
+ assert.match(html,/class="day-settled"/);assert.ok(html.includes(strings.en['errand-'+next]));
+ const later=structuredClone(s);sim.changeLight(later);later.dayTime=999;sim.changeLight(later);
+ assert.equal(later.grove.errands[0].id,next,'the peek matches what the next fresh day offers');
+ for(const k of ['daySettledTitle','daySettledText','tomorrowPeek'])assert.match(strings.ar[k],/[؀-ۿ]/);
+});

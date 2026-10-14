@@ -1,5 +1,5 @@
 // The Today sheet: the day's small errands (and, as the house grows, the lantern that they feed).
-import {errandDef,errandsReady,ERRAND_EMBERS,lanternLevel,nextLantern} from './simulation.js';
+import {errandDef,errandsReady,tomorrowErrand,daySettled,ERRAND_EMBERS,lanternLevel,nextLantern} from './simulation.js';
 import {icon} from './icons.js';
 
 // Colour returns to the house as the lantern grows: a soft saturation lift, none at all at the top level.
@@ -35,9 +35,15 @@ function lanternCard(s,{t,n,button}){
    min="0" max="${next??warmth}" value="${warmth}" aria-label="${t('lanternWarmth')}"></meter><small
    >${progress}</small></div>${tend}</section>`;
 }
+// The day's close: once every errand is collected, the sheet settles the day and peeks at tomorrow.
+function settledCard(s,t){
+ if(!daySettled(s))return '';const next=tomorrowErrand(s);
+ return `<section class="day-settled"><span aria-hidden="true">☾</span><div><strong>${t('daySettledTitle')}</strong><p
+   >${t('daySettledText')}</p>${next?`<small>${t('tomorrowPeek')} ${t('errand-'+next)}</small>`:''}</div></section>`;
+}
 export function todayMarkup(s,c){
  const {t,n}=c;
  return `<h2 id="sheet-title">${t('today')}</h2><p class="sheet-intro">${t('todayIntro')}</p>${lanternCard(s,c)}<p
    class="ember-count">${icon('spark')}<span>${t('embers')}</span><strong>${n(s.grove.embers)}</strong></p><ul
-   class="errand-list">${s.grove.errands.map(item=>errandRow(item,c)).join('')}</ul>`;
+   class="errand-list">${s.grove.errands.map(item=>errandRow(item,c)).join('')}</ul>${settledCard(s,t)}`;
 }

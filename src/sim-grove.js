@@ -13,13 +13,17 @@ const NEEDS={
 export const errandPossible=(s,e)=>!e.needs||NEEDS[e.needs](s);
 // A small deterministic shuffle by day: the same day always offers the same errands.
 const mix=(day,i)=>((day*2654435761+i*40503)>>>0)%9973;
-export function rollErrands(s){
- if(s.day===1){s.grove.errands=FIRST_DAY_ERRANDS.map(id=>({id,done:false,collected:false}));
-  s.grove.errandDay=1;return}
- const pool=ERRANDS.filter(e=>errandPossible(s,e)).map((e,i)=>({e,k:mix(s.day,i)})).sort((a,b)=>a.k-b.k);
- s.grove.errands=pool.slice(0,ERRANDS_PER_DAY).map(({e})=>({id:e.id,done:false,collected:false}));
- s.grove.errandDay=s.day;
+function errandsFor(s,day){
+ if(day===1)return FIRST_DAY_ERRANDS;
+ const pool=ERRANDS.filter(e=>errandPossible(s,e)).map((e,i)=>({e,k:mix(day,i)})).sort((a,b)=>a.k-b.k);
+ return pool.slice(0,ERRANDS_PER_DAY).map(({e})=>e.id);
 }
+export function rollErrands(s){
+ s.grove.errands=errandsFor(s,s.day).map(id=>({id,done:false,collected:false}));s.grove.errandDay=s.day;
+}
+// A peek at tomorrow's first errand for the day's closing card (the house may still change by then).
+export const tomorrowErrand=s=>errandsFor(s,s.day+1)[0]??null;
+export const daySettled=s=>s.grove.errands.length>0&&s.grove.errands.every(e=>e.collected);
 // Called by the house rules when something happens; a matching open errand is marked done (not paid).
 export function noteErrand(s,on,arg=null){
  for(const item of s.grove.errands){const e=errandDef(item.id);
@@ -35,6 +39,7 @@ export function collectErrand(s,id){
  if(!item)return {ok:false,reason:'invalid'};if(item.collected)return {ok:false,reason:'errandCollected'};
  if(!item.done)return {ok:false,reason:'errandNotDone'};
  item.collected=true;s.grove.embers=Math.min(999,s.grove.embers+ERRAND_EMBERS);
+ if(daySettled(s))emit(s,{type:'day-settled'});
  return {ok:true,id,embers:ERRAND_EMBERS};
 }
 // The lantern only grows when the player tends it; every held ember goes in at once.

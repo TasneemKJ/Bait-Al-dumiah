@@ -20,7 +20,7 @@ export {activityLevel,activityReward,activityRewardReady,checkMilestones,storySt
 export {controlTea,emptyTeaCup,releaseTea,serveTea,teaStatus} from './sim-tea.js';
 export {interactStory,playStoryKeepsake} from './sim-story.js';
 export {errandDef,errandsDone,errandsReady,collectErrand,ERRAND_EMBERS,
-  lanternLevel,nextLantern,tendLantern} from './sim-grove.js';
+  lanternLevel,nextLantern,tendLantern,tomorrowErrand,daySettled} from './sim-grove.js';
 export {SAVE_VERSION,migrate,readSave,restore} from './save-codec.js';
 // The first-launch intro plays once: true the first time a house claims it, false ever after.
 export function claimIntro(s){if(s.introSeen)return false;s.introSeen=true;return true}

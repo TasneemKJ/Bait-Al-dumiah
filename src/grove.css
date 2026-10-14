@@ -38,3 +38,10 @@ html[lang=ar] .errand{font-size:14px}
 .lantern-card:not([data-level="0"]) .lantern-art{box-shadow:inset 0 0 0 3px #f2dfc4,0 0 calc(var(--lantern) * 5px) #f1b45c88}
 /* Colour returns to the house as the lantern grows (the variable is set from the lantern level). */
 #world{filter:var(--house-colour,none);transition:filter 2.4s ease}
+.day-settled{display:flex;gap:14px;align-items:flex-start;margin-top:16px;padding:16px;border-radius:14px;
+ background:#4f3b50;color:#f3e3d2}
+.day-settled>span{font-size:26px;line-height:1;color:#efcf98}
+.day-settled strong{font-family:Georgia,serif;font-weight:normal;font-size:18px}
+[dir=rtl] .day-settled strong{font-family:Tahoma,Arial,sans-serif}
+.day-settled p{font-size:12px;line-height:1.7;margin:4px 0;color:#e6d2c6}
+.day-settled small{font-size:11px;color:#efcf98}
