@@ -58,3 +58,5 @@ html[lang=ar] .errand{font-size:14px}
 .hearts>i.full .icon{fill:currentColor}
 .bond-row .hearts{margin-inline-start:auto;margin-inline-end:8px}
 .bond-row .hearts>i .icon{width:15px;height:15px}
+.hug-button{width:100%;margin-top:10px;border-color:#d7b6bf;background:#f5e3e3;color:var(--rose-dark);gap:8px}
+.hug-button .icon{width:19px;height:19px}

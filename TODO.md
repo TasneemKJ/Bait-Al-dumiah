@@ -14,7 +14,7 @@ Plan and analysis: `docs/research/REFERENCE-GAMES-2026-10-14.md`; ledger: `docs/
 - [x] 10 (CG) "That's today" close with tomorrow's first errand as a teaser
 - [x] 11 (CG) Lantern wonders list: what each level brought, shown as a little ledger
 - [x] 12 (CG) Heart levels shown as hearts on resident tabs and the closeness row
-- [ ] 13 (SF) Daily hug, once per resident per day, free, small closeness and comfort
+- [x] 13 (SF) Daily hug, once per resident per day, free, small closeness and comfort
 - [ ] 14 (SF) Hug acting: the doll squeezes and lifts, hearts rise; still under reduced motion
 - [ ] 15 (SF) Hug sound: a soft cloth pat and a two-note hum
 - [ ] 16 (SF) Comfort food: cook one Levantine dish a day in the kitchen for the whole house

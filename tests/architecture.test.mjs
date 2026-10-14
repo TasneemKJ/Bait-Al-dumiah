@@ -16,7 +16,7 @@ const LAYER_OF={
  'event-bindings.js':'shared','content.js':'data','locale-data.js':'data','locale-rituals.js':'data','locale-story.js':'data',
  'locale-house.js':'data','locale-keepsakes.js':'data','locale-grove.js':'data','content-grove.js':'data','i18n.js':'data','icons.js':'data',
  'simulation.js':'simulation','home-session.js':'simulation','return-greeting.js':'simulation',
- 'stitch-path.js':'simulation','sim-util.js':'simulation','sim-core.js':'simulation','sim-tea.js':'simulation','sim-stitch.js':'simulation','sim-chimes.js':'simulation','sim-story.js':'simulation','sim-queries.js':'simulation','sim-state.js':'simulation','sim-grove.js':'simulation','save-grove.js':'simulation','save-codec.js':'simulation','lullaby-score.js':'simulation','intro-score.js':'simulation','night-score.js':'simulation',
+ 'stitch-path.js':'simulation','sim-util.js':'simulation','sim-core.js':'simulation','sim-tea.js':'simulation','sim-stitch.js':'simulation','sim-chimes.js':'simulation','sim-story.js':'simulation','sim-queries.js':'simulation','sim-state.js':'simulation','sim-grove.js':'simulation','sim-care.js':'simulation','save-grove.js':'simulation','save-codec.js':'simulation','lullaby-score.js':'simulation','intro-score.js':'simulation','night-score.js':'simulation',
  'tea-input.js':'simulation','stitch-input.js':'simulation','chime-input.js':'simulation',
  'carry-gesture.js':'simulation','pointer-gesture.js':'simulation','wish-glow.js':'simulation',
  'resident-portraits.js':'simulation',

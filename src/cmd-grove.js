@@ -7,6 +7,11 @@ export const groveCommands={
    if(result.ok){app.say(app.ui.t('errandCollectedNote'));app.audio.effect('place');app.save();app.ui.tick()}
    else app.say(app.ui.t(result.reason));
   },
+'hug':(app,value)=>{
+   const result=sim.hug(app.state,value);
+   if(result.ok){app.ui.close();app.say(app.ui.t('hugged').replace('{name}',app.ui.t(value)));
+   app.audio.effect('care:soothe');app.save();app.ui.tick()}else app.say(app.ui.t(result.reason));
+  },
 'tend-lantern':app=>{
    const result=sim.tendLantern(app.state);
    // The sheet folds away so the player sees the flame take the embers.

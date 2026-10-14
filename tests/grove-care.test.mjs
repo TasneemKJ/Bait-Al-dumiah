@@ -16,3 +16,21 @@ test('the household sheet shows hearts on every resident tab and on the closenes
  const html=householdMarkup(s,{t,n:String,button,avatar:()=>'',selected:'lina'});
  assert.equal((html.match(/class="hearts"/g)||[]).length,4);
 });
+test('one hug per resident per day: comfort and closeness rise, free, never farmed by hurrying dawn',()=>{
+ const s=sim.createState(),lina=s.dolls[0],buttons=s.buttons,comfort=lina.comfort,bond=lina.bond;
+ assert.equal(sim.hug(s,'lina').ok,true);assert.ok(lina.comfort>comfort);assert.ok(lina.bond>bond);
+ assert.equal(s.buttons,buttons);assert.equal(lina.action,'hug');
+ assert.deepEqual(sim.hug(s,'lina'),{ok:false,reason:'huggedToday'});assert.equal(sim.hug(s,'noor').ok,true);
+ sim.changeLight(s);sim.changeLight(s);assert.equal(s.day,2);assert.equal(sim.hug(s,'lina').ok,false,'hurried dawn');
+ sim.changeLight(s);s.dayTime=999;sim.changeLight(s);assert.equal(sim.hug(s,'lina').ok,true,'a day spent in the house');
+ assert.equal(sim.hug(s,'nobody').ok,false);s.paused=true;assert.equal(sim.hug(s,'sami').ok,false);
+});
+test('hugs survive a save and the restore clamps them; the sheet offers or marks the hug',()=>{
+ const s=sim.createState();sim.hug(s,'lina');const raw=JSON.parse(JSON.stringify(s));raw.grove.hugs.noor=1e9;raw.grove.hugs.x=1;
+ const r=sim.restore(JSON.stringify(raw));assert.deepEqual(r.grove.hugs,{lina:1,noor:1});
+ let html=householdMarkup(s,{t,n:String,button:(a,l,i,x)=>`<button data-action="${a}" ${x}>${l}</button>`,avatar:()=>'',selected:'lina'});
+ assert.match(html,/data-action="hug"[^>]*disabled>Hugged today/);
+ html=householdMarkup(s,{t,n:String,button:(a,l,i,x)=>`<button data-action="${a}" ${x}>${l}</button>`,avatar:()=>'',selected:'sami'});
+ assert.match(html,/data-action="hug"[^>]*>Hug</);
+ for(const k of ['hug','huggedToday','hugged'])assert.match(strings.ar[k],/[؀-ۿ]/);
+});

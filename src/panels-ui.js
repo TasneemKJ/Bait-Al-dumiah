@@ -4,7 +4,8 @@ import {storyMemoriesMarkup} from './story-ui.js';
 import {DOLLS,ROOMS,CATALOG,SECRETS,ACTIONS,MILESTONES,DOOR_STEPS,GIFT_COST,VISITOR_GIFTS} from './content.js';
 import {isNight,coziness,wishFor,wishReward,bondLevel,nextBond,isContent,contentThreshold,
   delighted,inFavoriteRoom,currentStreak,secretCozyNeeded,doorOpen,nextDoorStep,doorReady,
-  canAfford,wishGranted,hasBasket,secretsLeft,giftReady,isNewestGift,slotTaken,restingNote} from './simulation.js';
+  canAfford,wishGranted,hasBasket,secretsLeft,giftReady,isNewestGift,slotTaken,restingNote,
+  huggedToday} from './simulation.js';
 import {giftArt} from './gift-art.js';
 import {icon} from './icons.js';
 import {todayMarkup,heartsMarkup} from './grove-ui.js';
@@ -73,6 +74,8 @@ export function householdMarkup(s,{t,n,button,avatar,selected}){
      'wish-action':''}">${icon(actionIcon[key])}<span><strong>${t(key)}</strong><small
        >${t(key+'Effect')}</small></span><em>${action.cost?
      n(action.cost)+' '+t('buttons'):t('free')}</em></button>`).join('')}</div>
+   ${button('hug',t(huggedToday(s,d.id)?'huggedToday':'hug'),'heart',`class="hug-button" data-id="${d.id}" ${
+     huggedToday(s,d.id)?'disabled':''}`)}
    <label class="room-select">${t('move')}<select data-field="doll-room"
      data-id="${d.id}">${ROOMS.map(r=>`<option value="${r.id}" ${r.id===d.room?
      'selected':''}>${t(r.id)}${r.id===def.favRoom?' ♡':''}</option>`).join('')}</select></label>
