@@ -4,9 +4,9 @@ import {nightSky,duskGlow} from './visual-policy.js';
 import {lanternLevel} from '../simulation.js';
 const vertex=`varying vec2 vUv; void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`;
 const fragment=`varying vec2 vUv; uniform float night; uniform float dusk; 
- uniform vec3 nightBottom; uniform vec3 nightTop; uniform vec3 nightGlow;
+ uniform vec3 nightBottom; uniform vec3 nightTop; uniform vec3 nightGlow; uniform vec3 tint;
  void main(){
- vec3 day=mix(vec3(.74,.64,.64),vec3(.94,.85,.73),smoothstep(0.,.7,vUv.y));
+ vec3 day=mix(vec3(.74,.64,.64),vec3(.94,.85,.73),smoothstep(0.,.7,vUv.y))*tint;
  vec3 nightColor=mix(nightBottom,nightTop,vUv.y);
  float halo=exp(-length((vUv-vec2(.48,.46))*vec2(2.7,2.))*3.);
  vec3 c=mix(day,nightColor,night)+halo*mix(vec3(.02),nightGlow,night);
@@ -14,12 +14,15 @@ const fragment=`varying vec2 vUv; uniform float night; uniform float dusk;
  gl_FragColor=vec4(c,1.);
  #include <colorspace_fragment>
 }`;
+// A soft seasonal cast on the daytime sky (the night sky keeps its own palette). Multipliers stay near 1.
+export const SEASON_TINT={autumn:[1.04,.97,.9],winter:[.95,.98,1.04],spring:[1.03,.97,1],summer:[1.03,1.01,.93]};
+export const seasonTint=season=>SEASON_TINT[season]??[1,1,1];
 export function createAtmosphere(scene){
  const sky=nightSky();
  const backdrop=new T.Mesh(new T.PlaneGeometry(160,90),
    new T.ShaderMaterial({vertexShader:vertex,fragmentShader:fragment,uniforms:{night:{value:0},
    dusk:{value:0},nightBottom:{value:new T.Vector3(...sky.bottom)},nightTop:{value:new T.Vector3(...sky.top)},
-   nightGlow:{value:new T.Vector3(...sky.glow)}},depthWrite:false}));
+   nightGlow:{value:new T.Vector3(...sky.glow)},tint:{value:new T.Vector3(1,1,1)}},depthWrite:false}));
    backdrop.position.set(0,18,-28);scene.add(backdrop);
  const soft=softTexture(),starPos=new Float32Array(140*3);
  for(let i=0;i<140;i++){starPos[i*3]=Math.sin(i*127.1)*26;starPos[i*3+1]=4+(i*2.71)%23;
@@ -42,7 +45,8 @@ export function createAtmosphere(scene){
  const moths=[];for(let i=0;i<5;i++){const m=new T.Sprite(new T.SpriteMaterial({map:soft,
    color:0xf6d6a1,opacity:.75,transparent:true,depthWrite:false,
    blending:T.AdditiveBlending}));m.name='lantern-firefly';m.scale.set(.07,.07,1);scene.add(m);moths.push(m)}
- return {update(state,mix,level='high'){
+ return {setSeason(season){backdrop.material.uniforms.tint.value.set(...seasonTint(season))},
+  update(state,mix,level='high'){
   backdrop.material.uniforms.night.value=mix;backdrop.material.uniforms.dusk.value=duskGlow(state.clock);
   const wonder=lanternLevel(state)>=4;stars.material.opacity=mix*(wonder?1:.78);stars.material.size=wonder?.17:.13;
   moon.visible=mix>.05;moon.scale.setScalar(.9);

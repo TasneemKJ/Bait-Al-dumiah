@@ -25,3 +25,13 @@ test('the world shows the season it is given, fewer summer flowers after dark, a
  const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
  assert.match(main,/setSeason\?\.\(sim\.seasonFor\(new Date\(\)\.getMonth\(\)\)\)/,'the calendar is read only in the composition root');
 });
+import {createAtmosphere,seasonTint,SEASON_TINT} from '../src/render/atmosphere.js';
+test('each season casts a soft tint on the daytime sky only; unknown seasons stay neutral',t=>{
+ for(const [season,tint] of Object.entries(SEASON_TINT)){assert.ok(SEASON_LOOK[season]);
+  for(const c of tint)assert.ok(c>=.88&&c<=1.06,season+' stays subtle')}
+ assert.deepEqual(seasonTint('monsoon'),[1,1,1]);
+ textureCanvas(t);const scene=new T.Scene(),atmosphere=createAtmosphere(scene);atmosphere.setSeason('winter');
+ const sky=scene.children.find(o=>o.material?.uniforms?.tint);assert.deepEqual(sky.material.uniforms.tint.value.toArray(),SEASON_TINT.winter);
+ assert.match(sky.material.fragmentShader,/smoothstep\(0\.,\.7,vUv\.y\)\)\*tint/,'only the day gradient is tinted');
+ assert.match(readFileSync(new URL('../src/render/world.js',import.meta.url),'utf8'),/parts\.atmosphere\.setSeason\(season\)/);
+});
