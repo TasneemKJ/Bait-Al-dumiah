@@ -24,7 +24,7 @@ Plan and analysis: `docs/research/REFERENCE-GAMES-2026-10-14.md`; ledger: `docs/
 - [x] 20 (SF) Ribbon ceremony: finishing an arc ties a ribbon and leaves a letter in the journal
 - [x] 21 (SF) Kintsugi glow: a doll whose arc is complete wears a fine gold seam light
 - [x] 22 (SF) Mood words on resident cards (cheerful, sleepy, peckish, wistful)
-- [ ] 23 (SF) Expressive idle: content dolls sway, tired dolls droop
+- [x] 23 (SF) Expressive idle: content dolls sway, tired dolls droop
 - [ ] 24 (SF) Goodnight round: tuck each doll in after dark; the house hushes when all three are tucked
 - [ ] 25 (SF) Hand-inked flourishes on paper sheets and section headings
 - [ ] 26 (AC) Real seasons from the device calendar: drifting leaves, snow, petals or jasmine in the courtyard

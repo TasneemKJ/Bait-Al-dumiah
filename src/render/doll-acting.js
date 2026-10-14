@@ -79,6 +79,14 @@ function aimArm(arm,target,weight=1){
  arm.quaternion.slerp(upper,weight);arm.forearm.quaternion.slerp(bend,weight);
 }
 const smooth=x=>{x=T.MathUtils.clamp(x,0,1);return x*x*(3-2*x)};
+// Idle bodies show their mood: cheerful dolls sway wider with a small bob, sleepy ones droop and slow,
+// wistful ones lower their heads. Droop is a still pose, so it also holds under reduced motion.
+export function idleMood(mood){
+ if(mood==='cheerful')return {sway:1.8,speed:1.3,bob:.012,droop:0};
+ if(mood==='sleepy')return {sway:.6,speed:.55,bob:0,droop:.14};
+ if(mood==='wistful')return {sway:.8,speed:.8,bob:0,droop:.08};
+ return {sway:1,speed:1,bob:0,droop:0};
+}
 // A hug: arms gather in a quarter second, hold, and let go by three seconds; still poses hold it whole.
 export const hugEnvelope=(age,still=false)=>!Number.isFinite(age)||age<0||age>3?0:still?1:
   smooth(age/.25)*(1-smooth((age-2.2)/.8));

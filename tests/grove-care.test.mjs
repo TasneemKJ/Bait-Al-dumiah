@@ -64,3 +64,12 @@ test('each resident shows one mood word: the lowest need speaks first, contentme
  for(const m of sim.MOODS){assert.ok(strings.en['mood-'+m]);assert.match(strings.ar['mood-'+m],/[؀-ۿ]/)}
  assert.match(householdMarkup(s,{t,n:String,button,avatar:()=>'',selected:'lina'}),/class="mood-chip"\s+data-mood="calm">Calm/);
 });
+import {idleMood} from '../src/render/doll-acting.js';
+test('idle bodies show their mood: cheerful sways and bobs, sleepy and wistful droop',()=>{
+ const base=idleMood(null),happy=idleMood('cheerful'),tired=idleMood('sleepy'),sad=idleMood('wistful');
+ assert.ok(happy.sway>base.sway&&happy.bob>0);assert.ok(tired.droop>sad.droop&&sad.droop>base.droop);
+ assert.ok(tired.speed<base.speed);assert.deepEqual(idleMood('calm'),base);
+ const dolls=readFileSync(new URL('../src/render/dolls.js',import.meta.url),'utf8');
+ assert.match(dolls,/idleMood\(d\.action==='idle'\?moodOf\(state,d\.id\):null\)/);
+ assert.match(dolls,/rotation\.x=d\.action==='rest'\?\.23:idle\.droop/);
+});

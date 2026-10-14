@@ -3,7 +3,7 @@ import * as T from 'three';
 import {createLaceHem,createCollar} from './doll-trimmings.js';
 import {createSpectacles} from './doll-spectacles.js';
 import {batchDoll} from './doll-rig-batch.js';
-import {createArm,levelCup,balanceWalk,gaze,express,carePose,greeting,nightCuriosity,hairFollow,
+import {createArm,levelCup,balanceWalk,gaze,express,carePose,greeting,nightCuriosity,hairFollow,idleMood,
   clothFollow,groundWalkingFeet} from './doll-acting.js';
 import {createApron,createOveralls,createFoot,createSock} from './doll-wardrobe.js';
 import {createHair,fabricBow} from './doll-hair.js';
@@ -11,7 +11,7 @@ import {createSculptedHead,createPortraitEye,createBrow,closePortraitEye,createP
   createEar,bisqueMaterial,createNeckJoint} from './doll-face.js';
 import {wishGlowStrength,wishGlowOpacity} from '../wish-glow.js';
 import {createRibbon} from './doll-ribbon.js';
-import {arcComplete} from '../simulation.js';
+import {arcComplete,moodOf} from '../simulation.js';
 import {createTeaSteam,createComfortHearts,createSleepCrescent} from './resident-effects.js';
 import {DOLLS,ROOMS} from '../content.js';
 import {palette as P,cylinder,ring,mat,cup,batch} from './primitives.js';
@@ -133,12 +133,14 @@ export function createDolls(parent){
    v.ribbon.update(arcComplete(state,v.id),t,!motion);
    v.sleepCrescent.update(t,d.action==='rest',!motion);v.sparkles.visible=d.action==='play';
    v.sparkles.rotation.y=motion?t*.7:0;
-   v.body.position.y=motion?(d.action==='play'?Math.abs(Math.sin(t*4.6))*.065:0):0;
+   const idle=idleMood(d.action==='idle'?moodOf(state,d.id):null);
+   v.body.position.y=motion?(d.action==='play'?Math.abs(Math.sin(t*4.6))*.065:idle.bob*Math.abs(Math.sin(t*2.4+i))):0;
    v.body.rotation.z=motion&&d.action==='play'?Math.sin(t*3.6)*.05:0;
-   v.head.rotation.z=d.action==='rest'?.16:motion?Math.sin(t*.6+i)*.04:0;
+   v.head.rotation.z=d.action==='rest'?.16:motion?Math.sin(t*.6*idle.speed+i)*.04*idle.sway:0;
    v.baseHeadYaw=motion?T.MathUtils.damp(v.baseHeadYaw||0,selected===d.id?
      T.MathUtils.clamp(Number.isFinite(viewerYaw)?viewerYaw:0,-.25,
-     .25):Math.sin(t*.36+i)*.06,5,dt):0;v.head.rotation.y=v.baseHeadYaw;v.head.rotation.x=d.action==='rest'?.23:0;
+     .25):Math.sin(t*.36+i)*.06,5,dt):0;v.head.rotation.y=v.baseHeadYaw;
+   v.head.rotation.x=d.action==='rest'?.23:idle.droop;
    const openness=d.action==='rest'?.12:motion?blinkOpen(t,i):1;
    v.eyes.forEach(e=>closePortraitEye(e,openness));
    v.arms.forEach((a,j)=>{const sign=j===0?-1:1;a.rotation.y=0;
