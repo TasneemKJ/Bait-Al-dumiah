@@ -26,7 +26,7 @@ export {interactStory,playStoryKeepsake} from './sim-story.js';
 export {errandDef,errandsDone,errandsReady,collectErrand,ERRAND_EMBERS,
   lanternLevel,nextLantern,tendLantern,tomorrowErrand,daySettled,
   lanternWonders,seasonFor,currentEvent,setMonth,errandEmbers,
-  rainyDay,VISIT_REWARD,mailWaiting,readMail} from './sim-grove.js';
+  rainyDay,VISIT_REWARD,mailWaiting,readMail,birthdayToday} from './sim-grove.js';
 export {SAVE_VERSION,migrate,readSave,restore} from './save-codec.js';
 // The first-launch intro plays once: true the first time a house claims it, false ever after.
 export function claimIntro(s){if(s.introSeen)return false;s.introSeen=true;return true}

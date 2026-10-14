@@ -1,7 +1,7 @@
 // The Today sheet: the day's small errands (and, as the house grows, the lantern that they feed).
 import {letters,ARC_REWARD,arcStatus,cookedToday,lanternWonders,errandDef,errandsReady,tomorrowErrand,daySettled,
   errandEmbers,currentEvent,rainyDay,lanternLevel,nextLantern,foundToday,nextTrinket,
-  trinketProp,wallPaint,roomCharm,mailWaiting} from './simulation.js';
+  trinketProp,wallPaint,roomCharm,mailWaiting,birthdayToday} from './simulation.js';
 import {icon} from './icons.js';
 import {DISHES,TRINKETS,WALL_PAINTS} from './content-grove.js';
 import {curioArt} from './curio-art.js';
@@ -124,6 +124,11 @@ function mailCard(s,{t,n,button}){
  return `<section class="mail-card open"><div><strong>${t('mailFrom-'+m.id)}</strong><p
    >${t('mail-'+m.id)}</p></div></section>`;
 }
+function birthdayCard(s,t){
+ const id=birthdayToday(s);if(!id)return '';
+ return `<section class="event-card birthday-card"><strong>${t('birthdayTitle').replace('{name}',t(id))}</strong><p
+   >${t('birthdayText').replace('{name}',t(id))}</p></section>`;
+}
 function findNote(s,t){
  if(foundToday(s)||!nextTrinket(s))return '';const prop=INTERACTIVE_PROPS.find(p=>p.id===trinketProp(s));
  return `<p class="weather-note find-note"><b aria-hidden="true">✦</b><span>${t('trinketHint').replace('{room}',
@@ -143,6 +148,7 @@ function eventCard(s,t){
 export function todayMarkup(s,c){
  const {t,n}=c;
  return `<h2 id="sheet-title">${t('today')}</h2><p class="sheet-intro">${t('todayIntro')}</p>${mailCard(s,c)}${
+   birthdayCard(s,t)}${
    eventCard(s,t)}${
    lanternCard(s,c)}<p
    class="ember-count">${icon('spark')}<span>${t('embers')}</span><strong>${n(s.grove.embers)}</strong></p><ul

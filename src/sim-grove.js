@@ -1,6 +1,6 @@
 // Daily errands and the courtyard lantern: small, capped, explicitly collected. Pure rules, no DOM.
 import {ERRANDS,ERRANDS_PER_DAY,LANTERN_LEVELS,FIRST_DAY_ERRANDS,LANTERN_WONDERS,
-  SEASONS,EVENTS,MAIL,MAIL_GIFT} from './content-grove.js';
+  SEASONS,EVENTS,MAIL,MAIL_GIFT,BIRTHDAYS} from './content-grove.js';
 import {SECRETS,DOOR_STEPS,ROOMS} from './content.js';
 // Events are transient notices, capped like every other house event.
 const emit=(s,event)=>{if(s.events.length<24)s.events.push(event)};
@@ -16,21 +16,27 @@ export const errandPossible=(s,e)=>!e.needs||NEEDS[e.needs](s);
 const mix=(day,i)=>((day*2654435761+i*40503)>>>0)%9973;
 function errandsFor(s,day){
  if(day===1)return FIRST_DAY_ERRANDS;
- const pool=ERRANDS.filter(e=>!e.event&&errandPossible(s,e)).map((e,i)=>({e,k:mix(day,i)})).sort((a,b)=>a.k-b.k);
+ const pool=ERRANDS.filter(e=>!e.event&&!e.birthday&&errandPossible(s,e)).map((e,i)=>({e,k:mix(day,i)}))
+   .sort((a,b)=>a.k-b.k);
  return pool.slice(0,ERRANDS_PER_DAY).map(({e})=>e.id);
 }
 // The seasonal event running this month (from the device calendar the interface hands in), if any.
 export const currentEvent=s=>EVENTS.find(e=>e.months.includes(s.grove.month))?.id??null;
-const eventErrand=s=>ERRANDS.find(e=>e.event&&e.event===currentEvent(s))??null;
-function addEventErrand(s){const e=eventErrand(s);
- if(e&&!s.grove.errands.some(x=>x.id===e.id))s.grove.errands.push({id:e.id,done:false,collected:false})}
+// Whose birthday it is by the device calendar, if anyone's.
+export const birthdayToday=s=>Object.keys(BIRTHDAYS).find(id=>BIRTHDAYS[id][0]===s.grove.month&&
+  BIRTHDAYS[id][1]===s.grove.date)??null;
+const calendarErrands=s=>ERRANDS.filter(e=>e.event&&e.event===currentEvent(s)||
+  e.birthday&&e.birthday===birthdayToday(s));
+function addEventErrand(s){for(const e of calendarErrands(s))
+ if(!s.grove.errands.some(x=>x.id===e.id))s.grove.errands.push({id:e.id,done:false,collected:false})}
 export function rollErrands(s){
  s.grove.errands=errandsFor(s,s.day).map(id=>({id,done:false,collected:false}));s.grove.errandDay=s.day;
  addEventErrand(s);rollVisit(s);rollMail(s);
 }
 // The interface tells the house what month it is; a running event joins today's errands at once.
-export function setMonth(s,month){
- if(!Number.isInteger(month)||month<0||month>11||s.grove.month===month)return;s.grove.month=month;addEventErrand(s);
+export function setMonth(s,month,date=s.grove.date){
+ if(!Number.isInteger(month)||month<0||month>11)return;if(!Number.isInteger(date)||date<1||date>31)date=0;
+ if(s.grove.month===month&&s.grove.date===date)return;s.grove.month=month;s.grove.date=date;addEventErrand(s);
 }
 // A peek at tomorrow's first errand for the day's closing card (the house may still change by then).
 export const tomorrowErrand=s=>errandsFor(s,s.day+1)[0]??null;

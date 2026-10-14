@@ -22,7 +22,13 @@ export const ERRANDS=[
  {id:'event-lamps',on:'tend',icon:'lamp',event:'lamps',embers:2},
  {id:'event-almond',on:'hug',icon:'heart',event:'almond',embers:2},
  {id:'event-jasmine',on:'tuck',icon:'moon',event:'jasmine',embers:2},
+ // A resident's birthday adds a birthday hug for them, worth three embers.
+ {id:'birthday-lina',on:'hug',arg:'lina',icon:'heart',birthday:'lina',embers:3},
+ {id:'birthday-noor',on:'hug',arg:'noor',icon:'heart',birthday:'noor',embers:3},
+ {id:'birthday-sami',on:'hug',arg:'sami',icon:'heart',birthday:'sami',embers:3},
 ];
+// Each resident's made-on day in the player's calendar: [month 0-11, day of month].
+export const BIRTHDAYS={lina:[9,20],noor:[2,3],sami:[6,14]};
 // Seasonal events by device month (0-11): olive harvest, winter lamps, almond blossom, jasmine nights.
 export const EVENTS=[{id:'lamps',months:[11,0]},{id:'almond',months:[1,2]},{id:'jasmine',months:[5,6,7]},
   {id:'olive',months:[9,10]}];

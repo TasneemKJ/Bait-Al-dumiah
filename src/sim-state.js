@@ -17,7 +17,7 @@ export function createState(){
   story:{chapter:0,step:0,lastAction:null,lastActionAt:-10},
   introSeen:false,
   grove:{errandDay:0,errands:[],embers:0,warmth:0,hugs:{},dishDay:0,dish:null,dishAt:-99,tastes:{},arcs:{},
-    tucks:{},month:-1,trinkets:[],findDay:0,visit:null,walls:{},mail:null},
+    tucks:{},month:-1,date:0,trinkets:[],findDay:0,visit:null,walls:{},mail:null},
   settings:{locale:'en',muted:true,reducedMotion:false,quality:'auto',largeText:false}};
  rollErrands(s);return s;
 }
