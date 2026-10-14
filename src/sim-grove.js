@@ -1,5 +1,5 @@
 // Daily errands and the courtyard lantern: small, capped, explicitly collected. Pure rules, no DOM.
-import {ERRANDS,ERRANDS_PER_DAY,LANTERN_LEVELS} from './content-grove.js';
+import {ERRANDS,ERRANDS_PER_DAY,LANTERN_LEVELS,FIRST_DAY_ERRANDS} from './content-grove.js';
 import {SECRETS,DOOR_STEPS} from './content.js';
 // Events are transient notices, capped like every other house event.
 const emit=(s,event)=>{if(s.events.length<24)s.events.push(event)};
@@ -14,6 +14,8 @@ export const errandPossible=(s,e)=>!e.needs||NEEDS[e.needs](s);
 // A small deterministic shuffle by day: the same day always offers the same errands.
 const mix=(day,i)=>((day*2654435761+i*40503)>>>0)%9973;
 export function rollErrands(s){
+ if(s.day===1){s.grove.errands=FIRST_DAY_ERRANDS.map(id=>({id,done:false,collected:false}));
+  s.grove.errandDay=1;return}
  const pool=ERRANDS.filter(e=>errandPossible(s,e)).map((e,i)=>({e,k:mix(s.day,i)})).sort((a,b)=>a.k-b.k);
  s.grove.errands=pool.slice(0,ERRANDS_PER_DAY).map(({e})=>({id:e.id,done:false,collected:false}));
  s.grove.errandDay=s.day;

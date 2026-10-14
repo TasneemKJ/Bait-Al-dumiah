@@ -19,5 +19,7 @@ export const ERRANDS=[
  {id:'gift',on:'gift',icon:'ghost',needs:'door'},
 ];
 export const ERRANDS_PER_DAY=3;
+// The first day teaches the house through its errands: Lina's tea, a first keepsake, the tea table.
+export const FIRST_DAY_ERRANDS=['care-lina','place','ritual-tea'];
 // The courtyard lantern: total warmth needed for each level (0 is a cold wick, 5 lights the whole lane).
 export const LANTERN_LEVELS=[0,3,8,15,24,36];

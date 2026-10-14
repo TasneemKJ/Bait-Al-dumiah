@@ -53,3 +53,11 @@ test('a finished errand is collected once, by hand, for an ember',()=>{
  assert.match(todayMarkup(s,{t,n:String,button:(a,l,i,x)=>`<button data-action="${a}" ${x}>${l}</button>`}),/data-action="collect-errand" data-id/);
  for(const k of ['embers','errandCollectedNote','errandCollected','errandNotDone'])assert.match(strings.ar[k],/[؀-ۿ]/);
 });
+import {FIRST_DAY_ERRANDS} from '../src/content-grove.js';
+test('day one teaches the house through fixed errands that its opening already points to',()=>{
+ const s=sim.createState();assert.deepEqual(ids(s),FIRST_DAY_ERRANDS);
+ assert.equal(sim.wishFor(s,'lina'),'tea','Lina\'s first wish is the first errand');
+ sim.care(s,'lina','tea');sim.place(s,'plant','kitchen',0);assert.equal(sim.errandsDone(s),2);
+ const later=sim.createState();later.day=2;later.dayTime=999;sim.changeLight(later);sim.changeLight(later);
+ assert.notDeepEqual(ids(later),FIRST_DAY_ERRANDS,'later days draw from the pool');
+});
