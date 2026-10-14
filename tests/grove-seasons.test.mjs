@@ -23,7 +23,7 @@ test('the world shows the season it is given, fewer summer flowers after dark, a
  seasons.setSeason('summer');seasons.update(s,0);const day=seasons.status.count;seasons.update(s,1);assert.ok(seasons.status.count<day);
  seasons.setSeason('monsoon');seasons.update(s,0);assert.equal(seasons.points.visible,false);
  const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
- assert.match(main,/setSeason\?\.\(sim\.seasonFor\(new Date\(\)\.getMonth\(\)\)\)/,'the calendar is read only in the composition root');
+ assert.match(main,/app\.month=new Date\(\)\.getMonth\(\);app\.world\?\.setSeason\?\.\(sim\.seasonFor\(app\.month\)\)/,'the calendar is read only in the composition root');
 });
 import {createAtmosphere,seasonTint,SEASON_TINT} from '../src/render/atmosphere.js';
 test('each season casts a soft tint on the daytime sky only; unknown seasons stay neutral',t=>{

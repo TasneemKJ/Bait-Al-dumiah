@@ -16,7 +16,8 @@ export function installLoop(app){
   // The intro holds the house still: no simulation, saves or notices until play begins where it lands.
   if(!document.hidden&&!app.fatal&&app.session.entered)app.intro?.update(now);
   if(!document.hidden&&!app.fatal&&app.session.entered&&app.intro?.active)app.world?.render(app.state,dt,null);
-  else if(!document.hidden&&!app.fatal&&app.session.entered){app.updateWorkUI(dt);app.session.advance(app.state,dt);
+  else if(!document.hidden&&!app.fatal&&app.session.entered){app.updateWorkUI(dt);
+  if(Number.isInteger(app.month))sim.setMonth(app.state,app.month);app.session.advance(app.state,dt);
   if(app.state.events.length)for(const event of app.state.events.splice(0))app.announce(event);
   if(app.notices.length&&now>=app.noticeAt&&!app.physicalActivity())app.showNotice(now);
   app.world?.render(app.state,dt,app.ui.selected);

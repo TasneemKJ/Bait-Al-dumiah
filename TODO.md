@@ -29,7 +29,7 @@ Plan and analysis: `docs/research/REFERENCE-GAMES-2026-10-14.md`; ledger: `docs/
 - [x] 25 (SF) Hand-inked flourishes on paper sheets and section headings
 - [x] 26 (AC) Real seasons from the device calendar: drifting leaves, snow, petals or jasmine in the courtyard
 - [x] 27 (AC) Seasonal sky tint on the backdrop
-- [ ] 28 (AC) Seasonal events: olive harvest, winter lamps, almond blossom, jasmine nights, each with an event errand
+- [x] 28 (AC) Seasonal events: olive harvest, winter lamps, almond blossom, jasmine nights, each with an event errand
 - [ ] 29 (AC) Daily weather: soft rain days, seeded by the day
 - [ ] 30 (AC) Rain sound bed on rain days, gesture-gated
 - [ ] 31 (AC) A hidden trinket each day: one prop glints; inspect it to find a small thing

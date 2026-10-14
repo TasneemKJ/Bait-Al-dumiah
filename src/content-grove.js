@@ -17,7 +17,15 @@ export const ERRANDS=[
  {id:'place',on:'place',icon:'leaf'},
  {id:'whisper',on:'whisper',icon:'ghost',needs:'whisper'},
  {id:'gift',on:'gift',icon:'ghost',needs:'door'},
+ // Seasonal event errands join the day's three while their event runs; they are never drawn from the pool.
+ {id:'event-olive',on:'cook',icon:'leaf',event:'olive',embers:2},
+ {id:'event-lamps',on:'tend',icon:'lamp',event:'lamps',embers:2},
+ {id:'event-almond',on:'hug',icon:'heart',event:'almond',embers:2},
+ {id:'event-jasmine',on:'tuck',icon:'moon',event:'jasmine',embers:2},
 ];
+// Seasonal events by device month (0-11): olive harvest, winter lamps, almond blossom, jasmine nights.
+export const EVENTS=[{id:'lamps',months:[11,0]},{id:'almond',months:[1,2]},{id:'jasmine',months:[5,6,7]},
+  {id:'olive',months:[9,10]}];
 export const ERRANDS_PER_DAY=3;
 // The first day teaches the house through its errands: Lina's tea, a first keepsake, the tea table.
 export const FIRST_DAY_ERRANDS=['care-lina','place','ritual-tea'];

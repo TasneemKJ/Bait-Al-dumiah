@@ -18,6 +18,7 @@ export function restoreGrove(s,raw){
  const known=e=>obj(e)&&ERRANDS.some(x=>x.id===e.id)&&!seen.has(e.id)&&seen.add(e.id);
  g.errands=(Array.isArray(v.errands)?v.errands.slice(0,6):[]).filter(known)
    .map(e=>({id:e.id,done:e.done===true||e.collected===true,collected:e.collected===true}));
+ g.month=Number.isInteger(v.month)&&v.month>=0&&v.month<12?v.month:-1;
  g.dishDay=integer(v.dishDay,0,s.day);const tastes=obj(v.tastes)??{};
  g.dish=DISHES.some(d=>d.id===v.dish)?v.dish:null;g.dishAt=Number.isFinite(v.dishAt)?clamp(v.dishAt,-99,s.elapsed):-99;
  for(const d of s.dolls){const known=obj(tastes[d.id]);if(!known)continue;

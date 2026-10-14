@@ -76,6 +76,6 @@ export function tuckIn(s,id){
  if(tuckedIn(s,id))return {ok:false,reason:'tuckedAlready'};
  s.grove.tucks[id]=careDay(s);d.energy=clamp(d.energy+8);d.comfort=clamp(d.comfort+5);growBond(s,d,1);
  d.action='rest';d.lastCare=s.elapsed;d.actionUntil=s.elapsed+4;
- const hushed=houseHushed(s);if(hushed&&s.events.length<24)s.events.push({type:'house-hush'});
+ noteErrand(s,'tuck',id);const hushed=houseHushed(s);if(hushed&&s.events.length<24)s.events.push({type:'house-hush'});
  return {ok:true,id,hushed};
 }

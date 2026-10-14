@@ -102,3 +102,7 @@ html[lang=ar] .errand{font-size:14px}
 [dir=rtl] #sheet h2#sheet-title::after,[dir=rtl] #sheet .section-heading::after{transform:scaleX(-1);margin-inline-start:auto;margin-inline-end:0}
 #sheet .section-heading::after{width:60px;background-size:60px 10px}
 @media(forced-colors:active){#sheet h2#sheet-title::after,#sheet .section-heading::after{display:none}}
+.event-card{margin:0 0 14px;padding:12px 14px;border-radius:14px;border:1px dashed #c9a46f;background:#fbf1df}
+.event-card strong{font-family:Georgia,serif;font-weight:normal;font-size:16px;color:#8a5d34}
+[dir=rtl] .event-card strong{font-family:Tahoma,Arial,sans-serif}
+.event-card p{font-size:11px;line-height:1.7;color:var(--muted);margin-top:3px}

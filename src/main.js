@@ -80,7 +80,7 @@ function buildViews(){
 installFeedback(app);installView(app);installCommands(app);
 buildViews();
 // The player's own year: the device calendar picks the courtyard's season.
-app.world?.setSeason?.(sim.seasonFor(new Date().getMonth()));
+app.month=new Date().getMonth();app.world?.setSeason?.(sim.seasonFor(app.month));
 app.film=createFilmUI(document.querySelector('#app'),{getState:()=>app.state,
  onState:active=>{app.filmActive=active;app.cancelWorkInput();app.syncPause();
   app.world?.setEnabled(!active&&!app.state.paused);},
