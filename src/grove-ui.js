@@ -10,6 +10,12 @@ export function syncHouseColour(root,s){
  const value=houseColour(lanternLevel(s)),text=value>=1?'none':`saturate(${value})`;
  if(root.style.getPropertyValue('--house-colour')!==text)root.style.setProperty('--house-colour',text);
 }
+// Closeness as a row of hearts: one filled heart per level, four in all, readable without colour.
+export function heartsMarkup(level,t){
+ const l=Math.max(0,Math.min(4,Number.isInteger(level)?level:0));
+ return `<span class="hearts" role="img" aria-label="${t('heartsLabel').replace('{level}',t('bond'+l))}">${[1,2,3,4]
+   .map(i=>`<i class="${i<=l?'full':''}">${icon('heart')}</i>`).join('')}</span>`;
+}
 // Today has news when an errand waits to be collected or embers wait for the lantern.
 export const todayNews=s=>errandsReady(s)>0||s.grove.embers>0;
 // The clue's hand-off to Today: collect first, then tend.

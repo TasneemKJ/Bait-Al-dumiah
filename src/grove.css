@@ -50,3 +50,11 @@ html[lang=ar] .errand{font-size:14px}
 .lantern-wonders li .icon{width:14px;height:14px;color:#c4a07a}
 .lantern-wonders li.reached{opacity:1;color:var(--ink)}
 .lantern-wonders li.reached .icon{color:#6f9078}
+/* Closeness hearts: filled for each level reached; outlines stay visible in forced colours. */
+.hearts{display:inline-flex;gap:2px;align-items:center}
+.hearts>i{display:inline-flex;color:#d8bfc4}
+.hearts>i .icon{width:12px;height:12px}
+.hearts>i.full{color:#b0607f}
+.hearts>i.full .icon{fill:currentColor}
+.bond-row .hearts{margin-inline-start:auto;margin-inline-end:8px}
+.bond-row .hearts>i .icon{width:15px;height:15px}
