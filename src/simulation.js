@@ -10,7 +10,7 @@ import {ROOMS,DOLLS,CATALOG,SLOTS,SECRETS,ACTIONS,MILESTONES,SEW_SECONDS,DOOR_ST
   VISITOR_GIFTS,ACTIVITIES,RESTORATION_COSTS,RESTORATION_MASTERY,WISH_REFRESH_SECONDS,
     SEW_DAILY,BASKET_MAX} from './content.js';
 import {createState} from './sim-state.js';
-import {noteErrand,rollErrands} from './sim-grove.js';
+import {noteErrand,rollErrands,answerVisit} from './sim-grove.js';
 export {trinketProp,foundToday,nextTrinket,trinketHere,findTrinket} from './sim-finds.js';
 export {hug,huggedToday,careDay,cook,cookedToday,arcStatus,fulfilRequest,ARC_REWARD,
   arcComplete,letters,moodOf,MOODS,tuckIn,tuckedIn,houseHushed,chatterFor} from './sim-care.js';
@@ -25,7 +25,7 @@ export {interactStory,playStoryKeepsake} from './sim-story.js';
 export {errandDef,errandsDone,errandsReady,collectErrand,ERRAND_EMBERS,
   lanternLevel,nextLantern,tendLantern,tomorrowErrand,daySettled,
   lanternWonders,seasonFor,currentEvent,setMonth,errandEmbers,
-  rainyDay} from './sim-grove.js';
+  rainyDay,VISIT_REWARD} from './sim-grove.js';
 export {SAVE_VERSION,migrate,readSave,restore} from './save-codec.js';
 // The first-launch intro plays once: true the first time a house claims it, false ever after.
 export function claimIntro(s){if(s.introSeen)return false;s.introSeen=true;return true}
@@ -132,7 +132,8 @@ export function useDecor(s,id){
  return done(item.item==='musicbox'?'wind':'rock');
 }
 export function moveDoll(s,id,room){const doll=s.dolls.find(d=>d.id===id);
-if(!doll||!has(ROOMS,room))return fail('invalid');doll.room=room;return {ok:true,favorite:inFavoriteRoom(doll)}}
+if(!doll||!has(ROOMS,room))return fail('invalid');doll.room=room;const visit=answerVisit(s,id,room);
+if(visit)growBond(s,doll,3);return {ok:true,favorite:inFavoriteRoom(doll),visit}}
 export function changeLight(s){if(isNight(s)){s.clock=0;newDay(s)}else{s.clock=120}return {ok:true}}
 export function discover(s){
  if(!isNight(s))return fail('daylight');

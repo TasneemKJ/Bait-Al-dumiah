@@ -93,3 +93,15 @@ test('each resident has a line of chatter for the day, in their own voice, stead
   assert.match(strings.ar[k],/[؀-ۿ]/)}
  assert.match(householdMarkup(s,{t,n:String,button,avatar:()=>'',selected:'sami'}),/class="chatter"/);
 });
+test('on every other day one resident asks for a room; moving them there is thanked once',()=>{
+ const s=sim.createState();assert.equal(s.grove.visit,null,'never on the first day');
+ s.day=3;s.grove.errandDay=0;s.dayTime=999;sim.changeLight(s);sim.changeLight(s);
+ const v=s.grove.visit;assert.ok(v,'an even day brings a request');const d=s.dolls.find(x=>x.id===v.id);assert.notEqual(d.room,v.room);
+ const other=['kitchen','parlor','studio','bedroom'].find(r=>r!==v.room);assert.equal(sim.moveDoll(s,v.id,other).visit,null);
+ const buttons=s.buttons;const r=sim.moveDoll(s,v.id,v.room);assert.deepEqual(r.visit,{reward:sim.VISIT_REWARD});
+ assert.ok(s.buttons>=buttons+sim.VISIT_REWARD);assert.equal(sim.moveDoll(s,v.id,v.room).visit,null,'thanked once');
+ assert.equal(s.events.filter(e=>e.type==='visit-thanks').length,1);
+ const raw=JSON.parse(JSON.stringify(s));raw.grove.visit.room='attic';assert.equal(sim.restore(JSON.stringify(raw)).grove.visit,null);
+ assert.equal(sim.restore(JSON.stringify(s)).grove.visit.done,true);
+ for(const k of ['visitAsk','visitDone','visitThanks'])assert.match(strings.ar[k],/\{room\}/);
+});

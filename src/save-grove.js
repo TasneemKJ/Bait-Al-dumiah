@@ -1,5 +1,6 @@
 // Restores the reference-game systems' record. Every field is whitelisted, clamped and defaulted.
 import {ERRANDS,LANTERN_LEVELS,DISHES,ARCS,TRINKETS} from './content-grove.js';
+import {ROOMS} from './content.js';
 import {rollErrands} from './sim-grove.js';
 import {integer,clamp} from './sim-util.js';
 
@@ -27,5 +28,7 @@ export function restoreGrove(s,raw){
    (g.tastes[d.id]??={})[dish.id]=known[dish.id]}
  const arcs=obj(v.arcs)??{};
  for(const [id,arc] of Object.entries(ARCS))if(Number.isFinite(arcs[id]))g.arcs[id]=integer(arcs[id],0,arc.length);
+ const visit=obj(v.visit);g.visit=visit&&s.dolls.some(d=>d.id===visit.id)&&ROOMS.some(r=>r.id===visit.room)?
+   {id:visit.id,room:visit.room,day:integer(visit.day,0,s.day),done:visit.done===true}:null;
  if(!g.errands.length||!g.errandDay)rollErrands(s);
 }

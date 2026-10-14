@@ -1,7 +1,7 @@
 // Daily errands and the courtyard lantern: small, capped, explicitly collected. Pure rules, no DOM.
 import {ERRANDS,ERRANDS_PER_DAY,LANTERN_LEVELS,FIRST_DAY_ERRANDS,LANTERN_WONDERS,
   SEASONS,EVENTS} from './content-grove.js';
-import {SECRETS,DOOR_STEPS} from './content.js';
+import {SECRETS,DOOR_STEPS,ROOMS} from './content.js';
 // Events are transient notices, capped like every other house event.
 const emit=(s,event)=>{if(s.events.length<24)s.events.push(event)};
 
@@ -26,7 +26,7 @@ function addEventErrand(s){const e=eventErrand(s);
  if(e&&!s.grove.errands.some(x=>x.id===e.id))s.grove.errands.push({id:e.id,done:false,collected:false})}
 export function rollErrands(s){
  s.grove.errands=errandsFor(s,s.day).map(id=>({id,done:false,collected:false}));s.grove.errandDay=s.day;
- addEventErrand(s);
+ addEventErrand(s);rollVisit(s);
 }
 // The interface tells the house what month it is; a running event joins today's errands at once.
 export function setMonth(s,month){
@@ -71,4 +71,18 @@ export const seasonFor=month=>SEASONS[Number.isInteger(month)&&month>=0&&month<1
 export function rainyDay(s){
  const day=s.grove.errandDay;if(day<=1||[5,6,7].includes(s.grove.month))return false;
  return mix(day,7)%4===0;
+}
+// A spontaneous wish on every other day spent in the house: one resident asks to spend it in another room.
+export function rollVisit(s){
+ const day=s.grove.errandDay;s.grove.visit=null;if(day<=1||day%2)return;
+ const d=s.dolls[mix(day,3)%s.dolls.length],rooms=ROOMS.filter(r=>r.id!==d.room);
+ s.grove.visit={id:d.id,room:rooms[mix(day,5)%rooms.length].id,day,done:false};
+}
+export const VISIT_REWARD=6;
+// Moving the resident there answers it once: a little thanks, closeness and comfort.
+export function answerVisit(s,id,room){
+ const v=s.grove.visit;if(!v||v.done||v.day!==s.grove.errandDay||v.id!==id||v.room!==room)return null;
+ v.done=true;const d=s.dolls.find(x=>x.id===id);d.comfort=Math.min(100,d.comfort+8);
+ s.buttons=Math.min(9999,s.buttons+VISIT_REWARD);s.earnedToday=Math.min(99999,s.earnedToday+VISIT_REWARD);
+ emit(s,{type:'visit-thanks',id,room});return {reward:VISIT_REWARD};
 }

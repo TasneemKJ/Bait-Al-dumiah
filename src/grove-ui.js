@@ -105,11 +105,16 @@ function findNote(s,t){
  return `<p class="weather-note find-note"><b aria-hidden="true">✦</b><span>${t('trinketHint').replace('{room}',
    t(prop.room+'In'))}</span></p>`;
 }
+function visitNote(s,t){
+ const v=s.grove.visit;if(!v||v.day!==s.grove.errandDay)return '';
+ return `<p class="weather-note visit-note${v.done?' done':''}">${icon(v.done?'check':'home')}<span>${t(v.done?
+   'visitDone':'visitAsk').replace('{name}',t(v.id)).replace('{room}',t(v.room+'In'))}</span></p>`;
+}
 function eventCard(s,t){
  const rain=rainyDay(s)?`<p class="weather-note"><b aria-hidden="true">☂</b><span>${t('rainToday')}</span></p>`:'';
- const event=currentEvent(s);if(!event)return rain+findNote(s,t);
+ const event=currentEvent(s);if(!event)return rain+findNote(s,t)+visitNote(s,t);
  return `<section class="event-card" data-event="${event}"><strong>${t('event-'+event)}</strong><p
-   >${t('event-'+event+'Text')}</p></section>${rain}${findNote(s,t)}`;
+   >${t('event-'+event+'Text')}</p></section>${rain}${findNote(s,t)}${visitNote(s,t)}`;
 }
 export function todayMarkup(s,c){
  const {t,n}=c;

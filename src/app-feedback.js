@@ -36,6 +36,8 @@ export function installFeedback(app){
   if(event.type==='lantern')say(`${t('lanternUp')} ${t('lantern'+event.level)}`);
   if(event.type==='day-settled')say(t('daySettledTitle')+' '+t('daySettledText'));
   if(event.type==='house-hush'){say(t('houseHush'));audio.duskSwell?.()}
+  if(event.type==='visit-thanks')say(t('visitThanks').replace('{name}',t(event.id))
+   .replace('{room}',t(event.room+'In')));
   if(event.type==='errand')say(t('errandDone').replace('{name}',t('errand-'+event.id)));
  }
  function showError(kind){app.fatal=true;app.syncPause();save();app.homeUI?.hide();

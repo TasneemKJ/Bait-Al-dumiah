@@ -35,7 +35,7 @@ Plan and analysis: `docs/research/REFERENCE-GAMES-2026-10-14.md`; ledger: `docs/
 - [x] 31 (AC) A hidden trinket each day: one prop glints; inspect it to find a small thing
 - [x] 32 (AC) Curio cabinet: the trinket collection with art and a count
 - [x] 33 (AC) Resident chatter: a personality line of the day when you open a resident
-- [ ] 34 (AC) Spontaneous requests: a resident asks to spend the day in a room; moving them is thanked
+- [x] 34 (AC) Spontaneous requests: a resident asks to spend the day in a room; moving them is thanked
 - [ ] 35 (AC) Wall colours per room: four paints each, free and reversible
 - [ ] 36 (AC) Placement pop: squash, settle and a dust puff when a keepsake lands
 - [ ] 37 (AC) Room charm stars in the decorate sheet
