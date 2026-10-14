@@ -31,7 +31,7 @@ with sync_playwright() as p,open('/tmp/browser.lock','w') as lock:
   pending.append((OUT/f'.{lang}-{SIZE}.rendering.mp4',OUT/f'bait-al-dumiah-{lang}-{SIZE}.mp4'))
   encoders.append(subprocess.Popen(['ffmpeg','-y','-v','error','-f','image2pipe','-vcodec','mjpeg',
    '-r',str(FPS),'-i','pipe:0','-i',str(score),'-c:v','libx264','-preset','fast','-crf','23',
-   '-threads','1','-vf','fps=24','-pix_fmt','yuv420p','-c:a','aac','-b:a','160k','-af',
+   '-threads','1','-vf','fps=24','-pix_fmt','yuv420p','-color_range','pc','-colorspace','bt470bg','-c:a','aac','-b:a','160k','-af',
    'loudnorm=I=-16:TP=-1.8:LRA=9','-ar','48000','-t','60','-movflags','+faststart',
    str(pending[-1][0])],stdin=subprocess.PIPE,stderr=log))
  try:

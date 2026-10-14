@@ -1,0 +1,13 @@
+{
+  "seconds": 60,
+  "capture_fps": 12,
+  "fps": 24,
+  "cadence": "each captured 3D frame held twice",
+  "width": 1080,
+  "height": 1920,
+  "world_width": 720,
+  "world_height": 1280,
+  "source": "actual local Three house and dolls",
+  "captions": "native browser canvas shaping",
+  "sound": "original procedural music box; no narration"
+}

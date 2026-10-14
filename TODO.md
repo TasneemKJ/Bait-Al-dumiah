@@ -333,14 +333,14 @@ Six independently reproduced source defects have RED/GREEN behavior regressions.
 
 ## Cinema iteration 2026-10-12
 Twenty-idea exploration, IDEAL/5Ws, source plan and selected scope: `docs/cinema/2026-10-12-size-of-memory.md`.
-- [ ] 12-second opening, optional 60-second live film and EN/AR standalone exports.
-- [ ] Repository verification, mobile bilingual matrix, lifecycle and rendered-frame review.
+- [x] 12-second opening, optional 60-second live film and four EN/AR standalone portrait/wide exports.
+- [x] Repository verification (546 tests), all eight bilingual phone film cases, lifecycle/4× fallback, core 56-check browser journey and story smoke; native rendered and decoded samples inspected.
 
 ## Film grounding follow-up — 2026-10-13
 - [x] Inspect full-size kitchen proof and implement private-film support/contact corrections.
 - [x] Verify resident sole bounds through a geometric regression; preserve gameplay source geometry.
 - [x] Encode through ignored temporary files; publish local filenames only after full-length/frame-count validation.
-- [ ] Inspect all regenerated full-size frames, complete both aspect-ratio exports and verify their actual media streams.
+- [x] Inspect all seven full-size shot samples in both compositions and both final cards; complete four exports, full decode, loudness, metadata/sidecar/cover verification and SHA-256 manifest.
 
 ## Desktop navigation legibility — 2026-10-13
 - [x] Record actual faint room/dock labels in combined-source desktop closeup; twenty ideas and 5Ws in the iteration ledger.

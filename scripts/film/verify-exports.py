@@ -12,7 +12,9 @@ for size in ['1080x1920','1920x1080']:
   video=next(s for s in info['streams'] if s['codec_type']=='video')
   audio=next(s for s in info['streams'] if s['codec_type']=='audio')
   assert (video['width'],video['height'])==(width,height)
-  assert video['codec_name']=='h264' and video['pix_fmt']=='yuv420p'
+  assert video['codec_name']=='h264' and video['pix_fmt'] in ['yuv420p','yuvj420p']
+  # FFprobe names full-range 8-bit 4:2:0 as yuvj420p; require its range flag.
+  assert video['pix_fmt']!='yuvj420p' or video.get('color_range')=='pc'
   assert video['avg_frame_rate']=='24/1' and int(video['nb_frames'])==1440
   assert abs(float(info['format']['duration'])-60)<.05
   assert audio['codec_name']=='aac' and audio['sample_rate']=='48000' and audio['channels']==2
@@ -20,7 +22,9 @@ for size in ['1080x1920','1920x1080']:
   subtitle=movie.with_suffix('.srt');text=subtitle.read_text(encoding='utf8')
   assert text.count(' --> ')==7 and '00:01:00,000' in text
   results.append({'file':movie.name,'seconds':float(info['format']['duration']),
-   'size':size,'bytes':movie.stat().st_size,'video':'H.264/yuv420p/24fps','audio':'AAC/stereo/48kHz',
+   'size':size,'bytes':movie.stat().st_size,'video':f"H.264/{video['pix_fmt']}/24fps",
+   'pixel_format':video['pix_fmt'],'color_range':video.get('color_range','unspecified'),
+   'color_space':video.get('color_space','unspecified'),'audio':'AAC/stereo/48kHz',
    'captured_poses_per_second':12,'native_type':True,'subtitle':subtitle.name})
   files.extend([movie,subtitle])
 for lang in ['en','ar']:

@@ -1,0 +1,58 @@
+[
+  {
+    "file": "bait-al-dumiah-en-1080x1920.mp4",
+    "seconds": 60.0,
+    "size": "1080x1920",
+    "bytes": 11156062,
+    "video": "H.264/yuvj420p/24fps",
+    "pixel_format": "yuvj420p",
+    "color_range": "pc",
+    "color_space": "bt470bg",
+    "audio": "AAC/stereo/48kHz",
+    "captured_poses_per_second": 12,
+    "native_type": true,
+    "subtitle": "bait-al-dumiah-en-1080x1920.srt"
+  },
+  {
+    "file": "bait-al-dumiah-ar-1080x1920.mp4",
+    "seconds": 60.0,
+    "size": "1080x1920",
+    "bytes": 11169819,
+    "video": "H.264/yuvj420p/24fps",
+    "pixel_format": "yuvj420p",
+    "color_range": "pc",
+    "color_space": "bt470bg",
+    "audio": "AAC/stereo/48kHz",
+    "captured_poses_per_second": 12,
+    "native_type": true,
+    "subtitle": "bait-al-dumiah-ar-1080x1920.srt"
+  },
+  {
+    "file": "bait-al-dumiah-en-1920x1080.mp4",
+    "seconds": 60.0,
+    "size": "1920x1080",
+    "bytes": 12946057,
+    "video": "H.264/yuvj420p/24fps",
+    "pixel_format": "yuvj420p",
+    "color_range": "pc",
+    "color_space": "bt470bg",
+    "audio": "AAC/stereo/48kHz",
+    "captured_poses_per_second": 12,
+    "native_type": true,
+    "subtitle": "bait-al-dumiah-en-1920x1080.srt"
+  },
+  {
+    "file": "bait-al-dumiah-ar-1920x1080.mp4",
+    "seconds": 60.0,
+    "size": "1920x1080",
+    "bytes": 12985623,
+    "video": "H.264/yuvj420p/24fps",
+    "pixel_format": "yuvj420p",
+    "color_range": "pc",
+    "color_space": "bt470bg",
+    "audio": "AAC/stereo/48kHz",
+    "captured_poses_per_second": 12,
+    "native_type": true,
+    "subtitle": "bait-al-dumiah-ar-1920x1080.srt"
+  }
+]
