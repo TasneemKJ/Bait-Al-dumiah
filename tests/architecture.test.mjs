@@ -23,7 +23,7 @@ const LAYER_OF={
  'ui.js':'ui','intro-ui.js':'ui','intro-sound.js':'ui','activities-ui.js':'ui','chime-ui.js':'ui','home-ui.js':'ui','object-ui.js':'ui',
  'stitch-ui.js':'ui','stitch-view.js':'ui','canvas-aria.js':'ui','chime-input-bindings.js':'ui','chime-view.js':'ui','objective-ui.js':'ui','shell-markup.js':'ui','hud-sync.js':'ui','dom-sync.js':'ui','readouts.js':'ui','ui-events.js':'ui','save-transfer.js':'ui','panels-ui.js':'ui','stitch-input-bindings.js':'ui','tea-input-bindings.js':'ui','tea-view.js':'ui','story-ui.js':'ui','tea-ui.js':'ui','audio.js':'ui','gift-art.js':'ui','grove-ui.js':'ui',
  'object-controls.js':'ui','room-views.js':'ui','resident-label.js':'ui','placement-keys.js':'ui','playfield-layout.js':'ui','placement-flow.js':'ui',
- 'app-feedback.js':'ui','app-view.js':'ui','app-commands.js':'ui','cmd-home.js':'ui','cmd-camera.js':'ui','cmd-story.js':'ui','cmd-activities.js':'ui','cmd-house.js':'ui','cmd-save.js':'ui','app-loop.js':'ui',
+ 'app-feedback.js':'ui','app-view.js':'ui','app-commands.js':'ui','cmd-home.js':'ui','cmd-camera.js':'ui','cmd-story.js':'ui','cmd-activities.js':'ui','cmd-house.js':'ui','cmd-save.js':'ui','app-loop.js':'ui','cmd-grove.js':'ui',
  'film-ui.js':'ui','film-sound.js':'ui','main.js':'main',
 };
 const MAX_LINES=500;

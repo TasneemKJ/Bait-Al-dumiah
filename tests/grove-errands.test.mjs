@@ -38,6 +38,18 @@ test('restore whitelists, dedupes and clamps the errand record; old saves get a 
 test('Today copy exists in both languages and the sheet lists every errand',()=>{
  for(const e of ERRANDS){assert.ok(strings.en['errand-'+e.id]);assert.match(strings.ar['errand-'+e.id],/[؀-ۿ]/)}
  const s=sim.createState();s.grove.errands[0].done=true;const t=k=>strings.en[k]??k;
- const html=todayMarkup(s,{t,n:String});assert.equal((html.match(/class="errand /g)||[]).length,3);
+ const html=todayMarkup(s,{t,n:String,button:()=>''});assert.equal((html.match(/class="errand /g)||[]).length,3);
  assert.match(html,/errand done/);assert.match(html,/id="sheet-title">Today/);
+});
+test('a finished errand is collected once, by hand, for an ember',()=>{
+ const s=sim.createState();const id=s.grove.errands[0].id;
+ assert.deepEqual(sim.collectErrand(s,id),{ok:false,reason:'errandNotDone'});assert.equal(s.grove.embers,0);
+ s.grove.errands[0].done=true;const buttons=s.buttons;
+ assert.equal(sim.collectErrand(s,id).ok,true);assert.equal(s.grove.embers,sim.ERRAND_EMBERS);assert.equal(s.buttons,buttons);
+ assert.deepEqual(sim.collectErrand(s,id),{ok:false,reason:'errandCollected'});assert.equal(s.grove.embers,sim.ERRAND_EMBERS);
+ assert.equal(sim.collectErrand(s,'nope').ok,false);
+ const t=k=>strings.en[k]??k,html=todayMarkup(s,{t,n:String,button:(a,l,i,x)=>`<button data-action="${a}" ${x}>${l}</button>`});
+ assert.match(html,/Collected/);s.grove.errands[1].done=true;
+ assert.match(todayMarkup(s,{t,n:String,button:(a,l,i,x)=>`<button data-action="${a}" ${x}>${l}</button>`}),/data-action="collect-errand" data-id/);
+ for(const k of ['embers','errandCollectedNote','errandCollected','errandNotDone'])assert.match(strings.ar[k],/[؀-ۿ]/);
 });

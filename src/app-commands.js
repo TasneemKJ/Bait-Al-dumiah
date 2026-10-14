@@ -5,9 +5,10 @@ import {storyCommands} from './cmd-story.js';
 import {activitiesCommands} from './cmd-activities.js';
 import {houseCommands} from './cmd-house.js';
 import {saveCommands} from './cmd-save.js';
+import {groveCommands} from './cmd-grove.js';
 
 const handlers=Object.assign({},homeCommands,cameraCommands,storyCommands,
-  activitiesCommands,houseCommands,saveCommands);
+  activitiesCommands,houseCommands,saveCommands,groveCommands);
 const BEFORE_ENTRY=['home-play','home-reload','home-sound','home-language','sound'];
 
 function runCommand(app,action,value,origin='control'){

@@ -25,3 +25,13 @@ export function noteErrand(s,on,arg=null){
   item.done=true;emit(s,{type:'errand',id:item.id})}
 }
 export const errandsDone=s=>s.grove.errands.filter(e=>e.done).length;
+export const errandsReady=s=>s.grove.errands.filter(e=>e.done&&!e.collected).length;
+export const ERRAND_EMBERS=1;
+// Collecting is the explicit action that pays: a finished errand becomes embers for the lantern.
+export function collectErrand(s,id){
+ const item=s.grove.errands.find(e=>e.id===id);
+ if(!item)return {ok:false,reason:'invalid'};if(item.collected)return {ok:false,reason:'errandCollected'};
+ if(!item.done)return {ok:false,reason:'errandNotDone'};
+ item.collected=true;s.grove.embers=Math.min(999,s.grove.embers+ERRAND_EMBERS);
+ return {ok:true,id,embers:ERRAND_EMBERS};
+}

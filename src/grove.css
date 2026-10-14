@@ -10,3 +10,10 @@
 html[lang=ar] .errand{font-size:14px}
 /* Today leads the House Tools drawer across its full width: it is where a short daily visit starts. */
 #ui .dock[data-expanded=true]>[data-action="panel-today"]{grid-column:1/-1}
+.ember-count{display:flex;align-items:center;gap:8px;margin:0 0 12px;font-size:12px;color:var(--muted)}
+.ember-count .icon{width:18px;height:18px;color:#c08a4e}
+.ember-count strong{font-size:16px;color:var(--ink);font-weight:500}
+.errand>button{font-size:11px;padding:6px 12px;gap:4px;flex-shrink:0}
+.errand>button .icon{width:14px;height:14px}
+.errand.collected{opacity:.72}
+.errand.collected>em .icon{color:#6f9078}
