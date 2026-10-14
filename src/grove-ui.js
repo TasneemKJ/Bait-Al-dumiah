@@ -60,6 +60,14 @@ function kitchenMarkup(s,{t,n}){
    >${t('dish-'+d.id)}</strong><small>${t('dish-'+d.id+'Text')}</small><em>${icon('button')}${n(d.cost)}</em></button>`)
    .join('')}</div>`;
 }
+// The taste notebook: what each resident has shown they love, like or would rather not eat.
+export function tasteNotebook(s,id,t){
+ const known=s.grove.tastes[id]??{},mark={love:'heart',like:'check',meh:'minus'};
+ return `<h3 class="section-heading">${t('tastesTitle')}</h3><ul class="taste-list">${DISHES.map(d=>{
+  const taste=known[d.id],glyph=taste?icon(mark[taste]):'<b aria-hidden="true">?</b>';
+  return `<li class="${taste??'unknown'}">${glyph}<span
+   >${t('dish-'+d.id)}</span><small>${t('taste-'+(taste??'unknown'))}</small></li>`}).join('')}</ul>`;
+}
 export function todayMarkup(s,c){
  const {t,n}=c;
  return `<h2 id="sheet-title">${t('today')}</h2><p class="sheet-intro">${t('todayIntro')}</p>${lanternCard(s,c)}<p

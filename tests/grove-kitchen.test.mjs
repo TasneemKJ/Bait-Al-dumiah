@@ -30,3 +30,12 @@ test('every resident has exactly one favourite, tastes restore whitelisted, and 
  const html=todayMarkup(sim.createState(),{t,n:String,button});assert.equal((html.match(/data-action="cook"/g)||[]).length,4);
  assert.match(todayMarkup(s,{t,n:String,button}),/data-action="cook" data-id="kaak" class="dish" disabled/);
 });
+import {householdMarkup} from '../src/panels-ui.js';
+import {tasteNotebook} from '../src/grove-ui.js';
+test('the household notebook shows what each resident has shown about every dish',()=>{
+ const s=sim.createState();let html=tasteNotebook(s,'lina',t);assert.equal((html.match(/class="unknown"/g)||[]).length,4);
+ sim.cook(s,'maamoul');html=tasteNotebook(s,'lina',t);assert.match(html,/class="love"/);assert.ok(html.includes(strings.en['taste-love']));
+ assert.match(tasteNotebook(s,'noor',t),/class="meh"/);
+ assert.match(householdMarkup(s,{t,n:String,button:()=>'',avatar:()=>'',selected:'sami'}),/class="taste-list"/);
+ for(const k of ['love','like','meh','unknown'])assert.match(strings.ar['taste-'+k],/[؀-ۿ]/);
+});

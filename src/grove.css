@@ -67,3 +67,9 @@ html[lang=ar] .errand{font-size:14px}
 .dish small{font-size:10px;line-height:1.5;color:var(--muted);min-height:30px}
 .dish em{font-style:normal;font-size:11px;display:flex;align-items:center;gap:4px}
 .dish em .icon{width:14px;height:14px}
+.taste-list{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px}
+.taste-list li{display:flex;align-items:center;gap:10px;font-size:12px;padding:6px 0;border-bottom:1px dashed var(--line)}
+.taste-list li>span{flex:1}.taste-list li>small{font-size:10px;color:var(--muted)}
+.taste-list .icon,.taste-list b{width:16px;height:16px;text-align:center;font-size:12px;color:#b59682}
+.taste-list li.love .icon{color:#b0607f;fill:currentColor}.taste-list li.like .icon{color:#6f9078}
+.taste-list li.unknown{color:var(--muted)}

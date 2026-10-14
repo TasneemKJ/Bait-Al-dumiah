@@ -8,7 +8,7 @@ import {isNight,coziness,wishFor,wishReward,bondLevel,nextBond,isContent,content
   huggedToday} from './simulation.js';
 import {giftArt} from './gift-art.js';
 import {icon} from './icons.js';
-import {todayMarkup,heartsMarkup} from './grove-ui.js';
+import {todayMarkup,heartsMarkup,tasteNotebook} from './grove-ui.js';
 export const actionIcon={tea:'tea',play:'play',rest:'rest',soothe:'heart'};
 export const wishKey=(id,action)=>DOLLS.find(d=>d.id===id).wish===action?id+'Wish':id+'Wish_'+action;
 
@@ -88,6 +88,7 @@ export function householdMarkup(s,{t,n,button,avatar,selected}){
        'met':''}">${icon('home')}<span>${t('favRoomLabel')}<strong
          >${t(def.favRoom)}</strong></span>${inFavoriteRoom(d)?icon('check'):''}</p></div>
    <p class="sheet-intro">${delighted(s,d)?t('delightedNote'):''} ${inFavoriteRoom(d)?t('favRoomNote'):''}</p>
+   ${tasteNotebook(s,d.id,t)}
    <h3 class="section-heading">${t('memories')}</h3><div class="memories">${[1,2,3].map(i=>level>=i?
      `<p>${t(d.id+'Memory'+i)}</p>`:`<p
        class="locked">${icon('moon')}<span>${t('memoryLocked')} · ${t('bond'+i)}</span></p>`).join('')}</div>`;
