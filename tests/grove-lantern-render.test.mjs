@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import * as T from 'three';
 import {createState} from '../src/simulation.js';
-import {lanternLook,createLantern} from '../src/render/lantern.js';
+import {lanternLook,createLantern,moteCount,MAX_MOTES} from '../src/render/lantern.js';
 import {textureCanvas} from './helpers/render-node.mjs';
 
 test('a cold wick shows no flame; each level is brighter and wider, and stronger after dark',()=>{
@@ -22,4 +22,17 @@ test('the courtyard lantern follows the saved warmth and is a touch target for T
  lantern.update(s,1);assert.equal(lantern.status.level,0);
  s.grove.warmth=15;lantern.update(s,1);assert.equal(lantern.status.level,3);assert.equal(lantern.hit.userData.lantern,true);
  assert.match(readFileSync(new URL('../src/main.js',import.meta.url),'utf8'),/data\.lantern\)ui\.open\('today'\)/);
+});
+test('light motes return after dark with each lantern level, never by day',()=>{
+ assert.equal(moteCount(5,0),0);assert.equal(moteCount(0,1),0);
+ for(let l=1;l<=5;l++)assert.ok(moteCount(l,1)>moteCount(l-1,1));assert.ok(moteCount(5,1)<=MAX_MOTES);
+ assert.equal(moteCount(NaN,1),0);
+});
+test('the scene draws only the motes the lantern has earned and keeps them still under reduced motion',t=>{
+ textureCanvas(t);const parent=new T.Group(),lantern=createLantern(parent),s=createState();s.grove.warmth=15;
+ lantern.update(s,1);assert.equal(lantern.status.motes,moteCount(3,1));
+ const motes=parent.getObjectByName('returning-motes');assert.equal(motes.geometry.drawRange.count,moteCount(3,1));
+ s.settings.reducedMotion=true;s.elapsed=40;lantern.update(s,1);const p=motes.position.clone();
+ s.elapsed=90;lantern.update(s,1);assert.ok(motes.position.equals(p));
+ lantern.update(s,0);assert.equal(motes.visible,false);
 });
