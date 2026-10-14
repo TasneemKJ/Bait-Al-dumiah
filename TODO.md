@@ -17,7 +17,7 @@ Plan and analysis: `docs/research/REFERENCE-GAMES-2026-10-14.md`; ledger: `docs/
 - [x] 13 (SF) Daily hug, once per resident per day, free, small closeness and comfort
 - [x] 14 (SF) Hug acting: the doll squeezes and lifts, hearts rise; still under reduced motion
 - [x] 15 (SF) Hug sound: a soft cloth pat and a two-note hum
-- [ ] 16 (SF) Comfort food: cook one Levantine dish a day in the kitchen for the whole house
+- [x] 16 (SF) Comfort food: cook one Levantine dish a day in the kitchen for the whole house
 - [ ] 17 (SF) Taste notebook: each resident's discovered loves and dislikes
 - [ ] 18 (SF) Dish aroma: warm steam and motes over the kitchen table after cooking
 - [ ] 19 (SF) Personal arcs: three small requests per resident, unlocked by closeness

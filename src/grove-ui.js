@@ -1,7 +1,8 @@
 // The Today sheet: the day's small errands (and, as the house grows, the lantern that they feed).
-import {lanternWonders,errandDef,errandsReady,tomorrowErrand,daySettled,ERRAND_EMBERS,lanternLevel,
+import {cookedToday,lanternWonders,errandDef,errandsReady,tomorrowErrand,daySettled,ERRAND_EMBERS,lanternLevel,
   nextLantern} from './simulation.js';
 import {icon} from './icons.js';
+import {DISHES} from './content-grove.js';
 
 // Colour returns to the house as the lantern grows: a soft saturation lift, none at all at the top level.
 export const houseColour=level=>{const l=Math.max(0,Math.min(5,Number.isFinite(level)?level:0));
@@ -50,9 +51,19 @@ function settledCard(s,t){
  return `<section class="day-settled"><span aria-hidden="true">☾</span><div><strong>${t('daySettledTitle')}</strong><p
    >${t('daySettledText')}</p>${next?`<small>${t('tomorrowPeek')} ${t('errand-'+next)}</small>`:''}</div></section>`;
 }
+// Comfort food: one dish a day for the whole house, cooked from the Today sheet.
+function kitchenMarkup(s,{t,n}){
+ const done=cookedToday(s);
+ return `<h3 class="section-heading">${t('kitchenComfort')}</h3><p class="sheet-intro">${t(done?
+   'cookedTodayNote':'kitchenIntro')}</p><div class="dish-grid">${DISHES.map(d=>`<button type="button"
+   data-action="cook" data-id="${d.id}" class="dish" ${done||s.buttons<d.cost?'disabled':''}><strong
+   >${t('dish-'+d.id)}</strong><small>${t('dish-'+d.id+'Text')}</small><em>${icon('button')}${n(d.cost)}</em></button>`)
+   .join('')}</div>`;
+}
 export function todayMarkup(s,c){
  const {t,n}=c;
  return `<h2 id="sheet-title">${t('today')}</h2><p class="sheet-intro">${t('todayIntro')}</p>${lanternCard(s,c)}<p
    class="ember-count">${icon('spark')}<span>${t('embers')}</span><strong>${n(s.grove.embers)}</strong></p><ul
-   class="errand-list">${s.grove.errands.map(item=>errandRow(item,c)).join('')}</ul>${settledCard(s,t)}`;
+   class="errand-list">${s.grove.errands.map(item=>errandRow(item,c)).join('')}</ul>${settledCard(s,t)}${
+   kitchenMarkup(s,c)}`;
 }

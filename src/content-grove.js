@@ -25,3 +25,13 @@ export const FIRST_DAY_ERRANDS=['care-lina','place','ritual-tea'];
 export const LANTERN_LEVELS=[0,3,8,15,24,36];
 // What each lantern level brings back to the house, in order from level 1.
 export const LANTERN_WONDERS=['flame','colour','garland','stars','lane'];
+// Comfort food: one dish a day for the whole house. Every resident has a favourite and one that is
+// simply not for them (never a penalty, only a smaller comfort).
+export const DISHES=[{id:'kaak',cost:4},{id:'maamoul',cost:6},{id:'mujaddara',cost:5},{id:'knafeh',cost:8}];
+export const TASTES={
+ lina:{maamoul:'love',kaak:'like',mujaddara:'like',knafeh:'meh'},
+ noor:{mujaddara:'love',knafeh:'like',kaak:'like',maamoul:'meh'},
+ sami:{knafeh:'love',kaak:'like',maamoul:'like',mujaddara:'meh'},
+};
+export const TASTE_EFFECT={love:{hunger:30,comfort:15,bond:4},like:{hunger:25,comfort:6,bond:2},
+  meh:{hunger:20,comfort:2,bond:0}};

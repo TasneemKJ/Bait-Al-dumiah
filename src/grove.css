@@ -60,3 +60,10 @@ html[lang=ar] .errand{font-size:14px}
 .bond-row .hearts>i .icon{width:15px;height:15px}
 .hug-button{width:100%;margin-top:10px;border-color:#d7b6bf;background:#f5e3e3;color:var(--rose-dark);gap:8px}
 .hug-button .icon{width:19px;height:19px}
+.dish-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dish{flex-direction:column;align-items:flex-start;gap:4px;text-align:start;padding:12px;border-radius:12px;background:#f6eadf}
+.dish strong{font-family:Georgia,serif;font-weight:normal;font-size:15px}
+[dir=rtl] .dish strong{font-family:Tahoma,Arial,sans-serif}
+.dish small{font-size:10px;line-height:1.5;color:var(--muted);min-height:30px}
+.dish em{font-style:normal;font-size:11px;display:flex;align-items:center;gap:4px}
+.dish em .icon{width:14px;height:14px}
