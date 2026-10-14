@@ -26,7 +26,7 @@ Plan and analysis: `docs/research/REFERENCE-GAMES-2026-10-14.md`; ledger: `docs/
 - [x] 22 (SF) Mood words on resident cards (cheerful, sleepy, peckish, wistful)
 - [x] 23 (SF) Expressive idle: content dolls sway, tired dolls droop
 - [x] 24 (SF) Goodnight round: tuck each doll in after dark; the house hushes when all three are tucked
-- [ ] 25 (SF) Hand-inked flourishes on paper sheets and section headings
+- [x] 25 (SF) Hand-inked flourishes on paper sheets and section headings
 - [ ] 26 (AC) Real seasons from the device calendar: drifting leaves, snow, petals or jasmine in the courtyard
 - [ ] 27 (AC) Seasonal sky tint on the backdrop
 - [ ] 28 (AC) Seasonal events: olive harvest, winter lamps, almond blossom, jasmine nights, each with an event errand
