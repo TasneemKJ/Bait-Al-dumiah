@@ -10,6 +10,8 @@ import {createHair,fabricBow} from './doll-hair.js';
 import {createSculptedHead,createPortraitEye,createBrow,closePortraitEye,createPortraitMouth,createNose,
   createEar,bisqueMaterial,createNeckJoint} from './doll-face.js';
 import {wishGlowStrength,wishGlowOpacity} from '../wish-glow.js';
+import {createRibbon} from './doll-ribbon.js';
+import {arcComplete} from '../simulation.js';
 import {createTeaSteam,createComfortHearts,createSleepCrescent} from './resident-effects.js';
 import {DOLLS,ROOMS} from '../content.js';
 import {palette as P,cylinder,ring,mat,cup,batch} from './primitives.js';
@@ -100,7 +102,7 @@ function makeDoll(def){
    steam,wishGlow,comfortHearts,sleepCrescent,sparkles,room:null,id:def.id});
 }
 export function createDolls(parent){
- const dolls=DOLLS.map((def,i)=>{const v=makeDoll(def);parent.add(v.root);
+ const dolls=DOLLS.map((def,i)=>{const v=makeDoll(def);parent.add(v.root);v.ribbon=createRibbon(v.body);
  const r=ROOMS.find(x=>x.id===def.room);v.root.position.set(r.x+.85,r.y+.12,.88);return v});
  let previousSelection=null;
  return {dolls,targets:dolls.map(v=>v.hit),greetAll(times){dolls.forEach((v,
@@ -128,6 +130,7 @@ export function createDolls(parent){
    v.wishGlow.visible=k>0;v.wishGlow.material.opacity=o}
    v.halo.visible=selected===d.id;v.tea.visible=d.action==='tea';v.steam.update(t,d.action==='tea',!motion);
    v.comfortHearts.update(t,d.action==='soothe'||d.action==='hug',!motion,d.lastCare);
+   v.ribbon.update(arcComplete(state,v.id),t,!motion);
    v.sleepCrescent.update(t,d.action==='rest',!motion);v.sparkles.visible=d.action==='play';
    v.sparkles.rotation.y=motion?t*.7:0;
    v.body.position.y=motion?(d.action==='play'?Math.abs(Math.sin(t*4.6))*.065:0):0;

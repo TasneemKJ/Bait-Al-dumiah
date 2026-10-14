@@ -42,3 +42,11 @@ test('finishing an arc ties a ribbon once and leaves a letter in the journal; th
  for(const id of Object.keys(ARCS))assert.match(strings.ar['letter-'+id],/[؀-ۿ]/);
  assert.match(readFileSync(new URL('../src/cmd-grove.js',import.meta.url),'utf8'),/dispatch\('focus-doll',value\)/);
 });
+import * as T from 'three';
+import {createRibbon,ribbonShine} from '../src/render/doll-ribbon.js';
+test('a resident with a finished arc wears a gold ribbon that shimmers only with motion allowed',()=>{
+ const body=new T.Group(),ribbon=createRibbon(body);ribbon.update(false,1,false);assert.equal(ribbon.root.visible,false);
+ ribbon.update(true,1,false);assert.equal(ribbon.root.visible,true);assert.equal(ribbon.root.userData.noBatch,true);
+ assert.equal(ribbonShine(1,true),ribbonShine(9,true));assert.notEqual(ribbonShine(0,false),ribbonShine(1.2,false));
+ assert.match(readFileSync(new URL('../src/render/dolls.js',import.meta.url),'utf8'),/ribbon\.update\(arcComplete\(state,v\.id\)/);
+});

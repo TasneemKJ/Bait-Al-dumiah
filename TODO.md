@@ -22,7 +22,7 @@ Plan and analysis: `docs/research/REFERENCE-GAMES-2026-10-14.md`; ledger: `docs/
 - [x] 18 (SF) Dish aroma: warm steam and motes over the kitchen table after cooking
 - [x] 19 (SF) Personal arcs: three small requests per resident, unlocked by closeness
 - [x] 20 (SF) Ribbon ceremony: finishing an arc ties a ribbon and leaves a letter in the journal
-- [ ] 21 (SF) Kintsugi glow: a doll whose arc is complete wears a fine gold seam light
+- [x] 21 (SF) Kintsugi glow: a doll whose arc is complete wears a fine gold seam light
 - [ ] 22 (SF) Mood words on resident cards (cheerful, sleepy, peckish, wistful)
 - [ ] 23 (SF) Expressive idle: content dolls sway, tired dolls droop
 - [ ] 24 (SF) Goodnight round: tuck each doll in after dark; the house hushes when all three are tucked
