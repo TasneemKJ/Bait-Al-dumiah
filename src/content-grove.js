@@ -19,3 +19,5 @@ export const ERRANDS=[
  {id:'gift',on:'gift',icon:'ghost',needs:'door'},
 ];
 export const ERRANDS_PER_DAY=3;
+// The courtyard lantern: total warmth needed for each level (0 is a cold wick, 5 lights the whole lane).
+export const LANTERN_LEVELS=[0,3,8,15,24,36];

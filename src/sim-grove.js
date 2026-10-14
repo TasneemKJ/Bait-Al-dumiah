@@ -1,5 +1,5 @@
 // Daily errands and the courtyard lantern: small, capped, explicitly collected. Pure rules, no DOM.
-import {ERRANDS,ERRANDS_PER_DAY} from './content-grove.js';
+import {ERRANDS,ERRANDS_PER_DAY,LANTERN_LEVELS} from './content-grove.js';
 import {SECRETS,DOOR_STEPS} from './content.js';
 // Events are transient notices, capped like every other house event.
 const emit=(s,event)=>{if(s.events.length<24)s.events.push(event)};
@@ -34,4 +34,14 @@ export function collectErrand(s,id){
  if(!item.done)return {ok:false,reason:'errandNotDone'};
  item.collected=true;s.grove.embers=Math.min(999,s.grove.embers+ERRAND_EMBERS);
  return {ok:true,id,embers:ERRAND_EMBERS};
+}
+// The lantern only grows when the player tends it; every held ember goes in at once.
+export const lanternLevel=s=>LANTERN_LEVELS.reduce((level,min,i)=>s.grove.warmth>=min?i:level,0);
+export const nextLantern=s=>LANTERN_LEVELS.find(min=>min>s.grove.warmth)??null;
+export function tendLantern(s){
+ if(s.grove.embers<1)return {ok:false,reason:'noEmbers'};
+ const before=lanternLevel(s),added=s.grove.embers;
+ s.grove.warmth=Math.min(9999,s.grove.warmth+added);s.grove.embers=0;const level=lanternLevel(s);
+ if(level>before)emit(s,{type:'lantern',level});
+ return {ok:true,added,level,grew:level>before};
 }

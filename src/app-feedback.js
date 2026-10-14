@@ -33,6 +33,7 @@ export function installFeedback(app){
   if(event.type==='sewn')say(t('sewnHint'));
   if(event.type==='first-night')say(t('firstNightHint'));
   if(event.type==='calm')say(t('calmDayOne'));
+  if(event.type==='lantern')say(`${t('lanternUp')} ${t('lantern'+event.level)}`);
   if(event.type==='errand')say(t('errandDone').replace('{name}',t('errand-'+event.id)));
  }
  function showError(kind){app.fatal=true;app.syncPause();save();app.homeUI?.hide();

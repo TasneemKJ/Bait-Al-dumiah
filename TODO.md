@@ -4,7 +4,7 @@
 Plan and analysis: `docs/research/REFERENCE-GAMES-2026-10-14.md`; ledger: `docs/research/ITERATIONS-40.md`.
 - [x] 01 (CG) Today sheet with three daily errands drawn from real house actions, refreshed only after a day actually spent
 - [x] 02 (CG) Collect a finished errand for lantern embers (explicit collect, never automatic)
-- [ ] 03 (CG) Tend the courtyard lantern: spend embers, five warmth levels
+- [x] 03 (CG) Tend the courtyard lantern: spend embers, five warmth levels
 - [ ] 04 (CG) The lantern in the courtyard grows: brass fanous mesh whose flame and glow follow its level; touching it opens Today
 - [ ] 05 (CG) Colour returns to the house as the lantern grows (soft saturation lift on the scene)
 - [ ] 06 (CG) Light motes return at night, more of them with each lantern level

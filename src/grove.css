@@ -17,3 +17,22 @@ html[lang=ar] .errand{font-size:14px}
 .errand>button .icon{width:14px;height:14px}
 .errand.collected{opacity:.72}
 .errand.collected>em .icon{color:#6f9078}
+/* The lantern card: a little brass fanous drawn in CSS whose flame follows the level. */
+.lantern-card{display:flex;align-items:center;gap:14px;padding:14px;margin:0 0 14px;border-radius:14px;
+ background:linear-gradient(160deg,#f7ead8,#efdcc7);border:1px solid #dcc2a4}
+.lantern-card>div{flex:1;min-width:0;display:grid;gap:4px}
+.lantern-card strong{font-family:Georgia,serif;font-weight:normal;font-size:17px}
+[dir=rtl] .lantern-card strong{font-family:Tahoma,Arial,sans-serif}
+.lantern-card small{font-size:10px;color:var(--muted)}
+.lantern-card meter::-webkit-meter-optimum-value{background:#c99a5a}
+.lantern-card>button{font-size:11px;padding:8px 12px;gap:4px;flex-shrink:0}
+.lantern-card>button .icon{width:14px;height:14px}
+.lantern-art{position:relative;width:34px;height:52px;flex-shrink:0;border:2px solid #b68d5d;border-radius:40% 40% 18% 18%;
+ background:#5b4250;box-shadow:inset 0 0 0 3px #f2dfc4}
+.lantern-art>i{position:absolute;left:50%;bottom:12px;width:10px;height:14px;margin-left:-5px;border-radius:50% 50% 45% 45%;
+ background:radial-gradient(circle at 50% 70%,#fff3cf,#f1b45c 60%,transparent 72%);
+ transform:scale(calc(.25 + var(--lantern,0) * .17));transform-origin:50% 100%}
+.lantern-card[data-level="0"] .lantern-art>i{opacity:.25}
+.lantern-card[data-level="1"]{--lantern:1}.lantern-card[data-level="2"]{--lantern:2}.lantern-card[data-level="3"]{--lantern:3}
+.lantern-card[data-level="4"]{--lantern:4}.lantern-card[data-level="5"]{--lantern:5}
+.lantern-card:not([data-level="0"]) .lantern-art{box-shadow:inset 0 0 0 3px #f2dfc4,0 0 calc(var(--lantern) * 5px) #f1b45c88}
