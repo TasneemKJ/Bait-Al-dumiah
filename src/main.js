@@ -37,6 +37,7 @@ function pickFromScene(data){
   if(data.object)dispatch(storyUI?.selected===data.object?'activate-object':'select-object',data.object,'scene');
   if(data.doll)ui.open('household',data.doll);
   if(data.ghost)dispatch('discover');
+  if(data.lantern)ui.open('today');
   if(data.slot&&ui.placement)dispatch(ui.moveId!==null?'relocate-object':'place',
     {id:ui.moveId,item:ui.placement,...data.slot});
 }

@@ -66,6 +66,7 @@ export function createWorld(canvas,{onPick,onError}){
    moonChimes,isActive:id=>id==='tea'?st.teaActive:id==='stitch'?
    st.stitchActive:st.chimeActive,isLost:()=>st.lost,sections:()=>st.stitchSections});
  const unbindPointers=bindScenePointers({st,canvas,camera,controls,ray,mouse,residents,objects,ghost,
+   lantern:parts.lantern,
    slots,tapGesture,scenePointers},{onPick,onError});
  const resize=()=>fitViewport(canvas,camera,renderer,focusPose().height);
  let viewportWidth=0,viewportHeight=0;

@@ -2,7 +2,7 @@
 export function visualStatus(w){
  const {st,roomEffects,portraitCache,presentation,cameraMove,preview,house,decorSync,
    restoration,objects,storyProps,teaTable,sewingPlay,moonChimes,
-   courtyard,picking}=w;
+   courtyard,picking,lantern}=w;
  const stitchGuidePositions=picking.stitchGuidePositions;
  return {atmosphereFx:roomEffects.status(),portraitCount:portraitCache.size,
    quality:st.quality,focusedRoom:st.focusedRoom,focusedDoll:st.focusedDoll,
@@ -16,6 +16,6 @@ export function visualStatus(w){
       courtyard:house.root.getObjectByName('levantine-courtyard')?.userData.nightCue,
     selectedObject:objects.selected,story:storyProps.status(),teaActive:st.teaActive,tea:teaTable.status(),
       stitchActive:st.stitchActive,workCeilingVisible:house.workCeiling.visible,
-    workArchVisible:courtyard.studioArch.visible,stitch:sewingPlay.status(),
+    workArchVisible:courtyard.studioArch.visible,stitch:sewingPlay.status(),lanternLevel:lantern?.status.level,
       stitchGuides:stitchGuidePositions(),chimeActive:st.chimeActive,chimes:moonChimes.status()};
 }
