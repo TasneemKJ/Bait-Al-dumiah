@@ -33,3 +33,14 @@ test('the glint sits above today\'s prop, twinkles only with motion, and goes ou
  assert.deepEqual(glintLook(1,true),glintLook(9,true));assert.notDeepEqual(glintLook(.3,false),glintLook(.9,false));
  sim.findTrinket(s,sim.trinketProp(s));glint.update(s);assert.equal(glint.glint.visible,false);
 });
+import {curioMarkup} from '../src/grove-ui.js';
+import {CURIO_ART_IDS,curioArt} from '../src/curio-art.js';
+import {journalMarkup} from '../src/panels-ui.js';
+test('the journal\'s curio cabinet shows each found trinket\'s drawing and the shelves still empty',()=>{
+ assert.deepEqual([...CURIO_ART_IDS].sort(),[...TRINKETS].sort(),'every trinket has a local drawing');
+ for(const id of TRINKETS)assert.doesNotMatch(curioArt(id),/https?:|<script/);
+ const s=sim.createState();let html=curioMarkup(s,t,String);assert.equal((html.match(/class="curio empty"/g)||[]).length,12);
+ sim.findTrinket(s,sim.trinketProp(s));html=curioMarkup(s,t,String);assert.match(html,/<div class="curio"><svg/);
+ assert.match(html,/1\/12/);assert.match(journalMarkup(s,{t,n:String,button}),/curio-grid/);
+ for(const k of ['curioTitle','curioIntro','curioEmpty'])assert.match(strings.ar[k],/[؀-ۿ]/);
+});

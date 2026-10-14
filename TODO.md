@@ -33,7 +33,7 @@ Plan and analysis: `docs/research/REFERENCE-GAMES-2026-10-14.md`; ledger: `docs/
 - [x] 29 (AC) Daily weather: soft rain days, seeded by the day
 - [x] 30 (AC) Rain sound bed on rain days, gesture-gated
 - [x] 31 (AC) A hidden trinket each day: one prop glints; inspect it to find a small thing
-- [ ] 32 (AC) Curio cabinet: the trinket collection with art and a count
+- [x] 32 (AC) Curio cabinet: the trinket collection with art and a count
 - [ ] 33 (AC) Resident chatter: a personality line of the day when you open a resident
 - [ ] 34 (AC) Spontaneous requests: a resident asks to spend the day in a room; moving them is thanked
 - [ ] 35 (AC) Wall colours per room: four paints each, free and reversible

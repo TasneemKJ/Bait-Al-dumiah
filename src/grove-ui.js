@@ -3,7 +3,8 @@ import {letters,ARC_REWARD,arcStatus,cookedToday,lanternWonders,errandDef,errand
   errandEmbers,currentEvent,rainyDay,lanternLevel,nextLantern,foundToday,nextTrinket,
   trinketProp} from './simulation.js';
 import {icon} from './icons.js';
-import {DISHES} from './content-grove.js';
+import {DISHES,TRINKETS} from './content-grove.js';
+import {curioArt} from './curio-art.js';
 import {INTERACTIVE_PROPS} from './content.js';
 
 // Colour returns to the house as the lantern grows: a soft saturation lift, none at all at the top level.
@@ -73,6 +74,15 @@ export function requestsMarkup(s,id,{t,n,button}){
    a.met?tell():`<small>${t('requestNotMet')}</small>`}</li>`;
  return `<h3 class="section-heading">${t('requestsTitle')} <small>${n(a.step)}/${n(a.total)}</small></h3><ul
    class="request-list">${done}${now}</ul>`;
+}
+// The curio cabinet: every small thing found in the house, with the empty shelves still to fill.
+export function curioMarkup(s,t,n){
+ const cell=id=>s.grove.trinkets.includes(id)?
+   `<div class="curio">${curioArt(id)}<small>${t('trinket-'+id)}</small></div>`:
+   `<div class="curio empty"><span aria-hidden="true">?</span><small>${t('curioEmpty')}</small></div>`;
+ const count=`${n(s.grove.trinkets.length)}/${n(TRINKETS.length)}`;
+ return `<h3 class="section-heading">${t('curioTitle')} <small>${count}</small></h3><p
+   class="sheet-intro">${t('curioIntro')}</p><div class="curio-grid">${TRINKETS.map(cell).join('')}</div>`;
 }
 // Letters left by residents whose requests are all done, kept in the journal.
 export function lettersMarkup(s,t){
