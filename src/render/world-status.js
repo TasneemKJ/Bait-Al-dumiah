@@ -17,5 +17,6 @@ export function visualStatus(w){
     selectedObject:objects.selected,story:storyProps.status(),teaActive:st.teaActive,tea:teaTable.status(),
       stitchActive:st.stitchActive,workCeilingVisible:house.workCeiling.visible,
     workArchVisible:courtyard.studioArch.visible,stitch:sewingPlay.status(),lanternLevel:lantern?.status.level,
+      season:w.seasons?.status.season,
       stitchGuides:stitchGuidePositions(),chimeActive:st.chimeActive,chimes:moonChimes.status()};
 }

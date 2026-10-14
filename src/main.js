@@ -18,6 +18,7 @@ import {installFeedback} from './app-feedback.js';
 import {installView} from './app-view.js';
 import {installCommands} from './app-commands.js';
 import {installLoop,installDebug} from './app-loop.js';
+import * as sim from './simulation.js';
 
 let storage;try{storage=localStorage}catch{}
 const session=createHomeSession({storage,reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches});
@@ -78,6 +79,8 @@ function buildViews(){
 
 installFeedback(app);installView(app);installCommands(app);
 buildViews();
+// The player's own year: the device calendar picks the courtyard's season.
+app.world?.setSeason?.(sim.seasonFor(new Date().getMonth()));
 app.film=createFilmUI(document.querySelector('#app'),{getState:()=>app.state,
  onState:active=>{app.filmActive=active;app.cancelWorkInput();app.syncPause();
   app.world?.setEnabled(!active&&!app.state.paused);},

@@ -82,6 +82,7 @@ export function createWorld(canvas,{onPick,onError}){
   ...picking,renderer,camera,scene,home,syncViewport,setTeaActive,setStitchActive,setChimeActive,
     setChimeSelection(index){st.chimeSelection=Number.isInteger(index)&&index>=0&&index<4?index:-1},
   welcomeBack(times){residents.greetAll(times)},flareLantern(){parts.lantern.flare()},
+  setSeason(season){parts.seasons.setSeason(season)},
     selectObject(key){return objects.select(key)},clearObjectSelection(){objects.clear()},objectAt,
     objectPositions(){return objects.project(camera,canvas.clientWidth,canvas.clientHeight)},
   getPortraits(){return portraitCache.getAll()},

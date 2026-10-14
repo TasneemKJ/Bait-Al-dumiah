@@ -41,3 +41,6 @@ export const ARCS={
  noor:[{id:'noor-mobile',bond:1},{id:'noor-chimes',bond:2},{id:'noor-lantern',bond:3}],
  sami:[{id:'sami-bear',bond:1},{id:'sami-sewing',bond:2},{id:'sami-door',bond:3}],
 };
+// The player's own year: the device calendar picks the season (months 0-11, the Levant's northern year).
+export const SEASONS=['winter','winter','spring','spring','spring','summer','summer','summer','autumn','autumn',
+  'autumn','winter'];
