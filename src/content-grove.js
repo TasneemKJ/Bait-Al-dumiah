@@ -55,3 +55,5 @@ export const SEASONS=['winter','winter','spring','spring','spring','summer','sum
 // Small things the house hides, one a day, for the curio cabinet. The order they turn up in is fixed.
 export const TRINKETS=['blue-marble','old-stamp','tiny-spoon','glass-button','lavender-sachet','paper-star',
   'copper-coin','seashell','hair-ribbon','olive-wood-bird','embroidered-patch','silver-bell'];
+// Personality chatter: one line a day per resident, in their own voice.
+export const CHATTER_LINES=5;

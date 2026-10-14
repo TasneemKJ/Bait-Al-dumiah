@@ -1,7 +1,7 @@
 // Relationship care beyond needs: daily hugs (and the comfort that follows). Pure rules, no DOM.
 import {clamp} from './sim-util.js';
 import {growBond} from './sim-core.js';
-import {DISHES,TASTES,TASTE_EFFECT,ARCS} from './content-grove.js';
+import {DISHES,TASTES,TASTE_EFFECT,ARCS,CHATTER_LINES} from './content-grove.js';
 import {bondLevel,isContent,isNight} from './sim-queries.js';
 import {noteErrand,lanternLevel} from './sim-grove.js';
 
@@ -79,3 +79,6 @@ export function tuckIn(s,id){
  noteErrand(s,'tuck',id);const hushed=houseHushed(s);if(hushed&&s.events.length<24)s.events.push({type:'house-hush'});
  return {ok:true,id,hushed};
 }
+// Today's line of chatter for a resident: fixed by the day spent in the house, different per resident.
+export const chatterFor=(s,id)=>{const i=s.dolls.findIndex(d=>d.id===id);if(i<0)return null;
+ return `${id}-${(careDay(s)+i*2)%CHATTER_LINES}`};

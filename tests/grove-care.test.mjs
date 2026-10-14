@@ -85,3 +85,11 @@ test('after dark each resident is tucked in once; all three hush the house once'
  assert.match(householdMarkup(s,{t,n:String,button,avatar:()=>'',selected:'lina'}),/data-action="tuck-in"/);
  for(const k of ['tuckIn','tuckedAlready','tuckNight','tucked','houseHush'])assert.match(strings.ar[k],/[؀-ۿ]/);
 });
+test('each resident has a line of chatter for the day, in their own voice, steady through the day',()=>{
+ const s=sim.createState(),a=sim.chatterFor(s,'lina');assert.notEqual(a,sim.chatterFor(s,'noor').replace('noor','lina'));
+ sim.changeLight(s);sim.changeLight(s);assert.equal(sim.chatterFor(s,'lina'),a,'hurried dawn keeps the line');
+ sim.changeLight(s);s.dayTime=999;sim.changeLight(s);assert.notEqual(sim.chatterFor(s,'lina'),a);
+ for(const id of ['lina','noor','sami'])for(let i=0;i<5;i++){const k=`chatter-${id}-${i}`;assert.ok(strings.en[k]);
+  assert.match(strings.ar[k],/[؀-ۿ]/)}
+ assert.match(householdMarkup(s,{t,n:String,button,avatar:()=>'',selected:'sami'}),/class="chatter"/);
+});

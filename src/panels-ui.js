@@ -5,7 +5,7 @@ import {DOLLS,ROOMS,CATALOG,SECRETS,ACTIONS,MILESTONES,DOOR_STEPS,GIFT_COST,VISI
 import {isNight,coziness,wishFor,wishReward,bondLevel,nextBond,isContent,contentThreshold,
   delighted,inFavoriteRoom,currentStreak,secretCozyNeeded,doorOpen,nextDoorStep,doorReady,
   canAfford,wishGranted,hasBasket,secretsLeft,giftReady,isNewestGift,slotTaken,restingNote,
-  huggedToday,moodOf,tuckedIn} from './simulation.js';
+  huggedToday,moodOf,tuckedIn,chatterFor} from './simulation.js';
 import {giftArt} from './gift-art.js';
 import {icon} from './icons.js';
 import {todayMarkup,heartsMarkup,tasteNotebook,requestsMarkup,lettersMarkup,
@@ -59,6 +59,7 @@ export function householdMarkup(s,{t,n,button,avatar,selected}){
      data-mood="${moodOf(s,d.id)}">${t('mood-'+moodOf(s,d.id))}</span><p>${t(d.id+'Bio')}</p></div>${button(
      'focus-doll',t('lookCloser'),'plus',
      `class="doll-inspect" data-id="${d.id}" aria-label="${t('lookCloser')} · ${t(d.id)}"`)}</div>
+   <p class="chatter">${t('chatter-'+chatterFor(s,d.id))}</p>
    <div class="bond-row"><div><span>${t('closeness')}</span>${heartsMarkup(level,t)}<strong
      >${t('bond'+level)}</strong></div><meter min="0" max="100" value="${d.bond}"
      aria-label="${t('closeness')}"></meter><small>${next===null?
