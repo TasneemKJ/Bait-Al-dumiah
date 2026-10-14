@@ -111,6 +111,9 @@
  .room-views,.night .room-views,.dock[data-expanded=false],.night .dock[data-expanded=false]{background:var(--edge-paper);border-radius:8px;box-shadow:0 2px 8px #38232518}
  .room-views button,.dock[data-expanded=false]>.tools-toggle{font-size:12px}
 }
+@media(min-height:561px) and (min-width:681px) and (max-width:1000px){
+ .room-views .room-long{display:none}.room-views .room-short{display:inline}
+}
 @media(max-width:680px) and (orientation:portrait){
  #ui:before{content:"";position:absolute;inset-inline:0;bottom:0;height:calc(122px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--edge-paper) 66%);border-block-end:3px solid #8d654b66;pointer-events:none}
  .brand{top:max(12px,env(safe-area-inset-top));inset-inline-start:14px}.brand>div{padding:2px 4px}.brand h1{font-size:20px}

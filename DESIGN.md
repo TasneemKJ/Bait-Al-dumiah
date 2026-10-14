@@ -106,3 +106,4 @@ The portrait film's final card places the game title and welcome line in the exi
 
 ### Desktop navigation readability — 2026-10-13
 The room strip and collapsed House tools should remain compact but readable over a furnished room closeup. On desktop viewports wider than 680px and taller than 560px, their labels use 12px type and an opaque miniature-paper backing (cream by day, plum at night), retaining the existing room underline and control targets. The phone edge treatment and film composition are unchanged. Native paired EN/AR day/night acceptance is required before marking this refinement complete.
+At 681–1000px desktop widths, use the existing localized short room labels so the strip stays one line beneath its icons; full room names remain in each button's accessible label and title. This retains 12px type and 44px targets instead of letting long labels create a three-line navigation block.
