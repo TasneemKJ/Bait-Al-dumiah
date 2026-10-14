@@ -1,6 +1,6 @@
 // The Today sheet: the day's small errands (and, as the house grows, the lantern that they feed).
-import {cookedToday,lanternWonders,errandDef,errandsReady,tomorrowErrand,daySettled,ERRAND_EMBERS,lanternLevel,
-  nextLantern} from './simulation.js';
+import {ARC_REWARD,arcStatus,cookedToday,lanternWonders,errandDef,errandsReady,tomorrowErrand,daySettled,
+  ERRAND_EMBERS,lanternLevel,nextLantern} from './simulation.js';
 import {icon} from './icons.js';
 import {DISHES} from './content-grove.js';
 
@@ -59,6 +59,18 @@ function kitchenMarkup(s,{t,n}){
    data-action="cook" data-id="${d.id}" class="dish" ${done||s.buttons<d.cost?'disabled':''}><strong
    >${t('dish-'+d.id)}</strong><small>${t('dish-'+d.id+'Text')}</small><em>${icon('button')}${n(d.cost)}</em></button>`)
    .join('')}</div>`;
+}
+// A resident's personal requests: the one they are asking now, and those already done for them.
+export function requestsMarkup(s,id,{t,n,button}){
+ const a=arcStatus(s,id);if(!a)return '';
+ const done=a.done.map(r=>`<li class="done">${icon('check')}<span>${t('request-'+r)}</span></li>`).join('');
+ const tell=()=>button('fulfil-request',t('requestTell').replace('{name}',t(id))+' · +'+n(ARC_REWARD(a.step)),null,
+   `class="primary" data-id="${id}"`);
+ const now=a.finished?'':!a.heard?`<li class="locked">${icon('moon')}<span>${t('requestLocked')} · ${
+   t('bond'+a.next.bond)}</span></li>`:`<li class="open">${icon('spark')}<span>${t('request-'+a.next.id)}</span>${
+   a.met?tell():`<small>${t('requestNotMet')}</small>`}</li>`;
+ return `<h3 class="section-heading">${t('requestsTitle')} <small>${n(a.step)}/${n(a.total)}</small></h3><ul
+   class="request-list">${done}${now}</ul>`;
 }
 // The taste notebook: what each resident has shown they love, like or would rather not eat.
 export function tasteNotebook(s,id,t){

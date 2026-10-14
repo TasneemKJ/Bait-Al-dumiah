@@ -35,3 +35,9 @@ export const TASTES={
 };
 export const TASTE_EFFECT={love:{hunger:30,comfort:15,bond:4},like:{hunger:25,comfort:6,bond:2},
   meh:{hunger:20,comfort:2,bond:0}};
+// Personal arcs: three small requests per resident, each heard at a closeness level and kept in order.
+export const ARCS={
+ lina:[{id:'lina-maamoul',bond:1},{id:'lina-musicbox',bond:2},{id:'lina-cups',bond:3}],
+ noor:[{id:'noor-mobile',bond:1},{id:'noor-chimes',bond:2},{id:'noor-lantern',bond:3}],
+ sami:[{id:'sami-bear',bond:1},{id:'sami-sewing',bond:2},{id:'sami-door',bond:3}],
+};

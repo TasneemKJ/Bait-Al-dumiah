@@ -73,3 +73,13 @@ html[lang=ar] .errand{font-size:14px}
 .taste-list .icon,.taste-list b{width:16px;height:16px;text-align:center;font-size:12px;color:#b59682}
 .taste-list li.love .icon{color:#b0607f;fill:currentColor}.taste-list li.like .icon{color:#6f9078}
 .taste-list li.unknown{color:var(--muted)}
+.request-list{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:8px}
+.request-list li{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:12px;line-height:1.6;padding:10px 12px;
+ border-radius:12px;background:#f6eadf}
+.request-list li>span{flex:1 1 180px;font-family:Georgia,serif}
+[dir=rtl] .request-list li>span{font-family:Tahoma,Arial,sans-serif}
+.request-list li>.icon{width:16px;height:16px;color:#c4a07a}
+.request-list li.done{background:#eef0e2}.request-list li.done>.icon{color:#6f9078}
+.request-list li.locked{color:var(--muted);background:transparent;border:1px dashed var(--line)}
+.request-list li>small{font-size:10px;color:var(--muted)}
+.request-list li>button{font-size:11px;padding:8px 12px;margin-inline-start:auto}

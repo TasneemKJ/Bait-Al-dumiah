@@ -1,8 +1,9 @@
 // Relationship care beyond needs: daily hugs (and the comfort that follows). Pure rules, no DOM.
 import {clamp} from './sim-util.js';
 import {growBond} from './sim-core.js';
-import {noteErrand} from './sim-grove.js';
-import {DISHES,TASTES,TASTE_EFFECT} from './content-grove.js';
+import {DISHES,TASTES,TASTE_EFFECT,ARCS} from './content-grove.js';
+import {bondLevel} from './sim-queries.js';
+import {noteErrand,lanternLevel} from './sim-grove.js';
 
 // Daily things count by the last day actually spent in the house (when errands last refreshed),
 // so hurrying dawn with the light control never resets them.
@@ -29,4 +30,28 @@ export function cook(s,dishId){
   (s.grove.tastes[d.id]??={})[dish.id]=taste;return {id:d.id,taste}});
  s.unease=clamp(s.unease-3);noteErrand(s,'cook',dish.id);
  return {ok:true,dish:dish.id,cost:dish.cost,reactions};
+}
+// Each request names something already true in the house; the player tells the resident it is done.
+const placed=(s,item,room)=>s.decor.some(d=>d.item===item&&d.room===room);
+const REQUEST_MET={
+ 'lina-maamoul':s=>Boolean(s.grove.tastes.lina?.maamoul),'lina-musicbox':s=>placed(s,'musicbox','parlor'),
+ 'lina-cups':s=>s.activities.mastery.tea>=3,'noor-mobile':s=>placed(s,'mobile','bedroom'),
+ 'noor-chimes':s=>s.activities.mastery.lullaby>=2,'noor-lantern':s=>lanternLevel(s)>=3,
+ 'sami-bear':s=>placed(s,'bear','kitchen'),'sami-sewing':s=>s.activities.mastery.stitch>=2,'sami-door':s=>s.door>=3,
+};
+export const ARC_REWARD=step=>10+5*step;
+export function arcStatus(s,id){
+ const arc=ARCS[id];if(!arc)return null;const step=integerStep(s.grove.arcs[id],arc.length),next=arc[step]??null;
+ const d=s.dolls.find(x=>x.id===id),heard=Boolean(next)&&bondLevel(d.bond)>=next.bond;
+ return {step,total:arc.length,next,heard,met:heard&&REQUEST_MET[next.id](s),done:arc.slice(0,step).map(r=>r.id),
+   finished:step>=arc.length};
+}
+const integerStep=(v,max)=>Number.isInteger(v)?Math.max(0,Math.min(max,v)):0;
+export function fulfilRequest(s,id){
+ const status=arcStatus(s,id);if(!status)return {ok:false,reason:'invalid'};
+ if(status.finished)return {ok:false,reason:'arcFinished'};if(!status.heard)return {ok:false,reason:'requestUnheard'};
+ if(!status.met)return {ok:false,reason:'requestNotMet'};
+ const reward=ARC_REWARD(status.step),d=s.dolls.find(x=>x.id===id);s.grove.arcs[id]=status.step+1;
+ s.buttons=Math.min(9999,s.buttons+reward);s.earnedToday=Math.min(99999,s.earnedToday+reward);growBond(s,d,5);
+ return {ok:true,id,request:status.next.id,reward,finished:status.step+1>=status.total};
 }

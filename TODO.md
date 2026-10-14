@@ -20,7 +20,7 @@ Plan and analysis: `docs/research/REFERENCE-GAMES-2026-10-14.md`; ledger: `docs/
 - [x] 16 (SF) Comfort food: cook one Levantine dish a day in the kitchen for the whole house
 - [x] 17 (SF) Taste notebook: each resident's discovered loves and dislikes
 - [x] 18 (SF) Dish aroma: warm steam and motes over the kitchen table after cooking
-- [ ] 19 (SF) Personal arcs: three small requests per resident, unlocked by closeness
+- [x] 19 (SF) Personal arcs: three small requests per resident, unlocked by closeness
 - [ ] 20 (SF) Ribbon ceremony: finishing an arc ties a ribbon and leaves a letter in the journal
 - [ ] 21 (SF) Kintsugi glow: a doll whose arc is complete wears a fine gold seam light
 - [ ] 22 (SF) Mood words on resident cards (cheerful, sleepy, peckish, wistful)

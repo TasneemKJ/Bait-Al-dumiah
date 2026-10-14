@@ -16,7 +16,7 @@ export function createState(){
   restoration:Object.fromEntries(ROOMS.map(r=>[r.id,0])),
   story:{chapter:0,step:0,lastAction:null,lastActionAt:-10},
   introSeen:false,
-  grove:{errandDay:0,errands:[],embers:0,warmth:0,hugs:{},dishDay:0,dish:null,dishAt:-99,tastes:{}},
+  grove:{errandDay:0,errands:[],embers:0,warmth:0,hugs:{},dishDay:0,dish:null,dishAt:-99,tastes:{},arcs:{}},
   settings:{locale:'en',muted:true,reducedMotion:false,quality:'auto',largeText:false}};
  rollErrands(s);return s;
 }

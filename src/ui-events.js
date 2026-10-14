@@ -2,7 +2,7 @@
 // operations that touch its own state; everything else is forwarded to dispatch.
 const IDS=['focus-doll','begin-activity','restore-room','hug','cook'];
 const NUMBERS=['use-object','rotate-object','move-object','pack-object','remove'];
-const COLLECT=['claim','collect-basket','mend-door','gift','collect-errand','tend-lantern'];
+const COLLECT=['claim','collect-basket','mend-door','gift','collect-errand','tend-lantern','fulfil-request'];
 
 export function createUIEvents(host,ctx){
  const {dispatch}=ctx;
