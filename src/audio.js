@@ -130,6 +130,8 @@ export class DollhouseAudio{
    }
    return;
   }
+  if(kind==='lantern'){const now=this.context.currentTime;this.track(playClothTouch(this.context,this.master,now));
+   [[293.665,.06],[440,.22],[587.33,.4]].forEach(([f,d])=>this.tone(f,now+d,1.6,.03,'sine',.05));return}
   if(kind==='mint-tin')return this.track(playTinTouch(this.context,this.master,this.context.currentTime));
   if(kind==='moon-bed')return this.track(playClothTouch(this.context,this.master,this.context.currentTime));
   const t=this.context.currentTime,notes=kind==='secret'?[293.665,311.127,

@@ -9,7 +9,9 @@ export const groveCommands={
   },
 'tend-lantern':app=>{
    const result=sim.tendLantern(app.state);
-   if(result.ok){app.say(app.ui.t('lanternTended'));app.audio.effect('secret');app.save();app.ui.tick()}
+   // The sheet folds away so the player sees the flame take the embers.
+   if(result.ok){app.ui.close();app.world?.flareLantern();app.say(app.ui.t('lanternTended'));
+   app.audio.effect('lantern');app.save();app.ui.tick()}
    else app.say(app.ui.t(result.reason));
   },
 };

@@ -25,6 +25,10 @@ function createMotes(parent){
    opacity:.8,depthWrite:false,blending:T.AdditiveBlending}));motes.name='returning-motes';parent.add(motes);
  return motes;
 }
+// A tend flares the flame for a moment and sends sparks up; age in seconds, 0..1 strength out.
+export const FLARE_SECONDS=1.6;
+export const flareStrength=age=>Number.isFinite(age)&&age>=0&&age<FLARE_SECONDS?
+  Math.sin(Math.min(1,age/.18)*Math.PI/2)*(1-age/FLARE_SECONDS):0;
 // A brass fanous standing on the courtyard tiles, mirroring the fountain. Touching it opens Today.
 export function createLantern(parent){
  const root=new T.Group();root.name='courtyard-lantern';root.position.set(3.4,-.17,2.95);
@@ -45,13 +49,23 @@ export function createLantern(parent){
  const pool=createLampPool(root,0,0,.75,{y:.012,name:'lantern-pool'});
  const hit=new T.Mesh(new T.BoxGeometry(.5,.9,.5),new T.MeshBasicMaterial({visible:false}));
  hit.position.y=.38;hit.userData={lantern:true};root.add(hit);
- const motes=createMotes(parent),status={level:-1,motes:0};
- return {root,hit,status,update(state,night){
+ const motes=createMotes(parent),status={level:-1,motes:0,flare:0};
+ const sparks=new T.Points(new T.BufferGeometry().setAttribute('position',new T.BufferAttribute(new Float32Array(
+   Array.from({length:12},(_,i)=>[Math.sin(i*2.4)*.07,.3+i*.035,Math.cos(i*2.4)*.07]).flat()),3)),
+   new T.PointsMaterial({map:softTexture(),color:0xffc978,size:.05,transparent:true,opacity:0,depthWrite:false,
+   blending:T.AdditiveBlending}));sparks.name='lantern-sparks';sparks.visible=false;root.add(sparks);
+ let flareAt=-Infinity,pendingFlare=false;
+ return {root,hit,status,flare(){pendingFlare=true},update(state,night){
   const level=lanternLevel(state),still=state.settings.reducedMotion||state.paused;
   const look=lanternLook(level,night,state.elapsed,still);status.level=level;
-  flame.visible=look.flame>0;flame.scale.set(.09*look.flame,.15*look.flame,1);
+  if(pendingFlare){pendingFlare=false;flareAt=state.elapsed}
+  // Reduced motion keeps the brighter flame but never the rising sparks.
+  const flare=flareStrength(state.elapsed-flareAt);status.flare=flare;
+  sparks.visible=flare>0&&!still;sparks.material.opacity=flare;sparks.position.y=(1-flare)*.35;
+  const boost=1+.8*flare;
+  flame.visible=look.flame>0;flame.scale.set(.09*look.flame*boost,.15*look.flame*boost,1);
   glass.material.emissiveIntensity=look.glass;
-  glow.visible=look.glow>0;glow.material.opacity=look.glow;glow.scale.setScalar(look.glowSize);
+  glow.visible=look.glow>0;glow.material.opacity=Math.min(.9,look.glow*boost);glow.scale.setScalar(look.glowSize*boost);
   pool.visible=look.pool>0;pool.material.opacity=look.pool;
   const count=moteCount(level,night);status.motes=count;motes.visible=count>0;motes.geometry.setDrawRange(0,count);
   motes.material.opacity=.8*Math.min(1,(night-.3)/.4);

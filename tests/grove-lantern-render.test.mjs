@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import * as T from 'three';
 import {createState} from '../src/simulation.js';
-import {lanternLook,createLantern,moteCount,MAX_MOTES} from '../src/render/lantern.js';
+import {lanternLook,createLantern,moteCount,MAX_MOTES,flareStrength,FLARE_SECONDS} from '../src/render/lantern.js';
 import {textureCanvas} from './helpers/render-node.mjs';
 
 test('a cold wick shows no flame; each level is brighter and wider, and stronger after dark',()=>{
@@ -35,4 +35,15 @@ test('the scene draws only the motes the lantern has earned and keeps them still
  s.settings.reducedMotion=true;s.elapsed=40;lantern.update(s,1);const p=motes.position.clone();
  s.elapsed=90;lantern.update(s,1);assert.ok(motes.position.equals(p));
  lantern.update(s,0);assert.equal(motes.visible,false);
+});
+test('tending flares the flame and sends sparks up, briefly; reduced motion keeps only the flare',t=>{
+ assert.equal(flareStrength(-1),0);assert.equal(flareStrength(FLARE_SECONDS),0);assert.ok(flareStrength(.2)>flareStrength(1.2));
+ textureCanvas(t);const parent=new T.Group(),lantern=createLantern(parent),s=createState();s.grove.warmth=8;s.elapsed=10;
+ lantern.update(s,1);assert.equal(lantern.status.flare,0);lantern.flare();s.elapsed=10.2;lantern.update(s,1);
+ s.elapsed=10.4;lantern.update(s,1);assert.ok(lantern.status.flare>0);
+ const sparks=parent.getObjectByName('lantern-sparks');assert.equal(sparks.visible,true);
+ s.settings.reducedMotion=true;lantern.update(s,1);assert.equal(sparks.visible,false);assert.ok(lantern.status.flare>0);
+ s.elapsed=20;lantern.update(s,1);assert.equal(lantern.status.flare,0);
+ const cmd=readFileSync(new URL('../src/cmd-grove.js',import.meta.url),'utf8');assert.match(cmd,/flareLantern\(\)/);
+ assert.match(readFileSync(new URL('../src/audio.js',import.meta.url),'utf8'),/kind==='lantern'/);
 });
