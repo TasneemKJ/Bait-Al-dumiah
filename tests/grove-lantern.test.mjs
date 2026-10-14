@@ -40,3 +40,13 @@ test('a house saved before the lantern starts warm; a fresh one starts cold',()=
  assert.equal(sim.lanternLevel(sim.restore(JSON.stringify(sim.createState()))),0);
  raw.grove={warmth:1};assert.equal(sim.restore(JSON.stringify(raw)).grove.warmth,1,'a saved lantern is kept as it was');
 });
+import {LANTERN_WONDERS} from '../src/content-grove.js';
+test('each lantern level brings back one named wonder, shown as reached in Today',()=>{
+ const s=sim.createState(),t=k=>strings.en[k]??k,button=()=>'';assert.equal(LANTERN_WONDERS.length,LANTERN_LEVELS.length-1);
+ assert.ok(sim.lanternWonders(s).every(w=>!w.reached));s.grove.warmth=LANTERN_LEVELS[3];
+ assert.deepEqual(sim.lanternWonders(s).map(w=>w.reached),[true,true,true,false,false]);
+ const html=todayMarkup(s,{t,n:String,button});assert.equal((html.match(/<li class="reached"/g)||[]).length,3);
+ for(const id of LANTERN_WONDERS){assert.ok(strings.en['wonder-'+id]);assert.match(strings.ar['wonder-'+id],/[؀-ۿ]/)}
+ const src=f=>readFileSync(new URL('../src/render/'+f,import.meta.url),'utf8');
+ assert.match(src('ornaments.js'),/lantern>=3/);assert.match(src('atmosphere.js'),/lanternLevel\(state\)>=4/);
+});

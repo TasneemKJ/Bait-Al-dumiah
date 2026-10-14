@@ -1,5 +1,5 @@
 // Daily errands and the courtyard lantern: small, capped, explicitly collected. Pure rules, no DOM.
-import {ERRANDS,ERRANDS_PER_DAY,LANTERN_LEVELS,FIRST_DAY_ERRANDS} from './content-grove.js';
+import {ERRANDS,ERRANDS_PER_DAY,LANTERN_LEVELS,FIRST_DAY_ERRANDS,LANTERN_WONDERS} from './content-grove.js';
 import {SECRETS,DOOR_STEPS} from './content.js';
 // Events are transient notices, capped like every other house event.
 const emit=(s,event)=>{if(s.events.length<24)s.events.push(event)};
@@ -52,3 +52,5 @@ export function tendLantern(s){
  if(level>before)emit(s,{type:'lantern',level});
  return {ok:true,added,level,grew:level>before};
 }
+export const lanternWonders=s=>{const level=lanternLevel(s);
+ return LANTERN_WONDERS.map((id,i)=>({id,level:i+1,reached:level>=i+1}))};

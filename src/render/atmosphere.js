@@ -1,6 +1,7 @@
 import * as T from 'three';
 import {softTexture} from './textiles.js';
 import {nightSky,duskGlow} from './visual-policy.js';
+import {lanternLevel} from '../simulation.js';
 const vertex=`varying vec2 vUv; void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`;
 const fragment=`varying vec2 vUv; uniform float night; uniform float dusk; 
  uniform vec3 nightBottom; uniform vec3 nightTop; uniform vec3 nightGlow;
@@ -43,7 +44,8 @@ export function createAtmosphere(scene){
    blending:T.AdditiveBlending}));m.name='lantern-firefly';m.scale.set(.07,.07,1);scene.add(m);moths.push(m)}
  return {update(state,mix,level='high'){
   backdrop.material.uniforms.night.value=mix;backdrop.material.uniforms.dusk.value=duskGlow(state.clock);
-  stars.material.opacity=mix*.78;moon.visible=mix>.05;moon.scale.setScalar(.9);
+  const wonder=lanternLevel(state)>=4;stars.material.opacity=mix*(wonder?1:.78);stars.material.size=wonder?.17:.13;
+  moon.visible=mix>.05;moon.scale.setScalar(.9);
   const still=state.settings.reducedMotion||state.paused,t=state.elapsed;dust.visible=!state.settings.reducedMotion;
   if(!still){dust.rotation.y=t*.007;dust.position.y=Math.sin(t*.12)*.09}
   moths.forEach((m,i)=>{m.visible=mix>.5&&!state.settings.reducedMotion&&i<(level==='low'?

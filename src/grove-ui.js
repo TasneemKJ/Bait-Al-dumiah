@@ -1,5 +1,6 @@
 // The Today sheet: the day's small errands (and, as the house grows, the lantern that they feed).
-import {errandDef,errandsReady,tomorrowErrand,daySettled,ERRAND_EMBERS,lanternLevel,nextLantern} from './simulation.js';
+import {lanternWonders,errandDef,errandsReady,tomorrowErrand,daySettled,ERRAND_EMBERS,lanternLevel,
+  nextLantern} from './simulation.js';
 import {icon} from './icons.js';
 
 // Colour returns to the house as the lantern grows: a soft saturation lift, none at all at the top level.
@@ -33,7 +34,9 @@ function lanternCard(s,{t,n,button}){
  return `<section class="lantern-card" data-level="${level}"><span class="lantern-art"
    aria-hidden="true"><i></i></span><div><strong>${t('lanternTitle')}</strong><small>${t('lantern'+level)}</small><meter
    min="0" max="${next??warmth}" value="${warmth}" aria-label="${t('lanternWarmth')}"></meter><small
-   >${progress}</small></div>${tend}</section>`;
+   >${progress}</small></div>${tend}</section><ol class="lantern-wonders" aria-label="${t('wondersLabel')}">${
+   lanternWonders(s).map(w=>`<li class="${w.reached?'reached':''}">${icon(w.reached?'check':'spark')}<span
+   >${t('wonder-'+w.id)}</span></li>`).join('')}</ol>`;
 }
 // The day's close: once every errand is collected, the sheet settles the day and peeks at tomorrow.
 function settledCard(s,t){

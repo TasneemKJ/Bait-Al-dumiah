@@ -23,3 +23,5 @@ export const ERRANDS_PER_DAY=3;
 export const FIRST_DAY_ERRANDS=['care-lina','place','ritual-tea'];
 // The courtyard lantern: total warmth needed for each level (0 is a cold wick, 5 lights the whole lane).
 export const LANTERN_LEVELS=[0,3,8,15,24,36];
+// What each lantern level brings back to the house, in order from level 1.
+export const LANTERN_WONDERS=['flame','colour','garland','stars','lane'];

@@ -135,7 +135,7 @@ export function createCraftDetails(parent){
   }
  }
  batch(root);
- return {update(mix){bulb.emissiveIntensity=1.2+mix*2.1;
+ return {update(mix,lantern=0){bulb.emissiveIntensity=1.2+mix*2.1+(lantern>=3?.25+.55*mix:0);
  for(const h of halos){h.s.material.opacity=h.opacity*(.3+mix*.7)}},root};
 }
 

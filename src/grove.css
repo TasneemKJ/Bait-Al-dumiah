@@ -45,3 +45,8 @@ html[lang=ar] .errand{font-size:14px}
 [dir=rtl] .day-settled strong{font-family:Tahoma,Arial,sans-serif}
 .day-settled p{font-size:12px;line-height:1.7;margin:4px 0;color:#e6d2c6}
 .day-settled small{font-size:11px;color:#efcf98}
+.lantern-wonders{list-style:none;margin:-4px 0 16px;padding:0 4px;display:grid;gap:6px}
+.lantern-wonders li{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);opacity:.7}
+.lantern-wonders li .icon{width:14px;height:14px;color:#c4a07a}
+.lantern-wonders li.reached{opacity:1;color:var(--ink)}
+.lantern-wonders li.reached .icon{color:#6f9078}
