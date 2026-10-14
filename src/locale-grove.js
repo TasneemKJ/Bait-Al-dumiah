@@ -3,7 +3,8 @@
 export default {
  en:{
   today:'Today',todayIntro:'Three small errands for today. Do them in the house, then come back here.',
-  errandOpen:'Not yet',errandDoneMark:'Done',
+  errandOpen:'Not yet',objectiveErrand:'An errand is done. Collect its ember in Today.',
+  objectiveTend:'Embers are waiting. Tend the courtyard lantern.',errandDoneMark:'Done',
   errandDone:'Errand done: {name}. It waits in Today.',
   embers:'Lantern embers',lanternTitle:'The courtyard lantern',lanternWarmth:'Warmth',tend:'Tend',
   lanternTended:'The embers settle into the lantern.',noEmbers:'No embers yet. Collect a finished errand first.',
@@ -22,7 +23,8 @@ export default {
  },
  ar:{
   today:'اليوم',todayIntro:'تلات مشاوير صغار لليوم. اعملهن بالبيت، وبعدين ارجع لهون.',
-  errandOpen:'لسّا',errandDoneMark:'خلص',
+  errandOpen:'لسّا',objectiveErrand:'خلص مشوار. استلم جمرته من اليوم.',
+  objectiveTend:'في جمرات ناطرة. غذّي فانوس الحوش.',errandDoneMark:'خلص',
   errandDone:'خلص المشوار: {name}. ناطرك باليوم.',
   embers:'جمرات الفانوس',lanternTitle:'فانوس الحوش',lanternWarmth:'الدفا',tend:'غذّي',
   lanternTended:'الجمرات قعدت بقلب الفانوس.',noEmbers:'لسّا ما في جمرات. استلم مشوار خالص أوّل.',

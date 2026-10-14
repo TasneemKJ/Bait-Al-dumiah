@@ -3,7 +3,7 @@ import {daySweepDegrees} from './readouts.js';
 import {isNight,coziness,unclaimed,storyStatus,hasBasket,visitorWaiting} from './simulation.js';
 import {updateActivityStatus} from './activities-ui.js';
 import {icon} from './icons.js';
-import {syncHouseColour} from './grove-ui.js';
+import {syncHouseColour,todayNews} from './grove-ui.js';
 
 // HTML serialization expands self-closing SVG tags; compare authored content.
 const authoredMarkup=new WeakMap();
@@ -43,6 +43,9 @@ export function syncHud(host,s,{t,n,panel,placement,selected}){
  host.querySelector('.visitor-hint').hidden=!visitorWaiting(s)||Boolean(placement);
  host.querySelector('.dock [data-action="panel-household"]')?.classList.toggle('has-news',hasBasket(s));
  host.querySelector('.dock [data-action="panel-journal"]')?.classList.toggle('has-news',unclaimed(s).length>0);
+ // The folded House Tools carries Today's dot, since the daily visit starts there.
+ const today=todayNews(s);host.querySelector('.dock [data-action="panel-today"]')?.classList.toggle('has-news',today);
+ host.querySelector('.dock .tools-toggle')?.classList.toggle('has-news',today);
  host.querySelector('.pause-overlay').hidden=!s.paused||Boolean(panel);
  const pauseButton=host.querySelector('.dock [data-action="pause"]'),pauseLabel=t(s.paused?'resume':'pause');
  if(pauseButton.getAttribute('aria-pressed')!==String(s.paused)||pauseButton.title!==pauseLabel){

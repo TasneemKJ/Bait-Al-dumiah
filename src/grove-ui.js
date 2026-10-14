@@ -1,5 +1,5 @@
 // The Today sheet: the day's small errands (and, as the house grows, the lantern that they feed).
-import {errandDef,ERRAND_EMBERS,lanternLevel,nextLantern} from './simulation.js';
+import {errandDef,errandsReady,ERRAND_EMBERS,lanternLevel,nextLantern} from './simulation.js';
 import {icon} from './icons.js';
 
 // Colour returns to the house as the lantern grows: a soft saturation lift, none at all at the top level.
@@ -8,6 +8,14 @@ export const houseColour=level=>{const l=Math.max(0,Math.min(5,Number.isFinite(l
 export function syncHouseColour(root,s){
  const value=houseColour(lanternLevel(s)),text=value>=1?'none':`saturate(${value})`;
  if(root.style.getPropertyValue('--house-colour')!==text)root.style.setProperty('--house-colour',text);
+}
+// Today has news when an errand waits to be collected or embers wait for the lantern.
+export const todayNews=s=>errandsReady(s)>0||s.grove.embers>0;
+// The clue's hand-off to Today: collect first, then tend.
+export function todayStep(s,t){
+ if(errandsReady(s))return {copy:t('objectiveErrand'),label:t('collect'),ico:'lamp',action:'panel',value:'today'};
+ if(s.grove.embers>0)return {copy:t('objectiveTend'),label:t('tend'),ico:'lamp',action:'panel',value:'today'};
+ return null;
 }
 function errandRow(item,{t,n,button}){
  const e=errandDef(item.id),state=item.done?'done':'open';

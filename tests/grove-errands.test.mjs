@@ -61,3 +61,14 @@ test('day one teaches the house through fixed errands that its opening already p
  const later=sim.createState();later.day=2;later.dayTime=999;sim.changeLight(later);sim.changeLight(later);
  assert.notDeepEqual(ids(later),FIRST_DAY_ERRANDS,'later days draw from the pool');
 });
+import {nextStep} from '../src/objective-ui.js';
+import {todayNews} from '../src/grove-ui.js';
+test('a ready errand or held embers mark Today and the clue hands off to it after the wishes',()=>{
+ const s=sim.createState(),t=k=>strings.en[k]??k;s.story.chapter=3;
+ for(const d of s.dolls)s.wishes.push(d.id);assert.equal(todayNews(s),false);
+ s.grove.errands[0].done=true;assert.equal(todayNews(s),true);
+ let step=nextStep(s,t,String,'');assert.equal(step.value,'today');assert.equal(step.copy,strings.en.objectiveErrand);
+ sim.collectErrand(s,s.grove.errands[0].id);step=nextStep(s,t,String,'');assert.equal(step.copy,strings.en.objectiveTend);
+ sim.tendLantern(s);assert.equal(todayNews(s),false);assert.notEqual(nextStep(s,t,String,'').value,'today');
+ s.wishes=[];assert.equal(nextStep(s,t,String,'').action,'care','wishes still come first');
+});

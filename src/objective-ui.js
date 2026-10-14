@@ -3,6 +3,7 @@ import {isNight,coziness,wishFor,unclaimed,secretCozyNeeded,doorOpen,nextDoorSte
   doorReady,restorationReady,canAfford,wishGranted,hasBasket,secretsLeft,giftReady} from './simulation.js';
 import {storyObjective} from './story-ui.js';
 import {wishKey,actionIcon} from './panels-ui.js';
+import {todayStep} from './grove-ui.js';
 
 // One suggested next step: wishes, first keepsake, rewards to collect, then the night's whisper.
 export function nextStep(s,t,n,focusRoom){
@@ -11,6 +12,7 @@ export function nextStep(s,t,n,focusRoom){
  if(wish){const action=wishFor(s,wish.id);
  return {copy:t(wishKey(wish.id,action)),label:t(action),ico:actionIcon[action],
    action:'care',value:{id:wish.id,action}}}
+ const today=todayStep(s,t);if(today)return today;
  if(!s.decor.length)return {copy:t('objectiveDecorate'),label:t('decorate'),ico:'leaf',action:'panel',value:'decorate'};
  const readyRoom=ROOMS.find(r=>{const next=restorationReady(s,r.id);return next.ready&&canAfford(s,next.cost)});
  if(readyRoom)return {copy:t('restorationObjective'),label:t('restoreAction'),ico:'home',action:'panel',
