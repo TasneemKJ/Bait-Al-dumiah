@@ -67,3 +67,8 @@ export function tendLantern(s){
 export const lanternWonders=s=>{const level=lanternLevel(s);
  return LANTERN_WONDERS.map((id,i)=>({id,level:i+1,reached:level>=i+1}))};
 export const seasonFor=month=>SEASONS[Number.isInteger(month)&&month>=0&&month<12?month:0];
+// Weather by day: about one fresh day in four brings soft rain, never on the first day or in summer.
+export function rainyDay(s){
+ const day=s.grove.errandDay;if(day<=1||[5,6,7].includes(s.grove.month))return false;
+ return mix(day,7)%4===0;
+}

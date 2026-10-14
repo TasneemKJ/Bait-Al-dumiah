@@ -8,7 +8,7 @@ import {applyLighting} from './world-lighting.js';
 // mutable view state.
 export function renderFrame(w,state,dt,selected){
  const {st,canvas,renderer,scene,camera,controls,depthFog,hemi,key,fill,house,residents,
-   ghost,courtyard,lantern,supper,seasons,details,atmosphere,roomEffects,roomFrame,
+   ghost,courtyard,lantern,supper,seasons,weather,details,atmosphere,roomEffects,roomFrame,
    preview,restoration,objects,storyProps,teaTable,sewingPlay,moonChimes,decorSync,slots,
      cameraMove,working,setWorkActivity,resize,focusPose}=w;
  if(st.disposed||st.lost)return;st.reducedMotion=state.settings.reducedMotion;
@@ -35,7 +35,7 @@ export function renderFrame(w,state,dt,selected){
  applyLighting({renderer,depthFog,hemi,key,fill,house,courtyard},{state,
    nightMix:st.nightMix,focusedRoom:st.focusedRoom,lampFocus:st.lampFocus});
  details.update(st.nightMix,lantern.status.level);lantern.update(state,st.nightMix);supper.update(state);
- seasons.update(state,st.nightMix);
+ seasons.update(state,st.nightMix);weather.update(state,st.nightMix);
  atmosphere.update(state,st.nightMix,st.quality);
  roomEffects.update(state,st.nightMix);restoration.update(state,st.nightMix);
  storyProps.update(state,st.nightMix);teaTable.update(state);sewingPlay.update(state);

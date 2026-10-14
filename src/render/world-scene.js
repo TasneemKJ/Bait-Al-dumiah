@@ -20,6 +20,7 @@ import {createAtmosphere} from './atmosphere.js';
 import {createLantern} from './lantern.js';
 import {createSupper} from './supper.js';
 import {createSeasons} from './seasons.js';
+import {createWeather} from './weather.js';
 
 // Builds the Three.js scene graph: renderer, camera, controls, lights, house, residents and every prop layer.
 export function buildScene(canvas){
@@ -44,7 +45,7 @@ export function buildScene(canvas){
  floor.position.y=-.70;floor.receiveShadow=true;scene.add(floor);
  const house=createHouse(scene), residents=createDolls(house.root),ghost=createGhost(house.root);
  const courtyard=createLevantineSetting(house.root),lantern=createLantern(house.root),
-   supper=createSupper(house.root),seasons=createSeasons(house.root);
+   supper=createSupper(house.root),seasons=createSeasons(house.root),weather=createWeather(house.root);
  const portraitCache=createPortraitCache(residents,doll=>renderPortrait(renderer,doll));
  createKeepsakeDetails(house.root);const details=createCraftDetails(house.root);createGarden(house.root);
  const atmosphere=createAtmosphere(scene),roomEffects=createRoomEffects(house.root),
@@ -55,7 +56,7 @@ export function buildScene(canvas){
    teaTable=createTeaTable(house.root),sewingPlay=createSewingPlay(house.root),moonChimes=createMoonChimes(house.root);
  const decorSync=createDecorSync(house.root),slots=createSlotMarkers(house.root);
  return {renderer,scene,camera,depthFog,controls,hemi,key,fill,house,residents,ghost,
-   courtyard,lantern,supper,seasons,portraitCache,details,atmosphere,
+   courtyard,lantern,supper,seasons,weather,portraitCache,details,atmosphere,
    roomEffects,roomFrame,preview,restoration,objects,storyProps,teaTable,sewingPlay,moonChimes,decorSync,slots};
 }
 

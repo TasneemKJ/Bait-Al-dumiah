@@ -1,6 +1,6 @@
 // The Today sheet: the day's small errands (and, as the house grows, the lantern that they feed).
 import {letters,ARC_REWARD,arcStatus,cookedToday,lanternWonders,errandDef,errandsReady,tomorrowErrand,daySettled,
-  errandEmbers,currentEvent,lanternLevel,nextLantern} from './simulation.js';
+  errandEmbers,currentEvent,rainyDay,lanternLevel,nextLantern} from './simulation.js';
 import {icon} from './icons.js';
 import {DISHES} from './content-grove.js';
 
@@ -89,9 +89,10 @@ export function tasteNotebook(s,id,t){
 }
 // A seasonal event from the player's own calendar, with its extra errand in the list below.
 function eventCard(s,t){
- const event=currentEvent(s);if(!event)return '';
+ const rain=rainyDay(s)?`<p class="weather-note"><b aria-hidden="true">☂</b><span>${t('rainToday')}</span></p>`:'';
+ const event=currentEvent(s);if(!event)return rain;
  return `<section class="event-card" data-event="${event}"><strong>${t('event-'+event)}</strong><p
-   >${t('event-'+event+'Text')}</p></section>`;
+   >${t('event-'+event+'Text')}</p></section>${rain}`;
 }
 export function todayMarkup(s,c){
  const {t,n}=c;

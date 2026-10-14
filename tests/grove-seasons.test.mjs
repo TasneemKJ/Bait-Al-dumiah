@@ -35,3 +35,16 @@ test('each season casts a soft tint on the daytime sky only; unknown seasons sta
  assert.match(sky.material.fragmentShader,/smoothstep\(0\.,\.7,vUv\.y\)\)\*tint/,'only the day gradient is tinted');
  assert.match(readFileSync(new URL('../src/render/world.js',import.meta.url),'utf8'),/parts\.atmosphere\.setSeason\(season\)/);
 });
+import {createWeather,streak} from '../src/render/weather.js';
+import {todayMarkup} from '../src/grove-ui.js';
+import {strings} from '../src/i18n.js';
+test('soft rain falls on about one fresh day in four, never on day one or in summer, and stills with reduced motion',t=>{
+ const s=sim.createState();assert.equal(sim.rainyDay(s),false);let rainy=0;
+ for(let d=2;d<202;d++){s.grove.errandDay=d;if(sim.rainyDay(s))rainy++}assert.ok(rainy>25&&rainy<80,String(rainy));
+ s.grove.month=6;assert.equal(Array.from({length:50},(_,d)=>{s.grove.errandDay=d+2;return sim.rainyDay(s)}).some(Boolean),false);
+ assert.deepEqual(streak(4,0,true),streak(4,50,true));assert.notDeepEqual(streak(4,0,false),streak(4,.3,false));
+ textureCanvas(t);const parent=new T.Group(),weather=createWeather(parent);s.grove.month=9;
+ let day=2;while(!(s.grove.errandDay=day,sim.rainyDay(s)))day++;weather.update(s,0);assert.equal(weather.status.rain,true);
+ assert.match(todayMarkup(s,{t:k=>strings.en[k]??k,n:String,button:()=>''}),/weather-note/);
+ assert.match(strings.ar.rainToday,/[؀-ۿ]/);s.grove.errandDay=1;weather.update(s,0);assert.equal(weather.rain.visible,false);
+});
