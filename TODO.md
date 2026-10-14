@@ -2,6 +2,9 @@
 
 ## Reference-games pass — 2026-10-14
 Plan and analysis: `docs/research/REFERENCE-GAMES-2026-10-14.md`; ledger: `docs/research/ITERATIONS-40.md`.
+- [ ] Native acceptance of the forty: EN/AR phone play with touch at 360x640, 412x915 and 844x390, 4x CPU timing, listening to the hug, lantern and rain sounds. Source tests, build and 390x844 SwiftShader screenshots pass; `play_check.py` times out at its first desktop capture in this container (base commit fde61dd fails the same way).
+- [ ] Native Arabic review of the new Levantine copy in `src/locale-grove.js` (`docs/NATIVE-REVIEW.md`).
+- [ ] Atmosphere's existing stars and dust use world-unit point sizes, which render sub-pixel under the orthographic camera (found while sizing the new sprites); decide whether to resize them.
 - [x] 01 (CG) Today sheet with three daily errands drawn from real house actions, refreshed only after a day actually spent
 - [x] 02 (CG) Collect a finished errand for lantern embers (explicit collect, never automatic)
 - [x] 03 (CG) Tend the courtyard lantern: spend embers, five warmth levels

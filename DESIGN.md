@@ -35,6 +35,9 @@ Crossing: New Horizons; mechanisms only). What the player meets:
 
 All of it follows the rules: explicit collection, no decay, reduced motion keeps effects still, sound only after
 a gesture, English and Arabic for every line.
+New state lives in one `grove` record (`src/sim-grove.js`, `sim-care.js`, `sim-finds.js`, restored by
+`save-grove.js`); the device calendar is read only in `main.js` and handed to the house as data. Point sprites
+are sized in screen pixels because the house camera is orthographic.
 
 ## Visual language
 Soft porcelain and cream paper, rose, mint and gold accents, terracotta roof, warm interior light by day, cool moonlight with practical lamps at night. Serif display type for titles and story text, folded cream paper with a red-thread edge, restrained brass hairlines and a warm presentation plinth. Procedural meshes and canvas textures only.
