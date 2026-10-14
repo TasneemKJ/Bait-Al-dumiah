@@ -22,7 +22,11 @@ export const groveCommands={
 'fulfil-request':(app,value)=>{
    const result=sim.fulfilRequest(app.state,value);
    if(result.ok){app.say(app.ui.t('requestThanks').replace('{name}',app.ui.t(value))+` +${app.ui.n(result.reward)} `+
-   app.ui.t('buttons'));app.audio.effect('secret');app.save();app.ui.tick()}else app.say(app.ui.t(result.reason));
+   app.ui.t('buttons'));app.audio.effect('secret');app.save();app.ui.tick();
+   // The last request is a small ceremony: the camera goes to the resident and the ribbon is announced.
+   if(result.finished){app.dispatch('focus-doll',value);
+    app.say(app.ui.t('ribbonTied').replace('{name}',app.ui.t(value)))}
+   }else app.say(app.ui.t(result.reason));
   },
 'tend-lantern':app=>{
    const result=sim.tendLantern(app.state);

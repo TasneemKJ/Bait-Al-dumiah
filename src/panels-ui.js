@@ -8,7 +8,7 @@ import {isNight,coziness,wishFor,wishReward,bondLevel,nextBond,isContent,content
   huggedToday} from './simulation.js';
 import {giftArt} from './gift-art.js';
 import {icon} from './icons.js';
-import {todayMarkup,heartsMarkup,tasteNotebook,requestsMarkup} from './grove-ui.js';
+import {todayMarkup,heartsMarkup,tasteNotebook,requestsMarkup,lettersMarkup} from './grove-ui.js';
 export const actionIcon={tea:'tea',play:'play',rest:'rest',soothe:'heart'};
 export const wishKey=(id,action)=>DOLLS.find(d=>d.id===id).wish===action?id+'Wish':id+'Wish_'+action;
 
@@ -124,7 +124,7 @@ export function journalMarkup(s,{t,n,button}){
     'class="primary wide"'):`<p class="ending-note">${t('complete')}</p>`}${isNight(s)&&
       secretsLeft(s)&&coziness(s)<secretCozyNeeded(s)?
     `<p class="shy-note">${t('shyNeed')} ${n(secretCozyNeeded(s))}% · ${t('cozy')} ${n(coziness(s))}%</p>`:''}
-   ${storyMemoriesMarkup(s,t)}${doorMarkup(s,{t,n,button})}
+   ${lettersMarkup(s,t)}${storyMemoriesMarkup(s,t)}${doorMarkup(s,{t,n,button})}
    <h3 class="section-heading">${t('milestones')} <small
      >${n(s.milestones.length)}/${n(MILESTONES.length)}</small></h3><p
      class="sheet-intro">${t('milestonesIntro')} ${t('streakLabel')}: <strong>${n(currentStreak(s))}</strong></p><div

@@ -1,5 +1,5 @@
 // The Today sheet: the day's small errands (and, as the house grows, the lantern that they feed).
-import {ARC_REWARD,arcStatus,cookedToday,lanternWonders,errandDef,errandsReady,tomorrowErrand,daySettled,
+import {letters,ARC_REWARD,arcStatus,cookedToday,lanternWonders,errandDef,errandsReady,tomorrowErrand,daySettled,
   ERRAND_EMBERS,lanternLevel,nextLantern} from './simulation.js';
 import {icon} from './icons.js';
 import {DISHES} from './content-grove.js';
@@ -71,6 +71,13 @@ export function requestsMarkup(s,id,{t,n,button}){
    a.met?tell():`<small>${t('requestNotMet')}</small>`}</li>`;
  return `<h3 class="section-heading">${t('requestsTitle')} <small>${n(a.step)}/${n(a.total)}</small></h3><ul
    class="request-list">${done}${now}</ul>`;
+}
+// Letters left by residents whose requests are all done, kept in the journal.
+export function lettersMarkup(s,t){
+ const list=letters(s);if(!list.length)return '';
+ return `<h3 class="section-heading">${t('lettersTitle')}</h3><div class="letters">${list.map(id=>`<article
+   class="letter"><span class="ribbon" aria-hidden="true"></span><h4>${t('letterFrom').replace('{name}',t(id))}</h4><p
+   >${t('letter-'+id)}</p></article>`).join('')}</div>`;
 }
 // The taste notebook: what each resident has shown they love, like or would rather not eat.
 export function tasteNotebook(s,id,t){

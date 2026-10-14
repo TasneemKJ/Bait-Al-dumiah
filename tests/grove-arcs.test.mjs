@@ -30,3 +30,15 @@ test('the household lists done requests, the current one and its Tell button onl
  sim.fulfilRequest(s,'lina');s.dolls[0].bond=20;html=requestsMarkup(s,'lina',{t,n:String,button});
  assert.match(html,/class="done"/);assert.match(html,/class="locked"/);
 });
+import {lettersMarkup} from '../src/grove-ui.js';
+import {journalMarkup} from '../src/panels-ui.js';
+import {readFileSync} from 'node:fs';
+test('finishing an arc ties a ribbon once and leaves a letter in the journal; the resident stays',()=>{
+ const s=sim.createState();s.grove.arcs.noor=2;s.dolls[1].bond=70;s.grove.warmth=20;
+ assert.equal(sim.arcComplete(s,'noor'),false);assert.equal(lettersMarkup(s,t),'');
+ const r=sim.fulfilRequest(s,'noor');assert.equal(r.finished,true);assert.deepEqual(sim.letters(s),['noor']);
+ assert.equal(s.events.filter(e=>e.type==='arc-complete').length,1);assert.equal(s.dolls.length,3,'no farewell departure');
+ const html=journalMarkup(s,{t,n:String,button});assert.match(html,/class="letter"/);assert.ok(html.includes(strings.en['letter-noor']));
+ for(const id of Object.keys(ARCS))assert.match(strings.ar['letter-'+id],/[؀-ۿ]/);
+ assert.match(readFileSync(new URL('../src/cmd-grove.js',import.meta.url),'utf8'),/dispatch\('focus-doll',value\)/);
+});

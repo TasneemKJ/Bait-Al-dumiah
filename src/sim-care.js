@@ -40,6 +40,9 @@ const REQUEST_MET={
  'sami-bear':s=>placed(s,'bear','kitchen'),'sami-sewing':s=>s.activities.mastery.stitch>=2,'sami-door':s=>s.door>=3,
 };
 export const ARC_REWARD=step=>10+5*step;
+// Residents whose three requests are done: each has tied a ribbon and left a letter.
+export const arcComplete=(s,id)=>Boolean(ARCS[id])&&s.grove.arcs[id]>=ARCS[id].length;
+export const letters=s=>Object.keys(ARCS).filter(id=>arcComplete(s,id));
 export function arcStatus(s,id){
  const arc=ARCS[id];if(!arc)return null;const step=integerStep(s.grove.arcs[id],arc.length),next=arc[step]??null;
  const d=s.dolls.find(x=>x.id===id),heard=Boolean(next)&&bondLevel(d.bond)>=next.bond;
@@ -53,5 +56,6 @@ export function fulfilRequest(s,id){
  if(!status.met)return {ok:false,reason:'requestNotMet'};
  const reward=ARC_REWARD(status.step),d=s.dolls.find(x=>x.id===id);s.grove.arcs[id]=status.step+1;
  s.buttons=Math.min(9999,s.buttons+reward);s.earnedToday=Math.min(99999,s.earnedToday+reward);growBond(s,d,5);
- return {ok:true,id,request:status.next.id,reward,finished:status.step+1>=status.total};
+ const finished=status.step+1>=status.total;if(finished)s.events.length<24&&s.events.push({type:'arc-complete',id});
+ return {ok:true,id,request:status.next.id,reward,finished};
 }

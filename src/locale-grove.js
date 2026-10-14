@@ -24,6 +24,14 @@ export default {
   'request-sami-bear':'“The bear should sit in the kitchen. He likes the smell of supper.”',
   'request-sami-sewing':'“Sew with me in the studio, twice, so I can watch your hands.”',
   'request-sami-door':'“Help me mend the closed door as far as the key.”',
+  lettersTitle:'Letters',letterFrom:'From {name}',
+  ribbonTied:'A gold ribbon for {name}. A letter waits in the journal.',
+  'letter-lina':'You kept the cups warm and the music near. I used to set out four and put one back. '+
+   'Now I leave it out. It is yours.',
+  'letter-noor':'The lantern reaches my window now. I have stopped counting the dark. '+
+   'When you go, the light stays, and so do I.',
+  'letter-sami':'The eleventh key fits nothing yet. That is all right. '+
+   'You taught me that a door can wait, and so can a friend.',
   tastesTitle:'Tastes','taste-love':'Favourite','taste-like':'Likes it','taste-meh':'Not for them',
   'taste-unknown':'Not tried yet',
   kitchenComfort:'Comfort food',
@@ -75,6 +83,11 @@ export default {
   'request-sami-bear':'«الدبدوب لازم يقعد بالمطبخ. بيحبّ ريحة العشا.»',
   'request-sami-sewing':'«خيّط معي بأوضة التطريز مرّتين، لحتى اتفرّج على إيديك.»',
   'request-sami-door':'«ساعدني نصلّح الباب المسكّر لحدّ المفتاح.»',
+  lettersTitle:'رسايل',letterFrom:'من {name}',
+  ribbonTied:'شريطة دهبية لـ{name}. في رسالة ناطرة بالدفتر.',
+  'letter-lina':'دفّيت الفناجين وقرّبت الموسيقى. كنت حطّ أربع فناجين وارجّع واحد. هلّق بتركه. إلك.',
+  'letter-noor':'الفانوس صار يوصل لشبّاكي. بطّلت عدّ العتمة. لمّا بتروح، الضوّ بيضلّ، وأنا كمان.',
+  'letter-sami':'المفتاح الحادي عشر لسّا ما بيفتح شي. مش مشكلة. علّمتني إنّه الباب بيقدر يستنّى، والصاحب كمان.',
   tastesTitle:'الأذواق','taste-love':'المفضّلة','taste-like':'طيّبة','taste-meh':'مش هالقد',
   'taste-unknown':'لسّا ما انجرّبت',
   kitchenComfort:'أكل بيدفّي القلب',kitchenIntro:'اطبخ طبخة وحدة اليوم للبيت كلّه. كل روح صغيرة إلها طبختها المفضّلة.',

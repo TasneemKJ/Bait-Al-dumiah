@@ -83,3 +83,11 @@ html[lang=ar] .errand{font-size:14px}
 .request-list li.locked{color:var(--muted);background:transparent;border:1px dashed var(--line)}
 .request-list li>small{font-size:10px;color:var(--muted)}
 .request-list li>button{font-size:11px;padding:8px 12px;margin-inline-start:auto}
+.letters{display:grid;gap:12px;margin-top:10px}
+.letter{position:relative;padding:18px 18px 16px;border-radius:6px;background:#fffaf0;border:1px solid #e3d0b9;
+ box-shadow:0 6px 18px #6a4a4a14}
+.letter h4{margin:0 0 6px;font-family:Georgia,serif;font-weight:normal;font-size:15px;color:var(--rose-dark)}
+[dir=rtl] .letter h4{font-family:Tahoma,Arial,sans-serif}
+.letter p{font-size:12px;line-height:1.9;color:var(--ink);font-style:italic}
+.letter .ribbon{position:absolute;top:-6px;inset-inline-end:18px;width:14px;height:30px;background:#c9a14f;
+ clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%)}
