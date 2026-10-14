@@ -133,3 +133,12 @@ html[lang=ar] .errand{font-size:14px}
  border-bottom:1px dashed var(--line)}
 .charm-list b{font-weight:normal;letter-spacing:2px;color:#e3d3c3}
 .charm-list i{font-style:normal}.charm-list i.lit{color:#c99a4a}
+.mail-card{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:12px 14px;border-radius:6px;background:#fffaf0;
+ border:1px solid #e3d0b9;box-shadow:0 4px 14px #6a4a4a12}
+.mail-card>.icon{width:22px;height:22px;color:#b58a4a;flex-shrink:0}
+.mail-card>div{flex:1;min-width:0;display:grid;gap:3px}
+.mail-card strong{font-family:Georgia,serif;font-weight:normal;font-size:15px}
+[dir=rtl] .mail-card strong{font-family:Tahoma,Arial,sans-serif}
+.mail-card small{font-size:10px;color:var(--muted)}
+.mail-card p{font-size:12px;line-height:1.8;font-style:italic;color:var(--ink)}
+.mail-card>button{font-size:11px;padding:8px 14px}

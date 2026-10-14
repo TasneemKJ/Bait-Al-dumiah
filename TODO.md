@@ -39,7 +39,7 @@ Plan and analysis: `docs/research/REFERENCE-GAMES-2026-10-14.md`; ledger: `docs/
 - [x] 35 (AC) Wall colours per room: four paints each, free and reversible
 - [x] 36 (AC) Placement pop: squash, settle and a dust puff when a keepsake lands
 - [x] 37 (AC) Room charm stars in the decorate sheet
-- [ ] 38 (AC) Morning letter under the door on each fresh day
+- [x] 38 (AC) Morning letter under the door on each fresh day
 - [ ] 39 (AC) Resident birthdays by the calendar: bunting and a birthday errand
 - [ ] 40 (AC) Today's special: one keepsake a day at a kinder price
 

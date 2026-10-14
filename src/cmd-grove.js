@@ -42,6 +42,11 @@ export const groveCommands={
    const result=sim.paintWall(app.state,value?.room,value?.paint);
    if(result.ok){app.audio.effect('place');app.save();app.ui.tick()}else app.say(app.ui.t(result.reason));
   },
+'read-mail':app=>{
+   const result=sim.readMail(app.state);if(!result.ok){app.say(app.ui.t(result.reason));return}
+   app.say(app.ui.t('mailGift')+` +${app.ui.n(result.reward)} `+app.ui.t('buttons'));app.audio.effect('place');
+   app.save();app.ui.tick();
+  },
 'tend-lantern':app=>{
    const result=sim.tendLantern(app.state);
    // The sheet folds away so the player sees the flame take the embers.

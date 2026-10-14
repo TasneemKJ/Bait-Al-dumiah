@@ -62,3 +62,6 @@ export const WALL_PAINTS={
  kitchen:['#dfd5b8','#cfe0d2','#f0d9c4','#d9d3e6'],parlor:['#d5b99c','#cdd9c5','#e8c6c9','#d6d3e6'],
  studio:['#d6c9b2','#cfdcc9','#efd3c9','#d2cbe3'],bedroom:['#dfcca9','#cfe0d8','#f1d7d3','#d8d0e8'],
 };
+// Morning letters slipped under the door on each fresh day, from the lane's neighbours, in turn.
+export const MAIL=['baker','neighbour','postman','grandmother','visitor','teacher','seamstress','musician'];
+export const MAIL_GIFT=3;

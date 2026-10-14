@@ -1,5 +1,5 @@
 // Restores the reference-game systems' record. Every field is whitelisted, clamped and defaulted.
-import {ERRANDS,LANTERN_LEVELS,DISHES,ARCS,TRINKETS,WALL_PAINTS} from './content-grove.js';
+import {ERRANDS,LANTERN_LEVELS,DISHES,ARCS,TRINKETS,WALL_PAINTS,MAIL} from './content-grove.js';
 import {ROOMS} from './content.js';
 import {rollErrands} from './sim-grove.js';
 import {integer,clamp} from './sim-util.js';
@@ -33,5 +33,7 @@ export function restoreGrove(s,raw){
  const walls=obj(v.walls)??{};
  for(const [room,paints] of Object.entries(WALL_PAINTS))if(Number.isInteger(walls[room])&&walls[room]>0&&
    walls[room]<paints.length)g.walls[room]=walls[room];
+ const mail=obj(v.mail);g.mail=mail&&MAIL.includes(mail.id)?{id:mail.id,day:integer(mail.day,0,s.day),
+   read:mail.read===true}:null;
  if(!g.errands.length||!g.errandDay)rollErrands(s);
 }

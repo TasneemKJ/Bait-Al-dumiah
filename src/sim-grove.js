@@ -1,6 +1,6 @@
 // Daily errands and the courtyard lantern: small, capped, explicitly collected. Pure rules, no DOM.
 import {ERRANDS,ERRANDS_PER_DAY,LANTERN_LEVELS,FIRST_DAY_ERRANDS,LANTERN_WONDERS,
-  SEASONS,EVENTS} from './content-grove.js';
+  SEASONS,EVENTS,MAIL,MAIL_GIFT} from './content-grove.js';
 import {SECRETS,DOOR_STEPS,ROOMS} from './content.js';
 // Events are transient notices, capped like every other house event.
 const emit=(s,event)=>{if(s.events.length<24)s.events.push(event)};
@@ -26,7 +26,7 @@ function addEventErrand(s){const e=eventErrand(s);
  if(e&&!s.grove.errands.some(x=>x.id===e.id))s.grove.errands.push({id:e.id,done:false,collected:false})}
 export function rollErrands(s){
  s.grove.errands=errandsFor(s,s.day).map(id=>({id,done:false,collected:false}));s.grove.errandDay=s.day;
- addEventErrand(s);rollVisit(s);
+ addEventErrand(s);rollVisit(s);rollMail(s);
 }
 // The interface tells the house what month it is; a running event joins today's errands at once.
 export function setMonth(s,month){
@@ -85,4 +85,16 @@ export function answerVisit(s,id,room){
  v.done=true;const d=s.dolls.find(x=>x.id===id);d.comfort=Math.min(100,d.comfort+8);
  s.buttons=Math.min(9999,s.buttons+VISIT_REWARD);s.earnedToday=Math.min(99999,s.earnedToday+VISIT_REWARD);
  emit(s,{type:'visit-thanks',id,room});return {reward:VISIT_REWARD};
+}
+// A letter waits under the door each fresh day (not the first); reading it is the explicit act that pays
+// the few buttons folded inside.
+export function rollMail(s){
+ const day=s.grove.errandDay;s.grove.mail=day>1?{id:MAIL[(day-2)%MAIL.length],day,read:false}:null;
+}
+export const mailWaiting=s=>Boolean(s.grove.mail&&!s.grove.mail.read&&s.grove.mail.day===s.grove.errandDay);
+export function readMail(s){
+ if(!mailWaiting(s))return {ok:false,reason:'noMail'};
+ s.grove.mail.read=true;s.buttons=Math.min(9999,s.buttons+MAIL_GIFT);
+ s.earnedToday=Math.min(99999,s.earnedToday+MAIL_GIFT);
+ return {ok:true,id:s.grove.mail.id,reward:MAIL_GIFT};
 }

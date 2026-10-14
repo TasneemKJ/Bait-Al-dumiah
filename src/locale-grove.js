@@ -89,6 +89,24 @@ export default {
   visitAsk:'{name} would like to spend today in the {room}. Move them there from Little souls.',
   visitDone:'{name} is spending today in the {room}.',
   visitThanks:'{name} looks around the {room}, delighted. Thank you.',
+  mailWaiting:'A letter under the door',mailRead:'Read',noMail:'No letter today.',
+  mailGift:'Folded inside, a few buttons:',
+  'mailFrom-baker':'From the baker on the corner',
+  'mail-baker':'“The first ka’ak of the morning came out lopsided, so I '+
+   'saved it for your house. Lopsided things taste of luck.”',
+  'mailFrom-neighbour':'From the neighbour upstairs','mail-neighbour':'“Your little lamps keep my stairs bright. '+
+   'I sleep better knowing someone is awake below.”',
+  'mailFrom-postman':'From the postman','mail-postman':'“No letters for the closed door again. I knock anyway. '+
+   'It seems polite.”',
+  'mailFrom-grandmother':'From an old friend of the house','mail-grandmother':'“I lived in your rooms once. '+
+   'The mint on the sill was mine. Keep it watered for me.”',
+  'mailFrom-visitor':'In small careful handwriting','mail-visitor':'“thank you for the light. i like the light.”',
+  'mailFrom-teacher':'From the school at the end of the lane','mail-teacher':'“The children drew your house today. '+
+   'Every drawing had a lantern in it.”',
+  'mailFrom-seamstress':'From the seamstress','mail-seamstress':'“A spool of red thread for Sami. '+
+   'He asked for the colour of a good morning.”',
+  'mailFrom-musician':'From the oud player','mail-musician':'“I heard a music box through your window and learned '+
+   'its tune. I play it badly, with love.”',
   roomCharm:'Room charm',charmStars:'{count} of 5 stars',
   roomCharmIntro:'Stars for keepsakes, a treasured piece, a lit lamp, new paper and a restored room.',
   wallPaint:'Wall paper',wallPaintIntro:'Repaper a room in another colour. Free, and you can always change it back.',
@@ -188,6 +206,21 @@ export default {
   curioEmpty:'لسّا مخبّاية',
   visitAsk:'طلب صغير من {name}: نهار اليوم {room}. النقل من «أهل البيت».',
   visitDone:'نهار {name} اليوم {room}.',visitThanks:'فرحة {name} {room} كبيرة. يسلموا إيديك.',
+  mailWaiting:'رسالة تحت الباب',mailRead:'اقرا',noMail:'ما في رسالة اليوم.',
+  mailGift:'جوّاتها مطويّين كم زرّ:',
+  'mailFrom-baker':'من فرّان الزاوية',
+  'mail-baker':'«أوّل كعكة الصبح طلعت معوجّة، فخبّيتها لبيتكن. الشي المعوجّ طعمته حظّ.»',
+  'mailFrom-neighbour':'من الجارة اللي فوق','mail-neighbour':'«قناديلكن الصغيرة بتضوّي درجي. بنام أحسن لمّا بعرف '+
+   'إنّه في حدا صاحي تحت.»',
+  'mailFrom-postman':'من ساعي البريد','mail-postman':'«ولا رسالة للباب المسكّر مرّة تانية. بدقّ عليه كمان. '+
+   'هيك الأصول.»',
+  'mailFrom-grandmother':'من صاحبة قديمة للبيت','mail-grandmother':'«سكنت بأوضكن مرّة. النعنع عالشبّاك كان إلي. '+
+   'اسقوه عنّي.»',
+  'mailFrom-visitor':'بخطّ زغير ومتأنّي','mail-visitor':'«شكراً عالضوّ. بحبّ الضوّ.»',
+  'mailFrom-teacher':'من المدرسة بآخر الحارة','mail-teacher':'«الولاد رسموا بيتكن اليوم. كل رسمة كان فيها فانوس.»',
+  'mailFrom-seamstress':'من الخيّاطة','mail-seamstress':'«بكرة خيط أحمر لسامي. طلب لون الصبحيّة الحلوة.»',
+  'mailFrom-musician':'من عازف العود','mail-musician':'«سمعت علبة موسيقى من شبّاككن وتعلّمت لحنها. بعزفها غلط، بس '+
+   'بمحبّة.»',
   roomCharm:'دفا الأوضة',charmStars:'نجوم: {count} من ٥',
   roomCharmIntro:'نجوم للتذكارات، والتذكار الغالي، والضوّ المضوّي، والورق الجديد، والأوضة المرمّمة.',
   wallPaint:'ورق الحيطان',wallPaintIntro:'لبّس الأوضة ورق بلون تاني. ببلاش، وبتقدر ترجّعه متى ما بدّك.',

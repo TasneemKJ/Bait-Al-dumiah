@@ -44,3 +44,15 @@ test('the journal\'s curio cabinet shows each found trinket\'s drawing and the s
  assert.match(html,/1\/12/);assert.match(journalMarkup(s,{t,n:String,button}),/curio-grid/);
  for(const k of ['curioTitle','curioIntro','curioEmpty'])assert.match(strings.ar[k],/[؀-ۿ]/);
 });
+import {MAIL,MAIL_GIFT} from '../src/content-grove.js';
+import {todayNews} from '../src/grove-ui.js';
+test('a letter waits under the door each fresh day; reading it once pays what is folded inside',()=>{
+ const s=sim.createState();assert.equal(s.grove.mail,null,'no letter on the first morning');
+ sim.changeLight(s);s.dayTime=999;sim.changeLight(s);assert.equal(sim.mailWaiting(s),true);assert.equal(todayNews(s),true);
+ assert.match(todayMarkup(s,{t,n:String,button}),/data-action="read-mail"/);const b=s.buttons;
+ assert.deepEqual(sim.readMail(s),{ok:true,id:MAIL[0],reward:MAIL_GIFT});assert.equal(s.buttons,b+MAIL_GIFT);
+ assert.equal(sim.readMail(s).reason,'noMail');assert.ok(todayMarkup(s,{t,n:String,button}).includes(strings.en['mail-'+MAIL[0]]));
+ sim.changeLight(s);sim.changeLight(s);assert.equal(sim.mailWaiting(s),false,'hurried dawn brings no new letter');
+ const raw=JSON.parse(JSON.stringify(s));raw.grove.mail.id='bill';assert.equal(sim.restore(JSON.stringify(raw)).grove.mail,null);
+ for(const id of MAIL)for(const k of ['mail-','mailFrom-'])assert.match(strings.ar[k+id],/[؀-ۿ]/);
+});

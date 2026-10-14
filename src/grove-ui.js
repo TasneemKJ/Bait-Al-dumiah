@@ -1,7 +1,7 @@
 // The Today sheet: the day's small errands (and, as the house grows, the lantern that they feed).
 import {letters,ARC_REWARD,arcStatus,cookedToday,lanternWonders,errandDef,errandsReady,tomorrowErrand,daySettled,
   errandEmbers,currentEvent,rainyDay,lanternLevel,nextLantern,foundToday,nextTrinket,
-  trinketProp,wallPaint,roomCharm} from './simulation.js';
+  trinketProp,wallPaint,roomCharm,mailWaiting} from './simulation.js';
 import {icon} from './icons.js';
 import {DISHES,TRINKETS,WALL_PAINTS} from './content-grove.js';
 import {curioArt} from './curio-art.js';
@@ -21,7 +21,7 @@ export function heartsMarkup(level,t){
    .map(i=>`<i class="${i<=l?'full':''}">${icon('heart')}</i>`).join('')}</span>`;
 }
 // Today has news when an errand waits to be collected or embers wait for the lantern.
-export const todayNews=s=>errandsReady(s)>0||s.grove.embers>0;
+export const todayNews=s=>errandsReady(s)>0||s.grove.embers>0||mailWaiting(s);
 // The clue's hand-off to Today: collect first, then tend.
 export function todayStep(s,t){
  if(errandsReady(s))return {copy:t('objectiveErrand'),label:t('collect'),ico:'lamp',action:'panel',value:'today'};
@@ -116,6 +116,14 @@ export function tasteNotebook(s,id,t){
    >${t('dish-'+d.id)}</span><small>${t('taste-'+(taste??'unknown'))}</small></li>`}).join('')}</ul>`;
 }
 // A seasonal event from the player's own calendar, with its extra errand in the list below.
+// The morning letter: folded under the door until read, then kept open for the rest of the day.
+function mailCard(s,{t,n,button}){
+ const m=s.grove.mail;if(!m||m.day!==s.grove.errandDay)return '';
+ if(!m.read)return `<section class="mail-card">${icon('book')}<div><strong>${t('mailWaiting')}</strong><small
+   >${t('mailFrom-'+m.id)}</small></div>${button('read-mail',t('mailRead'),null,'class="primary"')}</section>`;
+ return `<section class="mail-card open"><div><strong>${t('mailFrom-'+m.id)}</strong><p
+   >${t('mail-'+m.id)}</p></div></section>`;
+}
 function findNote(s,t){
  if(foundToday(s)||!nextTrinket(s))return '';const prop=INTERACTIVE_PROPS.find(p=>p.id===trinketProp(s));
  return `<p class="weather-note find-note"><b aria-hidden="true">✦</b><span>${t('trinketHint').replace('{room}',
@@ -134,7 +142,8 @@ function eventCard(s,t){
 }
 export function todayMarkup(s,c){
  const {t,n}=c;
- return `<h2 id="sheet-title">${t('today')}</h2><p class="sheet-intro">${t('todayIntro')}</p>${eventCard(s,t)}${
+ return `<h2 id="sheet-title">${t('today')}</h2><p class="sheet-intro">${t('todayIntro')}</p>${mailCard(s,c)}${
+   eventCard(s,t)}${
    lanternCard(s,c)}<p
    class="ember-count">${icon('spark')}<span>${t('embers')}</span><strong>${n(s.grove.embers)}</strong></p><ul
    class="errand-list">${s.grove.errands.map(item=>errandRow(item,c)).join('')}</ul>${settledCard(s,t)}${
