@@ -3,6 +3,7 @@ import {clamp} from './sim-util.js';
 import {growBond} from './sim-core.js';
 import {DISHES,TASTES,TASTE_EFFECT,ARCS,CHATTER_LINES,WALL_PAINTS} from './content-grove.js';
 import {bondLevel,isContent,isNight} from './sim-queries.js';
+import {DOLLS} from './content.js';
 import {noteErrand,lanternLevel} from './sim-grove.js';
 
 // Daily things count by the last day actually spent in the house (when errands last refreshed),
@@ -88,4 +89,13 @@ export function paintWall(s,room,paint){
  const paints=WALL_PAINTS[room];
  if(!paints||!Number.isInteger(paint)||paint<0||paint>=paints.length)return {ok:false,reason:'invalid'};
  s.grove.walls[room]=paint;return {ok:true,room,paint};
+}
+// Room charm: up to five stars for how lived-in a room feels. Each star names what earned it, so the
+// rating teaches decorating instead of judging it.
+export function roomCharm(s,room){
+ const here=s.decor.filter(d=>d.room===room),favs=DOLLS.map(d=>d.favItem);
+ const reasons=[...here.slice(0,3).map(()=>'keepsake'),...(here.some(d=>favs.includes(d.item))?['treasured']:[]),
+   ...(here.some(d=>d.item==='lamp'&&d.active)?['lamplit']:[]),...(wallPaint(s,room)>0?['papered']:[]),
+   ...((s.restoration[room]??0)>=2?['restored']:[])];
+ return {stars:Math.min(5,reasons.length),reasons:reasons.slice(0,5)};
 }

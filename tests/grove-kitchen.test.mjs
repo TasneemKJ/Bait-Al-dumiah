@@ -68,3 +68,12 @@ test('every room can be repapered in four colours, free and reversible, and the 
  sim.paintWall(s,'studio',0);walls.update(s);assert.equal(parent.children[0].visible,false);
  for(let i=0;i<4;i++)assert.match(strings.ar['paint'+i],/[؀-ۿ]/);
 });
+test('room charm earns a star for each keepsake (up to three), a treasured piece, a lit lamp, new paper and restoration',()=>{
+ const s=sim.createState();s.buttons=999;assert.equal(sim.roomCharm(s,'parlor').stars,0);
+ sim.place(s,'lamp','parlor',0);assert.equal(sim.roomCharm(s,'parlor').stars,1);
+ sim.useDecor(s,s.decor[0].id);assert.equal(sim.roomCharm(s,'parlor').stars,2);
+ sim.place(s,'musicbox','parlor',1);assert.deepEqual(sim.roomCharm(s,'parlor').reasons,['keepsake','keepsake','treasured','lamplit']);
+ sim.paintWall(s,'parlor',1);s.restoration.parlor=2;sim.place(s,'plant','parlor',2);assert.equal(sim.roomCharm(s,'parlor').stars,5);
+ const html=decorateMarkup(s,{t,n:String,button:()=>''});assert.match(html,/class="charm-list"/);
+ assert.equal((html.match(/<i class="lit">/g)||[]).length,5);assert.match(strings.ar.charmStars,/\{count\}/);
+});

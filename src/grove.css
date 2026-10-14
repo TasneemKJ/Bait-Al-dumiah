@@ -128,3 +128,8 @@ html[lang=ar] .errand{font-size:14px}
 .swatch{width:44px;height:44px;min-height:44px;padding:0;border-radius:50%;border:2px solid #fff7ea;
  background:radial-gradient(circle at 35% 30%,#fff8,transparent 60%),var(--paint);box-shadow:0 0 0 1px var(--line)}
 .swatch[aria-pressed=true]{box-shadow:0 0 0 2px var(--rose-dark)}
+.charm-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.charm-list li{display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:6px 0;
+ border-bottom:1px dashed var(--line)}
+.charm-list b{font-weight:normal;letter-spacing:2px;color:#e3d3c3}
+.charm-list i{font-style:normal}.charm-list i.lit{color:#c99a4a}

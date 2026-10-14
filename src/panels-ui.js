@@ -9,7 +9,7 @@ import {isNight,coziness,wishFor,wishReward,bondLevel,nextBond,isContent,content
 import {giftArt} from './gift-art.js';
 import {icon} from './icons.js';
 import {todayMarkup,heartsMarkup,tasteNotebook,requestsMarkup,lettersMarkup,
-  curioMarkup,paintMarkup} from './grove-ui.js';
+  curioMarkup,paintMarkup,charmMarkup} from './grove-ui.js';
 export const actionIcon={tea:'tea',play:'play',rest:'rest',soothe:'heart'};
 export const wishKey=(id,action)=>DOLLS.find(d=>d.id===id).wish===action?id+'Wish':id+'Wish_'+action;
 
@@ -113,7 +113,7 @@ export function decorateMarkup(s,{t,n,button}){
     ><small>${t(d.room)}</small></div><button type="button"
     data-action="remove"
       data-id="${d.id}">${t('refund')}<small>+${n(c.price)}</small></button></div
-        >`}).join(''):`<p class="empty-note">${t('emptyDecor')}</p>`}</div>${paintMarkup(s,t)}`;
+        >`}).join(''):`<p class="empty-note">${t('emptyDecor')}</p>`}</div>${charmMarkup(s,t,n)}${paintMarkup(s,t)}`;
 }
 
 export function journalMarkup(s,{t,n,button}){

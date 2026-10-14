@@ -1,7 +1,7 @@
 // The Today sheet: the day's small errands (and, as the house grows, the lantern that they feed).
 import {letters,ARC_REWARD,arcStatus,cookedToday,lanternWonders,errandDef,errandsReady,tomorrowErrand,daySettled,
   errandEmbers,currentEvent,rainyDay,lanternLevel,nextLantern,foundToday,nextTrinket,
-  trinketProp,wallPaint} from './simulation.js';
+  trinketProp,wallPaint,roomCharm} from './simulation.js';
 import {icon} from './icons.js';
 import {DISHES,TRINKETS,WALL_PAINTS} from './content-grove.js';
 import {curioArt} from './curio-art.js';
@@ -83,6 +83,14 @@ export function curioMarkup(s,t,n){
  const count=`${n(s.grove.trinkets.length)}/${n(TRINKETS.length)}`;
  return `<h3 class="section-heading">${t('curioTitle')} <small>${count}</small></h3><p
    class="sheet-intro">${t('curioIntro')}</p><div class="curio-grid">${TRINKETS.map(cell).join('')}</div>`;
+}
+// Room charm stars in the decorate sheet.
+export function charmMarkup(s,t,n=String){
+ const row=r=>{const c=roomCharm(s,r.id),stars=[1,2,3,4,5].map(i=>`<i class="${i<=c.stars?'lit':''}">★</i>`).join('');
+  return `<li><span>${t(r.id)}</span><b role="img" aria-label="${t('charmStars').replace('{count}',
+   n(c.stars))}">${stars}</b></li>`};
+ return `<h3 class="section-heading">${t('roomCharm')}</h3><p class="sheet-intro">${t('roomCharmIntro')}</p><ul
+   class="charm-list">${ROOMS.map(row).join('')}</ul>`;
 }
 // Wall paints: four papers per room as swatches; the chosen one is pressed.
 export function paintMarkup(s,t){
