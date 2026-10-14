@@ -31,6 +31,7 @@ export function cameraApi(w){
   // focus clears. At the handoff the play camera's own spring takes over from the path's pose and velocity and
   // settles in the kitchen, so play begins inside that motion. Null when the renderer cannot play it.
   introFrame(seconds,still=false){if(st.lost||st.disposed||working())return null;
+  st.introActionTime={seconds,still};
   const w=canvas.clientWidth,h=canvas.clientHeight,keys=introKeys(w,h,presentation.value);
   if(seconds<=0)st.introHanded=false;
   if(still||seconds<INTRO_HANDOFF){cameraMove.cancel();st.focusedRoom=null;st.focusedDoll=null;
@@ -38,6 +39,7 @@ export function cameraApi(w){
    return {beat:pose.beat,done:pose.done}}
   if(!st.introHanded)handOff(SETTLE_RESPONSE,INTRO_HANDOFF);
   const pose=introPose(keys,seconds);return {beat:pose.beat,done:pose.done}},
+  introEnd(){st.introActionTime=null;st.introActor?.restore();st.introActor=null;},
   // Skip: glide to the kitchen from the live pose, carrying the path's velocity (the still version cuts).
   introSkip(seconds,still=false){if(st.lost||st.disposed||working())return false;
   if(still)return cameraMove.moveTo(kitchenPose(),true);

@@ -103,3 +103,13 @@ test('merged loop paces Home while film blocks game work and prevents catch-up t
   if(prior[index])Object.defineProperty(globalThis,key,prior[index]);else delete globalThis[key];
  });}
 });
+
+test('tea action has anticipation, a sustained sip, a return and a held reduced-motion pose',async()=>{
+ const {teaActionTime}=await import('../src/render/film-action.js');
+ assert.equal(teaActionTime(-2),0);
+ assert.ok(teaActionTime(9)>0&&teaActionTime(9)<.85);
+ assert.ok(teaActionTime(11)>=.85&&teaActionTime(11)<=2.55);
+ assert.ok(teaActionTime(14)>2.55);
+ assert.equal(teaActionTime(60),3.85);
+ assert.equal(teaActionTime(9,true),teaActionTime(59,true));
+});

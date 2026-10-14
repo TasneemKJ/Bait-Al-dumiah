@@ -5,6 +5,10 @@ export function wideCamera(shot){
  // A portrait's distant full-house view would waste the sides in widescreen.
  // Move the real camera forward; the resident closeups retain their room context.
  if(shot.index===0||shot.index===6){eye[2]*=.66;target[1]=3.7;}
+ if(shot.index>=1&&shot.index<=3){
+  const active=[[-1.6,1.12,.7],[-1.6,4.32,.7],[3.75,4.32,.7]][shot.index-1];
+  target.splice(0,3,...active);eye.forEach((value,i)=>{eye[i]=active[i]+(value-active[i])*.76;});
+ }
  if(shot.index===5){const u=(shot.time-shot.start)/(shot.end-shot.start);
   eye.splice(0,3,-1.7+u*.5,2.2-u*.2,3.2-u*.5);target.splice(0,3,0,1.2,-1.4);}
  return {eye,target};

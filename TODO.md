@@ -346,3 +346,9 @@ Twenty-idea exploration, IDEAL/5Ws, source plan and selected scope: `docs/cinema
 - [x] Record actual faint room/dock labels in combined-source desktop closeup; twenty ideas and 5Ws in the iteration ledger.
 - [x] Review paired EN/AR day/night compact paper backing and 12px desktop labels, preserving targets and phone layout.
 - [x] Apply bounded accepted CSS; EN/AR wide day/night and 681×600 actual source inspected, targets/contrast/accessible names/side-control separation verified. One refinement accepted; final verify 546/546.
+
+## Motivated cinema actions — 2026-10-14
+- [x] Preserve private articulated residents; Lina's native and 640px motion proof reviewed by root.
+- [ ] Add Sami's stitch pull and Noor's quilt fold with measured hand/prop contacts and planted feet.
+- [ ] Verify deterministic seeking, reduced-motion holds, source/export parity and browser budget; root review before new exports.
+Twenty ideas and intent are in the iteration ledger; earlier completed films remain the previous static-tableau edition until replaced after review.

@@ -8,6 +8,7 @@ import {createCraftDetails,createGarden} from './ornaments.js';
 import {createState} from '../simulation.js';
 import {translate} from '../i18n.js';
 import {softTexture} from './textiles.js';
+import {createFilmAction} from './film-action.js';
 
 export const FILM_SECONDS=60;
 const SHOTS=[
@@ -87,11 +88,13 @@ function studioMaterials(scene){
  });
  for(const light of remove)light.removeFromParent();
 }
-// Porcelain residents hold their portrait pose; batch the still miniature's paint
-// into vertex colours so a phone spends its budget on the camera, not tiny mesh submissions.
+// Batch static architecture into vertex colours; retained resident joints and held
+// props spend the saved draw budget on deterministic, articulated actions.
 function bakeTableau(root){
  const paints=new Map();
- root.traverse(o=>{o.userData.noBatch=false;const m=o.material;
+ root.traverse(o=>{
+  for(let node=o;node;node=node.parent)if(node.userData.filmActor){node.userData.noBatch=true;return;}
+  o.userData.noBatch=false;const m=o.material;
   if(!o.isMesh||!m?.isMeshPhongMaterial||m.map||m.transparent||m.emissive.getHex())return;
   const key=[m.shininess,m.side].join(':');
   if(!paints.has(key))paints.set(key,new T.MeshPhongMaterial({vertexColors:true,
@@ -152,6 +155,7 @@ export function createFilmScene(output,{width=1080,height=1920,outputWidth=1080,
  const mist=steam(house.root);
  state.settings.reducedMotion=true;residents.update(state,0,null,0);
  groundTableau(house,residents);
+ const action=createFilmAction(residents);
  studioMaterials(scene);bakeTableau(house.root);
  output.width=outputWidth;output.height=Math.round(outputWidth*(landscape?9/16:16/9));
  const ctx=output.getContext('2d');ctx.scale(output.width/(landscape?1920:1080),output.height/(landscape?1080:1920));
@@ -160,6 +164,7 @@ export function createFilmScene(output,{width=1080,height=1920,outputWidth=1080,
   render(seconds,locale='en',still=false){
    if(renderer.getContext().isContextLost())throw new Error('Film graphics context lost');
    const shot=filmShot(seconds,still),time=still?shot.start+2:shot.time;
+   action.update(shot.time,still);
    mist(time);
    const moon=T.MathUtils.smoothstep(shot.time,25,42);
    light.key.intensity=3.2-moon*1.4;light.rim.intensity=2.8+moon;
@@ -169,6 +174,7 @@ export function createFilmScene(output,{width=1080,height=1920,outputWidth=1080,
    renderer.render(scene,camera);lastShot=shot;compositor(ctx,canvas,shot,locale);return shot;
   },
   stats(){return {...renderer.info.render};},
+  action(){return action.inspect();},
   compose(locale){if(lastShot)compositor(ctx,canvas,lastShot,locale);},
   poster(locale){if(lastShot&&landscape)composeWide(ctx,canvas,lastShot,locale,{poster:true});},
   // Source meshes share cached materials/textures with play; only retire this renderer's GPU context.

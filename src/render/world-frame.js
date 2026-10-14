@@ -2,6 +2,7 @@ import * as T from 'three';
 import {isNight,stitchStatus} from '../simulation.js';
 import {ROOMS} from '../content.js';
 import {detail} from './visual-policy.js';
+import {introAction} from './intro-action.js';
 import {applyLighting} from './world-lighting.js';
 
 // One animation frame: sync every layer with the state, then draw. `w` holds the scene parts and the world's
@@ -41,6 +42,8 @@ export function renderFrame(w,state,dt,selected){
  roomFrame.show(working()?null:st.focusedRoom);preview.update(st.previewPose,state);
  residents.update(state,dt,selected,Math.atan2(camera.position.x-controls.target.x,
    camera.position.z-controls.target.z));
+ if(st.introActionTime){st.introActor??=introAction(residents);
+ st.introActor.update(st.introActionTime.seconds,st.introActionTime.still);}
  for(const doll of residents.dolls){const room=state.dolls.find(d=>d.id===doll.id)?.room;
  doll.root.visible=!(st.teaActive&&room==='kitchen'||st.stitchActive&&room==='studio'||
    st.chimeActive&&room==='bedroom')}

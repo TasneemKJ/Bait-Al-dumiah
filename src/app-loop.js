@@ -13,7 +13,7 @@ export function installLoop(app){
   if(!document.hidden&&!app.fatal&&!app.session.entered&&
     app.homeUI?.previewVisible&&now-lastHomePaint>=HOME_FRAME_MS){lastHomePaint=now;
     app.world?.render(app.state,0,null)}
-  // The intro holds the house still: no simulation, saves or notices until play begins where it lands.
+  // The intro uses a private action clock: no simulation, saves or notices until play begins.
   if(!document.hidden&&!app.fatal&&app.session.entered)app.intro?.update(now);
   if(!document.hidden&&!app.fatal&&app.session.entered&&app.intro?.active)app.world?.render(app.state,dt,null);
   else if(!document.hidden&&!app.fatal&&app.session.entered){app.updateWorkUI(dt);app.session.advance(app.state,dt);

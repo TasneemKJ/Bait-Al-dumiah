@@ -26,6 +26,7 @@ function startIntro(app){
 // so asking for the kitchen keeps that glide. A skip starts the glide from the live pose and velocity; a grab
 // leaves the camera in the player's hands where they caught it.
 function finishIntro(app,{skipped=false,grab=false,seconds=0,still=false}={}){
+ app.world?.introEnd?.();
  app.host.inert=false;app.world?.setEnabled(!app.panelOpen&&!app.manualPause&&!app.carrying&&!app.fatal);
  if(grab){app.host.dataset.focusRoom='';app.host.dataset.focusDoll='';app.roomViews?.update()}
  else{if(skipped)app.world?.introSkip(seconds,still);app.dispatch('focus-room','kitchen')}

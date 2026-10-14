@@ -197,3 +197,12 @@ test('main: reload and old saves never replay the intro; Settings can replay it 
  old.dispatch()('watch-intro');assert.equal(old.intro().starts,1);assert.equal(old.host.inert,true);
  old.dispatch()('watch-intro');assert.equal(old.intro().starts,1,'one intro at a time');
 });
+
+test('intro action clock is transient and ending restores a held resident exactly once',()=>{
+ const r=rig();let restored=0;
+ r.api.introFrame(9.5,false);assert.deepEqual(r.st.introActionTime,{seconds:9.5,still:false});
+ r.st.introActor={restore(){restored++;}};
+ r.api.introEnd();r.api.introEnd();
+ assert.equal(restored,1);assert.equal(r.st.introActionTime,null);assert.equal(r.st.introActor,null);
+ r.api.introFrame(9.5,true);assert.deepEqual(r.st.introActionTime,{seconds:9.5,still:true});
+});

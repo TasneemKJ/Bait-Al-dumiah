@@ -66,7 +66,7 @@ export function express(v,d,still,dt){
 
 const down=new T.Vector3(0,-1,0),forearmAxis=new T.Vector3(0,-.129,.01).normalize();
 // Solve a two-link arm in body-local coordinates, preserving the wrist hierarchy.
-function aimArm(arm,target,weight=1){
+export function aimArm(arm,target,weight=1){
  const shoulder=arm.position,delta=new T.Vector3(...target).sub(shoulder),l1=.132,l2=Math.hypot(.129,
    .01),distance=T.MathUtils.clamp(delta.length(),.01,l1+l2-.001);
  const direction=delta.normalize(),pole=new T.Vector3(Math.sign(shoulder.x)*.3,-.22,-.01);

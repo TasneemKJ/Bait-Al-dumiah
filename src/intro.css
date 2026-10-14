@@ -35,3 +35,5 @@
  .intro-layer .intro-skip{bottom:max(14px,env(safe-area-inset-bottom))}
 }
 @media(prefers-reduced-transparency:reduce){.intro-layer .intro-skip{background:#fbf4e9;backdrop-filter:none}}
+/* The kitchen gesture occupies the lower room; keep its final line above the action. */
+.intro-layer[data-beat=settle] .intro-caption{top:max(24px,env(safe-area-inset-top));bottom:auto}

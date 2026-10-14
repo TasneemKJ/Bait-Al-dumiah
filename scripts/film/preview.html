@@ -3,8 +3,9 @@ import {createFilmScene} from '/src/render/film-scene.js';
 const params=new URLSearchParams(location.search),landscape=params.has('wide');
 const canvas=document.querySelector('canvas'),scene=createFilmScene(canvas,{landscape,outputWidth:landscape?1920:1080,width:Number(new URLSearchParams(location.search).get('width'))||1080,height:Number(new URLSearchParams(location.search).get('height'))||1920});
 window.filmStats=()=>scene.stats();
+window.filmActions=()=>scene.action();
 window.renderPoster=locale=>{scene.render(57,locale);scene.poster(locale);return canvas.toDataURL('image/jpeg',.96);};
-window.renderFilm=(time,locale='en')=>{scene.render(time,locale);return canvas.toDataURL('image/jpeg',.94)};
+window.renderFilm=(time,locale='en',still=false)=>{scene.render(time,locale,still);return canvas.toDataURL('image/jpeg',.94)};
 window.renderPair=time=>{scene.render(time,'en');const en=canvas.toDataURL('image/jpeg',.94);scene.compose('ar');return [en,canvas.toDataURL('image/jpeg',.94)];};
 window.renderFilm(3);window.filmReady=true;
 </script></body></html>
