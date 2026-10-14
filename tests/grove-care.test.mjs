@@ -44,3 +44,14 @@ test('a hug gathers, holds and lets go within three seconds; reduced motion hold
  assert.match(dolls,/d\.action==='soothe'\|\|d\.action==='hug'/,'reassurance hearts rise for a hug too');
  assert.match(readFileSync(new URL('../src/render/doll-acting.js',import.meta.url),'utf8'),/if\(d\.action==='hug'\)/);
 });
+import {DollhouseAudio} from '../src/audio.js';
+test('a hug has its own soft sound: cloth pats and a rising hum, only once audio is enabled',()=>{
+ const voices=[];const audio=new DollhouseAudio();audio.effect('hug');assert.equal(audio.nodes.size,0,'silent before a gesture');
+ const node=()=>({connect(){},disconnect(){},start(){},stop(){},gain:{value:0,setValueAtTime(){},linearRampToValueAtTime(){},
+  exponentialRampToValueAtTime(){}},frequency:{value:0},Q:{value:0},type:'',buffer:null,onended:null});
+ audio.context={currentTime:1,sampleRate:8000,createOscillator:()=>{voices.push('osc');return node()},createBiquadFilter:node,
+  createGain:node,createBufferSource:()=>{voices.push('cloth');return node()},createBuffer:(c,n)=>({getChannelData:()=>new Float32Array(n)})};
+ audio.master=node();audio.enabled=true;audio.effect('hug');
+ assert.equal(voices.filter(v=>v==='cloth').length,2);assert.equal(voices.filter(v=>v==='osc').length,4);
+ assert.match(readFileSync(new URL('../src/cmd-grove.js',import.meta.url),'utf8'),/effect\('hug'\)/);
+});

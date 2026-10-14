@@ -130,6 +130,10 @@ export class DollhouseAudio{
    }
    return;
   }
+  // A hug: a soft cloth pat, then a two-note hum that rises gently (A3 to D4).
+  if(kind==='hug'){const now=this.context.currentTime;this.track(playClothTouch(this.context,this.master,now));
+   this.track(playClothTouch(this.context,this.master,now+.24));
+   [[220,.18],[293.665,.5]].forEach(([f,d])=>this.tone(f,now+d,1.4,.026,'sine',.18));return}
   if(kind==='lantern'){const now=this.context.currentTime;this.track(playClothTouch(this.context,this.master,now));
    [[293.665,.06],[440,.22],[587.33,.4]].forEach(([f,d])=>this.tone(f,now+d,1.6,.03,'sine',.05));return}
   if(kind==='mint-tin')return this.track(playTinTouch(this.context,this.master,this.context.currentTime));
