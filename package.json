@@ -17,10 +17,10 @@
     "test:ui": "python scripts/ui_check.py && python scripts/tools_ui_checks.py"
   },
   "dependencies": {
-    "three": "0.180.0"
+    "three": "0.186.1"
   },
   "devDependencies": {
-    "eslint": "^9.39.5",
+    "eslint": "^10.13.0",
     "globals": "^17.13.0"
   }
 }
