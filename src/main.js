@@ -20,6 +20,7 @@ import {installCommands} from './app-commands.js';
 import {installLoop,installDebug} from './app-loop.js';
 import {inNativeApp} from './native-app.js';
 import {installStore} from './cmd-store.js';
+import {installTouchFeedback} from './app-touch.js';
 import {useAppWording} from './locale-data.js';
 
 // In the iPhone app, lines about a browser read as the app (src/locale-data.js `<key>App`).
@@ -91,6 +92,6 @@ app.film=createFilmUI(document.querySelector('#app'),{getState:()=>app.state,
  onClose:()=>{app.ui.open('settings');
   app.host.querySelector('[data-action="watch-film"]')?.focus({preventScroll:true});},
 });
-installLoop(app);installDebug(app);installStore(app);
+installLoop(app);installDebug(app);installStore(app);installTouchFeedback(app);
 // The iPhone app flushes the save before it copies it (TasKit flushSaveScript); save() writes nothing before Play.
 window.__baitAlDumiahSave=()=>app.save();

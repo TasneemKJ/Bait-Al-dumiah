@@ -140,8 +140,13 @@ export class DollhouseAudio{
  // The canary's little song (the app's subscription): a soft high trill, quieter than the music box.
  canary(){
   if(!this.ready)return false;const t=this.context.currentTime;
-  [2637,2960,2637,3136,2794,3520].forEach((f,i)=>this.tone(f,t+i*.085,.09,.007,'sine',.01));return true;
+  [1319,1480,1319,1568,1397,1760].forEach((f,i)=>this.tone(f,t+i*.085,.09,.007,'sine',.01));return true;
  }
+ // A control under the finger: a soft wooden tap, quieter than any reward.
+ press(){if(this.ready)this.track(playWoodTap(this.context,this.master,this.context.currentTime,.012))}
+ // A call or Siri leaves the context 'interrupted' (or suspended): the next touch brings sound back.
+ wake(){const c=this.context;if(!c||!this.enabled||this.paused||this.disposed||c.state==='running')return;
+  try{c.resume?.()?.catch?.(()=>{})}catch{/* resumed later */}}
  get ready(){return Boolean(this.context&&this.enabled&&!this.paused&&!this.disposed)}
  // The intro plays on its own bus under the master, so a skip fades it instead of cutting it.
  introCue(cue,delay=0){

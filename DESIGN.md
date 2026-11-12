@@ -121,3 +121,6 @@ The owner asked for Souq's earning model in the iPhone app. The web game is unch
 - A found whisper is announced with the count (`A whisper for the journal · 2/6`); the journal keeps the full sticker-book list.
 - The closed door between the ground-floor rooms carries a brass keyhole plate: in the app it is the visible place The Fifth Room opens.
 - Arabic calls the dolls warm little hearts (تلات قلوب صغار), never spirits (أرواح), in the intro and the film.
+
+## Touch and sound — studio gate (2026-11-13)
+Every press on a control gives a soft wooden tap (quieter than any reward) and one 8 ms buzz, which the app turns into the Taptic Engine (`src/app-touch.js`). An audio context left interrupted by a call or Siri resumes on the next touch, unless sound is off or the house is paused. The canary's trill stays inside the synth's range so it is a little melody.
