@@ -6,13 +6,16 @@ import {wishKey,actionIcon} from './panels-ui.js';
 import {appStore} from './app-store.js';
 import {fifthRoomOpen} from './access.js';
 
+function wishStep(s,t,wish){const action=wishFor(s,wish.id);
+ return {copy:t(wishKey(wish.id,action)),label:t(action),ico:actionIcon[action],
+  action:'care',value:{id:wish.id,action}}}
 // One suggested next step: wishes, first keepsake, rewards to collect, then the night's whisper.
 export function nextStep(s,t,n,focusRoom,access=appStore.access()){
  const wish=DOLLS.find(d=>!wishGranted(s,d.id));
+ // A new house starts with the wish the intro just named (Lina's tea): one tap pays, then the story leads.
+ if(!s.cares&&wish?.id==='lina')return wishStep(s,t,wish);
  const story=storyObjective(s,t,focusRoom);if(story)return story;
- if(wish){const action=wishFor(s,wish.id);
- return {copy:t(wishKey(wish.id,action)),label:t(action),ico:actionIcon[action],
-   action:'care',value:{id:wish.id,action}}}
+ if(wish)return wishStep(s,t,wish);
  if(!s.decor.length)return {copy:t('objectiveDecorate'),label:t('decorate'),ico:'leaf',action:'panel',value:'decorate'};
  const readyRoom=ROOMS.find(r=>{const next=restorationReady(s,r.id);return next.ready&&canAfford(s,next.cost)});
  if(readyRoom)return {copy:t('restorationObjective'),label:t('restoreAction'),ico:'home',action:'panel',

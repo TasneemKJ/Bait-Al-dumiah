@@ -124,3 +124,6 @@ The owner asked for Souq's earning model in the iPhone app. The web game is unch
 
 ## Touch and sound — studio gate (2026-11-13)
 Every press on a control gives a soft wooden tap (quieter than any reward) and one 8 ms buzz, which the app turns into the Taptic Engine (`src/app-touch.js`). An audio context left interrupted by a call or Siri resumes on the next touch, unless sound is off or the house is paused. The canary's trill stays inside the synth's range so it is a little melody.
+
+## First reward in seconds — studio gate (2026-11-13)
+Cold-play bot (before): the first reward came 93 s (ar) and 114 s (en) after Play, behind the whole first story chapter, because the clue always led with the story. Now a new house's first clue is the wish the intro has just named, Lina's tea: one tap on the clue, +8 buttons; after that first kindness the story leads as before.

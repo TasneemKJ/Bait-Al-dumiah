@@ -27,3 +27,12 @@ test('a found whisper says how many of the set are found',()=>{
 test('in Arabic the dolls are warm little hearts, never spirits',()=>{
  for(const key of ['introReveal','filmLine6'])assert.doesNotMatch(translate('ar',key),/أرواح/,key);
 });
+
+// Studio gate cold play (2026-11-13): the first reward came 93-114 s after Play, behind the whole first story chapter.
+// The very first clue is now Lina's tea (the intro has just said "Lina has the kettle on"): one tap, +8 buttons.
+test('the first clue in a new house is a wish that pays at once; the story follows',async()=>{
+ const {nextStep}=await import('../src/objective-ui.js');const t=key=>translate('en',key),n=String;
+ const s=createState();const first=nextStep(s,t,n,'');
+ assert.equal(first.action,'care');assert.equal(first.value.id,'lina');
+ s.cares=1;assert.notEqual(nextStep(s,t,n,'').action,'care','after the first kindness the story leads');
+});
