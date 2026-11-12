@@ -41,7 +41,9 @@ function pickFromScene(data){
   if(!app.session.entered)return;
   const {storyUI,ui,dispatch}=app;
   if(data.object)dispatch(storyUI?.selected===data.object?'activate-object':'select-object',data.object,'scene');
-  if(data.doll)ui.open('household',data.doll);
+  // A first touch greets (she waves, a soft sound, nothing to read); touching her again opens her sheet.
+  if(data.doll){if(app.touchedDoll===data.doll)ui.open('household',data.doll);
+  else{app.touchedDoll=data.doll;dispatch('greet-doll',data.doll)}}
   if(data.ghost)dispatch('discover');
   if(data.slot&&ui.placement)dispatch(ui.moveId!==null?'relocate-object':'place',
     {id:ui.moveId,item:ui.placement,...data.slot});

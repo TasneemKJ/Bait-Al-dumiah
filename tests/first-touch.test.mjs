@@ -1,0 +1,29 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {bootHome} from './helpers/main-home-harness.mjs';
+import {translate} from '../src/i18n.js';
+import {createState} from '../src/simulation.js';
+import {SECRETS} from '../src/content.js';
+
+// Owner council (2026-11-13): a touched soul reacts at once, with nothing to read; a second touch opens her sheet.
+test('the first touch on a doll greets the player; the second opens her sheet',()=>{
+ const game=bootHome();game.button('play').click();game.frame(1000);
+ game.pick({doll:'noor'});
+ assert.equal(game.ui().panel,null,'the house stays in view so the reaction can be seen');
+ assert.ok(game.greeted?.().includes('noor'),'the doll waves');
+ assert.ok(game.audioEvents.includes('effect'),'and makes a small sound');
+ game.pick({doll:'noor'});assert.equal(game.ui().panel,'household','a second touch opens her sheet');
+ game.ui().close();game.pick({doll:'sami'});assert.equal(game.ui().panel,null,'another doll greets first too');
+});
+
+test('a found whisper says how many of the set are found',()=>{
+ const s=createState();s.clock=130;s.cares=1;
+ const game=bootHome({saved:JSON.stringify(s)});game.button('play').click();game.frame(1000);
+ game.dispatch()('discover');for(let t=2000;t<12000;t+=500)game.frame(t);
+ const line=game.notices.find(n=>n.startsWith(translate('en','newSecret')));
+ assert.ok(line,'the whisper is announced');assert.match(line,new RegExp(`1/${SECRETS.length}`));
+});
+
+test('in Arabic the dolls are warm little hearts, never spirits',()=>{
+ for(const key of ['introReveal','filmLine6'])assert.doesNotMatch(translate('ar',key),/أرواح/,key);
+});

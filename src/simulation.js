@@ -11,6 +11,7 @@ import {ROOMS,DOLLS,CATALOG,SLOTS,SECRETS,ACTIONS,MILESTONES,SEW_SECONDS,DOOR_ST
     SEW_DAILY,BASKET_MAX} from './content.js';
 import {createState} from './sim-state.js';
 export {createState};
+export const SECRET_COUNT=SECRETS.length;
 export * from './sim-queries.js';
 export {controlStitch,finishStitch,releaseStitch,stitchSectionProgress,stitchStatus,
   unpickStitch} from './sim-stitch.js';

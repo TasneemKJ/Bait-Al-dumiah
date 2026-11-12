@@ -103,12 +103,14 @@ export function createDolls(parent){
  const dolls=DOLLS.map((def,i)=>{const v=makeDoll(def);parent.add(v.root);
  const r=ROOMS.find(x=>x.id===def.room);v.root.position.set(r.x+.85,r.y+.12,.88);return v});
  let previousSelection=null;
- return {dolls,targets:dolls.map(v=>v.hit),greetAll(times){dolls.forEach((v,
+ return {dolls,targets:dolls.map(v=>v.hit),
+  greet(id){const v=dolls.find(x=>x.id===id);if(v)v.greetNow=true},greetAll(times){dolls.forEach((v,
    i)=>{if(Number.isFinite(times[i]))v.greetedAt=times[i]})},update(state,dt,selected,viewerYaw=0){
   dolls.forEach(v=>{v.halo.visible=selected===v.id});if(state.paused)return;
   const motion=!state.settings.reducedMotion&&!state.paused,t=state.elapsed;
   if(previousSelection!==null&&previousSelection!==selected){const doll=dolls.find(v=>v.id===selected);
   if(doll)doll.greetedAt=motion?t:-Infinity}previousSelection=selected;
+  for(const v of dolls)if(v.greetNow){v.greetNow=false;v.greetedAt=motion?t:-Infinity}
   dolls.forEach((v,i)=>{
    const d=state.dolls.find(x=>x.id===v.id),r=ROOMS.find(x=>x.id===d.room),
      mates=state.dolls.filter(x=>x.room===d.room),order=mates.indexOf(d);

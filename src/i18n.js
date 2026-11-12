@@ -72,7 +72,7 @@ Object.assign(strings.en,{
  'activityRule-lullaby':'Watch and listen. Pull the hanging charms in reverse order; the little moon repeats the song.',
 });
 Object.assign(strings.ar,{
- introApproach:'بيت صغير، قناديله مضوية وناطرك.',introReveal:'ورا هالحيطان ساكنين تلات أرواح صغار.',
+ introApproach:'بيت صغير، قناديله مضوية وناطرك.',introReveal:'ورا هالحيطان ساكنين تلات قلوب صغار.',
    introSettle:'ابدأ من المطبخ. لينا حاطّة الإبريق عالنار.',
  introSkip:'تخطّى',introSkipLabel:'تخطّى المقدّمة',introSetting:'مشهد البداية',watchIntro:'شوف المقدّمة',
    introSettingHelp:'رجّع المشهد القصير اللي بيفتح عالبيت.',
@@ -174,5 +174,5 @@ Object.assign(strings.ar,{
  filmLine3:'نور تاركة ضو صغير للقمر.',
  filmLine4:'البيت بيتذكّر كل لمسة حنونة.',
  filmLine5:'وباب واحد ناطر حكايته.',
- filmLine6:'تلات أرواح صغيرة. ومحلّ إلك.',
+ filmLine6:'تلات قلوب صغيرة. ومحلّ إلك.',
 });

@@ -58,6 +58,7 @@ export function createUI(host,getState,dispatch){
    const choice=host.querySelector('#sheet [data-choice]:focus')?.dataset.choice;renderPanel();
    focusActivityControl(host,result,choice)},
   setPortraits(values){portraits=values??{};if(panel==='household')renderPanel()},
+  setSelected(id){selected=id;tick()},
   get selected(){return selected},get panel(){return panel},get placement(){return placer.item},
   get t(){return t},get n(){return n},dispose(){toaster.dispose();unbindEvents()}};
 }

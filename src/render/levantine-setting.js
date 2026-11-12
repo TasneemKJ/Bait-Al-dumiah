@@ -93,6 +93,9 @@ export function createLevantineSetting(parent){
  const door=arch(staticRoot,0,.14,-1.40,.80,2.15,wood,.07);door.name='closed-walnut-door';
  for(const x of [-.22,.22])for(const y of [.57,1.19,1.81])box(staticRoot,x,y,-1.31,.26,.41,.035,dark,true);
  for(const x of [-.11,.11])ring(staticRoot,x,1.20,-1.265,.044,.009,brass);
+ // A brass plate with a keyhole: the door is a place you can see is locked (The Fifth Room in the app).
+ box(staticRoot,.24,1.02,-1.285,.075,.13,.012,brass);box(staticRoot,.24,1.035,-1.277,.016,.016,.006,dark);
+ box(staticRoot,.24,1.005,-1.277,.008,.03,.006,dark);
  // Extend the display's front edge into a narrow courtyard, outside room slots.
  box(staticRoot,0,-.37,2.93,10.2,.32,1.64,wood,true);
  box(staticRoot,0,-.20,2.93,10.24,.055,1.67,stone,true);

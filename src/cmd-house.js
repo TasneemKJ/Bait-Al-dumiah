@@ -63,9 +63,12 @@ if(app.notify(result,result.favorite?'favoriteMoved':'placed'))app.ui.close();re
    if(app.ui.panel)app.ui.close();sim.changeLight(app.state);app.save();app.refreshUI();
    if(sim.isNight(app.state))app.say(app.ui.t('nightHint'));return;
   },
+'greet-doll':(app,value)=>{app.world?.greet?.(value);app.audio.effect('mobile');
+   app.ui.setSelected?.(value);return;},
 'discover':(app,value,origin)=>{
    const result=sim.discover(app.state);if(result.ok){app.save();app.audio.effect('secret');app.ui.open('journal');
-   app.say(app.ui.t('newSecret'))}else app.say(app.ui.t(result.reason)+(result.needed?
+   const {t,n}=app.ui;app.say(`${t('newSecret')} · ${n(app.state.journal.length)}/${n(sim.SECRET_COUNT)}`)}
+   else app.say(app.ui.t(result.reason)+(result.needed?
      ` ${app.ui.t('shyNeed')} ${app.ui.n(result.needed)}%`:''));return;
   },
 };

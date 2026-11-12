@@ -115,3 +115,9 @@ The owner asked for Souq's earning model in the iPhone app. The web game is unch
 - **The canary** (`Tas.BaitAlDumiah.canary.monthly` $1.99 / `.yearly` $14.99, one group "The Canary"): a canary in a brass cage hangs by the liwan window, sings a soft trill now and then by day and sleeps under a cloth at night. The game has no offline earning to extend, so the benefit is company only: it is never picked, saved or counted and touches no buttons, comfort, coziness or whispers. When the plan ends the canary simply leaves.
 - **Asked at the moment of use, never saved** (`src/access.js`, `src/app-store.js`): the door section and the mend/gift commands ask the App Store each time. A door already begun in a save (a web copy opened in the app) stays the player's. The next-step clue never points at a door this copy has not opened; the door section shows what opens it and leads to the card, which is also reachable from Settings.
 - **The card** (`src/store-ui.js`) says what each one opens before paying, prints the App Store's price inside `<bdi dir="ltr">`, and carries Restore, Manage subscription, Terms (Apple's standard EULA) and Privacy, in Levantine Arabic and English.
+
+## First touch and the found secrets — owner council (2026-11-13)
+- A first touch on a doll greets: she waves and a soft chime sounds, with nothing to read; touching her again opens her sheet (the same "once to select, again to act" rule as objects).
+- A found whisper is announced with the count (`A whisper for the journal · 2/6`); the journal keeps the full sticker-book list.
+- The closed door between the ground-floor rooms carries a brass keyhole plate: in the app it is the visible place The Fifth Room opens.
+- Arabic calls the dolls warm little hearts (تلات قلوب صغار), never spirits (أرواح), in the intro and the film.
