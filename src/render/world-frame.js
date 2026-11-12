@@ -47,6 +47,7 @@ export function renderFrame(w,state,dt,selected){
  if(st.focusedDoll){const room=state.dolls.find(d=>d.id===st.focusedDoll)?.room;
  if(room!==scene.userData.portraitRoom){scene.userData.portraitRoom=room;
  cameraMove.moveTo(focusPose(),st.reducedMotion)}}else scene.userData.portraitRoom=null;
+ w.canary.update(state.elapsed,night,state.settings.reducedMotion||state.paused);
  ghost.update(state.elapsed,night,state.settings.reducedMotion||state.paused,state.journal.length);
  if(working())ghost.root.visible=false;
  controls.enableDamping=!working()&&!state.settings.reducedMotion;controls.update();renderer.render(scene,camera);

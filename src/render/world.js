@@ -89,6 +89,8 @@ export function createWorld(canvas,{onPick,onError}){
   ...cameraApi(w),
   setPlacement(item){st.placement=item;slots.setActive(item);if(!item){st.previewPose=null;preview.clear()}},
   setPreview(pose){st.previewPose=pose},
+  // The canary is the App Store's answer, read each time it changes; it is never saved.
+  setCanary(on){parts.canary.setPresent(on)},canarySing(t){parts.canary.sing(t)},
   render(state,dt,selected){renderFrame(w,state,dt,selected)},
   dispose(){st.disposed=true;portraitCache.dispose();
   controls.removeEventListener('start',cancelCameraMove);controls.dispose();

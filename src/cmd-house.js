@@ -1,5 +1,13 @@
 // Commands: Residents, rewards, the door, placement and the day/night light.
 import * as sim from './simulation.js';
+import {appStore} from './app-store.js';
+import {fifthRoomOpen} from './access.js';
+
+// The door and its gifts need The Fifth Room in the app (asked now, never saved); the card says what it opens.
+function doorClosedHere(app){
+ if(fifthRoomOpen(app.state,appStore.access()))return false;
+ app.say(app.ui.t('doorLocked'));app.ui.open('store');return true;
+}
 
 export const houseCommands={
 'select':(app,value,origin)=>{return;},
@@ -23,11 +31,13 @@ export const houseCommands={
    app.audio.effect('place');app.save();app.ui.tick()}else app.say(app.ui.t(result.reason));return;
   },
 'mend-door':(app,value,origin)=>{
+   if(doorClosedHere(app))return;
    const result=sim.mendDoor(app.state);
    if(result.ok){app.say(app.ui.t(result.opened?'doorOpenedNote':'doorStepDone'));app.audio.effect('secret');app.save();
    app.ui.tick()}else app.say(result.needs?app.ui.t('needs_'+result.needs):app.ui.t(result.reason));return;
   },
 'gift':(app,value,origin)=>{
+   if(doorClosedHere(app))return;
    const result=sim.leaveGift(app.state);
    if(result.ok){app.say(`${app.ui.t('giftReceived')} ${app.ui.t('gift-'+result.gift+'Title')}`);
    app.audio.effect('secret');

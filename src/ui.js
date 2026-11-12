@@ -51,7 +51,7 @@ export function createUI(host,getState,dispatch){
  return {collapseTools(){if(toolsExpanded)setTools(false)},
   openObject(key){if(!objectInfo(getState(),key))return false;selectedObject=key;open('object');return true},
   clearObject(){selectedObject=null},beginMove:placer.beginMove,get moveId(){return placer.moveId},
-  open,close,refresh,tick,toast,setSaveWarning:toaster.setWarning,
+  open,close,refresh,tick,toast,renderPanel,setSaveWarning:toaster.setWarning,
   objective:()=>nextStep(getState(),t,n,host.dataset.focusRoom),
   clearPlacement:placer.clear,
   setActivityResult(result){activityResult=result;

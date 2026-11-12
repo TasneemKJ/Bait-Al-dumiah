@@ -1,6 +1,7 @@
 // Commands: Camera, panels, pause and tool state.
 import * as sim from './simulation.js';
 import {objectInfo} from './object-ui.js';
+import {appStore} from './app-store.js';
 
 export const cameraCommands={
 'tools-state':(app,value,origin)=>{if(value){app.storyUI?.clear();
@@ -9,6 +10,8 @@ app.world?.clearObjectSelection();app.objectControls?.collapse()}return;},
    // Dismissing a sequence also leaves it. Physical work remains in its scene
    // when the optional catalog closes during entry or a paused modal closes.
    if(app.panelOpen==='activities'&&value!=='activities'&&!app.physicalActivity())sim.endActivity(app.state);
+   // The card asks the App Store again each time it opens, and forgets a dismissed sheet's wait.
+   if(value==='store'&&app.panelOpen!=='store'){appStore.clearStatus();appStore.refresh()}
    if(value)app.cancelWorkInput();app.panelOpen=value||false;app.syncPause();app.storyUI?.clear();
    app.world?.setEnabled(!app.panelOpen&&!app.manualPause&&!app.carrying&&!app.fatal);
    app.world?.clearObjectSelection();if(!value)app.ui.clearObject();app.objectControls?.update();app.updateWorkUI();

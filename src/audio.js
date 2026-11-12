@@ -137,6 +137,11 @@ export class DollhouseAudio{
     783.991,659.255]:kind==='mobile'?[392,493.883,587.33]:[440,523.251];
   notes.forEach((f,i)=>this.tone(f,t+i*.16,1.2,.035));
  }
+ // The canary's little song (the app's subscription): a soft high trill, quieter than the music box.
+ canary(){
+  if(!this.ready)return false;const t=this.context.currentTime;
+  [2637,2960,2637,3136,2794,3520].forEach((f,i)=>this.tone(f,t+i*.085,.09,.007,'sine',.01));return true;
+ }
  get ready(){return Boolean(this.context&&this.enabled&&!this.paused&&!this.disposed)}
  // The intro plays on its own bus under the master, so a skip fades it instead of cutting it.
  introCue(cue,delay=0){

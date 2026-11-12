@@ -8,10 +8,19 @@ import {isNight,coziness,wishFor,wishReward,bondLevel,nextBond,isContent,content
 import {giftArt} from './gift-art.js';
 import {icon} from './icons.js';
 import {inNativeApp} from './native-app.js';
+import {appStore} from './app-store.js';
+import {fifthRoomLocked} from './access.js';
+import {storeMarkup} from './store-ui.js';
 export const actionIcon={tea:'tea',play:'play',rest:'rest',soothe:'heart'};
 export const wishKey=(id,action)=>DOLLS.find(d=>d.id===id).wish===action?id+'Wish':id+'Wish_'+action;
 
-export function doorMarkup(s,{t,n,button}){
+// In the app without The Fifth Room the door is shown, closed, with what opens it (asked now, never saved).
+function lockedDoorMarkup(s,{t,button}){
+ return `<h3 class="section-heading">${t('door')}</h3><p class="sheet-intro">${t('doorLockedIntro')}</p>${button(
+   'panel-store',t('doorLockedSee'),'spark','class="wide door-store"')}`;
+}
+export function doorMarkup(s,{t,n,button,access=appStore.access()}){
+ if(fifthRoomLocked(s,access))return lockedDoorMarkup(s,{t,button});
  const step=nextDoorStep(s),ready=step&&doorReady(s,step);
  const done=DOOR_STEPS.slice(0,s.door).map((d,
    i)=>`<article><span
@@ -151,11 +160,13 @@ export function settingsMarkup(s,{t,button,resetConfirm}){
     'selected':''}>${t(q)}</option>`).join('')}</select></label><p>${t('qualityHelp')}</p
       ><div class="setting-row"><span>${t('introSetting')}</span>${button('watch-intro',t('watchIntro'),
     'play')}</div><p>${t('introSettingHelp')}</p><div class="setting-row"><span>${t('filmLabel')}</span>
-    ${button('watch-film',t('filmWatch'),'play')}</div></div><details><summary>${t('helpTitle')}</summary><p
+    ${button('watch-film',t('filmWatch'),'play')}</div>${appStore.inApp?`<div
+    class="setting-row"><span>${t('storeSettings')}</span>${button('panel-store',t('storeSettingsOpen'),
+    'spark')}</div>`:''}</div><details><summary>${t('helpTitle')}</summary><p
     >${t('help')}</p><p>${t('controlsHelp')}</p></details><p
-      class="privacy-note">${inNativeApp()?t('privacyNoteApp'):`${t('privacyNote')} <a href="./credits.txt"
+      class="privacy-note">${t('privacyNote')}${inNativeApp()?'':` <a href="./credits.txt"
     target="_blank" rel="noopener">${t('creditsLink')}</a>`}</p><div
-      class="save-file"><h3>${t('saveFile')}</h3><p>${t(inNativeApp()?'saveFileHelpApp':'saveFileHelp')}</p><div
+      class="save-file"><h3>${t('saveFile')}</h3><p>${t('saveFileHelp')}</p><div
     class="row">${inNativeApp()?'':button('save-export',t('saveExport'),
     'book')}<label class="file-button"><input type="file" accept="application/json,.json"
     data-field="save-import"><span>${t('saveImport')}</span></label></div></div><div
@@ -174,6 +185,7 @@ const SHEETS={
   decorate:(s,c)=>decorateMarkup(s,c),
   journal:(s,c)=>journalMarkup(s,c),
   settings:(s,c)=>settingsMarkup(s,c),
+  store:(s,c)=>storeMarkup(appStore,c),
 };
 export const sheetMarkup=(panel,s,ctx)=>SHEETS[panel](s,ctx);
 

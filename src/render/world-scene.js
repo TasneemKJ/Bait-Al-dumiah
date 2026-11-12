@@ -17,6 +17,7 @@ import {createSewingPlay} from './sewing-play.js';
 import {createMoonChimes} from './moon-chimes.js';
 import {createRestoration} from './restoration.js';
 import {createAtmosphere} from './atmosphere.js';
+import {createCanary} from './canary.js';
 
 // Builds the Three.js scene graph: renderer, camera, controls, lights, house, residents and every prop layer.
 export function buildScene(canvas){
@@ -49,10 +50,10 @@ export function buildScene(canvas){
  const restoration=createRestoration(house.root),
    objects=createObjectInteractions(house.root),storyProps=createStoryProps(house.root),
    teaTable=createTeaTable(house.root),sewingPlay=createSewingPlay(house.root),moonChimes=createMoonChimes(house.root);
- const decorSync=createDecorSync(house.root),slots=createSlotMarkers(house.root);
+ const decorSync=createDecorSync(house.root),slots=createSlotMarkers(house.root),canary=createCanary(house.root);
  return {renderer,scene,camera,depthFog,controls,hemi,key,fill,house,residents,ghost,
    courtyard,portraitCache,details,atmosphere,
-   roomEffects,roomFrame,preview,restoration,objects,storyProps,teaTable,sewingPlay,moonChimes,decorSync,slots};
+   roomEffects,roomFrame,preview,restoration,objects,storyProps,teaTable,sewingPlay,moonChimes,decorSync,slots,canary};
 }
 
 // Frees every geometry, material and map in the scene (the renderer itself is disposed by the caller).

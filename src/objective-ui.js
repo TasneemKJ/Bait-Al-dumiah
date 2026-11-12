@@ -3,9 +3,11 @@ import {isNight,coziness,wishFor,unclaimed,secretCozyNeeded,doorOpen,nextDoorSte
   doorReady,restorationReady,canAfford,wishGranted,hasBasket,secretsLeft,giftReady} from './simulation.js';
 import {storyObjective} from './story-ui.js';
 import {wishKey,actionIcon} from './panels-ui.js';
+import {appStore} from './app-store.js';
+import {fifthRoomOpen} from './access.js';
 
 // One suggested next step: wishes, first keepsake, rewards to collect, then the night's whisper.
-export function nextStep(s,t,n,focusRoom){
+export function nextStep(s,t,n,focusRoom,access=appStore.access()){
  const wish=DOLLS.find(d=>!wishGranted(s,d.id));
  const story=storyObjective(s,t,focusRoom);if(story)return story;
  if(wish){const action=wishFor(s,wish.id);
@@ -22,7 +24,8 @@ export function nextStep(s,t,n,focusRoom){
  if(hasBasket(s))return {copy:t('objectiveBasket'),label:t('collect')+' +'+n(s.basket),
    ico:'button',action:'collect-basket'};
  const step=nextDoorStep(s);
- if(step&&doorReady(s,step)&&canAfford(s,step.cost))return {copy:t('objectiveDoor'),
+ // A door this copy has not opened is never the next step: it is offered only where it stands.
+ if(step&&fifthRoomOpen(s,access)&&doorReady(s,step)&&canAfford(s,step.cost))return {copy:t('objectiveDoor'),
    label:t('mend')+' · '+n(step.cost),ico:'home',action:'panel',value:'journal',focus:'.door-next'};
  if(secretsLeft(s)){
   if(isNight(s)&&s.lastSecretDay===s.day)return {copy:t('tomorrow'),label:t('dawn'),ico:'sun',action:'light'};
@@ -31,7 +34,7 @@ export function nextStep(s,t,n,focusRoom){
   return {copy:t('objectiveNight'),label:t(isNight(s)?'investigate':'night'),
     ico:isNight(s)?'ghost':'moon',action:isNight(s)?'discover':'light'};
  }
- if(doorOpen(s)&&isNight(s)&&giftReady(s))return {copy:t('objectiveGift'),
+ if(doorOpen(s)&&fifthRoomOpen(s,access)&&isNight(s)&&giftReady(s))return {copy:t('objectiveGift'),
    label:t('leaveGift')+' · '+n(GIFT_COST),ico:'ghost',action:'gift'};
  return {copy:t('objectiveReturn'),label:t('household'),ico:'souls',action:'panel',value:'household'};
 }
