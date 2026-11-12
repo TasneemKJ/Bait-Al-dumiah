@@ -60,6 +60,9 @@
             ReferencedContainer = "container:BaitAlDumiah.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <StoreKitConfigurationFileReference
+         identifier = "../../BaitAlDumiahTests/BaitAlDumiah.storekit">
+      </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

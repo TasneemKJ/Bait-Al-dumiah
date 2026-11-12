@@ -1,0 +1,120 @@
+{
+  "appPolicies": {
+    "eula": "",
+    "policies": [
+      {
+        "locale": "en_US",
+        "policyText": "",
+        "policyURL": ""
+      }
+    ]
+  },
+  "identifier": "BA1D0001",
+  "nonRenewingSubscriptions": [],
+  "products": [
+    {
+      "displayPrice": "4.99",
+      "familyShareable": true,
+      "internalID": "6790700001",
+      "localizations": [
+        {
+          "description": "يفتح الباب المسكّر وغرفته وهدايا الضيف",
+          "displayName": "الغرفة الخامسة",
+          "locale": "ar"
+        },
+        {
+          "description": "Opens the closed door, its room and the gifts",
+          "displayName": "The Fifth Room",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "Tas.BaitAlDumiah.fifthRoom",
+      "referenceName": "The Fifth Room",
+      "type": "NonConsumable"
+    }
+  ],
+  "settings": {
+    "_failTransactionsEnabled": false,
+    "_locale": "en_US",
+    "_storefront": "USA",
+    "_storeKitErrors": []
+  },
+  "subscriptionGroups": [
+    {
+      "id": "6790700100",
+      "localizations": [
+        {
+          "description": "",
+          "displayName": "الكناري",
+          "locale": "ar"
+        },
+        {
+          "description": "",
+          "displayName": "The Canary",
+          "locale": "en_US"
+        }
+      ],
+      "name": "The Canary",
+      "subscriptions": [
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "14.99",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "6790700102",
+          "introductoryOffer": null,
+          "localizations": [
+            {
+              "description": "كناري بقفص نحاس بالليوان، رفقة وبس",
+              "displayName": "الكناري سنوياً",
+              "locale": "ar"
+            },
+            {
+              "description": "A canary in the liwan. Company, nothing else",
+              "displayName": "The Canary Yearly",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "Tas.BaitAlDumiah.canary.yearly",
+          "recurringSubscriptionPeriod": "P1Y",
+          "referenceName": "The Canary Yearly",
+          "subscriptionGroupID": "6790700100",
+          "type": "RecurringSubscription",
+          "winbackOffers": []
+        },
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "1.99",
+          "familyShareable": false,
+          "groupNumber": 2,
+          "internalID": "6790700101",
+          "introductoryOffer": null,
+          "localizations": [
+            {
+              "description": "كناري بقفص نحاس بالليوان، رفقة وبس",
+              "displayName": "الكناري شهرياً",
+              "locale": "ar"
+            },
+            {
+              "description": "A canary in the liwan. Company, nothing else",
+              "displayName": "The Canary Monthly",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "Tas.BaitAlDumiah.canary.monthly",
+          "recurringSubscriptionPeriod": "P1M",
+          "referenceName": "The Canary Monthly",
+          "subscriptionGroupID": "6790700100",
+          "type": "RecurringSubscription",
+          "winbackOffers": []
+        }
+      ]
+    }
+  ],
+  "version": {
+    "major": 4,
+    "minor": 0
+  }
+}

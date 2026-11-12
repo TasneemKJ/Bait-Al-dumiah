@@ -18,15 +18,22 @@ final class BaitConfigTests: XCTestCase {
         XCTAssertEqual(config.debugJSDefaultsKey, "baitDebugJS")
     }
 
-    func testNothingIsSoldAndThereIsNoGameCenter() {
-        XCTAssertTrue(config.catalog.isEmpty)
+    func testWhatIsSoldIsTheFifthRoomAndTheCanaryAndNeverPower() {
+        XCTAssertEqual(config.catalog.map(\.productID),
+                       ["Tas.BaitAlDumiah.fifthRoom", "Tas.BaitAlDumiah.canary.monthly", "Tas.BaitAlDumiah.canary.yearly"],
+                       "product IDs are permanent once in App Store Connect")
+        XCTAssertEqual(config.catalog.map(\.key), ["fifthRoom", "canaryMonthly", "canaryYearly"], "src/app-store.js PRODUCTS")
+        XCTAssertEqual(config.primaryProductKey, "fifthRoom")
+        XCTAssertEqual(config.bridgeGlobal, "baitApp")
+        XCTAssertEqual(config.bootGlobal, "__baitAppBoot")
         XCTAssertNil(config.gameCenter)
-        XCTAssertNil(TasBridgeMessage.parse(["type": "buy", "data": ["id": "buttons"]], config: config))
+        XCTAssertNil(TasBridgeMessage.parse(["type": "buy", "data": ["id": "buttons"]], config: config), "buttons are never sold")
+        XCTAssertEqual(TasBridgeMessage.parse(["type": "buy", "data": ["id": "fifthRoom"]], config: config), .buy("fifthRoom"))
     }
 
     func testTheBuiltGameShipsInsideTheApp() throws {
         let root = try XCTUnwrap(TasSchemeHandler.webRootURL(config: config), "the build phase copied dist/ to game/")
-        for path in ["index.html", "src/main.js", "src/native-app.js", "src/styles.css",
+        for path in ["index.html", "tas-bridge.js", "src/main.js", "src/app-store.js", "src/native-app.js", "src/styles.css",
                      "vendor/three.module.min.js", "vendor/three.core.min.js", "vendor/OrbitControls.js",
                      "credits.txt", "vendor/THREE-LICENSE.txt"] {
             XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(path).path), path)
@@ -36,6 +43,9 @@ final class BaitConfigTests: XCTestCase {
         }
         let main = try String(contentsOf: root.appendingPathComponent("src/main.js"), encoding: .utf8)
         XCTAssertTrue(main.contains("window.__baitAlDumiahSave"), "the save hook flushSaveScript calls")
+        let page = try String(contentsOf: root.appendingPathComponent("index.html"), encoding: .utf8)
+        let bridgeAt = try XCTUnwrap(page.range(of: "./tas-bridge.js")), gameAt = try XCTUnwrap(page.range(of: "./src/main.js"))
+        XCTAssertLessThan(bridgeAt.lowerBound, gameAt.lowerBound, "the bridge loads before the game")
     }
 
     func testEveryFileTheGameLoadsIsServed() throws {
@@ -56,6 +66,7 @@ final class BaitConfigTests: XCTestCase {
     func testLegalLinksAreReal() {
         XCTAssertEqual(config.legalPages["terms"]?.host, "www.apple.com")
         XCTAssertEqual(config.legalPages["privacy"]?.absoluteString, "https://tas-games.vercel.app/bait-al-dumiah/privacy.html")
+        XCTAssertEqual(config.legalPages["support"], SiteLinks.support)
         XCTAssertEqual(SiteLinks.support.absoluteString, "https://tas-games.vercel.app/bait-al-dumiah/support.html")
     }
 }

@@ -6,11 +6,12 @@ is `tas-engine/toolkit/release/README.md`; this page is what is particular to th
 ## Signing
 - Certificate: Apple Distribution `2PFCH5WWG4`, expires **2027-11-07**.
 - Profile: **Bait Al-dumiah AppStore (API)** (`a1c56bbd-d34f-4f76-9910-e6c3211a324a`), expires
-  **2027-11-07**. Renew both before then. No capabilities (no iCloud, Game Center or purchases).
+  **2027-11-07**. Renew both before then. Capabilities: In-App Purchase only (no iCloud, no Game Center). If the profile predates
+  the purchases, regenerate it.
 
 ## Before every build
-- [ ] `npm run verify` green, apart from the twelve browser-script checks that already fail on `main`
-      (they check the Python browser scripts, not the game) — note any new failure.
+- [ ] `npm run verify` green. Twelve tests in `tests/native-entry.test.mjs` run `python`; on a Mac with
+      only `python3`, put a `python` → `python3` link first on `PATH` (2026-11-13: 549/549 that way).
 - [ ] iOS suite green (command in `ios/README.md`).
 - [ ] Build from a **clean worktree at a pushed commit**, with `tas-engine` beside it:
       `git worktree add --detach <dir>/Bait-Al-dumiah <sha>`, `ln -s …/tas-engine <dir>/tas-engine`,
@@ -31,5 +32,8 @@ are only real on a device: the simulator proves nothing there), airplane-mode re
 tea pouring and sewing, background and relaunch (the house is where it was), delete and reinstall
 (a new house; nothing is kept outside the app).
 
-Review notes: no account, no purchases, no network. "Play" enters the house; touch an object once
-to select it and again to act. Everything is reachable without payment or login.
+Before review also: buy The Fifth Room and the canary with a Sandbox account; Restore on a second
+install; cancel the canary in Settings → Apple Account and see it leave.
+
+Review notes: see `ios/store/listing.json` (`reviewNotes`): no account, no network; where each
+purchase is and how to reach it.

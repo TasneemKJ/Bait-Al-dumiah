@@ -8,12 +8,15 @@ offline from `baitaldumiah://app/` in a `WKWebView` (folder mode, `webRoot: "gam
 ```
 index.html + src/ ──npm run build──▶ dist/ ──Xcode "Copy the game"──▶ BaitAlDumiah.app/game/ ──▶ baitaldumiah://app/
 ios/BaitAlDumiah
- ├─ BaitConfig.swift        everything TasKit needs: scheme, save prefix, flush hook, legal links
+ ├─ BaitConfig.swift        everything TasKit needs: scheme, save prefix, flush hook, catalog, legal links
  ├─ BaitAlDumiahApp.swift   the SwiftUI entry (ten lines)
  └─ Assets, Info.plist, InfoPlist.xcstrings (Arabic and English name), PrivacyInfo.xcprivacy
 ios/BaitAlDumiahTests
- ├─ BaitConfigTests          persisted names; every bundled file is served, JS as JavaScript
- └─ GamePageIntegrationTests the real page in a real web view: WebGL2, Play, save → vault, Settings
+ ├─ BaitAlDumiah.storekit    the three products for local StoreKit tests (the scheme's Run uses it too)
+ ├─ BaitConfigTests          persisted names, the catalog; every bundled file is served, JS as JavaScript
+ ├─ BaitStoreTests           prices, buy, refund, Ask to Buy, failure; the canary: expiry, upgrade, grace
+ └─ GamePageIntegrationTests the real page in a real web view: WebGL2, Play, save → vault, Settings,
+                             price → page, buying opens the door, the store card at 44pt in both languages
 ```
 
 ## Build and test
@@ -24,7 +27,7 @@ tas-engine must be checked out next to this repo (`../tas-engine`); the project 
 ```bash
 npm ci && npm run build                          # dist/ at the repo root
 xcodebuild -project ios/BaitAlDumiah.xcodeproj -scheme BaitAlDumiah \
-  -destination 'platform=iOS Simulator,name=iPhone 17e' test
+  -destination 'platform=iOS Simulator,name=<your iPhone simulator>' test
 ```
 
 The build fails with a clear message if `dist/index.html` is missing. Debug builds run one line of
@@ -42,9 +45,16 @@ JavaScript after load: `xcrun simctl launch booted Tas.BaitAlDumiah -baitDebugJS
   download; the `credits.txt` link, a new window) and says the house stays on this iPhone.
   Opening a copy saved from the web game still works. The licences ship inside the app
   (`game/credits.txt`, `game/vendor/THREE-LICENSE.txt`).
-- **Nothing is sold and there is no Game Center in 1.0.** To sell something later, follow
-  `tas-engine/toolkit/new-game.md` §1 (inline `tas-bridge.js`) and §4 (a `.storekit` file and store tests).
-- **Orientation:** portrait and landscape; the game is checked at 844×390 as well (AGENTS.md).
+- **What is sold (owner, 2026-11-13), never power:** The Fifth Room `Tas.BaitAlDumiah.fifthRoom`
+  ($4.99, once: the closed door, the room behind it, the visitor's gifts) and the canary
+  `Tas.BaitAlDumiah.canary.monthly` / `.yearly` ($1.99 / $14.99, group "The Canary": company in the
+  liwan, nothing else). `public/tas-bridge.js` is a verbatim copy of `tas-engine/web/tas-bridge.js`,
+  loaded before the game; `src/app-store.js` makes `window.baitApp`, and `src/access.js` asks it at
+  the moment of use and never saves the answer. On the web nothing is sold and everything is open.
+  The card is `src/store-ui.js` (Settings → The Fifth Room and the canary, or the closed door in the
+  journal). Debug: `-baitDebugJS "baitApp.openStore()"` after entering the house. No Game Center.
+- **Orientation:** portrait only in 1.0. The web game also lays out at 844×390, but rotation in the
+  app has not been checked (no Simulator UI on the build Mac); allow landscape after a real-iPhone check.
 
 ## Decisions (2026-11-13)
 
@@ -52,13 +62,16 @@ JavaScript after load: `xcrun simctl launch booted Tas.BaitAlDumiah -baitDebugJS
 |---|---|
 | Shape | TasKit folder mode over the existing `dist/`; no bundler, no rewrite. |
 | Identifiers | Bundle `Tas.BaitAlDumiah`, scheme `baitaldumiah`, SKU `BaitAlDumiah`, App Store Connect name «بيت الدمية · Bait Al-dumiah», primary language Arabic. |
-| Pay model | Free, no in-app purchases (the game has no monetization). |
+| Pay model | Free download; The Fifth Room $4.99 once; the canary $1.99 a month or $14.99 a year (DESIGN.md, owner override 2026-11-13). |
 | Game Center | None in 1.0. |
 | Web | The web build keeps working unchanged; the app adds no network requests. |
 
 ## What App Store Connect needs (owner)
 
 - App record: bundle `Tas.BaitAlDumiah` (registered 2026-11-13), SKU `BaitAlDumiah`, primary language Arabic.
-- Privacy: **Data Not Collected**. Privacy Policy `https://tas-games.vercel.app/bait-al-dumiah/privacy.html`,
+- In-app purchases: the three products above (`ios/store/listing.json` has names, descriptions and
+  review notes; `ios/store/review/store-card.png` is the review screenshot). The first one must be
+  added to the version in the web UI.
+- Privacy: **Data Not Collected** (Apple handles payment). Privacy Policy `https://tas-games.vercel.app/bait-al-dumiah/privacy.html`,
   Support `https://tas-games.vercel.app/bait-al-dumiah/support.html` (pages in the `tas-games` repo).
 - Age rating questionnaire, Arabic and English listing and screenshots (see `ios/store/`), review notes.
