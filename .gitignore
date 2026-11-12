@@ -3,3 +3,7 @@ dist/
 artifacts/
 .superpowers/
 __pycache__/
+ios/**/xcuserdata/
+ios/build/
+*.xcarchive
+export-*/

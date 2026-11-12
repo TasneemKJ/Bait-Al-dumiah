@@ -1,0 +1,14 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "comment" : "The name under the icon",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "بيت الدمية" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Bait Al-dumiah" } }
+      }
+    }
+  },
+  "version" : "1.0"
+}

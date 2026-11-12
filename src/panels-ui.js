@@ -7,6 +7,7 @@ import {isNight,coziness,wishFor,wishReward,bondLevel,nextBond,isContent,content
   canAfford,wishGranted,hasBasket,secretsLeft,giftReady,isNewestGift,slotTaken,restingNote} from './simulation.js';
 import {giftArt} from './gift-art.js';
 import {icon} from './icons.js';
+import {inNativeApp} from './native-app.js';
 export const actionIcon={tea:'tea',play:'play',rest:'rest',soothe:'heart'};
 export const wishKey=(id,action)=>DOLLS.find(d=>d.id===id).wish===action?id+'Wish':id+'Wish_'+action;
 
@@ -152,10 +153,10 @@ export function settingsMarkup(s,{t,button,resetConfirm}){
     'play')}</div><p>${t('introSettingHelp')}</p><div class="setting-row"><span>${t('filmLabel')}</span>
     ${button('watch-film',t('filmWatch'),'play')}</div></div><details><summary>${t('helpTitle')}</summary><p
     >${t('help')}</p><p>${t('controlsHelp')}</p></details><p
-      class="privacy-note">${t('privacyNote')} <a href="./credits.txt" target="_blank"
-    rel="noopener">${t('creditsLink')}</a></p><div
-      class="save-file"><h3>${t('saveFile')}</h3><p>${t('saveFileHelp')}</p><div
-    class="row">${button('save-export',t('saveExport'),
+      class="privacy-note">${inNativeApp()?t('privacyNoteApp'):`${t('privacyNote')} <a href="./credits.txt"
+    target="_blank" rel="noopener">${t('creditsLink')}</a>`}</p><div
+      class="save-file"><h3>${t('saveFile')}</h3><p>${t(inNativeApp()?'saveFileHelpApp':'saveFileHelp')}</p><div
+    class="row">${inNativeApp()?'':button('save-export',t('saveExport'),
     'book')}<label class="file-button"><input type="file" accept="application/json,.json"
     data-field="save-import"><span>${t('saveImport')}</span></label></div></div><div
       class="reset-section">${resetConfirm?

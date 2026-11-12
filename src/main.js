@@ -84,3 +84,5 @@ app.film=createFilmUI(document.querySelector('#app'),{getState:()=>app.state,
   app.host.querySelector('[data-action="watch-film"]')?.focus({preventScroll:true});},
 });
 installLoop(app);installDebug(app);
+// The iPhone app flushes the save before it copies it (TasKit flushSaveScript); save() writes nothing before Play.
+window.__baitAlDumiahSave=()=>app.save();
