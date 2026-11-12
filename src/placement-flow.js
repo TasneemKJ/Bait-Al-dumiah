@@ -1,5 +1,6 @@
 // The decor placer: which item is being placed or moved, and the room and slot it is aimed at.
 import {slotTaken} from './simulation.js';
+import {ROOMS} from './content.js';
 import {placementMarkup} from './panels-ui.js';
 import {button} from './shell-markup.js';
 
@@ -21,7 +22,11 @@ export function createPlacementFlow(host,getState,dispatch,{t,n,closeSheet}){
   get item(){return placement},get moveId(){return moveId},render,clear,
   // A sheet opening over the placer cancels it, so the world never keeps a stale ghost.
   cancelIfActive(){if(!placement)return;clear();dispatch('placement-cancel')},
-  chooseItem(id){begin(id,null,'kitchen',0)},
+  // A new keepsake aims at a free spot: the room in view first, then the first room with space.
+  chooseItem(id){const s=getState(),view=ROOMS.find(r=>r.id===host.dataset?.focusRoom)?.id;
+   const rooms=[...new Set([view,'kitchen',...ROOMS.map(r=>r.id)].filter(Boolean))];
+   const free=r=>[0,1,2].find(i=>!slotTaken(s,r,i));const at=rooms.find(r=>free(r)!==undefined)??'kitchen';
+   begin(id,null,at,free(at)??0)},
   beginMove(id){const d=getState().decor.find(d=>d.id===id);if(!d)return false;
    begin(d.item,id,d.room,d.slot);return true},
   cancel(){clear();dispatch('placement-cancel')},
