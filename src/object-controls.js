@@ -28,7 +28,7 @@ export function createObjectControls(host,getState,onSelect){
    const focused=nav.contains(document.activeElement)?document.activeElement.dataset.object:null;
    signature=next;const t=k=>translate(s.settings.locale,k);
    nav.setAttribute('aria-label',t('roomObjects'));nav.dataset.expanded=String(expanded);
-   nav.innerHTML=`<button type="button" data-object-toggle
+   nav.innerHTML=`<button type="button" data-object-toggle data-short="${t('barObjects')}"
      aria-expanded="${expanded}">${icon('spark')}<span>${t('roomObjects')}</span></button><div
      class="object-list" ${expanded?
      '':'hidden'}>${entries.map(e=>`<button type="button" data-object="${e.key}"

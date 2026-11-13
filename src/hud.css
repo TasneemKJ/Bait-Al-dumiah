@@ -134,3 +134,25 @@ html[lang=ar] #ui .dock[data-expanded=true]>button{font-size:max(16px,1rem)}
 @media (pointer:coarse){#sheet .sheet-header [data-action=close]:focus-visible{outline:none}}
 .app-pages{flex-wrap:wrap;margin:-8px 0 18px}.app-pages .store-button{background:none;font-size:11px}
 .app-signature{font-size:11px!important;line-height:1.7;color:var(--muted);border-top:1px dashed var(--line);padding-top:14px}
+/* The phone's bottom bar (hand-play, 2026-11-13): five equal columns, each icon with its short name beneath, like the
+   room tabs above it. Things to touch · House tools · Sound · Pause · Whole house. */
+@media(max-width:680px) and (orientation:portrait){
+ #ui{--bar-col:calc((100% - 24px)/5)}
+ #ui .object-controls[data-expanded=false]{inset-inline-start:12px;width:var(--bar-col)}
+ #ui .dock[data-expanded=false]{width:calc(var(--bar-col)*3);max-width:none;padding:0;gap:0}
+ #ui .dock[data-expanded=false]>:is(.tools-toggle,[data-action=sound],[data-action=pause]){flex:1 1 0;width:auto;min-width:0}
+ #ui .camera-tools{inset-inline-end:12px;width:var(--bar-col);padding:0}
+ #ui .camera-tools>[data-action=camera]{width:100%}
+ #ui :is(.object-controls[data-expanded=false]>[data-object-toggle],.dock[data-expanded=false]>[data-short],
+  .camera-tools>[data-short]){flex-direction:column;gap:1px;height:48px;min-height:48px;padding:3px 0 2px;border-radius:12px}
+ #ui :is(.object-controls[data-expanded=false]>[data-object-toggle],.dock[data-expanded=false]>[data-short],
+  .camera-tools>[data-short])::after{content:attr(data-short);font:11px/1.25 "Trebuchet MS",Tahoma,sans-serif;
+  letter-spacing:.2px;color:inherit;opacity:.86;white-space:nowrap}
+ #ui .object-controls[data-expanded=false]>[data-object-toggle]{width:100%}
+ #ui :is(.object-controls[data-expanded=false]>[data-object-toggle],.dock[data-expanded=false]>[data-short],
+  .camera-tools>[data-short]){justify-content:flex-end}
+ #ui :is(.object-controls[data-expanded=false]>[data-object-toggle],.dock[data-expanded=false]>[data-short],
+  .camera-tools>[data-short])>.icon{width:20px;height:20px;margin:0}
+ #ui .dock[data-expanded=false]>.tools-toggle>span{position:absolute;width:1px;height:1px;overflow:hidden;
+  clip-path:inset(50%);white-space:nowrap}
+}
