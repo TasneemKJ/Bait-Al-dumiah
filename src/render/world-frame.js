@@ -43,10 +43,11 @@ export function renderFrame(w,state,dt,selected){
  roomFrame.tint(st.nightMix,dt,st.reducedMotion);preview.update(st.previewPose,state);
  residents.update(state,dt,selected,Math.atan2(camera.position.x-controls.target.x,
    camera.position.z-controls.target.z));
- for(const doll of residents.dolls){const room=state.dolls.find(d=>d.id===doll.id)?.room;
+ // Drawn rooms (rain night, idle visit), not saved ones, decide what a scene hides or follows.
+ for(const doll of residents.dolls){const room=doll.room;
  doll.root.visible=!(st.teaActive&&room==='kitchen'||st.stitchActive&&room==='studio'||
    st.chimeActive&&room==='bedroom')}
- if(st.focusedDoll){const room=state.dolls.find(d=>d.id===st.focusedDoll)?.room;
+ if(st.focusedDoll){const room=residents.dolls.find(v=>v.id===st.focusedDoll)?.room;
  if(room!==scene.userData.portraitRoom){scene.userData.portraitRoom=room;
  cameraMove.moveTo(focusPose(),st.reducedMotion)}}else scene.userData.portraitRoom=null;
  w.canary.update(state.elapsed,night,state.settings.reducedMotion||state.paused);

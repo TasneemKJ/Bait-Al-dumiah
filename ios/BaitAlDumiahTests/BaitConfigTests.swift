@@ -41,10 +41,12 @@ final class BaitConfigTests: XCTestCase {
         for webOnly in ["og-image.jpg", "manifest.webmanifest"] {
             XCTAssertFalse(FileManager.default.fileExists(atPath: root.appendingPathComponent(webOnly).path), webOnly)
         }
-        let main = try String(contentsOf: root.appendingPathComponent("src/main.js"), encoding: .utf8)
+        // The production build is one minified bundle (scripts/build.mjs); there is no src/ tree in the app.
+        XCTAssertFalse(FileManager.default.fileExists(atPath: root.appendingPathComponent("src").path), "no source tree")
+        let main = try String(contentsOf: root.appendingPathComponent("game.js"), encoding: .utf8)
         XCTAssertTrue(main.contains("window.__baitAlDumiahSave"), "the save hook flushSaveScript calls")
         let page = try String(contentsOf: root.appendingPathComponent("index.html"), encoding: .utf8)
-        let bridgeAt = try XCTUnwrap(page.range(of: "./tas-bridge.js")), gameAt = try XCTUnwrap(page.range(of: "./src/main.js"))
+        let bridgeAt = try XCTUnwrap(page.range(of: "./tas-bridge.js")), gameAt = try XCTUnwrap(page.range(of: "./game.js"))
         XCTAssertLessThan(bridgeAt.lowerBound, gameAt.lowerBound, "the bridge loads before the game")
     }
 

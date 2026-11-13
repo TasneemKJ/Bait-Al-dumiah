@@ -6,7 +6,8 @@ import {translate} from './i18n.js';
 
 export const CARD=Object.freeze({width:1080,height:1350,band:230});
 // The first week's arc names its own nights on the card (src/sim-arc.js).
-const arcMoment=s=>s.arc?.visits===ARC.rain?'arcCardRain':s.arc?.visits===ARC.day&&s.arc.keepsake?'arcCardNoor':null;
+const arcMoment=s=>s.arc?.visits===ARC.rain&&s.arc.rain?'arcCardRain':
+ s.arc?.visits===ARC.day&&s.arc.keepsake?'arcCardNoor':null;
 export function cardLines(s,t,n){
  const locale=s.settings.locale;
  return {title:t('title'),alt:translate(locale==='ar'?'en':'ar','title'),

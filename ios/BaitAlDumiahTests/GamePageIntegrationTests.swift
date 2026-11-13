@@ -106,7 +106,7 @@ final class GamePageIntegrationTests: XCTestCase {
         let webgl2 = try await js("!!document.createElement('canvas').getContext('webgl2')") as? Bool
         XCTAssertEqual(webgl2, true)
         let inApp = try await web.callAsyncJavaScript(
-            "return (await import('./src/native-app.js')).inNativeApp()", contentWorld: .page) as? Bool
+            "return !!window.webkit?.messageHandlers?.baitaldumiah", contentWorld: .page) as? Bool
         XCTAssertEqual(inApp, true, "the page sees webkit.messageHandlers.baitaldumiah")
         let vibrate = try await js("typeof navigator.vibrate") as? String
         XCTAssertEqual(vibrate, "function", "haptics reach the Taptic Engine")

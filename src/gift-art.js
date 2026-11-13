@@ -40,9 +40,9 @@ const art={
      ' stroke="#c9b6ae" stroke-width="1.3"'+
    ' stroke-linecap="round"/>',
  // Noor's keepsake on the seventh visit (src/sim-arc.js): a bow of jasmine thread with three flowers.
- 'jasmine-ribbon':'<path d="M24 22c-6-8-14-8-14-2s8 6 14 2c6 4 14 4 14-2s-8-6-14 2z" fill="#f0dfe4" stroke="#a9627e"'+
-   ' stroke-width="1.3" stroke-linejoin="round"/><path d="M22 24l-6 16M26 24l6 16" fill="none" stroke="#a9627e"'+
-   ' stroke-width="1.3" stroke-linecap="round"/><g fill="#fbf4e9" stroke="#b68d5d" stroke-width="1"><circle cx="24"'+
+ 'jasmine-ribbon':'<path d="M24 22c-6-8-14-8-14-2s8 6 14 2c6 4 14 4 14-2s-8-6-14 2z" fill="#fbf4e9" stroke="#b68d5d"'+
+   ' stroke-width="1.3" stroke-linejoin="round"/><path d="M22 24l-6 16M26 24l6 16" fill="none" stroke="#b68d5d"'+
+   ' stroke-width="1.3" stroke-linecap="round"/><g fill="#fbf4e9" stroke="#c59b60" stroke-width="1"><circle cx="24"'+
    ' cy="22" r="3"/><circle cx="17" cy="38" r="2.6"/><circle cx="31" cy="38" r="2.6"/></g><g fill="#e5b471">'+
    '<circle cx="24" cy="22" r="1.1"/><circle cx="17" cy="38" r=".9"/><circle cx="31" cy="38" r=".9"/></g>'
 };

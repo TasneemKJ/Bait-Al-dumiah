@@ -50,3 +50,10 @@ test('each heart drifts to her favourite room, or the liwan, never the room she 
  for(const id of ['lina','noor','sami'])for(let n=0;n<IDLE.lines;n++)for(const lang of ['en','ar'])
   assert.notEqual(translate(lang,`canaryMemory-${id}-${n}`),`canaryMemory-${id}-${n}`);
 });
+
+test('a continued house is not woken on entry, and entering counts a visit day that the save keeps',()=>{
+ const saved=createState();saved.elapsed=500;saved.cares=4;saved.introSeen=true;
+ const game=bootHome({store:store(),saved:JSON.stringify(saved)});game.button('play').click();live(game,2);
+ assert.deepEqual(visits(game),[],'no visit on entry');
+ assert.equal(game.state().arc.visits,1);assert.match(game.writes.at(-1).value,/"arc":\{"visits":1/);
+});

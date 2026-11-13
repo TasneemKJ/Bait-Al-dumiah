@@ -13,7 +13,8 @@ export function visitRoom(s,id){
  return [fav,'parlor','kitchen'].find(r=>r&&r!==d.room)??null;
 }
 export function installIdleLife(app,store=appStore){
- let quietSince=0,visit=null,nextAt=0,turn=0;const sung={};
+ // The quiet clock starts at the first watched moment, so a continued save never wakes on entry.
+ let quietSince=null,visit=null,nextAt=0,turn=0;const sung={};
  const poke=()=>{quietSince=app.state.elapsed;if(visit)nextAt=app.state.elapsed+IDLE.rest};
  for(const target of [app.canvas,app.host])for(const type of ['pointerdown','keydown','wheel'])
   target?.addEventListener?.(type,poke,{capture:true,passive:true});
@@ -28,7 +29,7 @@ export function installIdleLife(app,store=appStore){
   if(app.audio?.canary?.())app.world?.canarySing?.(app.state.elapsed);
  }
  app.idle={poke,get visit(){return visit},tick(){
-  const s=app.state;if(!allowed()){end();quietSince=s.elapsed;return}
+  const s=app.state;if(!allowed()){end();quietSince=null;return}quietSince??=s.elapsed;
   if(visit&&s.elapsed>=visit.until){end();nextAt=s.elapsed+IDLE.rest;return}
   if(visit||s.elapsed-quietSince<IDLE.after||s.elapsed<nextAt)return;
   const id=DOLLS[turn++%DOLLS.length].id,room=visitRoom(s,id);

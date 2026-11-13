@@ -84,7 +84,8 @@ test('the share card names the rain night and Noor\'s night, and otherwise the d
  const {cardLines}=await import('../src/share-card.js');
  for(const lang of ['en','ar']){const t=k=>translate(lang,k),s=sim.createState();s.settings.locale=lang;
   assert.ok(cardLines(s,t,String).detail.startsWith(t('day')));
-  s.arc.visits=5;assert.ok(cardLines(s,t,String).detail.startsWith(t('arcCardRain')),lang);
+  s.arc.visits=5;assert.ok(cardLines(s,t,String).detail.startsWith(t('day')),'not before the rain comes');
+  s.arc.rain=true;assert.ok(cardLines(s,t,String).detail.startsWith(t('arcCardRain')),lang);
   s.arc.visits=7;s.arc.keepsake=true;assert.ok(cardLines(s,t,String).detail.startsWith(t('arcCardNoor')),lang);
  }
 });
