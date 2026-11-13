@@ -3,12 +3,10 @@
 export default {
  en:{
   storeTitle:'More of the house',
-  storeIntro:'The whole house of four rooms is free. Two small additions, if you like.',
+  storeIntro:'The whole house is free. Two small extras, if you like.',
   fifthName:'The Fifth Room',
-  fifthNote:'At once: the closed door opens a crack, its first mending is done, and the visitor leaves '+
-   'a pressed jasmine on the threshold. Then four more mendings, free of buttons: the key waits until Sami '+
-   'holds you dear, the last until you have heard all six whispers. Behind it: the fifth room and the rest '+
-   'of the visitor\'s eight gifts, one a night. Paid once.',
+  fifthNote:'At once: the door opens a crack, its first mending done, a jasmine on the threshold. '+
+   'Then free mendings (Sami\'s key, six whispers), the room and its gifts. Paid once.',
   fifthOwned:'Yours. The door is open; its last mendings are free (Sami\'s key, then the six whispers).',
   fifthDelivered:'The closed door opens a crack. A pressed jasmine waits on the threshold. Four free mendings '+
    'remain: Sami\'s key, then all six whispers.',
@@ -16,14 +14,12 @@ export default {
    'cost no buttons. The key waits until Sami holds you dear; the last waits until you have heard all six '+
    'whispers. Then the visitor\'s gifts come, one a night.',
   canaryName:'The canary',
-  canaryNote:'A canary in a brass cage lives by the liwan window. It sings its little song by day and '+
-   'sleeps under a cloth at night, and now and then sings aloud what a doll can\'t say: lines every player '+
-   'can read, free, beside each doll\'s memories in Little souls. Company only: no buttons, comfort, '+
-   'whispers or story are for sale.',
+  canaryNote:'A canary by the liwan window, singing by day. Its songs are lines anyone reads free in '+
+   'Little souls. Company only: nothing else is for sale.',
   canaryOwned:'On. The canary is in the liwan.',
   storeMonthly:'{price} a month',storeYearly:'{price} a year',
-  storeRenews:'Monthly or yearly. It renews automatically until you cancel it in your Apple Account settings, '+
-   'at least 24 hours before the period ends. When it ends, the canary flies home and nothing else changes.',
+  storeRenews:'Monthly or yearly. Renews automatically unless cancelled in your Apple Account settings at least '+
+   '24 hours before the period ends. Then the canary flies home; nothing else changes.',
   storeBuy:'Buy',storeOwned:'Yours',storeLoading:'Asking the App Store…',storeBuying:'Waiting for the App Store…',
   storePending:'Waiting for approval. It opens when it is given.',
   storeFailed:'The App Store could not finish that. Nothing was charged.',
@@ -50,9 +46,8 @@ export default {
   storeTitle:'أكتر من البيت',
   storeIntro:'البيت كلّه بغرفه الأربعة ببلاش. وفي إضافتين زغار إذا حابب.',
   fifthName:'الغرفة الخامسة',
-  fifthNote:'فوراً: الباب المسكّر بينفتح شقّ زغير، وأول تصليح بيخلص، والضيف بيترك ياسمينة مكبوسة عالعتبة. '+
-   'وبعدين أربع تصليحات كمان بلا أزرار: المفتاح ناطر لحتى توصل لدرجة الغلاوة مع سامي، والأخير لحتى تسمع '+
-   'الستّ همسات كلّهن. ووراه: الغرفة الخامسة وباقي هدايا الضيف التمانة، هدية كل ليلة. بتدفعها مرّة وحدة.',
+  fifthNote:'فوراً: الباب بينفتح شقّ، وأول تصليح بيخلص، وياسمينة مكبوسة عالعتبة. وبعدين تصليحات ببلاش '+
+   '(مفتاح سامي، والستّ همسات)، والغرفة الخامسة وهدايا الضيف. بتدفعها مرّة وحدة.',
   fifthOwned:'صارت إلك. الباب مفتوح، وآخر تصليحاته ببلاش (مفتاح سامي، وبعدين الستّ همسات).',
   fifthDelivered:'الباب المسكّر انفتح شقّ زغير. في ياسمينة مكبوسة ناطرة عالعتبة. باقي أربع تصليحات ببلاش: '+
    'مفتاح سامي، وبعدين الستّ همسات كلّهن.',
@@ -60,9 +55,8 @@ export default {
    'المفتاح ناطر لحتى توصل لدرجة الغلاوة مع سامي، والأخير لحتى تسمع الستّ همسات كلّهن. وبعدها بتجي هدايا '+
    'الضيف، هدية كل ليلة.',
   canaryName:'الكناري',
-  canaryNote:'كناري بقفص نحاس ساكن جنب شبّاك الليوان. بالنهار بيغنّي غنّيته الزغيرة، وبالليل بينام '+
-   'تحت شرشف، وكل فترة بيغنّي بصوت عالي اللي الدمية ما بتقدر تقوله: كلام مكتوب ببلاش لكل لاعب '+
-   'جنب ذكريات كل دمية بـ«أهل البيت». رفقة وبس: ما في أزرار ولا راحة ولا همسات ولا حكاية للبيع.',
+  canaryNote:'كناري جنب شبّاك الليوان، بيغنّي بالنهار وبينام تحت شرشف بالليل. غنّياته كلام بيقدر '+
+   'أي حدا يقراه ببلاش بـ«أهل البيت». رفقة وبس: ما في شي تاني للبيع.',
   canaryOwned:'شغّال. الكناري بالليوان.',
   storeMonthly:'{price} بالشهر',storeYearly:'{price} بالسنة',
   storeRenews:'شهري أو سنوي. بيتجدّد لحاله لحتى تلغيه من إعدادات حساب Apple، قبل آخر المدّة بـ٢٤ ساعة '+
