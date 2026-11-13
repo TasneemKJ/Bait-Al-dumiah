@@ -165,7 +165,7 @@ Object.assign(strings.en,{
 Object.assign(strings.ar,{
  filmLoading:'نفتح البيت الصغير…',
  filmTitle:'بيت بحجم الذكرى',filmWatch:'شاهد الفيلم',filmLabel:'زيارة في دقيقة',
- filmClose:'عُد إلى البيت',filmPause:'أوقف قليلاً',filmPlay:'واصل',filmReplay:'شاهده مرة أخرى',
+ filmClose:'عُد إلى البيت',filmPause:'إيقاف',filmPlay:'واصل',filmReplay:'أعِد الفيلم',
  filmSound:'الصوت يعمل',filmSilent:'بلا صوت',filmError:'لم نستطع فتح الفيلم. بيتك في أمان.',
  filmEnd:'أهلاً وسهلاً بك.',filmChapter:'بيت صغير، وذكراه كبيرة',
  filmLine0:'بعض البيوت بحجم الذكرى.',

@@ -74,7 +74,7 @@ export default {
   doorLockedSee:'انظر الغرفة الخامسة',
   canaryArrived:'جاء كناري ليسكن بجانب نافذة الليوان.',
   homePromise:'بيت صغير، ثلاثة قلوب صغيرة، وبضعة أسرار جميلة.',
-  barObjects:'أشياء',barTools:'أدوات',barSound:'الصوت',barPause:'استراحة',barHouse:'البيت',
+  barObjects:'أشياء',barTools:'أدوات',barSound:'الصوت',barPause:'وقفة',barHouse:'البيت',
   keepsakeWish:'أمنية {doll} اليوم:',keepsakeWishGranted:'في مكانها تماماً. سلمت يداك.',
   objectiveComplete:'سُمعت كل الهمسات وصارت كل زاوية محبوبة. اكتملت حكاية هذا البيت؛ زُرنا أيّ يوم لنشرب الشاي.',
   shareLabel:'صورة لبيتك',shareAction:'شارك',shareUnavailable:'لم نستطع أن نصنع الصورة الآن.',
