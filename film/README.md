@@ -1,4 +1,4 @@
-# The size of memory / بيت على قدّ الذكرى
+# The size of memory / بيت بحجم الذكرى
 
 A 60-second cinematic visit to **Bait Al-Dumiah / بيت الدمية**. Actual local Three.js house and residents; original procedural music-box score and porcelain/wood resonances; no voice recording, external artwork, service credentials or remote runtime assets.
 

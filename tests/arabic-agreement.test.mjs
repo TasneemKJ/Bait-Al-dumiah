@@ -20,8 +20,8 @@ test('counts are written as "label: n / total", never as a number before a plura
  assert.match(ar.activityCooldown,/\{x\} من ثواني/);
 });
 test('room locatives carry their own preposition: no kashida joined to the definite article',()=>{
- for(const r of ['kitchen','parlor','studio','bedroom']){assert.ok(ar[r+'In']&&en[r+'In'],r);assert.match(ar[r+'In'],/^ب/)}
- assert.doesNotMatch(ar.storyFindRoom,/ـ/);assert.match(ar.storyFindRoom,/^شوف \{room\}$/);
+ for(const r of ['kitchen','parlor','studio','bedroom']){assert.ok(ar[r+'In']&&en[r+'In'],r);assert.match(ar[r+'In'],/^في /)}
+ assert.doesNotMatch(ar.storyFindRoom,/ـ/);assert.match(ar.storyFindRoom,/^ابحث \{room\}$/);
 });
 test('every English key has an Arabic form',()=>{
  for(const k of Object.keys(en))assert.ok(k in ar,`missing Arabic for ${k}`);

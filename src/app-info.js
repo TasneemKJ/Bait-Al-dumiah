@@ -1,6 +1,6 @@
 // Settings rows for the iPhone app (studio bar, 2026-11-13): haptics, support and privacy pages, the version and the
 // studio's signature. The version is the Xcode project's MARKETING_VERSION (tests/settings-app.test.mjs).
-export const APP_VERSION='1.0';
+export const APP_VERSION='1.1';
 // Kept under the save prefix so the vault carries it with the house.
 export const HAPTICS_KEY='bait-al-dumiah.v1.haptics';
 const store=()=>{try{return globalThis.localStorage}catch{return null}};

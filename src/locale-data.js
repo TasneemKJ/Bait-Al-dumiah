@@ -1,4 +1,4 @@
-// Original game copy, split by domain so each table stays readable. ar is shared Levantine/Shami Arabic;
+// Original game copy, split by domain so each table stays readable. ar is simple, warm fusha (MSA);
 // saved locale IDs stay stable.
 import rituals from './locale-rituals.js';
 import story from './locale-story.js';

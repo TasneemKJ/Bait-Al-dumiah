@@ -103,8 +103,8 @@ test('the store card says what each one opens, prices left to right, and keeps R
   for(const price of ['$4.99','$1.99','$14.99'])assert.ok(html.includes(`<bdi dir="ltr">${price}</bdi>`),price);
   for(const id of ['fifthRoom','canaryMonthly','canaryYearly'])assert.match(html,new RegExp(`data-id="${id}"`));
   assert.match(html,/data-action="store-restore"/);assert.match(html,/data-id="terms"/);assert.match(html,/data-id="privacy"/);
-  assert.match(html,lang==='ar'?/بيتجدّد لحاله/:/renews automatically/i);
-  assert.match(html,lang==='ar'?/بالشهر/:/a month/);assert.match(html,lang==='ar'?/بالسنة/:/a year/);
+  assert.match(html,lang==='ar'?/يتجدّد تلقائياً/:/renews automatically/i);
+  assert.match(html,lang==='ar'?/في الشهر/:/a month/);assert.match(html,lang==='ar'?/في السنة/:/a year/);
   assert.doesNotMatch(html,/\{price\}/);
   if(lang==='ar')assert.ok(/[؀-ۿ]/.test(html));
  }

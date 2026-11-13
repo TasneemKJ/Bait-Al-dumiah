@@ -3,14 +3,17 @@ import assert from 'node:assert/strict';
 import {strings, translate, number} from '../src/i18n.js';
 import {createState, restore} from '../src/simulation.js';
 
-test('Shami language is named explicitly and resident wishes use colloquial speech', () => {
-  assert.equal(strings.ar.languageArabic, 'العربية · شامي');
-  assert.match(strings.ar.linaWish, /بدها/);
-  assert.match(strings.ar.noorWish, /بده/);
-  assert.match(strings.ar.samiWish, /بده/);
+test('Arabic is plain fusha: the language is named العربية and resident wishes carry no dialect verbs', () => {
+  assert.equal(strings.ar.languageArabic, 'العربية');
+  assert.match(strings.ar.linaWish, /تشتهي/);
+  assert.match(strings.ar.noorWish, /يريد/);
+  assert.match(strings.ar.samiWish, /يريد/);
+  for (const [key, value] of Object.entries(strings.ar)) {
+    assert.doesNotMatch(value, /(^|[\s«(])(شو|هيك|مش|ليش|هلّق|هلق|لسّا|لسا|كمان|شوي|بكرا|مبارح|عم|رح|بدّ?[هوين]ا?)(?=$|[\s.,،؛:!؟»)])/, key);
+  }
   assert.equal(strings.ar.household, 'أهل البيت');
 });
-test('all six whispers use authored Shami stories and preserve mystery rather than dismissing it', () => {
+test('all six whispers use authored fusha stories and preserve mystery rather than dismissing it', () => {
   for (const key of ['music-box','small-footsteps','portrait','jasmine','tea-for-four','welcome-home']) {
     assert.ok(strings.ar[key+'Text'].length > 80, key);
   }

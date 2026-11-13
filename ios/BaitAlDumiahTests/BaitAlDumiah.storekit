@@ -18,7 +18,7 @@
       "internalID": "6790700001",
       "localizations": [
         {
-          "description": "يفتح الباب المسكّر وغرفته وهدايا الضيف",
+          "description": "يفتح الباب المغلق وغرفته وهدايا الضيف",
           "displayName": "الغرفة الخامسة",
           "locale": "ar"
         },
@@ -66,7 +66,7 @@
           "introductoryOffer": null,
           "localizations": [
             {
-              "description": "كناري بقفص نحاس بالليوان، رفقة وبس",
+              "description": "كناري في قفص نحاسي في الليوان، رفقة لا أكثر",
               "displayName": "الكناري سنوياً",
               "locale": "ar"
             },
@@ -93,7 +93,7 @@
           "introductoryOffer": null,
           "localizations": [
             {
-              "description": "كناري بقفص نحاس بالليوان، رفقة وبس",
+              "description": "كناري في قفص نحاسي في الليوان، رفقة لا أكثر",
               "displayName": "الكناري شهرياً",
               "locale": "ar"
             },

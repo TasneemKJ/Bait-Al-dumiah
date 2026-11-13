@@ -1,6 +1,6 @@
 // The first week's arc (src/sim-arc.js): the rain night, the jasmine thread and Noor's day; and the
 // lines each heart can't say: written free in the journal with each memory, and sung aloud by the canary.
-// Noor is "he" in Arabic (نور بيحلم); English keeps to the name. The dolls are little hearts
+// Noor is "he" in Arabic (نور يحلم); English keeps to the name. The dolls are little hearts
 // (قلوب صغار), never spirits.
 export default {
  en:{
@@ -29,28 +29,28 @@ export default {
   'canaryMemory-sami-2':'I keep the smallest scrap, in case someone small comes back for it.',
  },
  ar:{
-  arcRainComing:'أهلين رجعت. في غيم عم يتجمّع فوق شبّاك الياسمين. الليلة يمكن تشتي.',
-  arcThreadHung:'أهلين رجعت. حدا علّق خيط ياسمين بالليوان. لينا ما بدها تقول لشو.',
-  arcNoorDay:'أهلين رجعت. الليلة ليلة نور: الليلة اللي قعد فيها نور أول مرة حدّ شبّاك الياسمين.',
-  arcRain:'الشتي عم يدقّ عالشبابيك. القلوب الزغار التلاتة قاعدين سوا بالليوان الليلة.',
-  arcAnniversary:'لينا وسامي ربطوا شريطة من خيط الياسمين حوالين الياسمينة جنب الشبّاك، كرمال نور. تذكار للدفتر.',
+  arcRainComing:'أهلاً بعودتك. غيم يتجمّع فوق نافذة الياسمين. قد تمطر الليلة.',
+  arcThreadHung:'أهلاً بعودتك. أحدهم علّق خيط ياسمين في الليوان. لينا لا تريد أن تقول لماذا.',
+  arcNoorDay:'أهلاً بعودتك. الليلة ليلة نور: الليلة التي جلس فيها نور أول مرة قرب نافذة الياسمين.',
+  arcRain:'المطر يدقّ على النوافذ. القلوب الصغيرة الثلاثة مجتمعة في الليوان الليلة.',
+  arcAnniversary:'ربطت لينا وسامي شريطاً من خيط الياسمين حول الياسمينة بجانب النافذة، من أجل نور. تذكار للدفتر.',
   arcKeepsakes:'تذكارات',
-  arcKeepsakeTitle:'شريطة الياسمين تبع نور',
-  arcKeepsakeText:'انربطت حوالين الياسمينة جنب الشبّاك بليلة نور. لسّا فيها ريحة الليلة اللي شتّت فيها.',
-  arcShare:'شارك ليلة نور',arcCardRain:'ليلة الشتي',arcCardNoor:'ليلة نور',
-  'canaryFor-lina':'الكناري عم يغنّي اللي لينا ما بتقدر تقوله:',
-  'canaryFor-noor':'الكناري عم يغنّي اللي نور ما بيقدر يقوله:',
-  'canaryFor-sami':'الكناري عم يغنّي اللي سامي ما بيقدر يقوله:',
-  'unsaid-lina':'اللي لينا ما بتقدر تقوله:','unsaid-noor':'اللي نور ما بيقدر يقوله:',
-  'unsaid-sami':'اللي سامي ما بيقدر يقوله:',
-  'canaryMemory-lina-0':'كان في حدا ياخد معلقتين سكّر. لسّا بخبّيهن جنب الإبريق.',
-  'canaryMemory-lina-1':'بصفّ أربع كاسات، لأنه لما كنت جديدة كنّا أربعة.',
-  'canaryMemory-lina-2':'لما الإبريق بيصفّر، بعمل حالي إنه في حدا راجع عالبيت.',
-  'canaryMemory-noor-0':'بعدّ النجوم كرمال ما تنتسى ولا وحدة منهن.',
-  'canaryMemory-noor-1':'الياسمينة كانت هون قبلي. بظن إنها متذكّرة مين زرعها.',
-  'canaryMemory-noor-2':'بتفقّد المزلاج لأنه مرّة، كان مفتوح.',
-  'canaryMemory-sami-0':'بخيّط زر لكل حدا حملني بإيده.',
-  'canaryMemory-sami-1':'أول خيط إلي كان أزرق. ما عم لاقيه بأي مكان.',
-  'canaryMemory-sami-2':'بخبّي أزغر شقفة قماش، يمكن حدا زغير يرجع ياخدها.',
+  arcKeepsakeTitle:'شريط ياسمين نور',
+  arcKeepsakeText:'رُبط حول الياسمينة بجانب النافذة في ليلة نور. ما زال فيه عطر الليلة التي أمطرت.',
+  arcShare:'شارك ليلة نور',arcCardRain:'ليلة المطر',arcCardNoor:'ليلة نور',
+  'canaryFor-lina':'الكناري يغنّي ما لا تستطيع لينا أن تقوله:',
+  'canaryFor-noor':'الكناري يغنّي ما لا يستطيع نور أن يقوله:',
+  'canaryFor-sami':'الكناري يغنّي ما لا يستطيع سامي أن يقوله:',
+  'unsaid-lina':'ما لا تستطيع لينا أن تقوله:','unsaid-noor':'ما لا يستطيع نور أن يقوله:',
+  'unsaid-sami':'ما لا يستطيع سامي أن يقوله:',
+  'canaryMemory-lina-0':'كان أحدهم يأخذ ملعقتي سكّر. ما زلت أخبّئهما بجانب الإبريق.',
+  'canaryMemory-lina-1':'أصفّ أربعة أكواب، لأننا كنّا أربعة حين كنت جديدة.',
+  'canaryMemory-lina-2':'حين يصفّر الإبريق، أتخيّل أن أحداً عائد إلى البيت.',
+  'canaryMemory-noor-0':'أعدّ النجوم كي لا تُنسى واحدة منها.',
+  'canaryMemory-noor-1':'الياسمينة كانت هنا قبلي. أظنّ أنها تذكر من زرعها.',
+  'canaryMemory-noor-2':'أتفقّد المزلاج لأنه، ذات مرة، كان مفتوحاً.',
+  'canaryMemory-sami-0':'أخيط زرّاً لكل من حملني بيده.',
+  'canaryMemory-sami-1':'أول خيط لي كان أزرق. لا أجده في أيّ مكان.',
+  'canaryMemory-sami-2':'أخبّئ أصغر قطعة قماش، لعلّ أحداً صغيراً يعود ليأخذها.',
  },
 };
