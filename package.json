@@ -10,16 +10,18 @@
     "dev": "node scripts/serve.mjs",
     "test": "node --test tests/*.test.mjs",
     "build": "node scripts/build.mjs && node scripts/check-size.mjs",
+    "build:debug": "BAIT_DEBUG=1 node scripts/build.mjs && node scripts/check-size.mjs",
     "verify": "npm run lint && npm test && npm run build",
     "preview": "node scripts/serve.mjs dist",
-    "test:browser": "python scripts/play_check.py && python scripts/story_smoke.py",
+    "test:browser": "npm run build:debug && python scripts/play_check.py && python scripts/story_smoke.py",
     "lint": "eslint src tests scripts eslint.config.js",
-    "test:ui": "python scripts/ui_check.py && python scripts/tools_ui_checks.py"
+    "test:ui": "npm run build:debug && python scripts/ui_check.py && python scripts/tools_ui_checks.py"
   },
   "dependencies": {
     "three": "0.180.0"
   },
   "devDependencies": {
+    "esbuild": "0.25.10",
     "eslint": "^9.39.5",
     "globals": "^17.13.0"
   }

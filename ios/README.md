@@ -1,7 +1,7 @@
 # بيت الدمية · Bait Al-dumiah for iPhone
 
 The iPhone app is a thin native shell around the web game. `npm run build` writes the game to
-`dist/` (`index.html`, `src/`, `vendor/`); Xcode's **Copy the game** phase copies that folder
+`dist/` (`index.html`, `game.js`, `game.css`, `vendor/`); Xcode's **Copy the game** phase copies that folder
 into the app as `game/`, and TasKit (`../tas-engine/ios`, the shared Tas Games shell) serves it
 offline from `baitaldumiah://app/` in a `WKWebView` (folder mode, `webRoot: "game"`).
 
@@ -60,7 +60,7 @@ JavaScript after load: `xcrun simctl launch booted Tas.BaitAlDumiah -baitDebugJS
 
 | Question | Decision |
 |---|---|
-| Shape | TasKit folder mode over the existing `dist/`; no bundler, no rewrite. |
+| Shape | TasKit folder mode over `dist/`: one minified `game.js` + `game.css` (esbuild), three.js in `vendor/`; no `src/` and no `?debug=1` seam in a production build (`npm run build:debug` keeps it for the browser checks). |
 | Identifiers | Bundle `Tas.BaitAlDumiah`, scheme `baitaldumiah`, SKU `BaitAlDumiah`, App Store Connect name «بيت الدمية · Bait Al-dumiah», primary language Arabic. |
 | Pay model | Free download; The Fifth Room $4.99 once; the canary $1.99 a month or $14.99 a year (DESIGN.md, owner override 2026-11-13). |
 | Game Center | None in 1.0. |

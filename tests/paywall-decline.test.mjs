@@ -44,7 +44,7 @@ for(const [outcome,answer] of Object.entries(OUTCOMES))test(`declining both shee
  const before=game.state().dolls.find(d=>d.id==='lina').hunger;
  game.dispatch()('care',{id:'lina',action:'tea'});
  assert.ok(game.state().dolls.find(d=>d.id==='lina').hunger>before,'tea is still served');
- const day=game.state().day;t=live(game,500,t);
+ const day=game.state().day;live(game,500,t);
  assert.ok(game.state().day>=day+2,'the days go on');
  assert.deepEqual(game.opens,['store','store'],'only the player opened the card');
  playable(game,'two days later');
@@ -61,6 +61,6 @@ test('an ended canary plan simply leaves; no card opens and play goes on',()=>{
  const w=page(),store=createAppStore(w);
  const game=bootHome({store});game.button('play').click();let t=live(game,1,0);
  w.baitApp.update({owned:{canaryMonthly:true}});t=live(game,5,t);
- w.baitApp.update({owned:{canaryMonthly:false}});t=live(game,250,t);
+ w.baitApp.update({owned:{canaryMonthly:false}});live(game,250,t);
  assert.deepEqual(game.opens,[]);playable(game,'after the plan ended');
 });
