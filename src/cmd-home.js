@@ -35,6 +35,7 @@ function finishIntro(app,{skipped=false,grab=false,seconds=0,still=false}={}){
  if(grab){app.host.dataset.focusRoom='';app.host.dataset.focusDoll='';app.roomViews?.update()}
  else{if(skipped)app.world?.introSkip(seconds,still);app.dispatch('focus-room','kitchen')}
  app.last=performance.now();if(!grab)app.canvas.focus({preventScroll:true});
+ app.deliverFifthRoom?.();
 }
 function enterPlay(app){
  if(app.fatal||!app.world)return;
@@ -49,7 +50,8 @@ function enterPlay(app){
  if(!app.state.settings.muted&&!app.audio.enabled)void app.audio.enable().then(ok=>{if(!ok)app.ui.toast((entrySaved?
    '':app.ui.t('savingFailed')+' ')+app.ui.t('audioUnavailable'));app.audio.setPaused(app.state.paused)});
  entrySaved=app.save();
- if(entrySaved){if(app.session.recovered)app.say(app.ui.t('saveRecovered'));else greetReturningPlayer(app)}
+ if(entrySaved){if(app.session.recovered)app.say(app.ui.t('saveRecovered'));else greetReturningPlayer(app);
+  if(!app.intro?.active)app.deliverFifthRoom?.()}
 }
 function welcomeGlance(app){
  if(app.state.settings.reducedMotion)return;const room=waveRoom(app.state);if(!room)return;

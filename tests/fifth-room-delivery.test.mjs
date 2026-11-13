@@ -92,5 +92,15 @@ test('the canary sings nothing a free player cannot read: each line is in the jo
  const fresh=sim.createState(),html=householdMarkup(fresh,{...ctx('en'),avatar:()=>'',selected:'lina'});
  assert.ok(!html.includes(translate('en','canaryMemory-lina-0')),'a line waits with its memory');
  const card=storeMarkup({owns:()=>false,price:()=>'$1',canary:()=>false,status:''},ctx('en'));
- assert.match(card,/journal/i,'the card says where the lines are written');
+ assert.match(card,/Little souls/,'the card says where the lines are written');
+});
+test('owned at boot: nothing is written on Home; delivery waits for the house to be entered',()=>{
+ for(const saved of [null,JSON.stringify(sim.createState())]){
+  const {s}=store({fifthRoom:true});const game=bootHome({store:s,saved});
+  assert.equal(game.writes.length,0,'Home never writes the save');assert.equal(game.state().door,0);
+  game.button('play').click();live(game,1);
+  assert.equal(game.state().door,1,'entering delivers it');assert.ok(game.opens.includes('journal'));
+ }
+ const {s}=store({fifthRoom:true});const failed=bootHome({store:s,saved:'x',readFails:true});
+ assert.equal(failed.writes.length,0,'a failed read is never overwritten');
 });

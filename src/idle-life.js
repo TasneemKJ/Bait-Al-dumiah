@@ -1,7 +1,7 @@
 // The house breathes while the player only watches: after a quiet stretch one little heart goes to sit in
 // another room for a while (drawn there; her room in the save is unchanged) and a curtain stirs. With the
 // canary (asked of the App Store at that moment) it sings aloud, by day, what that heart can't say: the
-// same lines every player reads in the journal beside each memory (src/panels-ui.js), so nothing is sold.
+// same lines every player reads beside each doll's memories in her sheet (src/panels-ui.js), so nothing is sold.
 // Cosmetic only: no buttons, comfort, bond or save change. Held still under reduced motion.
 import * as sim from './simulation.js';
 import {DOLLS} from './content.js';

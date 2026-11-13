@@ -19,10 +19,11 @@ export const storeCommands={
 
 // The Fifth Room delivered the moment it is owned (bought, restored or reinstalled): the door opens a crack,
 // the first mending is done and a gift waits on the threshold. Once per save; the journal opens on it.
+// Called when the App Store answers, on entering the house, after the intro and after an import or reset.
 export function deliverFifthRoom(app){
- if(!app.state||!welcomeFifthRoom(app.state,appStore.access()))return false;
- app.save?.();if(!app.session?.entered)return true;
- app.say(app.ui.t('fifthDelivered'));app.audio?.effect?.('secret');app.ui.open('journal');
+ // Only inside the house: Home never writes the save, and the player sees what arrived.
+ if(!app.session?.entered||!app.state||!welcomeFifthRoom(app.state,appStore.access()))return false;
+ app.save?.();app.say(app.ui.t('fifthDelivered'));app.audio?.effect?.('secret');app.ui.open('journal');
  app.host?.querySelector?.('#sheet .door-entries')?.scrollIntoView?.({block:'center'});return true;
 }
 // The App Store answered: redraw the open card or door, and let the canary come or go. A purchase
@@ -45,7 +46,7 @@ export function installStore(app){
   if(s.elapsed<nextSong||sim.isNight(s))return;nextSong=s.elapsed+38+Math.random()*30;
   if(app.audio.canary?.())app.world?.canarySing?.(s.elapsed);
  },1000);song?.unref?.();
- app.world?.setCanary?.(canary);deliverFifthRoom(app);
+ app.world?.setCanary?.(canary);app.deliverFifthRoom=()=>deliverFifthRoom(app);
  app.openStore=()=>{appStore.clearStatus();appStore.refresh();app.ui.open('store')};
  // The app's tests (and a debug launch) open the card directly.
  if(appStore.inApp)appStore.bridge.openStore=()=>app.openStore();

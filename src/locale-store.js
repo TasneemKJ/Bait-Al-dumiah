@@ -9,17 +9,17 @@ export default {
    'a pressed jasmine on the threshold. Then four more mendings, free of buttons: the key waits until Sami '+
    'holds you dear, the last until you have heard all six whispers. Behind it: the fifth room and the rest '+
    'of the visitor\'s eight gifts, one a night. Paid once.',
-  fifthOwned:'Yours. The door is open a crack; four free mendings remain (Sami\'s key, then the six whispers).',
+  fifthOwned:'Yours. The door is open; its last mendings are free (Sami\'s key, then the six whispers).',
   fifthDelivered:'The closed door opens a crack. A pressed jasmine waits on the threshold. Four free mendings '+
    'remain: Sami\'s key, then all six whispers.',
-  doorOwnedIntro:'The Fifth Room is yours: the door is open a crack. Four more mendings open it fully, and they '+
+  doorOwnedIntro:'The Fifth Room is yours: the door is open a crack. The mendings that open it fully '+
    'cost no buttons. The key waits until Sami holds you dear; the last waits until you have heard all six '+
    'whispers. Then the visitor\'s gifts come, one a night.',
   canaryName:'The canary',
   canaryNote:'A canary in a brass cage lives by the liwan window. It sings its little song by day and '+
    'sleeps under a cloth at night, and now and then sings aloud what a doll can\'t say: lines every player '+
-   'finds written in the journal beside each memory. Company only: no buttons, comfort, whispers or story '+
-   'are for sale.',
+   'can read, free, beside each doll\'s memories in Little souls. Company only: no buttons, comfort, '+
+   'whispers or story are for sale.',
   canaryOwned:'On. The canary is in the liwan.',
   storeMonthly:'{price} a month',storeYearly:'{price} a year',
   storeRenews:'Monthly or yearly. It renews automatically until you cancel it in your Apple Account settings, '+
@@ -53,16 +53,16 @@ export default {
   fifthNote:'فوراً: الباب المسكّر بينفتح شقّ زغير، وأول تصليح بيخلص، والضيف بيترك ياسمينة مكبوسة عالعتبة. '+
    'وبعدين أربع تصليحات كمان بلا أزرار: المفتاح ناطر لحتى توصل لدرجة الغلاوة مع سامي، والأخير لحتى تسمع '+
    'الستّ همسات كلّهن. ووراه: الغرفة الخامسة وباقي هدايا الضيف التمانة، هدية كل ليلة. بتدفعها مرّة وحدة.',
-  fifthOwned:'صارت إلك. الباب مفتوح شقّ، وباقي أربع تصليحات ببلاش (مفتاح سامي، وبعدين الستّ همسات).',
+  fifthOwned:'صارت إلك. الباب مفتوح، وآخر تصليحاته ببلاش (مفتاح سامي، وبعدين الستّ همسات).',
   fifthDelivered:'الباب المسكّر انفتح شقّ زغير. في ياسمينة مكبوسة ناطرة عالعتبة. باقي أربع تصليحات ببلاش: '+
    'مفتاح سامي، وبعدين الستّ همسات كلّهن.',
-  doorOwnedIntro:'الغرفة الخامسة صارت إلك: الباب مفتوح شقّ. أربع تصليحات كمان بيفتحوه عالآخر، وما بيكلّفوا ولا زر. '+
+  doorOwnedIntro:'الغرفة الخامسة صارت إلك: الباب مفتوح شقّ. التصليحات اللي بتفتحه عالآخر ما بتكلّف ولا زر. '+
    'المفتاح ناطر لحتى توصل لدرجة الغلاوة مع سامي، والأخير لحتى تسمع الستّ همسات كلّهن. وبعدها بتجي هدايا '+
    'الضيف، هدية كل ليلة.',
   canaryName:'الكناري',
   canaryNote:'كناري بقفص نحاس ساكن جنب شبّاك الليوان. بالنهار بيغنّي غنّيته الزغيرة، وبالليل بينام '+
-   'تحت شرشف، وكل فترة بيغنّي بصوت عالي اللي الدمية ما بتقدر تقوله: كلام مكتوب لكل لاعب بالدفتر '+
-   'جنب كل ذكرى. رفقة وبس: ما في أزرار ولا راحة ولا همسات ولا حكاية للبيع.',
+   'تحت شرشف، وكل فترة بيغنّي بصوت عالي اللي الدمية ما بتقدر تقوله: كلام مكتوب ببلاش لكل لاعب '+
+   'جنب ذكريات كل دمية بـ«أهل البيت». رفقة وبس: ما في أزرار ولا راحة ولا همسات ولا حكاية للبيع.',
   canaryOwned:'شغّال. الكناري بالليوان.',
   storeMonthly:'{price} بالشهر',storeYearly:'{price} بالسنة',
   storeRenews:'شهري أو سنوي. بيتجدّد لحاله لحتى تلغيه من إعدادات حساب Apple، قبل آخر المدّة بـ٢٤ ساعة '+
