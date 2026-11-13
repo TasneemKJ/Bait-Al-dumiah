@@ -36,3 +36,13 @@ test('the first clue in a new house is a wish that pays at once; the story follo
  assert.equal(first.action,'care');assert.equal(first.value.id,'lina');
  s.cares=1;assert.notEqual(nextStep(s,t,n,'').action,'care','after the first kindness the story leads');
 });
+
+// Play-through finding: after tonight's whisper the journal still offered "Greet the visitor", which only answered
+// "That is all for tonight". It now offers the morning, like the clue does.
+test('after tonight\'s whisper the journal offers the morning, not another greeting',async()=>{
+ const {journalMarkup}=await import('../src/panels-ui.js');const {button}=await import('../src/shell-markup.js');
+ const s=createState();s.clock=130;s.journal=['music-box'];s.lastSecretDay=s.day;
+ const html=journalMarkup(s,{t:k=>translate('en',k),n:String,button});
+ assert.doesNotMatch(html,/data-action="discover"/);assert.match(html,/data-action="light"/);
+ s.lastSecretDay=0;assert.match(journalMarkup(s,{t:k=>translate('en',k),n:String,button}),/data-action="discover"/);
+});

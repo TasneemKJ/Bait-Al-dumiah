@@ -124,9 +124,9 @@ export function journalMarkup(s,{t,n,button}){
     `<p class="empty-note">${t('noSecrets')}</p>`:''}<div class="journal-entries">${s.journal.map((id,
     i)=>`<article><span class="entry-number">${n(i+1).padStart(2,
     '0')}</span><div><h3>${t(id+'Title')}</h3><p>${t(id+'Text')}</p></div></article>`).join('')}</div
-      >${secretsLeft(s)?button(isNight(s)?
-    'discover':'light',t(isNight(s)?'investigate':'night'),isNight(s)?'ghost':'moon',
-    'class="primary wide"'):`<p class="ending-note">${t('complete')}</p>`}${isNight(s)&&
+      >${secretsLeft(s)?(isNight(s)&&s.lastSecretDay===s.day?button('light',t('dawn'),'sun','class="wide"'):
+    button(isNight(s)?'discover':'light',t(isNight(s)?'investigate':'night'),isNight(s)?'ghost':'moon',
+    'class="primary wide"')):`<p class="ending-note">${t('complete')}</p>`}${isNight(s)&&
       secretsLeft(s)&&coziness(s)<secretCozyNeeded(s)?
     `<p class="shy-note">${t('shyNeed')} ${n(secretCozyNeeded(s))}% · ${t('cozy')} ${n(coziness(s))}%</p>`:''}
    ${storyMemoriesMarkup(s,t)}${doorMarkup(s,{t,n,button})}
