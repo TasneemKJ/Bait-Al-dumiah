@@ -12,7 +12,7 @@ test('every bottom-bar control carries a short visible label in both languages',
   const t=k=>translate(lang,k),html=shellMarkup(createState(),{t,n:v=>number(lang,v),button,clueExpanded:false,toolsExpanded:false});
   for(const [action,key] of Object.entries(BAR)){
    const label=t(key);assert.ok(label&&label!==key&&[...label].length<=7,`${lang} ${key}: ${label}`);
-   assert.match(html,new RegExp(`data-action="${action}"[^>]*data-short="${label}"`),`${lang} ${action}`);
+   assert.match(html,new RegExp(`data-action="${action}"[^>]*data-short="${label}"`,'s'),`${lang} ${action}`);
   }
   assert.ok([...t('barObjects')].length<=7&&t('barObjects')!=='barObjects');
  }

@@ -40,14 +40,17 @@ export function shellMarkup(s,{t,n,button,clueExpanded,toolsExpanded}){
     class="mobile-hint">${t('mobileHint')}</span></div>
   <nav class="dock" data-expanded="${toolsExpanded}"
     aria-label="${t('title')}">${button('toggle-tools',t('houseTools'),'home',
-    `class="tools-toggle" aria-expanded="${toolsExpanded}" data-short="${t('barTools')}"`)}${Object.entries(dockIcons).map(([key,
+    `class="tools-toggle" aria-expanded="${toolsExpanded}"
+     data-short="${t('barTools')}"`)}${Object.entries(dockIcons).map(([key,
       ico])=>button('panel-'+key,t(key),ico,
     `aria-haspopup="dialog"`)).join('')}<span
       class="dock-divider"></span>${button('sound',t(s.settings.muted?'soundOff':'soundOn'),s.settings.muted?
     'muted':'volume',
-      `class="icon-button" title="${t('sound')}" aria-pressed="${!s.settings.muted}" data-short="${t('barSound')}"`)}${button('pause',
+      `class="icon-button" title="${t('sound')}" aria-pressed="${!s.settings.muted}"
+       data-short="${t('barSound')}"`)}${button('pause',
       t(s.paused?'resume':'pause'),
-    s.paused?'resume':'pause',`class="icon-button" title="${t('pause')}" aria-pressed="${s.paused}" data-short="${t('barPause')}"`)}</nav>
+    s.paused?'resume':'pause',`class="icon-button" title="${t('pause')}" aria-pressed="${s.paused}"
+     data-short="${t('barPause')}"`)}</nav>
   <div class="saved-note">${icon('check')}<span>${t('saved')}</span></div>
   <div class="placement" hidden></div><div id="toast" role="status" aria-live="polite"></div>
   <div class="pause-overlay"
