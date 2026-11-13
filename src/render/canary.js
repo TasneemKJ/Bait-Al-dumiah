@@ -13,7 +13,7 @@ function buildCage(root){
  ring(root,0,height,0,radius,.007,P.gold,true);ring(root,0,height*.55,0,radius,.005,P.gold,true);
  ball(root,0,height+.13,0,.025,.025,.025,P.gold);
  const hook=ring(root,0,height+.18,0,.035,.006,P.gold);hook.rotation.y=Math.PI/2;
- line(root,[0,height+.21,0],[0,.95,0],.004,P.dark);
+ line(root,[0,height+.21,0],[0,.9,0],.004,P.dark);
  line(root,[-radius*.9,.13,0],[radius*.9,.13,0],.007,P.wood);
  cylinder(root,radius*.55,.07,radius*.3,.035,.03,P.cream);
 }
@@ -30,7 +30,8 @@ function buildBird(root){
 }
 export function createCanary(parent){
  const room=ROOMS.find(r=>r.id==='parlor'),root=new T.Group();root.name='canary';root.userData.noBatch=true;
- root.position.set(room.x-1.62,room.y+1.86,-1.02);root.visible=false;parent.add(root);
+ // By the jasmine window, clear of the lamp; a little larger to read on a phone.
+ root.position.set(room.x+.38,room.y+1.72,-1.0);root.scale.setScalar(1.3);root.visible=false;parent.add(root);
  buildCage(root);const {bird,head}=buildBird(root);
  const cover=ball(root,0,.17,0,.215,.25,.215,CLOTH);cover.material=mat(CLOTH,{roughness:.95});
  root.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=true;o.raycast=()=>{}}});
