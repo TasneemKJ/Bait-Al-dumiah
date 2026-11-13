@@ -70,6 +70,7 @@ final class BaitStoreTests: XCTestCase {
     }
 
     func testAFailedPurchaseSaysSo() async throws {
+        guard #available(iOS 17.0, *) else { throw XCTSkip("simulated StoreKit errors need iOS 17") }
         try await session.setSimulatedError(.generic(.unknown), forAPI: .purchase)
         let store = TasStore(config: .bait, defaults: defaults)
         await store.buy("fifthRoom")
