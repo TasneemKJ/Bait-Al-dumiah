@@ -1,4 +1,5 @@
-// The first week's arc (src/sim-arc.js): the rain night, the jasmine thread and Noor's day.
+// The first week's arc (src/sim-arc.js): the rain night, the jasmine thread and Noor's day; and the
+// canary's songs for the memory each heart can't say (src/idle-life.js, canary subscribers only).
 // Noor is "he" in Arabic (نور بيحلم); English keeps to the name. The dolls are little hearts
 // (قلوب صغار), never spirits.
 export default {
@@ -13,6 +14,18 @@ export default {
   arcKeepsakeTitle:'Noor\'s jasmine ribbon',
   arcKeepsakeText:'Tied round the jasmine by the window on Noor\'s night. It still smells of the night it rained.',
   arcShare:'Share Noor\'s night',arcCardRain:'The rain night',arcCardNoor:'Noor\'s night',
+  'canaryFor-lina':'The canary sings what Lina can\'t say:',
+  'canaryFor-noor':'The canary sings what Noor can\'t say:',
+  'canaryFor-sami':'The canary sings what Sami can\'t say:',
+  'canaryMemory-lina-0':'Someone used to take two sugars. I still keep them by the kettle.',
+  'canaryMemory-lina-1':'I set four cups, because there were four of us when I was new.',
+  'canaryMemory-lina-2':'When the kettle sings, I pretend someone is coming home.',
+  'canaryMemory-noor-0':'I count the stars so that none of them is forgotten.',
+  'canaryMemory-noor-1':'The jasmine was here before me. I think it remembers who planted it.',
+  'canaryMemory-noor-2':'I check the latch because once, it was open.',
+  'canaryMemory-sami-0':'I sew one button for everyone who ever held me.',
+  'canaryMemory-sami-1':'My first thread was blue. I can\'t find it anywhere.',
+  'canaryMemory-sami-2':'I keep the smallest scrap, in case someone small comes back for it.',
  },
  ar:{
   arcRainComing:'أهلين رجعت. في غيم عم يتجمّع فوق شبّاك الياسمين. الليلة يمكن تشتي.',
@@ -24,5 +37,17 @@ export default {
   arcKeepsakeTitle:'شريطة الياسمين تبع نور',
   arcKeepsakeText:'انربطت حوالين الياسمينة جنب الشبّاك بليلة نور. لسّا فيها ريحة الليلة اللي شتّت فيها.',
   arcShare:'شارك ليلة نور',arcCardRain:'ليلة الشتي',arcCardNoor:'ليلة نور',
+  'canaryFor-lina':'الكناري عم يغنّي اللي لينا ما بتقدر تقوله:',
+  'canaryFor-noor':'الكناري عم يغنّي اللي نور ما بيقدر يقوله:',
+  'canaryFor-sami':'الكناري عم يغنّي اللي سامي ما بيقدر يقوله:',
+  'canaryMemory-lina-0':'كان في حدا ياخد معلقتين سكّر. لسّا بخبّيهن جنب الإبريق.',
+  'canaryMemory-lina-1':'بصفّ أربع كاسات، لأنه لما كنت جديدة كنّا أربعة.',
+  'canaryMemory-lina-2':'لما الإبريق بيصفّر، بعمل حالي إنه في حدا راجع عالبيت.',
+  'canaryMemory-noor-0':'بعدّ النجوم كرمال ما تنتسى ولا وحدة منهن.',
+  'canaryMemory-noor-1':'الياسمينة كانت هون قبلي. بظن إنها متذكّرة مين زرعها.',
+  'canaryMemory-noor-2':'بتفقّد المزلاج لأنه مرّة، كان مفتوح.',
+  'canaryMemory-sami-0':'بخيّط زر لكل حدا حملني بإيده.',
+  'canaryMemory-sami-1':'أول خيط إلي كان أزرق. ما عم لاقيه بأي مكان.',
+  'canaryMemory-sami-2':'بخبّي أزغر شقفة قماش، يمكن حدا زغير يرجع ياخدها.',
  },
 };

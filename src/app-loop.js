@@ -20,7 +20,7 @@ export function installLoop(app){
   else if(!document.hidden&&!app.fatal&&app.session.entered){app.updateWorkUI(dt);app.session.advance(app.state,dt);
   if(app.state.events.length)for(const event of app.state.events.splice(0))app.announce(event);
   if(app.notices.length&&now>=app.noticeAt&&!app.physicalActivity())app.showNotice(now);
-  app.world?.render(app.state,dt,app.ui.selected);
+  app.idle?.tick();app.world?.render(app.state,dt,app.ui.selected);
   app.residentLabel.update(app.state,app.ui.selected,app.host.dataset.focusRoom||
     (sim.dollRoom(app.state,app.host.dataset.focusDoll)??''),
     app.world?.project(app.ui.selected,.05),Boolean(app.ui.panel||app.ui.placement||

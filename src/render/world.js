@@ -89,7 +89,7 @@ export function createWorld(canvas,{onPick,onError}){
   visualStatus(){return visualStatus(w)},
   ...cameraApi(w),
   setPlacement(item){st.placement=item;slots.setActive(item);if(!item){st.previewPose=null;preview.clear()}},
-  setPreview(pose){st.previewPose=pose},picture:(s,use)=>takePicture(w,s,use),
+  setPreview(pose){st.previewPose=pose},picture:(s,use)=>takePicture(w,s,use),stirCurtain:parts.roomEffects.stir,
   // The canary is the App Store's answer, read each time it changes; it is never saved.
   setCanary(on){parts.canary.setPresent(on)},canarySing(t){parts.canary.sing(t)},setVisit:parts.residents.setVisit,
   render(state,dt,selected){renderFrame(w,state,dt,selected)},

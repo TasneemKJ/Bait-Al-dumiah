@@ -19,6 +19,7 @@ import {installView} from './app-view.js';
 import {installCommands} from './app-commands.js';
 import {installLoop} from './app-loop.js';
 import {installDebug} from './debug-seam.js';
+import {installIdleLife} from './idle-life.js';
 import {inNativeApp} from './native-app.js';
 import {installStore} from './cmd-store.js';
 import {installTouchFeedback} from './app-touch.js';
@@ -94,6 +95,6 @@ app.film=createFilmUI(document.querySelector('#app'),{getState:()=>app.state,
  onClose:()=>{app.ui.open('settings');
   app.host.querySelector('[data-action="watch-film"]')?.focus({preventScroll:true});},
 });
-installLoop(app);installDebug(app);installStore(app);installTouchFeedback(app);
+installLoop(app);installDebug(app);installStore(app);installTouchFeedback(app);installIdleLife(app);
 // The iPhone app flushes the save before it copies it (TasKit flushSaveScript); save() writes nothing before Play.
 window.__baitAlDumiahSave=()=>app.save();

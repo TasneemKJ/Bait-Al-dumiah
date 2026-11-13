@@ -9,6 +9,9 @@ export function createRoomEffects(parent){
  const patches=createWindowPatches(root);
  const curtains=[];parent.traverse(o=>{if(o.name==='draped-curtain')curtains.push(o)});
  const pools=[];parent.traverse(o=>{if(o.name==='lamp-pool-static')pools.push(o)});
+ // An idle stir (src/idle-life.js): one window's pair of curtains lifts and settles over four seconds.
+ let gust=-Infinity,pair=-1;const stirOf=(i,t)=>{const k=(t-gust)/4;
+  return Math.floor(i/2)===pair&&k>0&&k<1?Math.sin(Math.PI*k)*Math.sin((t-gust)*2.6):0};
  const anchor=(()=>{let a=null;parent.traverse(o=>{if(o.name==='kettle-steam-anchor')a=o});return a})();
  const kettleSteam=anchor?createKettleSteam(anchor):null;
  const flames=[];const silhouette=new T.Shape();silhouette.moveTo(0,0);
@@ -24,16 +27,17 @@ export function createRoomEffects(parent){
     opacity:.92,side:T.DoubleSide,depthWrite:false}));
   inner.scale.set(.48,.65,1);inner.position.z=.009;flame.add(inner);
  }
- return {root,status(){return {pools:pools.length,poolOpacity:pools[0]?.material.opacity??null,
+ return {root,stir(t){gust=t;pair=(pair+1)%Math.max(1,Math.ceil(curtains.length/2))},
+  status(){return {pools:pools.length,poolOpacity:pools[0]?.material.opacity??null,
    steam:Boolean(kettleSteam),steamVisible:kettleSteam?.root.visible??false}},update(state,mix){
   const lit=Math.max(0,Math.min(1,mix));pools.forEach(p=>{p.material.opacity=poolOpacity(.15+lit*.85)});
   if(kettleSteam){const lina=state.dolls.find(d=>d.id==='lina');
   kettleSteam.update(state.elapsed,Boolean(lina)&&lina.action==='idle',state.settings.reducedMotion||state.paused)}
   faceFill.intensity=.18+Math.max(0,Math.min(1,mix))*.48;
   patches.forEach(p=>{p.material.color.set(0xf0d1a0).lerp(new T.Color(0xabc4ef),mix);p.material.opacity=.15-mix*.065});
-  if(!state.paused){curtains.forEach((c,i)=>{c.rotation.x=state.settings.reducedMotion?
-    0:Math.sin(state.elapsed*.42+i*.8)*.014;
-  c.rotation.z=state.settings.reducedMotion?0:Math.sin(state.elapsed*.35+i)*.009*c.userData.curtainSide});
+  if(!state.paused){curtains.forEach((c,i)=>{const g=stirOf(i,state.elapsed),still=state.settings.reducedMotion;
+  c.rotation.x=still?0:Math.sin(state.elapsed*.42+i*.8)*.014+g*.10;
+  c.rotation.z=still?0:(Math.sin(state.elapsed*.35+i)*.009+Math.abs(g)*.05)*c.userData.curtainSide});
   const t=state.settings.reducedMotion?0:state.elapsed;
   flames.forEach((f,i)=>{f.scale.y=1+Math.sin(t*1.7+i*2.2)*.055;f.rotation.z=Math.sin(t*.9+i)*.025;
   f.children[0].material.opacity=.68+Math.max(0,Math.min(1,mix))*.20})}
