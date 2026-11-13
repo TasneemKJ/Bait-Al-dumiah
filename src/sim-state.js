@@ -7,7 +7,7 @@ export function createState(){
     comfort:d.comfort,lastCare:-10,action:'idle',actionUntil:0,bond:0,sew:0})),
   decor:[],nextId:1,wishes:[],journal:[],lastSecretDay:0,paused:false,
   streak:0,lastFullDay:0,sewnToday:0,basket:0,earnedToday:0,achieved:[],milestones:[],events:[],door:0,
-    gifts:[],lastGiftDay:0,dayTime:0,hints:{night:false,calm:false},
+    gifts:[],lastGiftDay:0,keepsakeWishDay:0,dayTime:0,hints:{night:false,calm:false},
   activities:{mastery:Object.fromEntries(ACTIVITIES.map(a=>[a.id,0])),
     completed:Object.fromEntries(ACTIVITIES.map(a=>[a.id,0])),
     lastReward:Object.fromEntries(ACTIVITIES.map(a=>[a.id,-ACTIVITY_COOLDOWN])),teaRecords:[null,null,

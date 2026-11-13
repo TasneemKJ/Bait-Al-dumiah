@@ -1,4 +1,4 @@
-import {earn,emit,checkMilestones,growBond,activityDef,activityLevel,completeActivity} from './sim-core.js';
+import {earn,emit,checkMilestones,growBond,activityDef,activityLevel,completeActivity,storyStatus} from './sim-core.js';
 import {createTea,stepTea,releaseTea} from './sim-tea.js';
 import {stitchActive,stitchSections,createStitch,releaseStitch} from './sim-stitch.js';
 import {stepChimes,cancelChime,replayChimes} from './sim-chimes.js';
@@ -87,16 +87,29 @@ export function step(s,dt){
  s.unease=clamp(s.unease+(target-s.unease)*dt*.008);
  checkMilestones(s);
 }
+// After the three stories, one doll a day wishes for one keepsake in one room that still has a free corner.
+// It is bounded by the house itself (twelve corners) and pays in closeness, never buttons.
+export function keepsakeWish(s){
+ if(storyStatus(s).chapter||s.keepsakeWishDay===s.day)return null;
+ const free=r=>SLOTS.some((_,i)=>!s.decor.some(d=>d.room===r.id&&d.slot===i));
+ const rooms=ROOMS.map((_,i)=>ROOMS[(i+s.day)%ROOMS.length]).filter(free);if(!rooms.length)return null;
+ const room=rooms[0],items=CATALOG.map((_,i)=>CATALOG[(i+s.day*5)%CATALOG.length]);
+ const item=items.find(c=>!s.decor.some(d=>d.room===room.id&&d.item===c.id))??items[0];
+ return {doll:DOLLS[s.day%DOLLS.length].id,item:item.id,room:room.id,price:item.price};
+}
 export function place(s,item,room,slot){
  const entry=CATALOG.find(x=>x.id===item);
  if(!entry||!has(ROOMS,room)||!Number.isInteger(slot)||slot<0||slot>=SLOTS.length)return fail('invalid');
  if(s.decor.some(d=>d.room===room&&d.slot===slot))return fail('occupied');
  if(s.buttons<entry.price)return fail('funds');
+ const wished=keepsakeWish(s),granted=wished?.item===item&&wished.room===room?wished.doll:undefined;
  s.buttons-=entry.price;
  s.decor.push({id:s.nextId++,item,room,slot,rotation:0,originRoom:room,active:false,tendedDay:0,lastUse:-10});
  const loved=s.dolls.filter(d=>d.room===room&&DOLLS.find(x=>x.id===d.id).favItem===item).map(d=>d.id);
+ if(granted){s.keepsakeWishDay=s.day;const d=s.dolls.find(x=>x.id===granted);
+  growBond(s,d,6);d.comfort=clamp(d.comfort+10)}
  checkMilestones(s);
- return {ok:true,cost:entry.price,loved};
+ return {ok:true,cost:entry.price,loved,wish:granted};
 }
 // Furniture benefits come from what is placed, never a one-time comfort credit to refund.
 export function remove(s,id){const index=s.decor.findIndex(d=>d.id===id);if(index<0)return fail('invalid');

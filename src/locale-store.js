@@ -30,6 +30,9 @@ export default {
   canaryArrived:'A canary has come to live by the liwan window.',
   homePromise:'A tiny home. Three little souls. A few beautiful secrets.',
   barObjects:'Things',barTools:'Tools',barSound:'Sound',barPause:'Pause',barHouse:'House',
+  keepsakeWish:'{doll}’s wish today:',keepsakeWishGranted:'just where I hoped. Thank you.',
+  objectiveComplete:'Every whisper is heard and every corner is loved. This house’s story is complete; come by any '+
+   'day for tea.',
   hapticsLabel:'Haptics',hapticsHelp:'A small tap under your finger for each press.',supportLink:'Support',
   creditsLine:'Made in three.js (MIT licence); the licences ship inside the app.',
  },
@@ -62,6 +65,8 @@ export default {
   canaryArrived:'إجا كناري يسكن جنب شبّاك الليوان.',
   homePromise:'بيت زغير، تلات قلوب صغار، وكم سرّ حلو.',
   barObjects:'أشياء',barTools:'أدوات',barSound:'الصوت',barPause:'وقفة',barHouse:'البيت',
+  keepsakeWish:'أمنية {doll} اليوم:',keepsakeWishGranted:'بمحلّها تماماً. يسلمو إيديك.',
+  objectiveComplete:'كل الهمسات انسمعت وكل زاوية صارت محبوبة. حكاية هالبيت خلصت؛ مرّ أي يوم نشرب شاي.',
   hapticsLabel:'الاهتزاز',hapticsHelp:'دقّة زغيرة تحت إصبعك مع كل كبسة.',supportLink:'الدعم',
   creditsLine:'معمولة بـ three.js (رخصة MIT)، والرخص موجودة جوّا التطبيق.',
  },

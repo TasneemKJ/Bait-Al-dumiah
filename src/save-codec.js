@@ -48,7 +48,7 @@ function restoreValid(v){
  s.basket=integer(v.basket,0,BASKET_MAX);
  s.dayTime=clamp(v.dayTime,0,1e6);s.door=integer(v.door,0,DOOR_STEPS.length);
  s.gifts=Array.isArray(v.gifts)?VISITOR_GIFTS.filter(g=>v.gifts.includes(g)):[];
- s.lastGiftDay=integer(v.lastGiftDay,0,s.day);
+ s.lastGiftDay=integer(v.lastGiftDay,0,s.day);s.keepsakeWishDay=integer(v.keepsakeWishDay,0,s.day);
  for(const a of ACTIVITIES){s.activities.mastery[a.id]=integer(v.activities?.mastery?.[a.id],0,999);
  s.activities.completed[a.id]=integer(v.activities?.completed?.[a.id],0,ACTIVITY_DAILY_CAP);
  s.activities.lastReward[a.id]=Number.isFinite(v.activities?.lastReward?.[a.id])?

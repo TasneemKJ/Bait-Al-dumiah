@@ -133,7 +133,7 @@ html[lang=ar] #ui .dock[data-expanded=true]>button{font-size:max(16px,1rem)}
 /* A sheet focuses its close button for keyboard and VoiceOver users; on touch the ring is not drawn around it. */
 @media (pointer:coarse){#sheet .sheet-header [data-action=close]:focus-visible{outline:none}}
 .app-pages{flex-wrap:wrap;margin:-8px 0 18px}.app-pages .store-button{background:none;font-size:11px}
-.app-signature{font-size:11px!important;line-height:1.7;color:var(--muted);border-top:1px dashed var(--line);padding-top:14px}
+.app-signature{line-height:1.7;color:var(--muted);border-top:1px dashed var(--line);padding-top:14px}
 /* The phone's bottom bar (hand-play, 2026-11-13): five equal columns, each icon with its short name beneath, like the
    room tabs above it. Things to touch · House tools · Sound · Pause · Whole house. */
 @media(max-width:680px) and (orientation:portrait){
@@ -156,3 +156,15 @@ html[lang=ar] #ui .dock[data-expanded=true]>button{font-size:max(16px,1rem)}
  #ui .dock[data-expanded=false]>.tools-toggle>span{position:absolute;width:1px;height:1px;overflow:hidden;
   clip-path:inset(50%);white-space:nowrap}
 }
+/* Sheets on a phone: every text run is at least 15 px (17 px with Large text). Headings and the few larger runs keep
+   their own size; 1em lets a run inside a larger parent stay as large as its parent. */
+@media(max-width:680px){
+ #ui dialog :is(p,span,small,strong,em,label,button,select,li,bdi,summary,a):not(:is(h1,h2,h3) *,summary,.ending-note,
+  .catalog-item>strong,.gift-picture,.entry-number){font-size:max(15px,1em)}
+ .large-text #ui dialog :is(p,span,small,strong,em,label,button,select,li,bdi,summary,a):not(:is(h1,h2,h3) *,summary,
+  .ending-note,.catalog-item>strong,.gift-picture){font-size:max(17px,1em)}
+ #ui dialog .eyebrow{letter-spacing:1px}
+ #ui dialog :is(p,.sheet-intro,.journal-entries p){line-height:1.6}
+ #ui dialog .entry-number{font-size:15px}
+}
+@media(max-width:680px){#ui dialog h2>small,#ui dialog h3>small{font-size:15px}}

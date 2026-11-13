@@ -54,7 +54,8 @@ export const houseCommands={
 'place':(app,value,origin)=>{
    const result=sim.place(app.state,value.item,value.room,value.slot);
    if(app.notify(result,'placed')){app.ui.clearPlacement();app.world?.setPlacement(null);app.audio.effect('place');
-   for(const id of result.loved)app.say(app.ui.t(id)+' · '+app.ui.t('lovedPlaced'))}return;
+   for(const id of result.loved)app.say(app.ui.t(id)+' · '+app.ui.t('lovedPlaced'));
+   if(result.wish)app.say(app.ui.t(result.wish)+' · '+app.ui.t('keepsakeWishGranted'))}return;
   },
 'remove':(app,value,origin)=>{app.notify(sim.remove(app.state,value),'packed');return;},
 'move':(app,value,origin)=>{const result=sim.moveDoll(app.state,value.id,value.room);

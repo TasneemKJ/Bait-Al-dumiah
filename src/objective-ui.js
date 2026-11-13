@@ -1,11 +1,13 @@
 import {DOLLS,ROOMS,GIFT_COST} from './content.js';
 import {isNight,coziness,wishFor,unclaimed,secretCozyNeeded,doorOpen,nextDoorStep,
-  doorReady,restorationReady,canAfford,wishGranted,hasBasket,secretsLeft,giftReady} from './simulation.js';
+  doorReady,restorationReady,canAfford,wishGranted,hasBasket,secretsLeft,giftReady,keepsakeWish,
+  storyStatus} from './simulation.js';
 import {storyObjective} from './story-ui.js';
 import {wishKey,actionIcon} from './panels-ui.js';
 import {appStore} from './app-store.js';
 import {fifthRoomOpen} from './access.js';
 
+export const keepsakeWishLine=(t,w)=>`${t('keepsakeWish').replace('{doll}',t(w.doll))} ${t(w.item)} · ${t(w.room)}`;
 function wishStep(s,t,wish){const action=wishFor(s,wish.id);
  return {copy:t(wishKey(wish.id,action)),label:t(action),ico:actionIcon[action],
   action:'care',value:{id:wish.id,action}}}
@@ -30,6 +32,9 @@ export function nextStep(s,t,n,focusRoom,access=appStore.access()){
  // A door this copy has not opened is never the next step: it is offered only where it stands.
  if(step&&fifthRoomOpen(s,access)&&doorReady(s,step)&&canAfford(s,step.cost))return {copy:t('objectiveDoor'),
    label:t('mend')+' · '+n(step.cost),ico:'home',action:'panel',value:'journal',focus:'.door-next'};
+ const keepsake=!isNight(s)&&keepsakeWish(s);
+ if(keepsake&&canAfford(s,keepsake.price))return {copy:keepsakeWishLine(t,keepsake),label:t('decorate'),ico:'leaf',
+   action:'panel',value:'decorate'};
  if(secretsLeft(s)){
   if(isNight(s)&&s.lastSecretDay===s.day)return {copy:t('tomorrow'),label:t('dawn'),ico:'sun',action:'light'};
   if(isNight(s)&&coziness(s)<secretCozyNeeded(s))return {copy:t('objectiveShy'),
@@ -39,5 +44,8 @@ export function nextStep(s,t,n,focusRoom,access=appStore.access()){
  }
  if(doorOpen(s)&&fifthRoomOpen(s,access)&&isNight(s)&&giftReady(s))return {copy:t('objectiveGift'),
    label:t('leaveGift')+' · '+n(GIFT_COST),ico:'ghost',action:'gift'};
- return {copy:t('objectiveReturn'),label:t('household'),ico:'souls',action:'panel',value:'household'};
+ // Honest ending: every whisper heard and every corner furnished is the whole of this house's story.
+ const complete=!secretsLeft(s)&&!storyStatus(s).chapter&&!keepsakeWish(s)&&s.keepsakeWishDay!==s.day;
+ return {copy:t(complete?'objectiveComplete':'objectiveReturn'),label:t('household'),ico:'souls',action:'panel',
+   value:'household'};
 }

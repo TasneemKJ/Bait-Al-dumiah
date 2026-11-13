@@ -139,3 +139,12 @@ The night has gentle unease (knocks inside the wall, footprints that do not lead
 - A first launch speaks the device's language (Arabic device → Arabic; any other → English); Preferences and a saved choice still win.
 - Home: both names (the current language's large, the other beneath) and one line of promise; the canvas fills the page so the house's painted backdrop is the whole background (no seam bands).
 - A selected room is the subject: the neighbouring rooms recede behind a soft paper veil (plum at night), so they peek rather than share the screen. The whole-house view is never veiled.
+
+## Keepsake wishes and an honest ending — owner override (2026-11-13)
+The simulated week showed nothing new after the sixth whisper and no use for buttons. Using only what the house has:
+- **One keepsake wish a day.** Once the three stories are told, one doll a day (in turn) wishes for one keepsake in one room that still has a free corner ("Noor's wish today: Music box · The jasmine liwan"). The clue and the Decorate sheet name it. Placing it spends buttons as any keepsake does and pays in closeness and comfort, never buttons. One a day (`keepsakeWishDay` in the save, clamped like the other day fields).
+- **Bounded by the house:** twelve corners. When every corner is furnished and every whisper heard, the clue says so: "This house's story is complete; come by any day for tea." Packing a keepsake frees a corner and wishes resume.
+- Simulated week after (two 4-minute sessions a day): a wish in every session through real day 6, the completion line on day 7. Buttons still outpace their uses late (641 by day 7): accepted, nothing is sold for them.
+
+## Readable sheets and a named bottom bar (2026-11-13)
+Sheets on a phone floor every text run at 15 px (17 px with Large text); the audit at 375 px went from 234 smaller runs to 0 in both languages. The phone's bottom bar is five equal columns with a short name under each icon.

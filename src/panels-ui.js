@@ -4,7 +4,8 @@ import {storyMemoriesMarkup} from './story-ui.js';
 import {DOLLS,ROOMS,CATALOG,SECRETS,ACTIONS,MILESTONES,DOOR_STEPS,GIFT_COST,VISITOR_GIFTS} from './content.js';
 import {isNight,coziness,wishFor,wishReward,bondLevel,nextBond,isContent,contentThreshold,
   delighted,inFavoriteRoom,currentStreak,secretCozyNeeded,doorOpen,nextDoorStep,doorReady,
-  canAfford,wishGranted,hasBasket,secretsLeft,giftReady,isNewestGift,slotTaken,restingNote} from './simulation.js';
+  canAfford,wishGranted,hasBasket,secretsLeft,giftReady,isNewestGift,slotTaken,restingNote,
+  keepsakeWish} from './simulation.js';
 import {giftArt} from './gift-art.js';
 import {icon} from './icons.js';
 import {inNativeApp} from './native-app.js';
@@ -99,9 +100,13 @@ export function householdMarkup(s,{t,n,button,avatar,selected}){
        class="locked">${icon('moon')}<span>${t('memoryLocked')} · ${t('bond'+i)}</span></p>`).join('')}</div>`;
 }
 
+// Today's keepsake wish, named where keepsakes are chosen.
+function keepsakeWishNote(s,t){const w=keepsakeWish(s);
+ return w?`<p class="keepsake-wish">${icon('heart')}<span>${t('keepsakeWish').replace('{doll}',
+   t(w.doll))} <strong>${t(w.item)} · ${t(w.room)}</strong></span></p>`:''}
 export function decorateMarkup(s,{t,n,button}){
   return `<h2 id="sheet-title">${t('decorate')}</h2><p
-    class="sheet-intro">${t('catalogNote')}</p><div class="catalog">${CATALOG.map(c=>`<button
+    class="sheet-intro">${t('catalogNote')}</p>${keepsakeWishNote(s,t)}<div class="catalog">${CATALOG.map(c=>`<button
     type="button" data-action="choose-item" data-id="${c.id}" class="catalog-item" ${!canAfford(s,c.price)?
     'disabled':''}><span class="item-art ${c.id}">${icon(c.icon)}</span><strong>${t(c.id)}</strong><span
     class="item-description">${t(c.id+'Desc')}</span><span
