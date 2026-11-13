@@ -60,7 +60,7 @@ export default {
   "occupied":"That spot already has something lovely.",
   "invalid":"That little spot is not available.",
   "kitchen":"The tea kitchen",
-  "parlor":"The jasmine liwan",
+  "parlor":"The jasmine sitting room",
   "studio":"The embroidery room",
   "bedroom":"The moon bedroom",
   "room":"Room",
@@ -107,8 +107,8 @@ export default {
   "small-footstepsText":"Sami counts three dolls, then four sets of small footprints in the flour. The fourth set "+
    "stops at a closed door. None leads back.",
   "portraitTitle":"A change of expression",
-  "portraitText":"You straighten the old portrait above the liwan. Noor asks why the little chair in the painting "+
-   "is empty now. You do not remember a chair.",
+  "portraitText":"You straighten the old portrait above the sitting room. Noor asks why the little chair "+
+   "in the painting is empty now. You do not remember a chair.",
   "jasmineTitle":"Jasmine in the dark",
   "jasmineText":"Jasmine drifts in through a shutter fastened from inside. Noor checks the latch. Outside, a "+
    "shadow stops moving before Noor does.",
@@ -233,7 +233,7 @@ export default {
   "occupied":"في هذه الزاوية قطعة من قبل.",
   "invalid":"لا نستطيع أن نضع شيئاً هنا.",
   "kitchen":"مطبخ الشاي",
-  "parlor":"ليوان الياسمين",
+  "parlor":"غرفة جلوس الياسمين",
   "studio":"غرفة التطريز",
   "bedroom":"غرفة القمر",
   "room":"الغرفة",
@@ -280,7 +280,7 @@ export default {
   "small-footstepsText":"عدّ سامي الدمى: ثلاث. وعدّ آثار الأقدام على الطحين: أربعة. الخطوات الصغيرة وصلت إلى الباب "+
    "المغلق... لكنها لم تعد.",
   "portraitTitle":"كرسي في الصورة",
-  "portraitText":"عدّلتَ الصورة العتيقة فوق الليوان. سأل نور: «لماذا الكرسي الصغير فارغ الآن؟» وأنت لا تذكر أصلاً "+
+  "portraitText":"عدّلتَ الصورة العتيقة فوق غرفة الجلوس. سأل نور: «لماذا الكرسي الصغير فارغ الآن؟» وأنت لا تذكر أصلاً "+
    "أن فيها كرسياً.",
   "jasmineTitle":"النافذة مغلقة",
   "jasmineText":"دخل عطر الياسمين من النافذة، مع أنها مغلقة من الداخل. عاد نور يتفقّد المزلاج. في الخارج، وقف الظلّ "+

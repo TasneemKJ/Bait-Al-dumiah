@@ -78,7 +78,7 @@ export default {
   "teaBest":"Best {score} / 100",
   "teaRestoreGoal":"{room}: {earned} / {needed} tea mastery for its next restoration.",
   "teaRestoreReady":"{room} mastery reached · its next restoration costs {cost} buttons.",
-  "teaHomeRestored":"The kitchen and liwan are fully restored. There is always room for tea.",
+  "teaHomeRestored":"The kitchen and sitting room are fully restored. There is always room for tea.",
   "teaCupList":"Cup levels and gold lines",
  },
  ar:{
@@ -158,7 +158,7 @@ export default {
   "teaBest":"أفضل نتيجة {score} / ١٠٠",
   "teaRestoreGoal":"{room}: {earned} / {needed} خبرة في الشاي للتجديد القادم.",
   "teaRestoreReady":"بلغتَ خبرة {room} · التجديد القادم يكلّف {cost} زرّ.",
-  "teaHomeRestored":"اكتمل تجديد المطبخ والليوان. وما زال للشاي مكان.",
+  "teaHomeRestored":"اكتمل تجديد المطبخ وغرفة الجلوس. وما زال للشاي مكان.",
   "teaCupList":"مستوى الشاي والخطّ الذهبي في كل فنجان",
  },
 };

@@ -16,7 +16,7 @@ Object.assign(strings.en,{
  homeInvalidSave:'This save could not be opened. Play starts a fresh house.',
 
  storyFindObject:'Find {object}',storyReadClue:'Unfold the clue',storyFoldClue:'Fold the clue',
- kitchenIn:'Kitchen',parlorIn:'Liwan',studioIn:'Studio',bedroomIn:'Bedroom',
+ kitchenIn:'Kitchen',parlorIn:'Sitting room',studioIn:'Studio',bedroomIn:'Bedroom',
  'object-moon-mobile':'Moon mobile',
  calmDayOne:'The house breathes out. Lina hums by the kettle, and nothing needs you for a little while.',
  firstNightHint:'Night has fallen. Someone small is waiting by the door: touch “Greet the visitor”.',
@@ -84,7 +84,7 @@ Object.assign(strings.ar,{
  homeInvalidSave:'لم نستطع فتح هذا الحفظ. «العب» يفتح بيتاً جديداً.',
 
  storyFindObject:'ابحث عن {object}',storyReadClue:'افتح الورقة',storyFoldClue:'اطوِ الورقة',
- kitchenIn:'في المطبخ',parlorIn:'في الليوان',studioIn:'في غرفة التطريز',bedroomIn:'في غرفة النوم',
+ kitchenIn:'في المطبخ',parlorIn:'في غرفة الجلوس',studioIn:'في غرفة التطريز',bedroomIn:'في غرفة النوم',
  // Counts read as "label: n / total" so no number has to agree with a noun (two cups would need the dual).
  stitchProgress:'الأجزاء المخيطة: {done} / {total}',teaProgress:'الفناجين الجاهزة: {ready} / {total}',
  activityCooldown:'المكافأة القادمة تجهز بعد {x} من ثواني اللعب. يمكنك أن تتمرّن الآن.',

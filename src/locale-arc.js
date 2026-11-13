@@ -5,9 +5,9 @@
 export default {
  en:{
   arcRainComing:'Welcome home. Clouds are gathering over the jasmine window. Tonight, it may rain.',
-  arcThreadHung:'Welcome home. Someone has hung jasmine thread across the liwan. Lina won\'t say what for.',
+  arcThreadHung:'Welcome home. Someone has hung jasmine thread across the sitting room. Lina won\'t say what for.',
   arcNoorDay:'Welcome home. Tonight is Noor\'s night: the night Noor first sat by the jasmine window.',
-  arcRain:'Rain on the shutters. The three little hearts keep together in the liwan tonight.',
+  arcRain:'Rain on the shutters. The three little hearts keep together in the sitting room tonight.',
   arcAnniversary:'Lina and Sami tie a ribbon of jasmine thread round the jasmine by the window, for Noor. '+
    'A keepsake for the journal.',
   arcKeepsakes:'Keepsakes',
@@ -30,9 +30,9 @@ export default {
  },
  ar:{
   arcRainComing:'أهلاً بعودتك. غيم يتجمّع فوق نافذة الياسمين. قد تمطر الليلة.',
-  arcThreadHung:'أهلاً بعودتك. أحدهم علّق خيط ياسمين في الليوان. لينا لا تريد أن تقول لماذا.',
+  arcThreadHung:'أهلاً بعودتك. أحدهم علّق خيط ياسمين في غرفة الجلوس. لينا لا تريد أن تقول لماذا.',
   arcNoorDay:'أهلاً بعودتك. الليلة ليلة نور: الليلة التي جلس فيها نور أول مرة قرب نافذة الياسمين.',
-  arcRain:'المطر يدقّ على النوافذ. القلوب الصغيرة الثلاثة مجتمعة في الليوان الليلة.',
+  arcRain:'المطر يدقّ على النوافذ. القلوب الصغيرة الثلاثة مجتمعة في غرفة الجلوس الليلة.',
   arcAnniversary:'ربطت لينا وسامي شريطاً من خيط الياسمين حول الياسمينة بجانب النافذة، من أجل نور. تذكار للدفتر.',
   arcKeepsakes:'تذكارات',
   arcKeepsakeTitle:'شريط ياسمين نور',
