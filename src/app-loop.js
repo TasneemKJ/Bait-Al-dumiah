@@ -1,6 +1,7 @@
 // The animation frame, visibility and keyboard handling. The debug seam is src/debug-seam.js.
 import * as sim from './simulation.js';
 import {bindPlacementEscape} from './placement-keys.js';
+import {localDate} from './cmd-home.js';
 
 const HOME_FRAME_MS=1000/15;
 
@@ -24,7 +25,7 @@ export function installLoop(app){
     (sim.dollRoom(app.state,app.host.dataset.focusDoll)??''),
     app.world?.project(app.ui.selected,.05),Boolean(app.ui.panel||app.ui.placement||
       app.state.paused||app.storyUI?.selected||app.physicalActivity()));
-  if(app.physicalActivity()!=='lullaby')app.audio.tick(sim.isNight(app.state));
+  if(app.physicalActivity()!=='lullaby')app.audio.tick(sim.isNight(app.state),sim.raining(app.state));
   if(now-lastUI>250){app.ui.tick();app.roomViews.update();app.objectControls.update();
   app.storyUI.update();lastUI=now}if(now-app.lastSave>8000){app.save();app.lastSave=now}}
   requestAnimationFrame(frame);
@@ -32,7 +33,8 @@ export function installLoop(app){
  requestAnimationFrame(frame);
  document.addEventListener('visibilitychange',()=>{app.intro?.resetClock?.();
  if(document.hidden){app.storyUI?.cancelDrag();
- app.cancelWorkInput()}app.syncPause();app.last=performance.now();if(document.hidden)app.save()});
+ app.cancelWorkInput()}else if(app.session?.entered&&sim.markVisit(app.state,localDate()))greetNewDay(app);
+ app.syncPause();app.last=performance.now();if(document.hidden)app.save()});
  window.addEventListener('pagehide',()=>{app.cancelWorkInput();app.save()});
  bindPlacementEscape(window,()=>{if(!app.ui.placement)return false;app.ui.clearPlacement();
  app.world?.setPlacement(null);app.roomViews.update();return true});
@@ -53,3 +55,5 @@ export function installLoop(app){
   if(event.key==='ArrowRight'){event.preventDefault();app.world?.orbit(.09)}
  });
 }
+// The app was left open past midnight: a new visit day, and the arc's line if it has one.
+function greetNewDay(app){const key=sim.arcGreeting(app.state);if(key)app.say(app.ui.t(key));app.save()}

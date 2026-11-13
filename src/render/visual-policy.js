@@ -5,6 +5,11 @@ export function lighting(mix){
  const t=clamp(mix,0,1),lerp=(a,b)=>a+(b-a)*t;
  return {ambient:lerp(1.15,.50),key:lerp(2.35,.50),rim:lerp(1.05,1.70),lamps:lerp(1.4,8.4),exposure:lerp(1.08,1.03)};
 }
+// The rain night (src/sim-arc.js): cooler and dimmer daylight-sky, more haze; the room lamps stay warm.
+export function rainLook(mix){
+ const t=clamp(mix,0,1);
+ return {ambient:1-.22*t,key:1-.38*t,fog:1+.7*t,tint:0x6f86b0,tintAmount:.4*t,glass:.3*t};
+}
 export function fog(mix){
  const t=clamp(mix,0,1),lerp=(a,b)=>a+(b-a)*t;
  const a=0xe7d8c8,b=0x252943;

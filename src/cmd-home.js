@@ -11,9 +11,13 @@ function showPlayShell(app){
  app.syncPause();app.world.syncViewport();app.world.setEnabled(!app.state.paused);
  app.refreshUI();app.playfieldLayout.measure();
 }
+// The player's own calendar day, for the first week's arc (src/sim-arc.js).
+export function localDate(d=new Date()){
+ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
 function greetReturningPlayer(app){
- const greeting=returnGreeting(app.state);if(!greeting)return;
- app.say(app.ui.t(greeting.key).replace('{count}',app.ui.n(greeting.count)));
+ const arc=sim.arcGreeting(app.state),greeting=returnGreeting(app.state);if(!arc&&!greeting)return;
+ app.say(arc?app.ui.t(arc):app.ui.t(greeting.key).replace('{count}',app.ui.n(greeting.count)));
  if(!app.state.settings.reducedMotion)app.world?.welcomeBack(waveSchedule(DOLLS.length,app.state.elapsed));
  welcomeGlance(app);
 }
@@ -41,7 +45,7 @@ function enterPlay(app){
  app.last=performance.now();app.lastSave=app.last;app.canvas.focus({preventScroll:true});
  // First launch only: claiming the intro is saved with the entry write below, so a reload never replays it.
  if(!(sim.claimIntro(app.state)&&startIntro(app))&&!app.session.canContinue)app.dispatch('focus-room','kitchen');
- let entrySaved=false;
+ sim.markVisit(app.state,localDate());let entrySaved=false;
  if(!app.state.settings.muted&&!app.audio.enabled)void app.audio.enable().then(ok=>{if(!ok)app.ui.toast((entrySaved?
    '':app.ui.t('savingFailed')+' ')+app.ui.t('audioUnavailable'));app.audio.setPaused(app.state.paused)});
  entrySaved=app.save();

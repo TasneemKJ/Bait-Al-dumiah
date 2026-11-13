@@ -122,6 +122,12 @@ export function decorateMarkup(s,{t,n,button}){
         >`}).join(''):`<p class="empty-note">${t('emptyDecor')}</p>`}</div>`;
 }
 
+// Noor's ribbon from the first week's arc: a free keepsake, never one of the visitor's gifts.
+// In the app it carries the house's picture, so Noor's night can be shared (src/share-card.js).
+const arcKeepsakeMarkup=(s,t,button)=>s.arc?.keepsake?`<h3 class="section-heading">${t('arcKeepsakes')}</h3><div
+ class="gift-grid"><div class="gift"><span class="gift-picture">${giftArt('jasmine-ribbon')}</span><strong
+ >${t('arcKeepsakeTitle')}</strong><small>${t('arcKeepsakeText')}</small></div></div>${appStore.inApp?
+ button('share-house',t('arcShare'),'heart','class="wide"'):''}`:'';
 export function journalMarkup(s,{t,n,button}){
   return `<h2 id="sheet-title">${t('journal')} <small>${n(s.journal.length)}/${n(SECRETS.length)}</small></h2><p
     class="sheet-intro">${t('whispersIntro')}</p><div
@@ -134,7 +140,7 @@ export function journalMarkup(s,{t,n,button}){
     'class="primary wide"')):`<p class="ending-note">${t('complete')}</p>`}${isNight(s)&&
       secretsLeft(s)&&coziness(s)<secretCozyNeeded(s)?
     `<p class="shy-note">${t('shyNeed')} ${n(secretCozyNeeded(s))}% · ${t('cozy')} ${n(coziness(s))}%</p>`:''}
-   ${storyMemoriesMarkup(s,t)}${doorMarkup(s,{t,n,button})}
+   ${storyMemoriesMarkup(s,t)}${arcKeepsakeMarkup(s,t,button)}${doorMarkup(s,{t,n,button})}
    <h3 class="section-heading">${t('milestones')} <small
      >${n(s.milestones.length)}/${n(MILESTONES.length)}</small></h3><p
      class="sheet-intro">${t('milestonesIntro')} ${t('streakLabel')}: <strong>${n(currentStreak(s))}</strong></p><div

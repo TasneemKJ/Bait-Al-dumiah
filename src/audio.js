@@ -1,4 +1,5 @@
 import {lullabyBeat} from './lullaby-score.js';
+import {createRainSound} from './rain-sound.js';
 // Original synthesized music and room sounds. No samples, network requests or
 // claim of reproducing an acoustic instrument. Audio remains gesture-gated.
 const bounded=(n,lo,hi,fallback)=>Math.max(lo,Math.min(hi,Number.isFinite(n)?n:fallback));
@@ -89,9 +90,10 @@ export class DollhouseAudio{
   if(!this.context)return;const t=this.context.currentTime;
   DUSK_SWELL.forEach((f,i)=>this.tone(f,t+i*.35,4,.022,'sine',1.8));
  }
- tick(night){
+ tick(night,rain=false){
   if(!this.context||!this.enabled||this.paused||this.disposed)return;
   const now=this.context.currentTime;
+  if(rain||this.rain){this.rain??=createRainSound(this.context,this.master);this.rain.set(rain)}
   if(!night)this.sawDay=true;
   if(this.night!==night){this.night=night;this.nextKnock=night?now+18:Infinity;
   if(night&&this.sawDay){this.sawDay=false;this.duskSwell()}}
@@ -167,5 +169,5 @@ export class DollhouseAudio{
  // The lullaby waits for the resolve chord to breathe before its first note.
  holdLullaby(seconds){if(this.context)this.next=Math.max(this.next,this.context.currentTime+seconds)}
  dispose(){if(this.disposed)return;this.disposed=true;this.enableGeneration++;this.enabled=false;
- this.stopVoices();this.context?.close().catch(()=>{})}
+ this.stopVoices();this.rain?.stop();this.rain=null;this.context?.close().catch(()=>{})}
 }

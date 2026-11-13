@@ -1,3 +1,4 @@
+import {freshArc} from './sim-arc.js';
 import {DOLLS,ROOMS,ACTIVITIES,ACTIVITY_COOLDOWN} from './content.js';
 
 // A fresh house: the state every new game and every failed load starts from.
@@ -14,6 +15,6 @@ export function createState(){
       null,null],stitchRecords:[null,null,null,null],active:null},
   restoration:Object.fromEntries(ROOMS.map(r=>[r.id,0])),
   story:{chapter:0,step:0,lastAction:null,lastActionAt:-10},
-  introSeen:false,
+  introSeen:false,arc:freshArc(),
   settings:{locale:'en',muted:true,reducedMotion:false,quality:'auto',largeText:false}};
 }

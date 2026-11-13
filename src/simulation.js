@@ -10,6 +10,8 @@ import {ROOMS,DOLLS,CATALOG,SLOTS,SECRETS,ACTIONS,MILESTONES,SEW_SECONDS,DOOR_ST
   VISITOR_GIFTS,ACTIVITIES,RESTORATION_COSTS,RESTORATION_MASTERY,WISH_REFRESH_SECONDS,
     SEW_DAILY,BASKET_MAX} from './content.js';
 import {createState} from './sim-state.js';
+import {stepArc} from './sim-arc.js';
+export {ARC,markVisit,raining,gatherRoom,garlands,anniversary,arcGreeting} from './sim-arc.js';
 export {createState};
 export const SECRET_COUNT=SECRETS.length;
 export * from './sim-queries.js';
@@ -70,6 +72,7 @@ export function step(s,dt){
  stepTea(s,dt);stepChimes(s,dt);const stitching=stitchActive(s);
  if(stitching)moveStitch(stitching,stitchSections(stitching),dt);
  if(s.clock>=240){s.clock-=240;newDay(s)}
+ stepArc(s);
  // One gentle pointer the first time night falls, for a player who has not met the visitor yet.
  if(isNight(s)&&!s.hints.night){s.hints.night=true;emit(s,{type:'first-night'})}
  // Day one is front-loaded: after the opening burst, one calm line makes the quiet stretch feel intended.

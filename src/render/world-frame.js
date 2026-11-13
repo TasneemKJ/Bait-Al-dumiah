@@ -32,8 +32,9 @@ export function renderFrame(w,state,dt,selected){
  const focusRoom=working()?null:st.focusedRoom;st.lampFocus??={};
  for(const {id:room} of ROOMS)st.lampFocus[room]=state.settings.reducedMotion?
    Number(room===focusRoom):T.MathUtils.damp(st.lampFocus[room]??0,Number(room===focusRoom),3,dt);
+ w.firstWeek.update(state,dt,st.reducedMotion);
  applyLighting({renderer,depthFog,hemi,key,fill,house,courtyard},{state,
-   nightMix:st.nightMix,focusedRoom:st.focusedRoom,lampFocus:st.lampFocus});
+   nightMix:st.nightMix,focusedRoom:st.focusedRoom,lampFocus:st.lampFocus,rainMix:w.firstWeek.rainMix});
  details.update(st.nightMix);atmosphere.update(state,st.nightMix,st.quality);
  roomEffects.update(state,st.nightMix);restoration.update(state,st.nightMix);
  storyProps.update(state,st.nightMix);teaTable.update(state);sewingPlay.update(state);

@@ -12,6 +12,7 @@ import {createSculptedHead,createPortraitEye,createBrow,closePortraitEye,createP
 import {wishGlowStrength,wishGlowOpacity} from '../wish-glow.js';
 import {createTeaSteam,createComfortHearts,createSleepCrescent} from './resident-effects.js';
 import {DOLLS,ROOMS} from '../content.js';
+import {gatherRoom} from '../simulation.js';
 import {palette as P,cylinder,ring,mat,cup,batch} from './primitives.js';
 import {softTexture} from './textiles.js';
 export function blinkOpen(time,index=0){
@@ -102,8 +103,11 @@ function makeDoll(def){
 export function createDolls(parent){
  const dolls=DOLLS.map((def,i)=>{const v=makeDoll(def);parent.add(v.root);
  const r=ROOMS.find(x=>x.id===def.room);v.root.position.set(r.x+.85,r.y+.12,.88);return v});
- let previousSelection=null;
+ let previousSelection=null,visit=null;
+ // Where a doll is drawn: together in the liwan on the rain night, or on a short idle visit; her room is unchanged.
+ const shownRoom=(state,d)=>gatherRoom(state)??(visit?.id===d.id?visit.room:d.room);
  return {dolls,targets:dolls.map(v=>v.hit),
+  setVisit(value){visit=value?{id:value.id,room:value.room}:null},
   greet(id){const v=dolls.find(x=>x.id===id);if(v)v.greetNow=true},greetAll(times){dolls.forEach((v,
    i)=>{if(Number.isFinite(times[i]))v.greetedAt=times[i]})},update(state,dt,selected,viewerYaw=0){
   dolls.forEach(v=>{v.halo.visible=selected===v.id});if(state.paused)return;
@@ -112,12 +116,12 @@ export function createDolls(parent){
   if(doll)doll.greetedAt=motion?t:-Infinity}previousSelection=selected;
   for(const v of dolls)if(v.greetNow){v.greetNow=false;v.greetedAt=motion?t:-Infinity}
   dolls.forEach((v,i)=>{
-   const d=state.dolls.find(x=>x.id===v.id),r=ROOMS.find(x=>x.id===d.room),
-     mates=state.dolls.filter(x=>x.room===d.room),order=mates.indexOf(d);
+   const d=state.dolls.find(x=>x.id===v.id),at=shownRoom(state,d),r=ROOMS.find(x=>x.id===at),
+     mates=state.dolls.filter(x=>shownRoom(state,x)===at),order=mates.indexOf(d);
    const base=mates.length>1?(order-(mates.length-1)/2)*1.08:(i===1?1.35:.80);
    const formation=mates.map(m=>m.id).join(':');
-   if(v.room!==d.room||v.formation!==formation){v.root.position.set(r.x+base,r.y+.12,.88);
-   v.room=d.room;v.formation=formation}
+   if(v.room!==at||v.formation!==formation){v.root.position.set(r.x+base,r.y+.12,.88);
+   v.room=at;v.formation=formation}
    const walk=motion&&d.action==='idle'?(mates.length>1?Math.sin(t*.13)*.10:Math.sin(t*.13+i*2)*.26):0;
    const previousX=v.root.position.x;
    v.root.position.x=state.settings.reducedMotion?r.x+base:T.MathUtils.damp(v.root.position.x,r.x+base+walk,3,dt);

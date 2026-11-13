@@ -1,13 +1,16 @@
 // The share card (iPhone app): the player's own house as the renderer draws it at night, cropped 4:5, with both
 // names, the day and the dolls' names on a plum band. No account, no network: the app's share sheet takes the PNG.
 import {DOLLS} from './content.js';
+import {ARC} from './sim-arc.js';
 import {translate} from './i18n.js';
 
 export const CARD=Object.freeze({width:1080,height:1350,band:230});
+// The first week's arc names its own nights on the card (src/sim-arc.js).
+const arcMoment=s=>s.arc?.visits===ARC.rain?'arcCardRain':s.arc?.visits===ARC.day&&s.arc.keepsake?'arcCardNoor':null;
 export function cardLines(s,t,n){
  const locale=s.settings.locale;
  return {title:t('title'),alt:translate(locale==='ar'?'en':'ar','title'),
-  detail:`${t('day')} ${n(s.day)} · ${DOLLS.map(d=>t(d.id)).join(' · ')}`};
+  detail:`${arcMoment(s)?t(arcMoment(s)):`${t('day')} ${n(s.day)}`} · ${DOLLS.map(d=>t(d.id)).join(' · ')}`};
 }
 // `source` is the WebGL canvas straight after a render (its buffer is only valid in that same task).
 export function composeCard(source,lines,makeCanvas=()=>document.createElement('canvas'),rtl=false){

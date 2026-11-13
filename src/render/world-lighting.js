@@ -1,8 +1,8 @@
 import * as T from 'three';
-import {lighting,duskGlow,fog as fogPolicy,practicalLight} from './visual-policy.js';
+import {lighting,duskGlow,fog as fogPolicy,practicalLight,rainLook} from './visual-policy.js';
 
 // Sets every light, the fog and the window glow from the blend between day and night.
-export function applyLighting(rig,{state,nightMix,focusedRoom,lampFocus=null}){
+export function applyLighting(rig,{state,nightMix,focusedRoom,lampFocus=null,rainMix=0}){
  const {renderer,depthFog,hemi,key,fill,house,courtyard}=rig;
  const cue=courtyard.update(state,nightMix),look=lighting(nightMix),
    haze=fogPolicy(nightMix);hemi.intensity=look.ambient;key.intensity=look.key;
@@ -20,4 +20,12 @@ export function applyLighting(rig,{state,nightMix,focusedRoom,lampFocus=null}){
  l.intensity=p.intensity;l.color.setHex(p.color);l.distance=p.distance}
  house.windows.forEach(m=>{m.emissive.set(0x8baaca).lerp(new T.Color(0xffc27d),
    dusk*(1-nightMix));m.emissiveIntensity=.14+nightMix*.62+dusk*.30});
+ if(rainMix>0)wet(rig,rainLook(rainMix));
+}
+// The rain night shifts the house's own palette toward slate blue; the lamps keep their warmth.
+const SLATE=new T.Color();
+function wet({depthFog,hemi,key,fill,house},r){
+ SLATE.setHex(r.tint);hemi.intensity*=r.ambient;key.intensity*=r.key;depthFog.density*=r.fog;
+ hemi.color.lerp(SLATE,r.tintAmount);key.color.lerp(SLATE,r.tintAmount);fill.color.lerp(SLATE,r.tintAmount*.6);
+ depthFog.color.lerp(SLATE,r.tintAmount*.5);house.windows.forEach(m=>m.emissive.lerp(SLATE,r.glass));
 }

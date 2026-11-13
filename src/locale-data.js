@@ -5,8 +5,9 @@ import story from './locale-story.js';
 import house from './locale-house.js';
 import keepsakes from './locale-keepsakes.js';
 import store from './locale-store.js';
+import arc from './locale-arc.js';
 
-const tables=[rituals,story,house,keepsakes,store];
+const tables=[rituals,story,house,keepsakes,store,arc];
 const merge=lang=>Object.assign({},...tables.map(table=>table[lang]));
 export const strings={en:merge('en'),ar:merge('ar')};
 // In the iPhone app (src/main.js turns this on) a key's `<key>App` wording wins when it exists:
