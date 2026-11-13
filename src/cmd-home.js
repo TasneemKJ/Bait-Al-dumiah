@@ -1,5 +1,6 @@
 // Commands: Home screen and entering play, sound and settings.
 import * as sim from './simulation.js';
+import {setHaptics} from './app-info.js';
 import {DOLLS} from './content.js';
 import {returnGreeting,waveSchedule,waveRoom} from './return-greeting.js';
 
@@ -84,6 +85,7 @@ export const homeCommands={
    else app.homeUI?.notify(app.ui.t('audioUnavailable'))}return;
   },
 'setting':(app,value,origin)=>{
+   if(value.key==='haptics'){setHaptics(Boolean(value.value));return}
    if(value.key==='locale'&&['en','ar'].includes(value.value))app.state.settings.locale=value.value;
    if(value.key==='quality'&&['auto','low','high'].includes(value.value))app.state.settings.quality=value.value;
    if(value.key==='motion')app.state.settings.reducedMotion=Boolean(value.value);

@@ -28,6 +28,8 @@ export default {
    'and a visitor who leaves gifts. It opens with The Fifth Room.',
   doorLockedSee:'See The Fifth Room',
   canaryArrived:'A canary has come to live by the liwan window.',
+  hapticsLabel:'Haptics',hapticsHelp:'A small tap under your finger for each press.',supportLink:'Support',
+  creditsLine:'Made in three.js (MIT licence); the licences ship inside the app.',
  },
  ar:{
   storeTitle:'أكتر من البيت',
@@ -56,5 +58,7 @@ export default {
    'بينفتح مع الغرفة الخامسة.',
   doorLockedSee:'شوف الغرفة الخامسة',
   canaryArrived:'إجا كناري يسكن جنب شبّاك الليوان.',
+  hapticsLabel:'الاهتزاز',hapticsHelp:'دقّة زغيرة تحت إصبعك مع كل كبسة.',supportLink:'الدعم',
+  creditsLine:'معمولة بـ three.js (رخصة MIT)، والرخص موجودة جوّا التطبيق.',
  },
 };

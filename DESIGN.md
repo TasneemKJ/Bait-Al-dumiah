@@ -127,3 +127,7 @@ Every press on a control gives a soft wooden tap (quieter than any reward) and o
 
 ## First reward in seconds — studio gate (2026-11-13)
 Cold-play bot (before): the first reward came 93 s (ar) and 114 s (en) after Play, behind the whole first story chapter, because the clue always led with the story. Now a new house's first clue is the wish the intro has just named, Lina's tea: one tap on the clue, +8 buttons; after that first kindness the story leads as before.
+
+## Settings and controls — studio bar (2026-11-13)
+- Settings in the app gains Haptics (on by default, kept as `bait-al-dumiah.v1.haptics` beside the save), Support and Privacy (opened by the app), and a signature line: the game, version 1.0, Tas Games, and the three.js credit.
+- Selects keep a 44 pt target and the house's paper with a thread chevron; the settings switches are a rose-thread pill with a cream bead (WebKit on iPhone drew selects 19 px tall and checkboxes as blank white squares). On touch, the close button a sheet focuses for VoiceOver is not ringed.

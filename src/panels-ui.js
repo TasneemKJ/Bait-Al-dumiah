@@ -11,6 +11,7 @@ import {inNativeApp} from './native-app.js';
 import {appStore} from './app-store.js';
 import {fifthRoomLocked} from './access.js';
 import {storeMarkup} from './store-ui.js';
+import {appInfoMarkup} from './app-info.js';
 export const actionIcon={tea:'tea',play:'play',rest:'rest',soothe:'heart'};
 export const wishKey=(id,action)=>DOLLS.find(d=>d.id===id).wish===action?id+'Wish':id+'Wish_'+action;
 
@@ -162,7 +163,8 @@ export function settingsMarkup(s,{t,button,resetConfirm}){
     'play')}</div><p>${t('introSettingHelp')}</p><div class="setting-row"><span>${t('filmLabel')}</span>
     ${button('watch-film',t('filmWatch'),'play')}</div>${appStore.inApp?`<div
     class="setting-row"><span>${t('storeSettings')}</span>${button('panel-store',t('storeSettingsOpen'),
-    'spark')}</div>`:''}</div><details><summary>${t('helpTitle')}</summary><p
+    'spark')}</div>`:''}${appInfoMarkup({t,button},
+    {inApp:appStore.inApp})}</div><details><summary>${t('helpTitle')}</summary><p
     >${t('help')}</p><p>${t('controlsHelp')}</p></details><p
       class="privacy-note">${t('privacyNote')}${inNativeApp()?'':` <a href="./credits.txt"
     target="_blank" rel="noopener">${t('creditsLink')}</a>`}</p><div
