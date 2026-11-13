@@ -128,7 +128,7 @@ Object.assign(strings.ar,{
    chimeListenShort:'انظر إلى الضوء. ردّد من الآخر إلى الأول.',chimeDoneShort:'القمر: أغنية أخرى. عُد وأبقِ الضوء.',
  chimeKeyboard:'يمين ويسار: اختر قطعة. اضغط المسافة واتركها لترنّ. R: اسمع مرة أخرى. Escape: عُد.',
  chimeKeysShort:'الأسهم: اختيار · المسافة: اسحب واترك · R: إعادة',
- chimeExit:'عُد إلى البيت',chimeRegion:'مكان عزف رنّة القمر',
+ chimeExit:'اترك القمر',chimeRegion:'مكان عزف رنّة القمر',
    chimeCanvas:'رنّة القمر. أربع قطع معلّقة وقمر صغير. اسحب قطعة واتركها لتعزف.',
  chimeMoon:'الهلال',chimeStar:'النجمة',chimeJasmine:'الياسمينة',chimeHeart:'القلب',
  chimeSelected:'اخترت: {name}',chimePullReadout:'السحبة: {pull}٪. اتركها بعد سحبة صغيرة.',

@@ -37,7 +37,7 @@ From version 1.1 the register is Modern Standard Arabic (fusha) everywhere: simp
 
 Conventions used: the player is addressed in the masculine singular, as before (`اضغط`, `أمسك`); Noor and Sami are masculine, Lina feminine; the dolls (`الدمى`) take feminine-singular agreement; tanween fath is written on indefinite accusatives (`زرّاً`, `بيتاً جديداً`); numbers stay Arabic-Indic. Kept on purpose: `الليوان` (a room with no fusha equivalent), `كشتبان`, `الكناري`, `نمط شامي` (names the embroidery tradition, not the language), and the proverb `الجار قبل الدار`. `دقّ` is used for knocking throughout (`دقّتان`, `الدقّات`). Word choices a native reader may want to revisit: `دبّ` for the teddy (was `دبدوب`), `أريكة` (was `كنباية`), `مودّة` for the fourth closeness level (was `غلاوة`), `ياسمينة مجفّفة` for the pressed jasmine (was `مكبوسة`), `درزة` for a seam, `سهما اليمين واليسار` (dual) in the tea-table label, `نلعب معاً` and `دثِّر للنوم` on the two care buttons (kept neutral because the doll may be Lina or one of the boys), and `filmLine3`, where Noor was feminine (`تاركة`) and is now masculine like everywhere else.
 
-Not regenerated in this pass (they still show the old wording): the Arabic store screenshots in `ios/store/screenshots/ar/`, `ios/store/review/store-card-ar.png`, and the Arabic film exports (`film/exports/*-ar-*.mp4`, the thumbnail), whose captions are burned in.
+Recaptured with the fusha text on the 6.9-inch simulator: the five Arabic store screenshots in `ios/store/screenshots/ar/` and `ios/store/review/store-card-ar.png`. Still showing the old wording: the Arabic film exports (`film/exports/*-ar-*.mp4`, the thumbnail), whose captions are burned in.
 
 Changed: 564 of 726 in-game strings (`strings.ar`), plus the store and film rows at the end.
 
@@ -578,7 +578,7 @@ Changed: 564 of 726 in-game strings (`strings.ar`), plus the store and film rows
 | `chimeListenShort` | شوف الضو. ردّ من الآخر للأول. | انظر إلى الضوء. ردّد من الآخر إلى الأول. |
 | `chimeDoneShort` | القمر: أغنية تانية. ارجع وخلي الضو. | القمر: أغنية أخرى. عُد وأبقِ الضوء. |
 | `chimeKeyboard` | يمين وشمال: اختار قطعة. اضغط المسافة واتركها لترنّ. R: اسمع كمان مرة. Escape: ارجع. | يمين ويسار: اختر قطعة. اضغط المسافة واتركها لترنّ. R: اسمع مرة أخرى. Escape: عُد. |
-| `chimeExit` | ارجع عالبيت | عُد إلى البيت |
+| `chimeExit` | ارجع عالبيت | اترك القمر |
 | `chimePractice` | تدريب ببلاش. الضو اللي كسبته بيضل إلك. | تدريب مجاني. الضوء الذي كسبتَه يبقى لك. |
 | `chimeReward` | الأغنية خلصت · +{reward} زرّ | اكتملت الأغنية · +{reward} زرّ |
 | `chimeMistake` | هاي نغمة تانية. اسمع مرة كمان، ما راح عليك شي. | هذه نغمة أخرى. اسمع مرة أخرى، لم تخسر شيئاً. |
