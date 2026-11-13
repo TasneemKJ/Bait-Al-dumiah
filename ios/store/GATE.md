@@ -130,7 +130,7 @@ clamped to one note). The silent switch silences the game (`ambientAudio: true`)
 | Arabic device opened in English | FIXED 303eb0a (test seen failing first) |
 | Title: seam bands where the canvas met the page; Latin name only; no promise | FIXED 303eb0a: canvas fills the page on Home, both names, one promise line (checked at 393x852 in both languages) |
 | Room view: the room above shared the screen | FIXED 303eb0a: neighbouring rooms recede behind a soft paper veil (plum at night); whole-house view unveiled |
-| Bottom bar: uneven gaps, icon-only buttons without a visible meaning | **OPEN**: not changed in this pass |
+| Bottom bar: uneven gaps, icon-only buttons without a visible meaning | FIXED 4991360 + 06667f9: five equal columns (zero gaps, 48 px, labels under icons: Things/Tools/Sound/Pause/House, أشياء/أدوات/الصوت/وقفة/البيت), measured at 375x667, 393x852, 440x956 in both languages, no overlaps; tray and drawer text now ≥ 15 px |
 
 Geometry re-run after these fixes at all four sizes, both languages: 2 findings each (3 at Pro Max), all the deliberate
 switch rows; zero occlusions.
@@ -139,7 +139,7 @@ switch rows; zero occlusions.
 1. **tas-games still says "no purchases"**: `bait-al-dumiah/support.html` ("Are there purchases or ads? No. The whole
    game is free"), `privacy.html` ("no purchases") and `index.html` ("No death, no ads, no purchases") contradict the
    app. They must say that purchases are handled by Apple and collect nothing, before submission.
-2. Body text below 15 pt on the smallest phone; no share moment; free days 5–7 have nothing new; the bottom bar's spacing and icon-only buttons (hand-play note 4).
+2. Body text below 15 pt on the smallest phone (bottom bar tray and drawer fixed in 06667f9); no share moment; free days 5–7 have nothing new.
 3. Not seen on a real iPhone: WebGL speed and heat, the canary in the liwan, haptics on the Taptic Engine.
 4. The store screenshots are real 6.9" app captures from the earlier session's build (the scenes are unchanged by this
    pass); fresh captures from this build, and the small-simulator pass, were blocked by the shared simulator service.
