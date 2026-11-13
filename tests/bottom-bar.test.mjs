@@ -22,3 +22,12 @@ test('the phone bar is five equal columns and prints the short labels under the 
  const css=readFileSync(new URL('../src/hud.css',import.meta.url),'utf8');
  assert.match(css,/content:attr\(data-short\)/);assert.match(css,/--bar-col:calc\(\(100% - 24px\)\/5\)/);
 });
+test('the bar sits on one baseline, 48 px tall, and its tray and drawer text is at least 15 px on a phone',()=>{
+ const css=readFileSync(new URL('../src/hud.css',import.meta.url),'utf8');
+ const story=readFileSync(new URL('../src/story.css',import.meta.url),'utf8');
+ for(const part of ['\\.dock\\[data-expanded=false\\]\\{bottom','\\.object-controls\\{inset-inline-start:12px;bottom',
+  '\\.camera-tools\\{inset-inline-end:12px;bottom'])assert.match(story,new RegExp(part+':var\\(--edge-bottom\\)'));
+ assert.match(css,/height:48px;min-height:48px/);
+ assert.match(css,/#ui \.dock\[data-expanded=true\]>button\{[^}]*font-size:max\(15px,1rem\)/);
+ assert.match(css,/#ui \.object-list button\{font-size:15px/);
+});
