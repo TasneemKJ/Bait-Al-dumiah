@@ -80,8 +80,8 @@ synthesized music-box bed and room tone, night knocks, the canary's trill (now i
 clamped to one note). The silent switch silences the game (`ambientAudio: true`).
 
 ## 5. Suites, archive
-`npm run verify`: see the final report (572/572 node tests with `python`→`python3`, lint, build at 430 KiB of the 500 KiB JS budget). iOS: 28 tests
-(config 5, StoreKit 16, real page 7). Archive: `/tmp/BaitAlDumiah.xcarchive`, team FJ3FMYPK3P.
+`npm run verify`: see the final report (572/572 node tests with `python`→`python3`, lint, build at 430 KiB of the 500 KiB JS budget). iOS: 28/28 at 303eb0a
+(config 5, StoreKit 16, real page 7); one earlier run on the shared simulator timed out loading the page (90 s), so the page tests now allow 180 s. Archive: `/tmp/BaitAlDumiah.xcarchive`, team FJ3FMYPK3P.
 
 ## Studio bar
 
@@ -100,7 +100,7 @@ clamped to one note). The silent switch silences the game (`ambientAudio: true`)
 | Store never before a win, never blocking | PASS | only at the door and in Settings |
 | Nothing bought taken back; asked from StoreKit | PASS | `src/access.js`; nothing in the save (test) |
 | Arabic and English first-class | PASS | both languages on every screen; dolls are «قلوب» not «أرواح» (fixed) |
-| Language follows device on first launch | OPEN | the first launch is English unless chosen in Preferences; not changed in this pass |
+| Language follows device on first launch | FIXED | 303eb0a (`navigator.languages[0]`, test); not yet seen on a simulator set to Arabic |
 | Reduce motion | PASS (existing) | `prefers-reduced-motion` and a switch; still shots for the intro |
 | Contrast 4.5:1 | NOT MEASURED | |
 | Body text ≥ 15 pt on SE | **FAIL** | sheet text is 11–12 px unless Large text is on; logged in TODO.md |
@@ -124,11 +124,22 @@ clamped to one note). The silent switch silences the game (`ambientAudio: true`)
 | Share moment | **MISSING** | logged in TODO.md |
 | Credits / signature | FIXED | Settings signature and three.js credit |
 
+## Hand-play notes (coordinator, 2026-11-13)
+| Note | Status |
+|---|---|
+| Arabic device opened in English | FIXED 303eb0a (test seen failing first) |
+| Title: seam bands where the canvas met the page; Latin name only; no promise | FIXED 303eb0a: canvas fills the page on Home, both names, one promise line (checked at 393x852 in both languages) |
+| Room view: the room above shared the screen | FIXED 303eb0a: neighbouring rooms recede behind a soft paper veil (plum at night); whole-house view unveiled |
+| Bottom bar: uneven gaps, icon-only buttons without a visible meaning | **OPEN**: not changed in this pass |
+
+Geometry re-run after these fixes at all four sizes, both languages: 2 findings each (3 at Pro Max), all the deliberate
+switch rows; zero occlusions.
+
 ## Why HOLD
 1. **tas-games still says "no purchases"**: `bait-al-dumiah/support.html` ("Are there purchases or ads? No. The whole
    game is free"), `privacy.html` ("no purchases") and `index.html` ("No death, no ads, no purchases") contradict the
    app. They must say that purchases are handled by Apple and collect nothing, before submission.
-2. Body text below 15 pt on the smallest phone; no share moment; free days 5–7 have nothing new.
+2. Body text below 15 pt on the smallest phone; no share moment; free days 5–7 have nothing new; the bottom bar's spacing and icon-only buttons (hand-play note 4).
 3. Not seen on a real iPhone: WebGL speed and heat, the canary in the liwan, haptics on the Taptic Engine.
 4. The store screenshots are real 6.9" app captures from the earlier session's build (the scenes are unchanged by this
    pass); fresh captures from this build, and the small-simulator pass, were blocked by the shared simulator service.
