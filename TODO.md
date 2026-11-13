@@ -1,5 +1,14 @@
 # TODO
 
+## 1.1 — first week and idle life (2026-11-13)
+- [x] Paywall decline test (four bridge outcomes + ended plan): passes unchanged.
+- [x] Production build bundled/minified; debug seam compiled out (`build:debug` keeps it).
+- [x] Visit-day arc: rain night (visit 5), jasmine thread (5–7), Noor's night keepsake (7); share card names them.
+- [x] Idle life: a heart visits another room, a curtain stirs; canary sings an unsaid memory (subscribers, by day).
+- [ ] Native Arabic read of `src/locale-arc.js` (row in `docs/NATIVE-REVIEW.md`).
+- [ ] On a real iPhone: rain night cost (instanced beads + 150 streaks) and the rain loop's level beside the lullaby.
+- [ ] Fresh store captures if the rain night or Noor's night should be a screenshot.
+
 ## Visual pass — 2026-10-12
 - [x] Lina's name tag no longer paints over the open House Tools drawer (it covered "Little rituals" at 390x844): the drawer stacks above it and both the drawer and the placement card count as paper the tag avoids.
 - [x] Phone-portrait clue chip measures against the 66px icon-only time card, so the time card keeps its compact width beside a long clue instead of stretching to 126px with a blank left half.

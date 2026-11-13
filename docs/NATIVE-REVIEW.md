@@ -27,5 +27,6 @@ Register: colloquial Levantine for UI and narration (`بيكبّر`, `هلّق`,
 | `introSkip` `watchIntro` `introSetting` | تخطّى ؛ شوف المقدّمة ؛ مشهد البداية | Skip; Watch intro; Opening scene | `تخطّى` vs `فوّت` for a Skip button |
 | loading card (`index.html`) | الجار قبل الدار / نفتح باب البيت الصغير… | The neighbour before the house (proverb) / Opening the little house's door… | the proverb is quoted correctly and fits a house game; spelling `الدار` |
 | `qualityLightened` (branch only, not shipped) | البيت صار أخف عشان يضل سلس. فيك تغيّر هالشي من الإعدادات. | The house now runs lighter so it stays smooth. You can change this in Settings. | only if the governor branch is ever merged |
+| 1.1 arc + canary (`src/locale-arc.js`, all keys) | ليلة الشتي، خيط الياسمين، ليلة نور، شريطة الياسمين تبع نور، وتلات ذكريات لكل قلب بيغنّيهن الكناري | The rain night, the jasmine thread, Noor's night, Noor's jasmine ribbon, the canary's three unsaid memories per heart | Levantine register; Noor and Sami masculine, Lina feminine (`ما بتقدر تقوله`); «ذكرى» vs «ليلة نور» for the anniversary; `الياسمينة` for the potted jasmine |
 
 How to reply: edit the Arabic in `src/i18n.js` (the override block) or `src/locale-data.js`, or paste replacements keyed by the first column; `npm test` re-checks digits, placeholders and the plural rules.

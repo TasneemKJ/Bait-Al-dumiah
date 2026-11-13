@@ -151,3 +151,33 @@ Sheets on a phone floor every text run at 15 px (17 px with Large text); the aud
 
 ## A picture of your house — studio bar (2026-11-13)
 Settings in the app offers **A picture of your house → Share**: the renderer draws the player's own whole house at night once, the page crops it 4:5 and adds both names, the day and the dolls' names on a plum band, and TasKit's existing share sheet takes the PNG (no account, no network; `NSPhotoLibraryAddUsageDescription` set for Save Image). Not offered on the web.
+
+## 1.1: a first week with a destination, and a house that breathes (2026-11-13)
+Free days 5–7 had nothing new and the reason to return was thin. Craft borrowed, nothing copied: Cozy Grove's
+paced daily drip (but counted in our own visit days, not a real-time lock), Spiritfarer's unsaid memories (spoken
+here by our canary), Unpacking's "the room tells the story" (strands of jasmine thread, a ribbon on the jasmine).
+- **Visit days, not dawns** (`src/sim-arc.js`): a visit day is a new, later calendar date the house was opened (or
+  left open past midnight). Hurried dawns never count; a clock set back counts nothing. Saved as `arc`
+  (whitelisted, clamped; older saves start at 0, so every player gets the whole arc). The date is passed in; the
+  simulation reads no clock.
+- **Visit 5, the rain night:** at nightfall the palette cools toward slate (`rainLook`, `visual-policy.js`; lamps
+  stay warm), beads of water run down the three window panes (one instanced mesh), rain falls past the house, a
+  local noise loop patters on the shutters, and the three little hearts keep together in the liwan. They are only
+  drawn there; each doll's room, wishes and favourite-room bonus are unchanged. The returning line foretells it.
+- **Night by night:** strands of jasmine thread (brass thread, cream buds, the house's own primitives) appear in the
+  liwan on visits 5, 6 and 7. Visit 6's returning line: someone hung them; Lina won't say why.
+- **Visit 7, Noor's night:** at nightfall Lina and Sami tie a cream jasmine ribbon round the jasmine by the window;
+  the journal gains a free *Keepsakes* card (gift-art style). Never one of the visitor's gifts (The Fifth Room).
+- **Share moment:** the share card names *The rain night* / *Noor's night*; in the app the keepsake card carries
+  *Share Noor's night* (the existing renderer picture, no network). Nothing opens by itself.
+- **Idle life** (`src/idle-life.js`): after 25 quiet seconds one heart (in turn) sits 16 s in her favourite room
+  (else the liwan) and a window's curtains lift and settle; 40 s rest between. Cosmetic only; ends for any sheet,
+  ritual, placement, intro, film or pause; none under reduced motion. Canary subscribers, by day: the canary sings
+  and a line gives that heart's unsaid memory (three each). Others see nothing, not a teaser.
+- **Paywall check** (`tests/paywall-decline.test.mjs`): declining The Fifth Room and the canary (cancelled, failed,
+  never answered, no products) closes to an unpaused house, care works, two days pass with no sheet reopening, and
+  the locked door still shows what opens it. It passed without changes.
+- **Release build:** one minified `game.js` + `game.css` (esbuild, pinned), no `src/` tree, no sourcemaps; the
+  `?debug=1` seam (`src/debug-seam.js`) is replaced by an empty function in production. `npm run build:debug`
+  keeps it for the python browser checks.
+
