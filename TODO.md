@@ -346,3 +346,15 @@ Twenty-idea exploration, IDEAL/5Ws, source plan and selected scope: `docs/cinema
 - [x] Record actual faint room/dock labels in combined-source desktop closeup; twenty ideas and 5Ws in the iteration ledger.
 - [x] Review paired EN/AR day/night compact paper backing and 12px desktop labels, preserving targets and phone layout.
 - [x] Apply bounded accepted CSS; EN/AR wide day/night and 681×600 actual source inspected, targets/contrast/accessible names/side-control separation verified. One refinement accepted; final verify 546/546.
+
+## After 1.0 (studio bar, 2026-11-13; not built for 1.0)
+- Rating prompt (SKStoreReviewController) at a moment of delight (the sixth whisper), at most once per version.
+- Local notifications for the return beat, asked only after the player chooses it.
+- iCloud save sync; Game Center (whispers found, door opened) if it fits the quiet tone.
+- App Store preview video from the film; custom product pages; in-app events (Ramadan night, Eid).
+- iPad layout, landscape in the app (the web lays out at 844x390 already), controller support.
+- More languages: French, Turkish, Urdu, Indonesian.
+- Seasonal beats from the house's own world: Ramadan lanterns, an Eid tea, jasmine season.
+- A share moment: share a still of the finished house through the iOS share sheet (TasKit `share`), made from the renderer.
+- Body text at 15 pt minimum on the smallest phone without the Large text switch (sheets use 11-12 px today).
+- Something new after the sixth whisper in the free house (days after day 7 are wishes and rituals only).
