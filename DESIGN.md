@@ -131,3 +131,6 @@ Cold-play bot (before): the first reward came 93 s (ar) and 114 s (en) after Pla
 ## Settings and controls — studio bar (2026-11-13)
 - Settings in the app gains Haptics (on by default, kept as `bait-al-dumiah.v1.haptics` beside the save), Support and Privacy (opened by the app), and a signature line: the game, version 1.0, Tas Games, and the three.js credit.
 - Selects keep a 44 pt target and the house's paper with a thread chevron; the settings switches are a rose-thread pill with a cream bead (WebKit on iPhone drew selects 19 px tall and checkboxes as blank white squares). On touch, the close button a sheet focuses for VoiceOver is not ringed.
+
+## Age rating — owner override (2026-11-13)
+The night has gentle unease (knocks inside the wall, footprints that do not lead back, the shy visitor under a sheet); there is no gore, death or jump scare. Horror/Fear is answered Infrequent/Mild (9+), so the store text may honestly say "cute and creepy" and "ghost". Everything else is None. `ios/store/listing.json` → `age`.
