@@ -156,12 +156,13 @@ const doorNeeds={'sami-dear':s=>bondLevel(s.dolls.find(d=>d.id==='sami').bond)>=
 export const doorOpen=s=>s.door>=DOOR_STEPS.length;
 export const nextDoorStep=s=>DOOR_STEPS[s.door]??null;
 export const doorReady=(s,step=nextDoorStep(s))=>Boolean(step)&&(!step.needs||doorNeeds[step.needs](s));
-export function mendDoor(s){
+// free: The Fifth Room was bought in the app (src/access.js doorCost); the waits still apply.
+export function mendDoor(s,{free=false}={}){
  const step=nextDoorStep(s);if(!step)return fail('doorDone');
  if(!doorReady(s,step))return fail('doorNeeds',{needs:step.needs});
- if(s.buttons<step.cost)return fail('funds');
- s.buttons-=step.cost;s.door++;s.unease=clamp(s.unease-6);checkMilestones(s);
- return {ok:true,step:step.id,cost:step.cost,opened:doorOpen(s)};
+ const cost=free?0:step.cost;if(s.buttons<cost)return fail('funds');
+ s.buttons-=cost;s.door++;s.unease=clamp(s.unease-6);checkMilestones(s);
+ return {ok:true,step:step.id,cost,opened:doorOpen(s)};
 }
 // Gifts cycle through the visitor's keepsakes in order, one a night, once the door is open.
 export function leaveGift(s){

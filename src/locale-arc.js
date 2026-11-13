@@ -1,5 +1,5 @@
 // The first week's arc (src/sim-arc.js): the rain night, the jasmine thread and Noor's day; and the
-// canary's songs for the memory each heart can't say (src/idle-life.js, canary subscribers only).
+// lines each heart can't say: written free in the journal with each memory, and sung aloud by the canary.
 // Noor is "he" in Arabic (نور بيحلم); English keeps to the name. The dolls are little hearts
 // (قلوب صغار), never spirits.
 export default {
@@ -17,6 +17,7 @@ export default {
   'canaryFor-lina':'The canary sings what Lina can\'t say:',
   'canaryFor-noor':'The canary sings what Noor can\'t say:',
   'canaryFor-sami':'The canary sings what Sami can\'t say:',
+  'unsaid-lina':'What Lina can\'t say:','unsaid-noor':'What Noor can\'t say:','unsaid-sami':'What Sami can\'t say:',
   'canaryMemory-lina-0':'Someone used to take two sugars. I still keep them by the kettle.',
   'canaryMemory-lina-1':'I set four cups, because there were four of us when I was new.',
   'canaryMemory-lina-2':'When the kettle sings, I pretend someone is coming home.',
@@ -40,6 +41,8 @@ export default {
   'canaryFor-lina':'الكناري عم يغنّي اللي لينا ما بتقدر تقوله:',
   'canaryFor-noor':'الكناري عم يغنّي اللي نور ما بيقدر يقوله:',
   'canaryFor-sami':'الكناري عم يغنّي اللي سامي ما بيقدر يقوله:',
+  'unsaid-lina':'اللي لينا ما بتقدر تقوله:','unsaid-noor':'اللي نور ما بيقدر يقوله:',
+  'unsaid-sami':'اللي سامي ما بيقدر يقوله:',
   'canaryMemory-lina-0':'كان في حدا ياخد معلقتين سكّر. لسّا بخبّيهن جنب الإبريق.',
   'canaryMemory-lina-1':'بصفّ أربع كاسات، لأنه لما كنت جديدة كنّا أربعة.',
   'canaryMemory-lina-2':'لما الإبريق بيصفّر، بعمل حالي إنه في حدا راجع عالبيت.',

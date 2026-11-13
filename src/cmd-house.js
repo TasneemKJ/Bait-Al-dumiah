@@ -1,7 +1,7 @@
 // Commands: Residents, rewards, the door, placement and the day/night light.
 import * as sim from './simulation.js';
 import {appStore} from './app-store.js';
-import {fifthRoomOpen} from './access.js';
+import {fifthRoomOpen,fifthRoomLocked} from './access.js';
 
 // The door and its gifts need The Fifth Room in the app (asked now, never saved); the card says what it opens.
 function doorClosedHere(app){
@@ -9,6 +9,13 @@ function doorClosedHere(app){
  app.say(app.ui.t('doorLocked'));app.ui.open('store');return true;
 }
 
+// After the sixth whisper, in the app, the closed door is offered once (never again; closing returns home).
+function offerFifthRoom(app){
+ const s=app.state;if(!appStore.inApp||s.hints.fifthOffer||!fifthRoomLocked(s,appStore.access())||
+  s.journal.length<sim.SECRET_COUNT)return false;
+ s.hints.fifthOffer=true;app.save();if(app.openStore)app.openStore();else app.ui.open('store');
+ return true;
+}
 export const houseCommands={
 'select':(app,value,origin)=>{return;},
 'care':(app,value,origin)=>{
@@ -32,7 +39,7 @@ export const houseCommands={
   },
 'mend-door':(app,value,origin)=>{
    if(doorClosedHere(app))return;
-   const result=sim.mendDoor(app.state);
+   const result=sim.mendDoor(app.state,{free:appStore.access().bought===true});
    if(result.ok){app.say(app.ui.t(result.opened?'doorOpenedNote':'doorStepDone'));app.audio.effect('secret');app.save();
    app.ui.tick()}else app.say(result.needs?app.ui.t('needs_'+result.needs):app.ui.t(result.reason));return;
   },
@@ -67,7 +74,8 @@ if(app.notify(result,result.favorite?'favoriteMoved':'placed'))app.ui.close();re
 'greet-doll':(app,value)=>{app.world?.greet?.(value);app.audio.effect('mobile');
    app.ui.setSelected?.(value);return;},
 'discover':(app,value,origin)=>{
-   const result=sim.discover(app.state);if(result.ok){app.save();app.audio.effect('secret');app.ui.open('journal');
+   const result=sim.discover(app.state);if(result.ok){app.save();app.audio.effect('secret');
+   if(!offerFifthRoom(app))app.ui.open('journal');
    const {t,n}=app.ui;app.say(`${t('newSecret')} · ${n(app.state.journal.length)}/${n(sim.SECRET_COUNT)}`)}
    else app.say(app.ui.t(result.reason)+(result.needed?
      ` ${app.ui.t('shyNeed')} ${app.ui.n(result.needed)}%`:''));return;

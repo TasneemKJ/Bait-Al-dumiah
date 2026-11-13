@@ -1,6 +1,9 @@
 // Commands: Exporting, importing and resetting the save.
 import * as sim from './simulation.js';
 import {downloadSave,readSaveFile} from './save-transfer.js';
+import {appStore} from './app-store.js';
+import {clampImport} from './access.js';
+import {deliverFifthRoom} from './cmd-store.js';
 
 // File reads can outlive a newer import or reset. Ownership is local to this app visit.
 const pendingImports=new WeakMap();
@@ -17,13 +20,15 @@ function replaceRun(app,next,settings){
  app.world?.setChimeActive(false);app.notices.length=0;
  app.ui.close();app.ui.clearPlacement();app.ui.setActivityResult(null);
  app.state=next;app.manualPause=false;app.syncPause();app.dispatch('camera');
- app.world?.setPlacement(null);app.refreshUI();return true;
+ app.world?.setPlacement(null);app.refreshUI();deliverFifthRoom(app);return true;
 }
 function importSave(app,file){
  const request={};pendingImports.set(app,request);
  return readSaveFile(file,sim.readSave).then(result=>{
   if(pendingImports.get(app)!==request)return;
   if(!result){app.say(app.ui.t('saveImportFailed'));return}
+  // In the app a carried-in door stays closed unless The Fifth Room is owned here (the web is unchanged).
+  clampImport(result.state,appStore.access());
   if(!replaceRun(app,result.state,{...result.state.settings,muted:app.state.settings.muted})){
    app.say(app.ui.t('saveImportNotSaved'));return;
   }

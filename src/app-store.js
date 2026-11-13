@@ -11,8 +11,8 @@ export const PRODUCTS=Object.freeze({fifthRoom:'fifthRoom',canaryMonthly:'canary
 
 export function accessFrom(bridge){
  if(!bridge?.inApp)return OPEN_ACCESS;
- return {fifthRoom:bridge.owns(PRODUCTS.fifthRoom),
-  canary:bridge.owns(PRODUCTS.canaryMonthly)||bridge.owns(PRODUCTS.canaryYearly)};
+ const fifthRoom=bridge.owns(PRODUCTS.fifthRoom);
+ return {fifthRoom,canary:bridge.owns(PRODUCTS.canaryMonthly)||bridge.owns(PRODUCTS.canaryYearly),bought:fifthRoom};
 }
 
 export function createAppStore(w=globalThis){

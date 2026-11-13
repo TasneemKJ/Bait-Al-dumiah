@@ -5,12 +5,21 @@ export default {
   storeTitle:'More of the house',
   storeIntro:'The whole house of four rooms is free. Two small additions, if you like.',
   fifthName:'The Fifth Room',
-  fifthNote:'Opens the closed door between the four rooms: five small mendings, the room behind it, '+
-   'and eight nights of gifts from the visitor. The mendings are still paid in buttons you earn. Paid once.',
-  fifthOwned:'Yours. The closed door can be mended.',
+  fifthNote:'At once: the closed door opens a crack, its first mending is done, and the visitor leaves '+
+   'a pressed jasmine on the threshold. Then four more mendings, free of buttons: the key waits until Sami '+
+   'holds you dear, the last until you have heard all six whispers. Behind it: the fifth room and the rest '+
+   'of the visitor\'s eight gifts, one a night. Paid once.',
+  fifthOwned:'Yours. The door is open a crack; four free mendings remain (Sami\'s key, then the six whispers).',
+  fifthDelivered:'The closed door opens a crack. A pressed jasmine waits on the threshold. Four free mendings '+
+   'remain: Sami\'s key, then all six whispers.',
+  doorOwnedIntro:'The Fifth Room is yours: the door is open a crack. Four more mendings open it fully, and they '+
+   'cost no buttons. The key waits until Sami holds you dear; the last waits until you have heard all six '+
+   'whispers. Then the visitor\'s gifts come, one a night.',
   canaryName:'The canary',
   canaryNote:'A canary in a brass cage lives by the liwan window. It sings its little song by day and '+
-   'sleeps under a cloth at night. It is company only: no buttons, comfort or whispers are for sale.',
+   'sleeps under a cloth at night, and now and then sings aloud what a doll can\'t say: lines every player '+
+   'finds written in the journal beside each memory. Company only: no buttons, comfort, whispers or story '+
+   'are for sale.',
   canaryOwned:'On. The canary is in the liwan.',
   storeMonthly:'{price} a month',storeYearly:'{price} a year',
   storeRenews:'Monthly or yearly. It renews automatically until you cancel it in your Apple Account settings, '+
@@ -41,12 +50,19 @@ export default {
   storeTitle:'أكتر من البيت',
   storeIntro:'البيت كلّه بغرفه الأربعة ببلاش. وفي إضافتين زغار إذا حابب.',
   fifthName:'الغرفة الخامسة',
-  fifthNote:'بتفتح الباب المسكّر اللي بين الأربع غرف: خمس تصليحات زغيرة، والغرفة اللي وراه، '+
-   'وتمان ليالي هدايا من الضيف. التصليحات بتضل بالأزرار اللي بتجمعها. بتدفعها مرّة وحدة.',
-  fifthOwned:'صارت إلك. فيك تصلّح الباب المسكّر.',
+  fifthNote:'فوراً: الباب المسكّر بينفتح شقّ زغير، وأول تصليح بيخلص، والضيف بيترك ياسمينة مكبوسة عالعتبة. '+
+   'وبعدين أربع تصليحات كمان بلا أزرار: المفتاح ناطر لحتى توصل لدرجة الغلاوة مع سامي، والأخير لحتى تسمع '+
+   'الستّ همسات كلّهن. ووراه: الغرفة الخامسة وباقي هدايا الضيف التمانة، هدية كل ليلة. بتدفعها مرّة وحدة.',
+  fifthOwned:'صارت إلك. الباب مفتوح شقّ، وباقي أربع تصليحات ببلاش (مفتاح سامي، وبعدين الستّ همسات).',
+  fifthDelivered:'الباب المسكّر انفتح شقّ زغير. في ياسمينة مكبوسة ناطرة عالعتبة. باقي أربع تصليحات ببلاش: '+
+   'مفتاح سامي، وبعدين الستّ همسات كلّهن.',
+  doorOwnedIntro:'الغرفة الخامسة صارت إلك: الباب مفتوح شقّ. أربع تصليحات كمان بيفتحوه عالآخر، وما بيكلّفوا ولا زر. '+
+   'المفتاح ناطر لحتى توصل لدرجة الغلاوة مع سامي، والأخير لحتى تسمع الستّ همسات كلّهن. وبعدها بتجي هدايا '+
+   'الضيف، هدية كل ليلة.',
   canaryName:'الكناري',
   canaryNote:'كناري بقفص نحاس ساكن جنب شبّاك الليوان. بالنهار بيغنّي غنّيته الزغيرة، وبالليل بينام '+
-   'تحت شرشف. هو رفقة وبس: ما في أزرار ولا راحة ولا أسرار للبيع.',
+   'تحت شرشف، وكل فترة بيغنّي بصوت عالي اللي الدمية ما بتقدر تقوله: كلام مكتوب لكل لاعب بالدفتر '+
+   'جنب كل ذكرى. رفقة وبس: ما في أزرار ولا راحة ولا همسات ولا حكاية للبيع.',
   canaryOwned:'شغّال. الكناري بالليوان.',
   storeMonthly:'{price} بالشهر',storeYearly:'{price} بالسنة',
   storeRenews:'شهري أو سنوي. بيتجدّد لحاله لحتى تلغيه من إعدادات حساب Apple، قبل آخر المدّة بـ٢٤ ساعة '+

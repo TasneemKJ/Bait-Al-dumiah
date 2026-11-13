@@ -1,6 +1,7 @@
 // Commands: the App Store card (iPhone app only) and the store's answers reaching the house.
 import * as sim from './simulation.js';
 import {appStore} from './app-store.js';
+import {welcomeFifthRoom} from './access.js';
 import {composeCard,cardLines} from './share-card.js';
 
 export const storeCommands={
@@ -16,6 +17,14 @@ export const storeCommands={
  if(url)appStore.share(url);else app.say(t('shareUnavailable'));return;},
 };
 
+// The Fifth Room delivered the moment it is owned (bought, restored or reinstalled): the door opens a crack,
+// the first mending is done and a gift waits on the threshold. Once per save; the journal opens on it.
+export function deliverFifthRoom(app){
+ if(!app.state||!welcomeFifthRoom(app.state,appStore.access()))return false;
+ app.save?.();if(!app.session?.entered)return true;
+ app.say(app.ui.t('fifthDelivered'));app.audio?.effect?.('secret');app.ui.open('journal');
+ app.host?.querySelector?.('#sheet .door-entries')?.scrollIntoView?.({block:'center'});return true;
+}
 // The App Store answered: redraw the open card or door, and let the canary come or go. A purchase
 // is never saved; the house only reads it.
 export function installStore(app){
@@ -25,6 +34,7 @@ export function installStore(app){
   app.world?.setCanary?.(now);
   if(now&&!canary&&app.session.entered)app.say(app.ui.t('canaryArrived'));
   canary=now;
+  if(deliverFifthRoom(app))return;
   if(app.ui?.panel)app.ui.renderPanel?.();app.ui?.tick?.();
  };
  appStore.onChange(sync);
@@ -35,7 +45,7 @@ export function installStore(app){
   if(s.elapsed<nextSong||sim.isNight(s))return;nextSong=s.elapsed+38+Math.random()*30;
   if(app.audio.canary?.())app.world?.canarySing?.(s.elapsed);
  },1000);song?.unref?.();
- app.world?.setCanary?.(canary);
+ app.world?.setCanary?.(canary);deliverFifthRoom(app);
  app.openStore=()=>{appStore.clearStatus();appStore.refresh();app.ui.open('store')};
  // The app's tests (and a debug launch) open the card directly.
  if(appStore.inApp)appStore.bridge.openStore=()=>app.openStore();

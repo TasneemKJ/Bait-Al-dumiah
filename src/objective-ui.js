@@ -5,7 +5,7 @@ import {isNight,coziness,wishFor,unclaimed,secretCozyNeeded,doorOpen,nextDoorSte
 import {storyObjective} from './story-ui.js';
 import {wishKey,actionIcon} from './panels-ui.js';
 import {appStore} from './app-store.js';
-import {fifthRoomOpen} from './access.js';
+import {fifthRoomOpen,doorCost} from './access.js';
 
 export const keepsakeWishLine=(t,w)=>`${t('keepsakeWish').replace('{doll}',t(w.doll))} ${t(w.item)} · ${t(w.room)}`;
 function wishStep(s,t,wish){const action=wishFor(s,wish.id);
@@ -30,8 +30,9 @@ export function nextStep(s,t,n,focusRoom,access=appStore.access()){
    ico:'button',action:'collect-basket'};
  const step=nextDoorStep(s);
  // A door this copy has not opened is never the next step: it is offered only where it stands.
- if(step&&fifthRoomOpen(s,access)&&doorReady(s,step)&&canAfford(s,step.cost))return {copy:t('objectiveDoor'),
-   label:t('mend')+' · '+n(step.cost),ico:'home',action:'panel',value:'journal',focus:'.door-next'};
+ const cost=step&&doorCost(step,access);
+ if(step&&fifthRoomOpen(s,access)&&doorReady(s,step)&&canAfford(s,cost))return {copy:t('objectiveDoor'),
+   label:cost?t('mend')+' · '+n(cost):t('mend'),ico:'home',action:'panel',value:'journal',focus:'.door-next'};
  const keepsake=!isNight(s)&&keepsakeWish(s);
  if(keepsake&&canAfford(s,keepsake.price))return {copy:keepsakeWishLine(t,keepsake),label:t('decorate'),ico:'leaf',
    action:'panel',value:'decorate'};

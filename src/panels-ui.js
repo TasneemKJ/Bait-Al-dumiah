@@ -10,7 +10,7 @@ import {giftArt} from './gift-art.js';
 import {icon} from './icons.js';
 import {inNativeApp} from './native-app.js';
 import {appStore} from './app-store.js';
-import {fifthRoomLocked} from './access.js';
+import {fifthRoomLocked,doorCost,accessOrOpen} from './access.js';
 import {storeMarkup} from './store-ui.js';
 import {appInfoMarkup} from './app-info.js';
 export const actionIcon={tea:'tea',play:'play',rest:'rest',soothe:'heart'};
@@ -23,21 +23,23 @@ function lockedDoorMarkup(s,{t,button}){
 }
 export function doorMarkup(s,{t,n,button,access=appStore.access()}){
  if(fifthRoomLocked(s,access))return lockedDoorMarkup(s,{t,button});
- const step=nextDoorStep(s),ready=step&&doorReady(s,step);
+ const step=nextDoorStep(s),ready=step&&doorReady(s,step),cost=step?doorCost(step,access):0;
+ const bought=accessOrOpen(access).bought;
  const done=DOOR_STEPS.slice(0,s.door).map((d,
    i)=>`<article><span
      class="entry-number">${icon('check')}</span><div><h3>${t('door_'+d.id+'Title')}</h3
        ><p>${t('door_'+d.id+'Text')}</p></div></article>`).join('');
  const next=step?`<div class="door-next"><div><strong>${t('door_'+step.id+'Title')}</strong><small>${ready?
    '':t('needs_'+step.needs)}</small></div>${button('mend-door',
-     t('mend')+' · '+n(step.cost),'button',`class="primary" ${ready&&canAfford(s,step.cost)?
+     cost?t('mend')+' · '+n(cost):t('mend'),'button',`class="primary" ${ready&&canAfford(s,cost)?
    '':'disabled'}`)}</div><p class="door-progress" aria-hidden="true">${DOOR_STEPS.map((d,
      i)=>`<span class="${i<s.door?'done':''}"></span>`).join('')}</p>`:'';
- const gifts=doorOpen(s)?
+ // The buyer's threshold gift shows at once; leaving gifts waits for the open door.
+ const gifts=doorOpen(s)||s.gifts.length?
    `<h3 class="section-heading">${t('gifts')} <small>${n(s.gifts.length)}/${n(VISITOR_GIFTS.length)}</small></h3><p
-   class="sheet-intro">${t('giftsIntro')}</p>${button('gift',
+   class="sheet-intro">${t('giftsIntro')}</p>${doorOpen(s)?button('gift',
      t('leaveGift')+' · '+n(GIFT_COST),'ghost',`class="primary wide" ${isNight(s)&&
-     giftReady(s)?'':'disabled'}`)}<div class="gift-grid">${VISITOR_GIFTS.map(g=>s.gifts.includes(g)?
+     giftReady(s)?'':'disabled'}`):''}<div class="gift-grid">${VISITOR_GIFTS.map(g=>s.gifts.includes(g)?
    `<div class="gift${isNewestGift(s,g)?
    ' newest':''}"><span
      class="gift-picture">${giftArt(g)}</span><strong>${t('gift-'+g+'Title')}</strong><small
@@ -46,9 +48,13 @@ export function doorMarkup(s,{t,n,button,access=appStore.access()}){
      aria-hidden="true">✦</span><small>${t('giftUnknown')}</small></div>`).join('')}</div>`:'';
  return `<h3 class="section-heading">${t('door')} <small
    >${n(s.door)}/${n(DOOR_STEPS.length)}</small></h3><p class="sheet-intro">${t(doorOpen(s)?
-   'doorOpenedNote':'doorIntro')}</p><div class="journal-entries door-entries">${done}</div>${next}${gifts}`;
+   'doorOpenedNote':bought?'doorOwnedIntro':'doorIntro')}</p><div
+   class="journal-entries door-entries">${done}</div>${next}${gifts}`;
 }
 
+// What each heart can't say, written beside the memory it belongs to (free; the canary only sings it).
+const unsaidLine=(s,t,id,i)=>{const [o,c]=s.settings.locale==='ar'?['«','»']:['“','”'];
+ return `<p class="unsaid"><em>${t('unsaid-'+id)}</em> ${o}${t(`canaryMemory-${id}-${i}`)}${c}</p>`};
 export function householdMarkup(s,{t,n,button,avatar,selected}){
   const d=s.dolls.find(x=>x.id===selected),def=DOLLS.find(x=>x.id===selected);
   const level=bondLevel(d.bond),next=nextBond(d.bond),wished=wishFor(s,d.id),
@@ -96,7 +102,7 @@ export function householdMarkup(s,{t,n,button,avatar,selected}){
          >${t(def.favRoom)}</strong></span>${inFavoriteRoom(d)?icon('check'):''}</p></div>
    <p class="sheet-intro">${delighted(s,d)?t('delightedNote'):''} ${inFavoriteRoom(d)?t('favRoomNote'):''}</p>
    <h3 class="section-heading">${t('memories')}</h3><div class="memories">${[1,2,3].map(i=>level>=i?
-     `<p>${t(d.id+'Memory'+i)}</p>`:`<p
+     `<p>${t(d.id+'Memory'+i)}</p>${unsaidLine(s,t,d.id,i-1)}`:`<p
        class="locked">${icon('moon')}<span>${t('memoryLocked')} · ${t('bond'+i)}</span></p>`).join('')}</div>`;
 }
 

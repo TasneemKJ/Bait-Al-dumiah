@@ -119,7 +119,9 @@ export function createLevantineSetting(parent){
  return {root,staticRoot,studioArch,water,shadow,doorGlow,ripple,update(state,mix){
   const f=nightFrame(state.elapsed,mix,state.settings.reducedMotion);
   shadow.visible=f.shadow>.001;shadow.material.opacity=f.shadow;shadow.position.x=-3.75+f.shadowX;
-  doorGlow.material.opacity=f.door;doorGlow.visible=f.door>0;
+  // A door that has been mended lets a little warm light under it by day too.
+  const ajar=state.door>0?.14+.04*state.door:0,glow=Math.max(f.door,ajar);
+  doorGlow.material.opacity=glow;doorGlow.visible=glow>0;
   water.material.opacity=.80+.025*f.ripple;
   ripple.scale.setScalar(state.settings.reducedMotion?1:.70+f.ripple*1.50);
   ripple.material.opacity=state.settings.reducedMotion?.12:.09+.12*(1-f.ripple);

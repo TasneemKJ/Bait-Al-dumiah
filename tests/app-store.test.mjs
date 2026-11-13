@@ -22,7 +22,7 @@ function page({inApp=true,boot=null}={}){
  return w;
 }
 const ctx=lang=>({t:key=>translate(lang,key),n:v=>number(lang,v),button});
-const LOCKED={fifthRoom:false,canary:false};
+const LOCKED={fifthRoom:false,canary:false,bought:false};
 
 test('the names agree with ios/BaitAlDumiah/BaitConfig.swift and the catalog keys',()=>{
  const swift=readFileSync(new URL('../ios/BaitAlDumiah/BaitConfig.swift',import.meta.url),'utf8');
@@ -30,7 +30,7 @@ test('the names agree with ios/BaitAlDumiah/BaitConfig.swift and the catalog key
  assert.match(swift,new RegExp(`bridgeGlobal: "${APP_NAMES.bridge}"`));
  assert.match(swift,new RegExp(`bootGlobal: "${APP_NAMES.boot}"`));
  for(const key of Object.values(PRODUCTS))assert.match(swift,new RegExp(`key: "${key}"`),key);
- assert.deepEqual(Object.keys(OPEN_ACCESS).sort(),['canary','fifthRoom']);
+ assert.deepEqual(Object.keys(OPEN_ACCESS).sort(),['bought','canary','fifthRoom']);
 });
 
 test('on the web nothing is sold: the door is open, the canary absent, nothing is posted',()=>{
@@ -49,9 +49,9 @@ test('in the app the App Store answers, at the moment it is asked, and the page 
  assert.deepEqual(store.access(),LOCKED);
  w.baitApp.update({owned:{fifthRoom:true,canaryMonthly:false,canaryYearly:false},
   prices:{fifthRoom:'$4.99',canaryMonthly:'$1.99',canaryYearly:'$14.99'}});
- assert.deepEqual(store.access(),{fifthRoom:true,canary:false});assert.equal(store.price('canaryYearly'),'$14.99');
+ assert.deepEqual(store.access(),{fifthRoom:true,canary:false,bought:true});assert.equal(store.price('canaryYearly'),'$14.99');
  w.baitApp.update({owned:{canaryYearly:true}});
- assert.deepEqual(store.access(),{fifthRoom:false,canary:true},'a refund closes it again');
+ assert.deepEqual(store.access(),{fifthRoom:false,canary:true,bought:false},'a refund closes it again');
  assert.ok(heard>=2);
  store.buy('fifthRoom');assert.equal(JSON.stringify(w.posts.at(-1)),'{"type":"buy","data":{"id":"fifthRoom"}}');
  assert.equal(store.status,'buying');store.clearStatus();assert.equal(store.status,'');
@@ -61,7 +61,7 @@ test('in the app the App Store answers, at the moment it is asked, and the page 
 });
 
 test('the boot answer is read before the game asks, and a stray global on the web locks nothing',()=>{
- assert.deepEqual(createAppStore(page({boot:{owned:{fifthRoom:true}}})).access(),{fifthRoom:true,canary:false});
+ assert.deepEqual(createAppStore(page({boot:{owned:{fifthRoom:true}}})).access(),{fifthRoom:true,canary:false,bought:true});
  assert.deepEqual(createAppStore(page({inApp:false,boot:{owned:{fifthRoom:false}}})).access(),OPEN_ACCESS);
  assert.deepEqual(accessFrom(null),OPEN_ACCESS);
 });
