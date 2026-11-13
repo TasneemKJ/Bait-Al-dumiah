@@ -9,7 +9,9 @@ export function setHaptics(on,storage=store()){try{storage?.setItem(HAPTICS_KEY,
 const page=(button,id,label)=>button('store-page',label,null,`data-id="${id}" class="store-button"`);
 export function appInfoMarkup({t,button},{inApp,haptics=hapticsOn()}){
  const rows=inApp?`<label><span>${t('hapticsLabel')}</span><input data-field="haptics" type="checkbox"
-  ${haptics?'checked':''}></label><p>${t('hapticsHelp')}</p><div class="row app-pages">${page(button,'support',
+  ${haptics?'checked':''}></label><p>${t('hapticsHelp')}</p><div class="setting-row"><span
+  >${t('shareLabel')}</span>${button(
+  'share-house',t('shareAction'),'heart')}</div><div class="row app-pages">${page(button,'support',
   t('supportLink'))}${page(button,'privacy',t('storePrivacy'))}</div>`:'';
  return `${rows}<p class="app-signature">${t('title')} ${APP_VERSION} · Tas Games · Tasnim Almousa<br
   >${t('creditsLine')}</p>`;

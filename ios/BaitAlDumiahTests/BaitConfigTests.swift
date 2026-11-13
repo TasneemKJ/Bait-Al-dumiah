@@ -63,6 +63,13 @@ final class BaitConfigTests: XCTestCase {
         XCTAssertNil(TasSchemeHandler.file(for: URL(string: "baitaldumiah://app/%2e%2e/Info.plist")!, config: config))
     }
 
+    func testTheShareSheetCanSaveToPhotos() {
+        // The share sheet's "Save Image" crashes without this key.
+        let text = Bundle.main.object(forInfoDictionaryKey: "NSPhotoLibraryAddUsageDescription") as? String
+        XCTAssertFalse((text ?? "").isEmpty)
+        XCTAssertNotNil(TasBridgeMessage.parse(["type": "share", "data": ["dataURL": "data:image/png;base64,iVBORw0KGgo="]], config: config))
+    }
+
     func testLegalLinksAreReal() {
         XCTAssertEqual(config.legalPages["terms"]?.host, "www.apple.com")
         XCTAssertEqual(config.legalPages["privacy"]?.absoluteString, "https://tas-games.vercel.app/bait-al-dumiah/privacy.html")

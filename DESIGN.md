@@ -148,3 +148,6 @@ The simulated week showed nothing new after the sixth whisper and no use for but
 
 ## Readable sheets and a named bottom bar (2026-11-13)
 Sheets on a phone floor every text run at 15 px (17 px with Large text); the audit at 375 px went from 234 smaller runs to 0 in both languages. The phone's bottom bar is five equal columns with a short name under each icon.
+
+## A picture of your house — studio bar (2026-11-13)
+Settings in the app offers **A picture of your house → Share**: the renderer draws the player's own whole house at night once, the page crops it 4:5 and adds both names, the day and the dolls' names on a plum band, and TasKit's existing share sheet takes the PNG (no account, no network; `NSPhotoLibraryAddUsageDescription` set for Save Image). Not offered on the web.

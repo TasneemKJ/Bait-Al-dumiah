@@ -325,6 +325,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "Bait Al-dumiah";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.casual-games";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Save a picture of your house to Photos.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
@@ -358,6 +359,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "Bait Al-dumiah";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.casual-games";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Save a picture of your house to Photos.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;

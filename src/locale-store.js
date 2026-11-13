@@ -33,6 +33,7 @@ export default {
   keepsakeWish:'{doll}’s wish today:',keepsakeWishGranted:'just where I hoped. Thank you.',
   objectiveComplete:'Every whisper is heard and every corner is loved. This house’s story is complete; come by any '+
    'day for tea.',
+  shareLabel:'A picture of your house',shareAction:'Share',shareUnavailable:'The picture could not be made just now.',
   hapticsLabel:'Haptics',hapticsHelp:'A small tap under your finger for each press.',supportLink:'Support',
   creditsLine:'Made in three.js (MIT licence); the licences ship inside the app.',
  },
@@ -67,6 +68,7 @@ export default {
   barObjects:'أشياء',barTools:'أدوات',barSound:'الصوت',barPause:'وقفة',barHouse:'البيت',
   keepsakeWish:'أمنية {doll} اليوم:',keepsakeWishGranted:'بمحلّها تماماً. يسلمو إيديك.',
   objectiveComplete:'كل الهمسات انسمعت وكل زاوية صارت محبوبة. حكاية هالبيت خلصت؛ مرّ أي يوم نشرب شاي.',
+  shareLabel:'صورة لبيتك',shareAction:'شارك',shareUnavailable:'ما قدرنا نعمل الصورة هلّق.',
   hapticsLabel:'الاهتزاز',hapticsHelp:'دقّة زغيرة تحت إصبعك مع كل كبسة.',supportLink:'الدعم',
   creditsLine:'معمولة بـ three.js (رخصة MIT)، والرخص موجودة جوّا التطبيق.',
  },

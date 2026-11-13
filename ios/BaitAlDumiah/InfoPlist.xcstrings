@@ -1,6 +1,14 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "NSPhotoLibraryAddUsageDescription" : {
+      "comment" : "Asked when the player saves the picture of the house to Photos",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "لحفظ صورة بيتك في الصور." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Save a picture of your house to Photos." } }
+      }
+    },
     "CFBundleDisplayName" : {
       "comment" : "The name under the icon",
       "extractionState" : "manual",

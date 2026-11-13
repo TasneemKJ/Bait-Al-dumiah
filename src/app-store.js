@@ -37,6 +37,8 @@ export function createAppStore(w=globalThis){
   openPage:name=>inApp&&bridge.openPage(name),
   // Apple's own sheet for changing or cancelling the plan.
   manage:()=>inApp&&bridge.post('manageSubscriptions'),
+  // The app's share sheet takes one PNG (a data URL).
+  share:dataURL=>inApp&&bridge.share(dataURL),
   // A stale "buying" (the sheet was dismissed) gives the buttons back when the card opens again.
   clearStatus(){if(inApp&&bridge.status==='buying')bridge.status=''},
   onChange(fn){listeners.add(fn);return ()=>listeners.delete(fn)},

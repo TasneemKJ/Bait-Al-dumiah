@@ -3,6 +3,7 @@ import {bindScenePointers} from './world-pointers.js';
 import {applyWorkActivity} from './world-work.js';
 import {cameraApi} from './world-camera.js';
 import {renderFrame} from './world-frame.js';
+import {takePicture} from './world-picture.js';
 import {visualStatus} from './world-status.js';
 import {houseFraming} from './house-framing.js';
 import {portraitFraming} from './doll-camera.js';
@@ -90,7 +91,7 @@ export function createWorld(canvas,{onPick,onError}){
   setPlacement(item){st.placement=item;slots.setActive(item);if(!item){st.previewPose=null;preview.clear()}},
   setPreview(pose){st.previewPose=pose},
   // The canary is the App Store's answer, read each time it changes; it is never saved.
-  setCanary(on){parts.canary.setPresent(on)},canarySing(t){parts.canary.sing(t)},
+  setCanary(on){parts.canary.setPresent(on)},canarySing(t){parts.canary.sing(t)},picture:(s,use)=>takePicture(w,s,use),
   render(state,dt,selected){renderFrame(w,state,dt,selected)},
   dispose(){st.disposed=true;portraitCache.dispose();
   controls.removeEventListener('start',cancelCameraMove);controls.dispose();
