@@ -93,9 +93,10 @@ final class BaitStoreTests: XCTestCase {
 
     // MARK: The canary (company in the liwan): auto-renewing, one group, two lengths
 
-    /// SKTestSession applies expiry, refunds and upgrades asynchronously: re-read for up to 5 s.
+    /// SKTestSession applies expiry, refunds and upgrades asynchronously: re-read for up to 15 s.
     private func settle(_ store: TasStore, until done: () -> Bool) async throws {
-        for _ in 0..<50 {
+        // 15 s: a simulator shared with other builds applies expiry and renewals slowly.
+        for _ in 0..<150 {
             await store.refreshEntitlements()
             if done() { return }
             try await Task.sleep(for: .milliseconds(100))

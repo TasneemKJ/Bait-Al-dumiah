@@ -134,3 +134,8 @@ Cold-play bot (before): the first reward came 93 s (ar) and 114 s (en) after Pla
 
 ## Age rating — owner override (2026-11-13)
 The night has gentle unease (knocks inside the wall, footprints that do not lead back, the shy visitor under a sheet); there is no gore, death or jump scare. Horror/Fear is answered Infrequent/Mild (9+), so the store text may honestly say "cute and creepy" and "ghost". Everything else is None. `ios/store/listing.json` → `age`.
+
+## First minute polish — hand-play notes (2026-11-13)
+- A first launch speaks the device's language (Arabic device → Arabic; any other → English); Preferences and a saved choice still win.
+- Home: both names (the current language's large, the other beneath) and one line of promise; the canvas fills the page so the house's painted backdrop is the whole background (no seam bands).
+- A selected room is the subject: the neighbouring rooms recede behind a soft paper veil (plum at night), so they peek rather than share the screen. The whole-house view is never veiled.

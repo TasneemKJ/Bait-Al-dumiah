@@ -36,3 +36,14 @@ test('Home Preferences panel positioning never targets the same-named action but
  assert.equal(placement.length,2,'both LTR and RTL panel placement are exercised');
  for(const [,selector]of placement)assert.match(selector,/section\.home-preferences/,`panel transform must not match BUTTON: ${selector.trim()}`);
 });
+
+// Hand-play (2026-11-13): the title showed only the Latin name and no promise.
+test('the title carries both names, the current language first, and one line of promise',()=>{
+ const dom=homeDOM(),state=createState();const ui=createHomeUI(dom.root,()=>state,()=>{},{});ui.ready();
+ const text=()=>dom.root.all().filter(n=>/home-(name|name-alt|promise)/.test(n.className)).map(n=>n.className+':'+n.textContent);
+ assert.deepEqual(text().slice(0,2),['home-name:Bait Al-dumiah','home-name-alt:بيت الدمية']);
+ assert.ok(text().some(x=>x.startsWith('home-promise:')&&x.length>20));
+ state.settings.locale='ar';ui.refresh();
+ assert.deepEqual(text().slice(0,2),['home-name:بيت الدمية','home-name-alt:Bait Al-dumiah']);
+ assert.ok(text().some(x=>x.startsWith('home-promise:')&&/[؀-ۿ]/.test(x)));
+});

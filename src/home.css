@@ -40,3 +40,8 @@
 }
 .night #home .home-notice{background:#2b2635eb;color:#f0dfcf;border:1px solid #8e748566}
 .night #home .home-preferences-title{color:#f0dfcf}
+#home .home-title .home-name,#home .home-title .home-name-alt,#home .home-title .home-promise{display:block}
+#home .home-title .home-name-alt{font-size:.5em;letter-spacing:0;margin-top:4px;color:#9a7480}
+#home .home-title .home-promise{font:15px/1.5 "Trebuchet MS",Tahoma,sans-serif;letter-spacing:.2px;color:var(--muted);margin:10px auto 0;max-width:30ch}
+/* The canvas fills the page on Home: the house's own painted backdrop is the background, with no seam bands. */
+#app[data-screen="home"] #world{top:0;height:100%}

@@ -5,6 +5,9 @@ export function createHomeUI(root,getState,dispatch,{canContinue=false,loadStatu
  const doc=root.ownerDocument;
  const element=(tag,className)=>{const node=doc.createElement(tag);node.className=className;return node};
  const title=element('h1','home-title');title.id='home-title';
+ // Both names, the current language's large, and one line of promise in the game's voice.
+ const name=element('span','home-name'),altName=element('span','home-name-alt'),promise=element('span','home-promise');
+ title.append(name,altName,promise);
  const actions=element('div','home-actions'),preferences=element('section','home-preferences');
  const heading=element('h2','home-preferences-title');heading.id='home-preferences-title';
  const notice=element('p','home-notice');notice.setAttribute('role','status');
@@ -25,7 +28,9 @@ export function createHomeUI(root,getState,dispatch,{canContinue=false,loadStatu
  if(open)sound.focus();else options.focus()}
  function refresh(){
   const locale=getState().settings.locale,t=key=>translate(locale,key);
-  title.textContent=t('title');heading.textContent=t('homePreferences');
+  name.textContent=t('title');altName.textContent=translate(locale==='ar'?'en':'ar','title');
+  altName.setAttribute('lang',locale==='ar'?'en':'ar');promise.textContent=t('homePromise');
+  heading.textContent=t('homePreferences');
   play.textContent=t(reloadRequired?'reload':canContinue?'homeContinue':'homePlay');
   options.textContent=t('homePreferences');
   sound.textContent=t(getState().settings.muted?'homeSoundOff':'homeSoundOn');

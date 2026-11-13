@@ -27,7 +27,8 @@ import {useAppWording} from './locale-data.js';
 useAppWording(inNativeApp());
 
 let storage;try{storage=localStorage}catch{}
-const session=createHomeSession({storage,reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches});
+const session=createHomeSession({storage,reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches,
+  deviceLocale:navigator.languages?.[0]??navigator.language});
 // The one shared context: services and DOM roots are fixed, the rest is filled in as the pieces are built.
 const app={
   session,audio:new DollhouseAudio(),canvas:document.querySelector('#world'),host:document.querySelector('#ui'),

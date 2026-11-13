@@ -38,7 +38,8 @@ export function renderFrame(w,state,dt,selected){
  roomEffects.update(state,st.nightMix);restoration.update(state,st.nightMix);
  storyProps.update(state,st.nightMix);teaTable.update(state);sewingPlay.update(state);
  moonChimes.update(state,st.chimeSelection);
- roomFrame.show(working()?null:st.focusedRoom);preview.update(st.previewPose,state);
+ roomFrame.show(working()?null:st.focusedRoom);
+ roomFrame.tint(st.nightMix,dt,st.reducedMotion);preview.update(st.previewPose,state);
  residents.update(state,dt,selected,Math.atan2(camera.position.x-controls.target.x,
    camera.position.z-controls.target.z));
  for(const doll of residents.dolls){const room=state.dolls.find(d=>d.id===doll.id)?.room;

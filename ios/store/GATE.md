@@ -80,7 +80,7 @@ synthesized music-box bed and room tone, night knocks, the canary's trill (now i
 clamped to one note). The silent switch silences the game (`ambientAudio: true`).
 
 ## 5. Suites, archive
-`npm run verify`: see the final report (573+ node tests, lint, build within the 500 KiB JS budget). iOS: 28 tests
+`npm run verify`: see the final report (572/572 node tests with `python`→`python3`, lint, build at 430 KiB of the 500 KiB JS budget). iOS: 28 tests
 (config 5, StoreKit 16, real page 7). Archive: `/tmp/BaitAlDumiah.xcarchive`, team FJ3FMYPK3P.
 
 ## Studio bar

@@ -22,7 +22,7 @@ function samePreferenceBase(left,right){
     a[key]===b[key])&&(a.largeText??false)===(b.largeText??false);
  }catch{return false}
 }
-export function createHomeSession({storage,reducedMotion=false}={}){
+export function createHomeSession({storage,reducedMotion=false,deviceLocale=''}={}){
  let raw=null,loadStatus='new',entered=false,recovered=false;
  try{raw=storage.getItem(SAVE_KEY)}catch{loadStatus='unavailable'}
  const loaded=readSave(raw),valid=loaded.ok&&!loaded.empty;
@@ -41,6 +41,8 @@ export function createHomeSession({storage,reducedMotion=false}={}){
  // A first launch starts with sound on, so the intro's score can play; audio still waits for the Play tap,
  // and a saved choice (the save or Home Preferences below) always wins. Older saves keep their own setting.
  const firstLaunch=raw===null||loaded.empty;if(firstLaunch)state.settings.muted=false;
+ // A first launch speaks the device's language (Arabic or English); Preferences or a save change it later.
+ if(firstLaunch)state.settings.locale=/^ar\b/i.test(String(deviceLocale))?'ar':'en';
  // An unreadable earlier save still means a returning player; only a first launch earns the intro.
  if(!firstLaunch)claimIntro(state);
  const preferenceBase=valid?JSON.stringify(state.settings):null;

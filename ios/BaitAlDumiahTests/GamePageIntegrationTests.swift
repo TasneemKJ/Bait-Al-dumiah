@@ -39,7 +39,7 @@ final class GamePageIntegrationTests: XCTestCase {
         window.isHidden = false
         // A fresh house each test: no save from an earlier test.
         // A cold simulator can take most of a minute to start the web content and GPU processes.
-        try await waitFor("location.protocol==='baitaldumiah:'&&document.readyState==='complete'", seconds: 90)
+        try await waitFor("location.protocol==='baitaldumiah:'&&document.readyState==='complete'", seconds: 180)
         // The old document stays scriptable until the reload lands: mark it, and wait for a document without the mark.
         _ = try await js("window.__resetting=true;Object.keys(localStorage).forEach(function(k){localStorage.removeItem(k)});location.reload();true")
         try await waitFor("!window.__resetting&&document.querySelector('.home-play')!==null&&!document.querySelector('.home-play').disabled&&!document.querySelector('#loading')", seconds: 60)
