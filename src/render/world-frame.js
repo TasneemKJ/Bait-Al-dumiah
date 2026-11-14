@@ -1,7 +1,7 @@
 import * as T from 'three';
 import {isNight,stitchStatus} from '../simulation.js';
 import {ROOMS} from '../content.js';
-import {detail} from './visual-policy.js';
+import {detail,pixelGovernor} from './visual-policy.js';
 import {applyLighting} from './world-lighting.js';
 
 // One animation frame: sync every layer with the state, then draw. `w` holds the scene parts and the world's
@@ -16,6 +16,7 @@ export function renderFrame(w,state,dt,selected){
  st.stitchSections=st.stitchActive?(stitchStatus(state)?.sections??[]):[];
  if(!state.paused)cameraMove.tick(dt,st.reducedMotion);
  const budget=detail(canvas.clientWidth,canvas.clientHeight,state.settings.quality,window.devicePixelRatio||1);
+ st.pixels??=pixelGovernor();budget.pixelRatio=st.pixels.ratio(budget.pixelRatio,dt);
  const densityChanged=st.pixelRatio!==budget.pixelRatio;
  if(st.quality!==budget.level||densityChanged){st.quality=budget.level;st.pixelRatio=budget.pixelRatio;
  renderer.setPixelRatio(budget.pixelRatio);renderer.shadowMap.enabled=budget.shadows;resize()}

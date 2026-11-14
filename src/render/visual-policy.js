@@ -38,9 +38,34 @@ export function practicalLight(roomId,mix,lamps,cue=1,focused=false){
 const PRACTICAL_SHARE=.22;
 // A focused room's lamp lifts 12%; a weight between 0 and 1 eases it so focus changes never jump in brightness.
 const focusWeight=f=>f===true?1:Number.isFinite(f)?Math.min(1,Math.max(0,f)):0;
+// The tier decides shadows; sharpness is the device's own up to 3x (a 3x iPhone draws every pixel), unless
+// the player chose Low. The pixel governor below steps it down only while frames are actually slow.
+export const PIXEL_CEILING=3,PIXEL_FLOOR=1,LOW_PIXELS=1.25;
 export function detail(width,height,preference='auto',dpr=1){
  const level=preference==='high'?'high':preference==='low'?'low':Math.min(width,height)<700?'low':'high';
- return {level,pixelRatio:clamp(dpr,1,level==='low'?1.25:1.75),shadows:level==='high'};
+ return {level,pixelRatio:clamp(dpr,1,preference==='low'?LOW_PIXELS:PIXEL_CEILING),shadows:level==='high'};
+}
+// Adaptive sharpness: a smoothed frame time over 20 ms for 1.5 s drops a quarter step; under 17.5 ms (60 fps
+// or better) for 6 s climbs one back, never above the ceiling. A level that has already proved too slow waits
+// twice as long each time (up to about three minutes) before it is tried again, so a device never see-saws.
+// The first seconds (shader compiles) are ignored; one stall cannot move it, only a slow stretch can.
+// Pure: the caller passes each frame's dt and the ceiling, and gets the ratio to draw.
+export const PIXEL_STEP=.25,SLOW_FRAME=.020,FAST_FRAME=.0175,SLOW_HOLD=1.5,FAST_HOLD=6,WARM_UP=2;
+export function pixelGovernor(){
+ let scale=null,ema=null,slow=0,fast=0,seen=0;
+ const failed=new Map(),key=v=>Math.round(v*100);
+ const wait=v=>FAST_HOLD*2**Math.min(5,failed.get(key(v))??0);
+ return {ratio(max,dt){
+  const top=clamp(max,PIXEL_FLOOR,PIXEL_CEILING);if(scale===null||scale>top)scale=top;
+  if(Number.isFinite(dt)&&dt>0){dt=Math.min(dt,.1);seen+=dt;if(seen>WARM_UP){
+   ema=ema===null?dt:ema+(dt-ema)*.12;
+   if(ema>SLOW_FRAME){slow+=dt;fast=0}else if(ema<FAST_FRAME){fast+=dt;slow=0}else{slow=0;fast=0}
+   if(slow>=SLOW_HOLD&&scale>PIXEL_FLOOR){failed.set(key(scale),(failed.get(key(scale))??0)+1);
+    scale=Math.max(PIXEL_FLOOR,scale-PIXEL_STEP);slow=0;ema=null}
+   else if(scale<top&&fast>=wait(Math.min(top,scale+PIXEL_STEP))){
+    scale=Math.min(top,scale+PIXEL_STEP);fast=0;ema=null}}}
+  return Math.round(scale*100)/100;
+ }};
 }
 export function framing(width,height,roomId=null,presentation={}){
  const w=Number.isFinite(width)?Math.max(1,width):390,h=Number.isFinite(height)?Math.max(1,height):844;
