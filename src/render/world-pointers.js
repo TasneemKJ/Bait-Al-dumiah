@@ -37,10 +37,13 @@ export function bindScenePointers(w,{onPick,onError}){
     ...(ghost.root.visible?[ghost.hit]:[])];
   const exact=ray.intersectObjects(targets,false)[0]?.object;
   const hit=exact??(st.placement?null:nearestTarget(targets,camera,rect,e.clientX,e.clientY));
-  if(hit)onPick(hit.userData);
-  // On the whole house, a touch on a room that hits nothing in it opens that room.
-  else if(!st.placement&&!st.focusedRoom&&!st.focusedDoll){const room=roomUnder(ray,house);
-   if(room)onPick({roomTap:room})}
+  // On the whole house a prop is a few pixels wide, so a touch on or near one opens its room first
+  // (iOS QA: a near touch snapped to the basin and the room never opened); in the room it selects.
+  // Residents and the ghost still answer at once. A touch that hits nothing opens the room under it.
+  const whole=!st.placement&&!st.focusedRoom&&!st.focusedDoll;
+  if(hit&&!(whole&&hit.userData.object))onPick(hit.userData);
+  else if(whole){const room=roomUnder(ray,house);
+   if(room)onPick({roomTap:room});else if(hit)onPick(hit.userData)}
  };
  const cancel=()=>{scenePointers.clear();tapGesture.cancel()};
  return bindAll([

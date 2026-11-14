@@ -10,7 +10,7 @@ import {buildItem,keepingPlaces,hatbox,footprints,bake,STANDS} from './mischief-
 // and its owner keeps glancing at the empty place. Hiding places are invisible touch volumes; a wrong
 // one breathes out dust (or a cold breath when the thing is in this room); the right one lifts the thing
 // out and carries it home. Everything here is drawn from saved state, so a reload shows the same house.
-const LAVENDER=0xa98bd6,DUST=0xd9c4a6,COLD=0xbfcaf0,GOLD=0xffd79a;
+const LAVENDER=0xa98bd6,PUFF=0x806a56,COLD=0xbfcaf0,GOLD=0xffd79a;
 const roomAt=id=>ROOMS.find(r=>r.id===id);
 const local=(room,[x,y,z])=>{const r=roomAt(room);return new T.Vector3(r.x+x,r.y+y,z)};
 // Where each room's small footprints begin (room-local x, z): clear of furniture, walking toward the front.
@@ -42,11 +42,14 @@ function place(root,def){
  ghost.visible=false;steps.visible=false;return {def,home,item,ghost,glow,core,steps,goneAt:null};
 }
 function createPuffs(root){
- const pool=Array.from({length:7},()=>sprite(root,DUST,0));let born=-1,at=new T.Vector3(),kind='dust';
+ // Drawn over the furniture it leaves and in a darker sepia, so it reads on cream plaster and on the jars
+ // (iOS QA: pale and depth-tested, it hid inside the nook). Hidden Folks answers every wrong tap visibly too.
+ const pool=Array.from({length:7},()=>{const s=sprite(root,PUFF,0);
+  s.material.depthTest=false;s.renderOrder=20;return s});let born=-1,at=new T.Vector3(),kind='dust';
  return {
   start(point,near,now){at=point.clone();born=now;kind=near?'cold':'dust';
-   pool.forEach(s=>{s.material.color.setHex(near?COLD:DUST);s.visible=true})},
-  update(now,still){const t=born<0?1:(now-born)/.8;
+   pool.forEach(s=>{s.material.color.setHex(near?COLD:PUFF);s.visible=true})},
+  update(now,still){const t=born<0?1:(now-born)/1.05;
    pool.forEach((s,i)=>{if(t>=1){s.visible=false;return}const a=i/pool.length*Math.PI*2,spread=still?.08:.08+.28*t;
     s.position.set(at.x+Math.cos(a)*spread,at.y+Math.sin(a)*spread*.6+(kind==='cold'?.1*t:0),at.z+.12);
     s.scale.setScalar((still?.42:.32+.3*t)*(i%2?1:.8));s.material.opacity=(1-t)*(kind==='cold'?.9:.85)})},
