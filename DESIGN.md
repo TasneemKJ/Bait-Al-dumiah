@@ -182,6 +182,10 @@ here by our canary), Unpacking's "the room tells the story" (strands of jasmine 
   keeps it for the python browser checks.
 
 
+## Backlog from random stimulus (2026-11-14)
+- **(Built in 1.2, see below.) The midnight visitor takes something.** Each night the little visitor takes one small thing (a button, a ribbon, the teaspoon) and hides it somewhere in the house. Tapping rooms and objects searches (this also gives scene taps a purpose: in a WebKit play test most scene taps did nothing). Found by the next night: the doll who owned it brightens. Missed: she is quiet for a day. Each loss gets a short dry elegy in fusha with gentle dark humour, e.g. «رحلت الملعقة الصغيرة في ظروف غامضة، ولم يحضر جنازتها أحد». Makes the "creepy" half visible, gives stakes and a reason to return daily. Comparables: Hidden Folks (tap-to-search), Toca Boca (touch exploration), Animal Crossing (mischief, never cruel).
+- Also from the play test: the decor placement card stays open across other actions; offer a clear cancel/close.
+
 ## 1.2: The Midnight Visitor (الزائر عند منتصف الليل) (2026-11-14)
 Players found the house easy and the creepy half nearly invisible; nothing could be lost and most taps on the 3D
 house did nothing. Now the little visitor has a face the player acts against, every night.
@@ -218,3 +222,15 @@ house did nothing. Now the little visitor has a face the player acts against, ev
 - **Budgets:** the whole house at night with a thing missing (390x844) draws 374 calls (ceiling 388; 361 before)
   and 397k triangles (ceiling 400k; 387k before). Each thing, and all keeping places together, bake into one
   vertex-painted mesh; the footprints into one; none cast shadows.
+
+## Backlog from random stimulus (2026-11-14, round 2)
+
+## Stimulus #11 (2026-11-14 06:25): broken clock · radio static · a seed
+**Comparables:** Unpacking (a story told by objects), Gris (wordless sadness), What Remains of Edith Finch (each room is one life).
+- **Broken clock → «الساعة الواقفة».** Every room has a clock stopped at the moment its occupant left. Tea poured at exactly that minute moves the clock forward one minute, and a short memory appears on the wall. Each correct pour restores something in the house, which gives the tea a meaning beyond a recipe.
+- **Radio static → «الإذاعة».** A radio in the sitting room picks up a single phrase each night between the static. Tuning it is a gentle drag gesture, and the phrase is a clue for the next night. For subscribers, a weekly broadcast with a new story. Dark humour: «نشرة الأحوال الجوية: غيوم فوق المقبرة، وصفاء في غرفة الجلوس».
+- **Seed → a plant on the windowsill** that grows only when the dolls are cared for. It needs no extra screens.
+**Best:** الساعة الواقفة (every pour moves the story forward). Second: الإذاعة (a recurring reason to subscribe).
+
+## #12 (random-stimulus, creepiness) the dollhouse mirror
+The hallway mirror shows one doll more than the room holds, standing where a doll stood last night. Pour well and it fades; a missed pour and it is a step closer in the next night's mirror. It never moves when watched. The ghost, amused: «ليست مني. أنا أطرق قبل الدخول».
