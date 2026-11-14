@@ -47,3 +47,12 @@ test('the title carries both names, the current language first, and one line of 
  assert.deepEqual(text().slice(0,2),['home-name:بيت الدمية','home-name-alt:Bait Al-dumiah']);
  assert.ok(text().some(x=>x.startsWith('home-promise:')&&/[؀-ۿ]/.test(x)));
 });
+test('a touch on the house itself opens the door, but never through a button, preferences or before ready',()=>{
+ const {root,actions,ui}=setup();const house={closest:()=>null},inButton={closest:sel=>sel.includes('button')?{}:null};
+ root.listeners.click({target:house});assert.deepEqual(actions,[],'not before the house is ready');
+ ui.ready();root.listeners.click({target:inButton});assert.deepEqual(actions,[],'a button answers for itself');
+ root.listeners.click({target:house});assert.deepEqual(actions,[['home-play']]);
+ find(root,'preferences').click();root.listeners.click({target:house});assert.deepEqual(actions,[['home-play']]);
+ find(root,'back').click();ui.requireReload('homeReadFailed');root.listeners.click({target:house});
+ assert.deepEqual(actions,[['home-play'],['home-reload']]);
+});

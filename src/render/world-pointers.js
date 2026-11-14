@@ -44,6 +44,8 @@ export function bindScenePointers(w,{onPick,onError}){
   if(hit&&!(whole&&hit.userData.object))onPick(hit.userData);
   else if(whole){const room=roomUnder(ray,house);
    if(room)onPick({roomTap:room});else if(hit)onPick(hit.userData)}
+  // Inside a room a touch on a bare wall or floor still gets an answer: whoever lives there looks up.
+  else if(!hit&&!st.placement&&st.focusedRoom)onPick({roomTouch:st.focusedRoom})
  };
  const cancel=()=>{scenePointers.clear();tapGesture.cancel()};
  return bindAll([

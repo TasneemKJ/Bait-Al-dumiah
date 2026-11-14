@@ -41,6 +41,10 @@ export function createHomeUI(root,getState,dispatch,{canContinue=false,loadStatu
   notice.textContent=(recoveryMessage?t(recoveryMessage):'')||(loadStatus==='unavailable'?
     t('homeReadFailed'):loadStatus==='invalid'?t('homeInvalidSave'):'');notice.hidden=!notice.textContent;
  }
+ // The house is the invitation: a touch anywhere on Home but its buttons opens the door, as Play does.
+ root.addEventListener('click',event=>{const target=event.target;
+  if(preferencesOpen||play.disabled||target?.closest?.('button,a,input,select,label'))return;
+  dispatch(reloadRequired?'home-reload':'home-play')});
  root.addEventListener('keydown',event=>{if(event.key==='Escape'&&
    preferencesOpen){event.preventDefault();showPreferences(false)}});
  root.dataset.view='home';preferences.hidden=true;root.setAttribute('aria-labelledby',title.id);refresh();

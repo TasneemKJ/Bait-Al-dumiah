@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {bootHome} from './helpers/main-home-harness.mjs';
 import {translate} from '../src/i18n.js';
 import {createState} from '../src/simulation.js';
@@ -45,4 +46,12 @@ test('after tonight\'s whisper the journal offers the morning, not another greet
  const html=journalMarkup(s,{t:k=>translate('en',k),n:String,button});
  assert.doesNotMatch(html,/data-action="discover"/);assert.match(html,/data-action="light"/);
  s.lastSecretDay=0;assert.match(journalMarkup(s,{t:k=>translate('en',k),n:String,button}),/data-action="discover"/);
+});
+
+test('a touch on a bare wall or floor of a room is answered: the doll who lives there waves',async()=>{
+ const game=bootHome();game.button('play').click();
+ game.pick({roomTouch:'kitchen'});assert.deepEqual(game.greeted(),['lina'],'Lina looks up from the kitchen');
+ game.pick({roomTouch:'parlor'});assert.deepEqual(game.greeted(),['lina'],'an empty room stays quiet');
+ const src=readFileSync(new URL('../src/render/world-pointers.js',import.meta.url),'utf8');
+ assert.match(src,/else if\(!hit&&!st\.placement&&st\.focusedRoom\)onPick\(\{roomTouch:st\.focusedRoom\}\)/);
 });

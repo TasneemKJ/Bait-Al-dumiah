@@ -45,3 +45,4 @@
 #home .home-title .home-promise{font:15px/1.5 "Trebuchet MS",Tahoma,sans-serif;letter-spacing:.2px;color:var(--muted);margin:10px auto 0;max-width:30ch}
 /* The canvas fills the page on Home: the house's own painted backdrop is the background, with no seam bands. */
 #app[data-screen="home"] #world{top:0;height:100%}
+#home[data-view=home]:not([hidden]){pointer-events:auto;cursor:pointer}
