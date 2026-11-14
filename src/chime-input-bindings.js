@@ -1,4 +1,5 @@
 import {bindAll} from './event-bindings.js';
+import {lastPointerWasMouse} from './pointer-kind.js';
 // Pointer, keyboard and lifecycle input for the chime surface; the surface owns state and rendering.
 export function bindChimeInput(ctx){
  const {canvas,gesture,mode,parts,active,blocked,stop,inside,pick,pullSpan,dispatch,
@@ -51,7 +52,8 @@ export function bindChimeInput(ctx){
  return bindAll([
   [canvas,'pointerdown',down,true],[canvas,'pointermove',move,true],[canvas,'pointerup',up,true],
   [canvas,'pointercancel',cancelPointer,true],[canvas,'lostpointercapture',cancelPointer,true],
-  [canvas,'click',e=>{if(active())stop(e)},true],[canvas,'contextmenu',e=>{if(active()){stop(e);cancel()}},true],
+  [canvas,'click',e=>{if(active())stop(e)},true],[canvas,'contextmenu',
+   e=>{if(active()){stop(e);if(lastPointerWasMouse())cancel()}},true],
   [canvas,'focusout',cancel,false],[canvas,'webglcontextlost',()=>{setLost();cancel()},false],
   [window,'keydown',keydown,true],[window,'keyup',keyup,true],[window,'blur',cancel,false],
   [window,'resize',cancel,false],[window,'orientationchange',cancel,false],

@@ -13,7 +13,7 @@ import {fileURLToPath} from 'node:url';
 //   main        composition root
 const LAYERS=['shared','data','simulation','render','ui','main'];
 const LAYER_OF={
- 'event-bindings.js':'shared','content.js':'data','locale-data.js':'data','locale-rituals.js':'data','locale-story.js':'data',
+ 'event-bindings.js':'shared','pointer-kind.js':'shared','content.js':'data','locale-data.js':'data','locale-rituals.js':'data','locale-story.js':'data',
  'locale-house.js':'data','locale-keepsakes.js':'data','locale-store.js':'data','locale-arc.js':'data','i18n.js':'data','icons.js':'data',
  'simulation.js':'simulation','access.js':'simulation','home-session.js':'simulation','return-greeting.js':'simulation',
  'stitch-path.js':'simulation','sim-util.js':'simulation','sim-arc.js':'simulation','sim-core.js':'simulation','sim-tea.js':'simulation','sim-stitch.js':'simulation','sim-chimes.js':'simulation','sim-story.js':'simulation','sim-queries.js':'simulation','sim-state.js':'simulation','save-codec.js':'simulation','lullaby-score.js':'simulation','intro-score.js':'simulation','night-score.js':'simulation',

@@ -26,11 +26,24 @@ function focusPoseFor(st,canvas,residents,house,presentation){
  return houseFraming(w,h,st.focusedRoom,presentation.value);
 }
 // The story object under a screen point, or null outside the canvas.
+// A finger is wider than a doll's teacup: a tap that misses every object still takes the nearest one whose
+// centre lies within PICK_SLOP CSS pixels on screen (2026-11-14, owner: "most things are not tappable").
+const PICK_SLOP=36,pickPoint=new T.Vector3();
 function pickObject({canvas,camera,ray,mouse,objects},x,y){
  const rect=canvas.getBoundingClientRect();
  if(!Number.isFinite(x)||!Number.isFinite(y)||x<rect.left||x>rect.right||y<rect.top||y>rect.bottom)return null;
  mouse.set((x-rect.left)/rect.width*2-1,-(y-rect.top)/rect.height*2+1);ray.setFromCamera(mouse,camera);
- return ray.intersectObjects(objects.targets,false)[0]?.object.userData.object??null;
+ const hit=ray.intersectObjects(objects.targets,false)[0]?.object.userData.object;
+ if(hit)return hit;
+ let best=null,bestD=PICK_SLOP*PICK_SLOP;
+ for(const target of objects.targets){
+  if(!target.userData.object)continue;
+  target.getWorldPosition(pickPoint).project(camera);
+  if(pickPoint.z<-1||pickPoint.z>1)continue;
+  const dx=rect.left+(pickPoint.x+1)/2*rect.width-x,dy=rect.top+(1-pickPoint.y)/2*rect.height-y,d=dx*dx+dy*dy;
+  if(d<bestD){bestD=d;best=target.userData.object}
+ }
+ return best;
 }
 function fitViewport(canvas,camera,renderer,height){
  const w=canvas.clientWidth,h=canvas.clientHeight,aspect=w/Math.max(1,h);

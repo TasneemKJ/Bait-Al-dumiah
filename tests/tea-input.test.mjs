@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createTeaGesture,createTeaKeyboard,TEA_INPUT} from '../src/tea-input.js';
+import {pourAssist,createTeaGesture,createTeaKeyboard,TEA_INPUT} from '../src/tea-input.js';
+import {TEA_TABLE} from '../src/content.js';
+import {teaHit} from '../src/sim-tea.js';
 import {createTeaUI} from '../src/tea-ui.js';
 import * as sim from '../src/simulation.js';
 
@@ -225,4 +227,15 @@ test('moving focus from a held pot to another control releases tea until a fresh
   emit(f.canvas,'pointerdown',pointer(100,100));emit(f.canvas,'pointermove',pointer(100,180));
   sim.step(f.state,.1);assert.ok(sim.teaStatus(f.state).poured>before.poured);
  }finally{f.close()}
+});
+
+test('while tilting, the spout glides onto the nearest cup in reach; aiming before the tilt stays free',()=>{
+ const g=createTeaGesture(),tea={phase:'pour',aim:-.2,cups:[{x:-.23},{x:.23}]},cup=-.23/TEA_TABLE.aimSpan;
+ assert.ok(g.down(pointer(100,100),'pot',tea,0));
+ assert.equal(g.move(pointer(101,100),0).aim,-.2,'no tilt: the aim is where the hand put it');
+ const pouring=g.move(pointer(101,100+TEA_INPUT.tiltDeadzone+TEA_INPUT.tiltDistance),0);
+ assert.ok(pouring.tilt>0&&Math.abs(pouring.aim-(cup+(-.2-cup)*.1))<1e-9,'tilting near a cup pours into it');
+ const st={aim:pouring.aim,cups:[{x:-.23},{x:.23}]};
+ assert.equal(teaHit(st)?.x,-.23,'and the stream lands in that cup');
+ assert.equal(pourAssist(.9,[-.23,.23]),.9,'out of reach: no help');
 });

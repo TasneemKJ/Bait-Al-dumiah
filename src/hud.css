@@ -169,3 +169,6 @@ html[lang=ar] #ui .dock[data-expanded=true]>button{font-size:max(16px,1rem)}
  #ui dialog .entry-number{font-size:15px}
 }
 @media(max-width:680px){#ui dialog h2>small,#ui dialog h3>small{font-size:15px}}
+/* 2026-11-14 play test: a toast never covers an open object card's button, and the HUD reads as resting while the intro owns the screen. */
+#app:has(.object-ribbon:not([hidden])) #toast{top:auto;bottom:calc(178px + env(safe-area-inset-bottom))}
+#ui[inert]{opacity:.45;transition:opacity .4s}

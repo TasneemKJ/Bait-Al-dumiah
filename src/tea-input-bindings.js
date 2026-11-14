@@ -1,6 +1,7 @@
 // Pointer, keyboard and lifecycle input for the tea work surface. The surface
 // owns state and rendering; this module turns browser events into commands.
 import {bindAll} from './event-bindings.js';
+import {lastPointerWasMouse} from './pointer-kind.js';
 
 // Pointer handlers: hold the pot to pour, tap a cup to empty it, tap the tray to serve or leave.
 function teaPointer(ctx){
@@ -77,7 +78,7 @@ export function bindTeaInput(ctx){
  const {active,stop,invoke,cancel,update,keyboard,gesture,canvas,setLost,parts}=ctx;
  const {pointerdown,pointermove,pointerup,pointercancel}=teaPointer(ctx),{keydown,keyup}=teaKeys(ctx);
  function consumeClick(e){if(active()&&!ctx.blocked())stop(e)}
- function contextmenu(e){if(active()){stop(e);cancel()}}
+ function contextmenu(e){if(active()){stop(e);if(lastPointerWasMouse())cancel()}}
  function exit(){cancel();invoke('tea-exit');update(0)}
  function visibility(){if(document.hidden)cancel()}
  function contextLost(){setLost();cancel()}

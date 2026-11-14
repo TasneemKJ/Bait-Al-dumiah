@@ -1,5 +1,6 @@
 /** Remember the whole gesture, not only its final displacement. */
-export function createTapGesture(threshold=7){
+// 12px: a fingertip on a phone wobbles more than 7px in an ordinary tap (iOS allows about 10pt).
+export function createTapGesture(threshold=12){
  let start=null;
  return {
   down(event){start=event.isPrimary?{id:event.pointerId,x:event.clientX,y:event.clientY,moved:false}:null},

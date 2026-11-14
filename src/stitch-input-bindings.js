@@ -1,4 +1,5 @@
 import {point} from './stitch-view.js';
+import {lastPointerWasMouse} from './pointer-kind.js';
 
 // Pointer, keyboard and lifecycle input for the stitch work surface. The surface
 // owns state and rendering; this module turns browser events into commands.
@@ -88,7 +89,7 @@ export function bindStitchInput(ctx){
  const {keydown,keyup}=keyHandlers(ctx);
  function pointercancel(e){if(e.pointerId===gesture.pointerId)cancel()}
  function consumeClick(e){if(active()&&!blocked())stop(e)}
- function contextmenu(e){if(active()){stop(e);cancel()}}
+ function contextmenu(e){if(active()){stop(e);if(lastPointerWasMouse())cancel()}}
  function exit(){cancel();invoke('stitch-exit');update(0)}
  function visibility(){if(document.hidden)cancel()}
  function contextLost(){setLost();cancel()}
