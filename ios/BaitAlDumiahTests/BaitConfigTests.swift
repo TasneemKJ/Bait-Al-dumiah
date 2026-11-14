@@ -26,9 +26,19 @@ final class BaitConfigTests: XCTestCase {
         XCTAssertEqual(config.primaryProductKey, "fifthRoom")
         XCTAssertEqual(config.bridgeGlobal, "baitApp")
         XCTAssertEqual(config.bootGlobal, "__baitAppBoot")
-        XCTAssertNil(config.gameCenter)
         XCTAssertNil(TasBridgeMessage.parse(["type": "buy", "data": ["id": "buttons"]], config: config), "buttons are never sold")
         XCTAssertEqual(TasBridgeMessage.parse(["type": "buy", "data": ["id": "fifthRoom"]], config: config), .buy("fifthRoom"))
+    }
+
+    /// The IDs exist in App Store Connect; never rename them after release.
+    func testGameCenterReportsTheSevenAchievementsAndDaysKept() throws {
+        let gc = try XCTUnwrap(config.gameCenter)
+        XCTAssertEqual(gc.achievements.count, 7)
+        XCTAssertEqual(gc.achievements.first?.id, "bait.milestone.1_first_tea")
+        XCTAssertEqual(Set(gc.achievements.map(\.id)).count, 7)
+        XCTAssertEqual(gc.leaderboards.map(\.id), ["bait.daysKept"])
+        XCTAssertTrue(gc.progressScript.contains("'bait-al-dumiah.v1'"), "reads the real save key")
+        XCTAssertTrue(gc.progressScript.hasPrefix("(function(){") && gc.progressScript.hasSuffix("})()"))
     }
 
     func testTheBuiltGameShipsInsideTheApp() throws {

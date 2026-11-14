@@ -6,7 +6,7 @@ is `tas-engine/toolkit/release/README.md`; this page is what is particular to th
 ## Signing
 - Certificate: Apple Distribution `2PFCH5WWG4`, expires **2027-11-07**.
 - Profile: **Bait Al-dumiah AppStore (API)** (`a1c56bbd-d34f-4f76-9910-e6c3211a324a`), expires
-  **2027-11-07**. Renew both before then. Capabilities: In-App Purchase only (no iCloud, no Game Center). If the profile predates
+  **2027-11-07**. Renew both before then. Capabilities: In-App Purchase (no iCloud); Game Center must be added (below). If the profile predates
   the purchases, regenerate it.
 
 ## Before every build
@@ -18,6 +18,11 @@ is `tas-engine/toolkit/release/README.md`; this page is what is particular to th
       `ln -s …/node_modules`, `npm run build`.
 - [ ] New `--build` every upload; `--version` for a new store version.
 - [ ] Saves: install build N, play, install N+1 over it: the same house opens.
+- [ ] Game Center: `BaitAlDumiah.entitlements` asks for `com.apple.developer.game-center`, so the bundle ID
+      needs the Game Center capability and the profile above regenerated after it, or signing fails. The seven
+      achievements and the `bait.daysKept` leaderboard (IDs in `game-center/progress.js`) are in App Store
+      Connect with art (`tas-games/store/bait-al-dumiah/game-center/`); add them to the version's Game Center
+      section on the first submission that ships them.
 
 ## Upload
 ```bash
