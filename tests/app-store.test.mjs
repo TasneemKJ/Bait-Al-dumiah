@@ -134,3 +134,25 @@ test('mending or a gift without The Fifth Room opens the card and changes nothin
  const open=bootHome({saved});open.button('play').click();open.frame(1000);
  open.dispatch()('mend-door');assert.equal(open.state().door,1,'the web door mends as before');
 });
+
+test('a rating is asked for only in the app, after a pause, and the bridge posts requestReview',async()=>{
+ const {askForReview,REVIEW_PAUSE}=await import('../src/app-store.js');
+ const web=createAppStore(page({inApp:false})),later=[];
+ askForReview(web,(fn,ms)=>later.push([fn,ms]));assert.equal(later.length,0,'never on the web');
+ assert.equal(web.review(),false);
+ const w=page(),store=createAppStore(w);w.posts.length=0;
+ askForReview(store,(fn,ms)=>later.push([fn,ms]));assert.equal(later.length,1);
+ assert.equal(later[0][1],REVIEW_PAUSE);assert.ok(REVIEW_PAUSE>=3000,'the moment lands first');
+ assert.equal(w.posts.length,0,'nothing asked yet');later[0][0]();
+ assert.deepEqual(w.posts.map(p=>p.type),['requestReview']);
+});
+
+test('the ask follows only the two won climaxes: a found thing and the story’s end',()=>{
+ const src=f=>readFileSync(new URL('../src/'+f,import.meta.url),'utf8');
+ const calls=['mischief-ui.js','cmd-story.js','store-ui.js','cmd-store.js','app-feedback.js']
+  .map(f=>[f,(src(f).match(/askForReview\(/g)||[]).length]);
+ assert.deepEqual(calls,[['mischief-ui.js',1],['cmd-story.js',1],['store-ui.js',0],['cmd-store.js',0],
+  ['app-feedback.js',0]]);
+ assert.match(src('mischief-ui.js'),/line\(\{type:'mischief-found',item:result\.item\}\);app\.save\(\);app\.ui\.tick\(\);askForReview\(appStore\)\}/);
+ assert.match(src('cmd-story.js'),/if\(result\.chapterComplete&&sim\.storyStatus\(app\.state\)\.finished\)askForReview/);
+});

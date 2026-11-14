@@ -1,6 +1,7 @@
 // Commands: Hidden-house story objects, carried items and keepsakes.
 import * as sim from './simulation.js';
 import {objectInfo,sceneObjectAction} from './object-ui.js';
+import {appStore,askForReview} from './app-store.js';
 
 const storySound=r=>['mint-tin','moon-bed'].includes(r.effect)?r.effect:r.chapterComplete?
   'secret':r.effect==='music-cabinet'?'musicbox':'care';
@@ -18,6 +19,8 @@ function interactStory(app,key){
  app.storyUI?.clear();app.world?.clearObjectSelection();
  app.storyUI?.respond(result.message,result.chapterComplete,result.reward);app.audio.effect(storySound(result));
  app.save();app.ui.tick();app.roomViews.update();app.objectControls?.update();
+ // The house's story has just ended: a won climax.
+ if(result.chapterComplete&&sim.storyStatus(app.state).finished)askForReview(appStore);
 }
 export const storyCommands={
 'select-object':(app,value,origin)=>{

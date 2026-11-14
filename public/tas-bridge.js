@@ -61,6 +61,8 @@
       openPage(name) { return this.post('openURL', { page: String(name) }); },
       /** Hands a PNG data URL to the share sheet. */
       share(dataURL) { return this.post('share', { dataURL: String(dataURL) }); },
+      /** After a won climax (never a loss or a purchase): the app may ask for a rating, rarely. */
+      requestReview() { return this.post('requestReview'); },
 
       setStatus(s) { this.status = s; if (onStatus) { try { onStatus(this); } catch (e) { /* the game's own */ } } },
 

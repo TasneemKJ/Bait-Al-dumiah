@@ -39,6 +39,9 @@ export function createAppStore(w=globalThis){
   manage:()=>inApp&&bridge.post('manageSubscriptions'),
   // The app's share sheet takes one PNG (a data URL).
   share:dataURL=>inApp&&bridge.share(dataURL),
+  // After a won climax only, never a loss or a purchase: the app may ask for a rating (TasKit asks
+  // Apple at most once in 90 days, and Apple decides whether to show anything).
+  review:()=>inApp&&typeof bridge.requestReview==='function'&&bridge.requestReview(),
   // A stale "buying" (the sheet was dismissed) gives the buttons back when the card opens again.
   clearStatus(){if(inApp&&bridge.status==='buying')bridge.status=''},
   onChange(fn){listeners.add(fn);return ()=>listeners.delete(fn)},
@@ -47,6 +50,10 @@ export function createAppStore(w=globalThis){
  store.refresh();
  return store;
 }
+
+// A won climax gets its quiet beat first: the ask comes after the moment has landed, never over it.
+export const REVIEW_PAUSE=4000;
+export function askForReview(store,later=setTimeout){if(store?.inApp)later(()=>store.review(),REVIEW_PAUSE)}
 
 // The page's one store (the bridge global must exist once, before the game asks).
 export const appStore=createAppStore();

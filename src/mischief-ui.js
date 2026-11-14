@@ -2,6 +2,7 @@
 // place (or the doll) and fades; the search is a touch on the house itself; the journal keeps the record.
 import * as sim from './simulation.js';
 import {ROOMS} from './content.js';
+import {appStore,askForReview} from './app-store.js';
 
 const MARGIN=16,TOP=176,BOTTOM=236;
 // Where tonight's thing may be: its owner's room, its floor, or the whole house.
@@ -68,7 +69,7 @@ export function installMischief(app){
   const result=sim.search(app.state,spot);if(!result.ok)return result;
   if(result.found){app.world?.mischiefFound?.(result.item,result.spot);app.world?.greet?.(result.doll);
    app.audio.effect('found');queue.length=0;if(current)hide();
-   line({type:'mischief-found',item:result.item});app.save();app.ui.tick()}
+   line({type:'mischief-found',item:result.item});app.save();app.ui.tick();askForReview(appStore)}
   else{app.world?.mischiefPuff?.(result.spot,result.near);app.audio.effect(result.near?'search-cold':'search-dust')}
   return result;
  }

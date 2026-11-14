@@ -181,6 +181,7 @@ test('touching the house: a room opens from the whole house, and a hiding place 
  assert.equal(game.state().mischief.item,'teaspoon','and nothing is searched yet');
  game.host.dataset.focusRoom='kitchen';game.pick({nook:'kettle',room:'kitchen'});
  assert.equal(game.state().mischief.item,'','in its own room, the touch finds it');
+ assert.equal(game.reviews(),1,'a thing found before nightfall is a won climax: the app may ask for a rating');
 });
 
 test('the quilt is searched by touching the moon bed itself, with the payload the scene really sends',async()=>{
