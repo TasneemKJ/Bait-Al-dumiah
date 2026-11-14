@@ -2,18 +2,24 @@
 // owns state and rendering; this module turns browser events into commands.
 import {bindAll} from './event-bindings.js';
 import {lastPointerWasMouse} from './pointer-kind.js';
+import {TEA_TABLE} from './content.js';
 
 // Pointer handlers: hold the pot to pour, tap a cup to empty it, tap the tray to serve or leave.
 function teaPointer(ctx){
  const {root,active,blocked,stop,releaseCapture,invoke,cancel,clearFeedback,update,gesture,
-   keyboard,canvas,dispatch,pick,aimAt,setInputMode}=ctx;
+   keyboard,canvas,dispatch,pick,aimAt,setInputMode,startPour}=ctx;
+ // A tap on the pot pours every cup still short of its line, nearest the spout first, and serves when all are
+ // ready; with every cup already ready, it serves.
+ function tapPour(tea){if(!tea||tea.phase!=='pour')return;if(tea.ready){invoke('tea-serve');return}
+  const spout=tea.aim*TEA_TABLE.aimSpan,open=tea.cups.filter(c=>!c.ready&&!c.overfilled)
+   .sort((a,b)=>Math.abs(a.x-spout)-Math.abs(b.x-spout));if(open.length)startPour(open.map(c=>c.id))}
  function pointerdown(e){
   const tea=active();if(!tea||blocked())return;stop(e);
   if(gesture.pointerId!==null)return;
   // 2026-11-14 (owner, on iPhone: "still cannot move or drag the tea pot"): the pot is small on a phone, so
   // while pouring a touch that misses the cups and the tray takes the pot. Aim is relative, so it never jumps.
   const hit=pick(e.clientX,e.clientY),projected=aimAt(e.clientX,e.clientY),
-   target=hit===null&&tea.phase==='pour'?'pot':hit;
+   target=hit===null?(tea.phase==='pour'?'pot':'tray'):hit;
   if(!gesture.down(e,target,tea,projected))return;
   keyboard.cancel();if(tea.pressed||tea.tilt)dispatch('tea-release');
   setInputMode('pointer');clearFeedback();canvas.focus({preventScroll:true});
@@ -38,10 +44,14 @@ function teaPointer(ctx){
   const id=gesture.pointerId,result=gesture.up(e,pick(e.clientX,e.clientY));
   releaseCapture(id);root.classList.remove('tea-holding');
   if(result?.type==='release'){invoke('tea-release');update(0);return}
+  if(result?.type==='pour-tap'){invoke('tea-release');tapPour(active());update(0);return}
   if(result?.type!=='tap')return;
   if(result.target==='pot'&&tea.phase==='served')invoke('tea-replay');
-  else if(result.target==='tray')invoke(tea.phase==='served'?'tea-exit':'tea-serve');
-  else if(result.target.startsWith('cup:')&&tea.phase==='pour')invoke('tea-empty',Number(result.target.slice(4)));
+  // Served: a tap anywhere but the pot goes home (a cup, the tray, the table).
+  else if(tea.phase==='served')invoke('tea-exit');
+  else if(result.target==='tray')invoke('tea-serve');
+  else if(result.target.startsWith('cup:')&&tea.phase==='pour'){const cup=tea.cups[Number(result.target.slice(4))];
+   if(cup?.overfilled)invoke('tea-empty',cup.id);else if(cup&&!cup.ready)startPour([cup.id])}
   update(0);
  }
  function pointercancel(e){if(e.pointerId===gesture.pointerId)cancel()}

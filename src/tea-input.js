@@ -45,7 +45,10 @@ export function createTeaGesture(){
   up(e,target){
    if(!pointer||e.pointerId!==pointer.id)return null;
    const p=pointer;pointer=null;
-   if(p.target==='pot'&&p.phase==='pour')return {type:'release'};
+   // 2026-11-14 (first 30 s: a new player taps, never holds): a touch that never moved off the pot is a tap,
+   // and a tap pours one cup to its line (src/tea-ui.js startPour). A hold and drag stays the skilled pour.
+   if(p.target==='pot'&&p.phase==='pour')return !p.moved&&validPointer(e)&&Math.hypot(e.clientX-p.x,
+     e.clientY-p.y)<=TEA_INPUT.dragThreshold?{type:'pour-tap'}:{type:'release'};
    if(!validPointer(e)||p.moved||Math.hypot(e.clientX-p.x,
      e.clientY-p.y)>TEA_INPUT.dragThreshold||target!==p.target)return null;
    return {type:'tap',target:p.target};

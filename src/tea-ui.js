@@ -1,4 +1,5 @@
 import {teaStatus} from './simulation.js';
+import {TEA_TABLE} from './content.js';
 import {teaPercent as percent} from './readouts.js';
 import {translate} from './i18n.js';
 import {setText,setAttribute} from './dom-sync.js';
@@ -23,6 +24,26 @@ const teaViewKey=(s,tea,inputMode,feedback)=>JSON.stringify([s.settings.locale,t
 const teaAnnouncementKey=(s,tea,inputMode,feedback)=>JSON.stringify([s.settings.locale,tea.phase,inputMode,
  tea.aimedCup,tea.ready,tea.cups.map(c=>[Math.floor(c.fill*10),c.ready,c.overfilled]),feedback]);
 
+// Tap-to-pour: the spout goes over the cup and tilts fully, and is lifted when the tea reaches the cup's line.
+// The simulation still judges where the tea lands and whether the cup is ready.
+// A list of cups is poured in turn; when the last is at its line and every cup is ready, the tea is served.
+export function createTapPour(active,dispatch){
+ let pouring=null,queue=[];
+ function next(){const tea=active();pouring=null;
+  while(queue.length){const id=queue.shift(),cup=tea?.cups.find(c=>c.id===id);
+   if(!cup||tea.phase!=='pour'||cup.ready||cup.overfilled)continue;
+   pouring={id,age:0};dispatch('tea-control',{aim:cup.x/TEA_TABLE.aimSpan,tilt:1,pressed:true});return true}
+  return false}
+ return {get cup(){return pouring?.id??null},
+  start(ids){queue=[...(Array.isArray(ids)?ids:[ids])];return next()},
+  stop(){pouring=null;queue=[]},
+  // True when it lifted the pot this frame.
+  tick(tea,dt){if(!pouring)return false;const cup=tea.cups.find(c=>c.id===pouring.id);
+   pouring.age+=Number.isFinite(dt)?dt:0;
+   if(tea.phase==='pour'&&cup&&cup.fill<cup.target-.012&&pouring.age<=6)return false;
+   dispatch('tea-release');if(next())return true;
+   if(tea.phase==='pour'&&active()?.ready)dispatch('tea-serve');return true}};
+}
 export function createTeaUI(host,canvas,getState,dispatch,{pick,aimAt}){
  const {root,parts}=mountTeaSurface(host);
  const gesture=createTeaGesture(),keyboard=createTeaKeyboard();
@@ -34,7 +55,8 @@ export function createTeaUI(host,canvas,getState,dispatch,{pick,aimAt}){
  const stop=e=>{e.preventDefault();e.stopImmediatePropagation()},releaseCapture=id=>releasePointer(canvas,id);
  function invoke(action,value){const result=dispatch(action,value);
  if(result?.ok===false&&result.reason)respond(result.reason);return result}
- function cancel(){
+ const tapPour=createTapPour(active,dispatch),startPour=id=>tapPour.start(id);
+ function cancel(){tapPour.stop();
   const id=gesture.pointerId,hadKeys=keyboard.active,tea=active();
   gesture.cancel();keyboard.cancel();root.classList.remove('tea-holding');releaseCapture(id);
   if(id!==null||hadKeys||tea?.pressed||tea?.tilt)dispatch('tea-release');
@@ -59,6 +81,7 @@ export function createTeaUI(host,canvas,getState,dispatch,{pick,aimAt}){
   if(keyboard.active&&gesture.pointerId===null&&tea.phase==='pour'&&
     dt>0){invoke('tea-control',keyboard.controls(dt,tea.aim));tea=active()}
   if(!tea)return;
+  if(tapPour.tick(tea,dt)){tea=active();if(!tea)return}
   const seconds=Number.isFinite(dt)?Math.max(0,Math.min(dt,.25)):0;feedbackAge+=seconds;announcementAge+=seconds;
   if(feedbackAge>4)clearFeedback();
   const s=getState();
@@ -75,7 +98,7 @@ export function createTeaUI(host,canvas,getState,dispatch,{pick,aimAt}){
   }
  }
  const unbindInput=bindTeaInput({root,active,blocked,stop,releaseCapture,invoke,cancel,
-   respond,clearFeedback,update,gesture,keyboard,canvas,dispatch,
+   respond,clearFeedback,update,gesture,keyboard,canvas,dispatch,startPour,
    pick,aimAt,setInputMode:mode=>{inputMode=mode},setLost:()=>{lost=true},parts});
  update(0);
  return {update,cancel,respond,dispose(){if(disposed)return;cancel();disposed=true;unbindInput();
