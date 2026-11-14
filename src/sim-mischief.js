@@ -19,7 +19,8 @@ export const spotDef=id=>MISCHIEF_SPOTS.find(p=>p.id===id)??null;
 // A story object that doubles as a hiding place ('prop:moon-bed' -> the quilt).
 export const spotForObject=key=>MISCHIEF_SPOTS.find(p=>p.prop&&'prop:'+p.prop===key)??null;
 export const freshMischief=()=>({nights:0,item:'',spot:'',takenDay:0,takenAt:0,lastDay:0,losses:0,
-  gone:'',goneDay:0,quiet:Object.fromEntries(DOLLS.map(d=>[d.id,0])),log:[]});
+  lost:Object.fromEntries(MISCHIEF_ITEMS.map(i=>[i.id,0])),gone:'',goneDay:0,
+  quiet:Object.fromEntries(DOLLS.map(d=>[d.id,0])),log:[]});
 
 // The game's own deterministic scramble (the audio noise LCG), seeded by the night, never a random source.
 function scramble(a,b){let x=(Math.imul(a+1,1664525)+Math.imul(b+7,22695477)+1013904223)>>>0;
@@ -52,8 +53,10 @@ function take(s){
  emit(s,{type:'mischief-take',...missing(s)});
 }
 function lose(s){
- const m=s.mischief,item=itemDef(m.item),elegy=m.losses%ELEGIES[item.id];
- m.losses=Math.min(9999,m.losses+1);m.quiet[item.doll]=s.day+1;m.gone=item.id;m.goneDay=s.day;
+ // Each thing's own losses choose its elegy: its first loss gets its first line, a second loss the next.
+ const m=s.mischief,item=itemDef(m.item),elegy=m.lost[item.id]%ELEGIES[item.id];
+ m.losses=Math.min(9999,m.losses+1);m.lost[item.id]=Math.min(9999,m.lost[item.id]+1);
+ m.quiet[item.doll]=s.day+1;m.gone=item.id;m.goneDay=s.day;
  record(s,{item:item.id,day:s.day,found:false,elegy});
  // No new mischief on a night that has just cost something.
  Object.assign(m,{item:'',spot:'',lastDay:s.day});
@@ -84,6 +87,7 @@ export function restoreMischief(v,day,elapsed){
   m.takenDay=integer(v.takenDay,1,day);m.takenAt=clamp(v.takenAt,0,elapsed)}
  if(itemDef(v.gone)){m.gone=v.gone;m.goneDay=integer(v.goneDay,0,day)}
  for(const d of DOLLS)m.quiet[d.id]=integer(v.quiet?.[d.id],0,day+1);
+ for(const i of MISCHIEF_ITEMS)m.lost[i.id]=integer(v.lost?.[i.id],0,9999);
  if(Array.isArray(v.log))m.log=v.log.filter(e=>e&&itemDef(e.item)).slice(-MISCHIEF_LOG).map(e=>({item:e.item,
    day:integer(e.day,1,day),found:e.found===true,elegy:e.found===true?0:integer(e.elegy,0,ELEGIES[e.item]-1)}));
  return m;

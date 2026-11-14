@@ -215,5 +215,6 @@ house did nothing. Now the little visitor has a face the player acts against, ev
   generosity (every nook answers) but adds a small, kind stake. *Animal Crossing*'s lost items return to a neighbour
   for friendship; ours is hidden on purpose by a creature you can see, on a clock, and its loss gets a funeral. The
   dry elegies, the thing's ghost and the footprints are this house's own.
-- **Budgets:** whole house at 390x844 374 draw calls (ceiling 388) and 394k triangles (ceiling 400k); the keeping
-  places and things are batched per material and cast no shadows.
+- **Budgets:** the whole house at night with a thing missing (390x844) draws 374 calls (ceiling 388; 361 before)
+  and 397k triangles (ceiling 400k; 387k before). Each thing, and all keeping places together, bake into one
+  vertex-painted mesh; the footprints into one; none cast shadows.

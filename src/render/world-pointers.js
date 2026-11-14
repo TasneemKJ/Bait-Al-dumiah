@@ -39,7 +39,8 @@ export function bindScenePointers(w,{onPick,onError}){
   const hit=exact??(st.placement?null:nearestTarget(targets,camera,rect,e.clientX,e.clientY));
   if(hit)onPick(hit.userData);
   // On the whole house, a touch on a room that hits nothing in it opens that room.
-  else if(!st.placement&&!st.focusedRoom&&!st.focusedDoll){const room=roomUnder(ray,house);if(room)onPick({room})}
+  else if(!st.placement&&!st.focusedRoom&&!st.focusedDoll){const room=roomUnder(ray,house);
+   if(room)onPick({roomTap:room})}
  };
  const cancel=()=>{scenePointers.clear();tapGesture.cancel()};
  return bindAll([

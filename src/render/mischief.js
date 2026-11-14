@@ -2,7 +2,7 @@ import * as T from 'three';
 import {ROOMS,MISCHIEF_ITEMS,MISCHIEF_SPOTS} from '../content.js';
 import {missing,goneItem,quietDoll} from '../simulation.js';
 import {softTexture} from './textiles.js';
-import {buildItem,keepingPlaces,hatbox,footprints,STANDS} from './mischief-art.js';
+import {buildItem,keepingPlaces,hatbox,footprints,bake,STANDS} from './mischief-art.js';
 
 // The midnight visitor in the house (src/sim-mischief.js). Every borrowed thing lives at its keeping place;
 // when one is missing, its place shows the thing's ghost, a soft lavender glow (the visitor's own colour,
@@ -63,9 +63,10 @@ const spotPoint=(id,props)=>{const p=MISCHIEF_SPOTS.find(s=>s.id===id);if(!p)ret
 
 export function createMischief(parent){
  const root=new T.Group();root.name='midnight-visitor';root.userData.noBatch=true;parent.add(root);
- const add=room=>{const g=new T.Group();g.name='keeping-place-'+room;root.add(g);
+ const still=new T.Group();still.name='keeping-places';root.add(still);
+ const add=room=>{const g=new T.Group();g.name='keeping-place-'+room;still.add(g);
   const r=roomAt(room);g.position.set(r.x,r.y,0);return g};
- keepingPlaces(add);hatbox(add);
+ keepingPlaces(add);hatbox(add);bake(still);
  const places=MISCHIEF_ITEMS.map(def=>place(root,def)),targets=createTargets(root),puffs=createPuffs(root);
  const glint=sprite(root,LAVENDER,.7,true),homeGlow=sprite(root,GOLD,0,true);
  let flight=null,clock=0,propPoint=null;

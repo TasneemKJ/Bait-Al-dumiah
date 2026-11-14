@@ -47,7 +47,7 @@ function pickFromScene(data){
   if(!app.session.entered)return;
   const {storyUI,ui,dispatch}=app,focused=app.host.dataset.focusRoom;
   // A room touched on the whole house opens; a hiding place searches only once its room is the subject.
-  if(data.room&&!data.nook)return dispatch('focus-room',data.room);
+  if(data.roomTap)return dispatch('focus-room',data.roomTap);
   if(data.nook)return dispatch(focused===data.room?'search':'focus-room',focused===data.room?data.nook:data.room);
   const spot=data.object&&sim.spotForObject(data.object);
   if(spot&&focused===spot.room&&sim.missing(app.state)?.spot===spot.id)return dispatch('search',spot.id);

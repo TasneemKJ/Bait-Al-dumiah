@@ -172,10 +172,31 @@ test('touching the house: a room opens from the whole house, and a hiding place 
  const {bootHome}=await import('./helpers/main-home-harness.mjs');
  const s=fresh();s.cares=1;toNight(s);s.events.length=0;
  const game=bootHome({saved:JSON.stringify(s)});game.button('play').click();
- game.pick({room:'studio'});assert.equal(game.focuses.at(-1),'studio');
+ game.pick({roomTap:'studio'});assert.equal(game.focuses.at(-1),'studio');
+ // Object volumes carry their room too (src/render/object-interactions.js): a prop still selects, never re-focuses.
+ const before=game.focuses.length;game.pick({object:'prop:tea-set',room:'kitchen'});
+ assert.equal(game.focuses.length,before,'a touched story object is not mistaken for a room tap');
  game.host.dataset.focusRoom='parlor';
  game.pick({nook:'kettle',room:'kitchen'});assert.equal(game.focuses.at(-1),'kitchen','another room opens first');
  assert.equal(game.state().mischief.item,'teaspoon','and nothing is searched yet');
  game.host.dataset.focusRoom='kitchen';game.pick({nook:'kettle',room:'kitchen'});
  assert.equal(game.state().mischief.item,'','in its own room, the touch finds it');
+});
+
+test('the quilt is searched by touching the moon bed itself, with the payload the scene really sends',async()=>{
+ const {bootHome}=await import('./helpers/main-home-harness.mjs');
+ const s=fresh();s.cares=1;toNight(s);s.mischief.spot='quilt';s.events.length=0;
+ const game=bootHome({saved:JSON.stringify(s)});game.button('play').click();
+ game.host.dataset.focusRoom='bedroom';game.pick({object:'prop:moon-bed',room:'bedroom'});
+ assert.equal(game.state().mischief.item,'','found under the quilt');
+ assert.equal(game.state().mischief.log.at(-1).found,true);
+});
+
+test('a thing’s first loss gets its first elegy and its second loss the next, whatever else was lost',()=>{
+ const s=fresh();const lose=item=>{toNight(s);Object.assign(s.mischief,{item,spot:'jars'});s.events.length=0;
+  toNight(s);return events(s,'mischief-lost')[0]};
+ assert.equal(lose('thimble').elegy,0);assert.equal(lose('bell').elegy,0);assert.equal(lose('thimble').elegy,1);
+ assert.equal(lose('teaspoon').elegy,0,'a first loss never says "again"');
+ assert.equal(sim.restore(JSON.stringify(s)).mischief.lost.thimble,2);
+ assert.equal(sim.restore(JSON.stringify({...s,mischief:{...s.mischief,lost:{thimble:-3,piano:4}}})).mischief.lost.thimble,0);
 });
