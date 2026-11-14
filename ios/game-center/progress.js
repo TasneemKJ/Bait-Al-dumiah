@@ -72,9 +72,9 @@ export const ACHIEVEMENTS = Object.freeze([
   {
     key: 'firstTea', id: 'bait.milestone.1_first_tea', points: 10, hidden: false,
     en: { name: 'The First Pour', before: 'Pour a round of tea at the kitchen table and serve it.',
-      after: 'The cups were filled to the line. Lina set out one more than anyone asked for.' },
-    ar: { name: 'الصبّة الأولى', before: 'اسكب الشاي على طاولة المطبخ وقدّمه.',
-      after: 'امتلأت الأكواب حتى الحدّ، ووضعت لينا كوباً زائداً لم يطلبه أحد.' },
+      after: 'The cups were filled to the gold line. Lina set out one more than anyone asked for.' },
+    ar: { name: 'حتى الخطّ الذهبي', before: 'صُبّ الشاي على طاولة المطبخ وقدّمه.',
+      after: 'امتلأت الفناجين حتى الخطّ، ووضعت لينا فنجاناً زائداً لم يطلبه أحد.' },
   },
   {
     key: 'threeWishes', id: 'bait.milestone.2_three_wishes', points: 15, hidden: false,
@@ -96,14 +96,14 @@ export const ACHIEVEMENTS = Object.freeze([
       before: 'When the midnight visitor borrows something, find it before the next nightfall.',
       after: 'Home again. The footprints that led away were very small, and nobody apologised.' },
     ar: { name: 'قبل أن يحلّ الليل',
-      before: 'حين يستعير زائر منتصف الليل شيئاً، اعثر عليه قبل أن يحلّ الليل التالي.',
+      before: 'حين يستعير الزائر الصغير شيئاً في الليل، اعثر عليه قبل أن يحلّ الليل التالي.',
       after: 'عاد إلى مكانه. كانت آثار الأقدام صغيرة جداً، ولم يعتذر أحد.' },
   },
   {
     key: 'threeWhispers', id: 'bait.milestone.5_three_whispers', points: 20, hidden: false,
     en: { name: 'Heard After Dark', before: 'Hear three whispers from the shy visitor at night.',
       after: 'It speaks only when the house is warm enough, and never louder than the kettle.' },
-    ar: { name: 'همسٌ بعد العتمة', before: 'اسمع ثلاث همسات من الزائر الخجول في الليل.',
+    ar: { name: 'همسٌ بعد العتمة', before: 'اسمع ثلاث همسات من الضيف الخجول في الليل.',
       after: 'لا يتكلّم إلا حين يدفأ البيت، ولا يعلو صوته على صوت الإبريق.' },
   },
   {
@@ -112,7 +112,7 @@ export const ACHIEVEMENTS = Object.freeze([
       before: 'Hear all six whispers, finish the three stories and fill every corner of the house.',
       after: 'There is nothing left to find. Someone still sets a cup at the threshold every night.' },
     ar: { name: 'حكاية البيت', before: 'اسمع الهمسات الستّ، وأتمّ الحكايات الثلاث، واملأ كل زاوية في البيت.',
-      after: 'لم يبقَ شيء لتجده، ومع ذلك يضع أحدهم كوباً عند العتبة كل ليلة.' },
+      after: 'لم يبقَ شيء لتجده، ومع ذلك يضع أحدهم فنجاناً عند العتبة كل ليلة.' },
   },
   {
     key: 'rainNight', id: 'bait.milestone.7_the_rain_night', points: 30, hidden: true,
