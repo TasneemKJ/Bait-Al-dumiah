@@ -37,6 +37,10 @@ export function installFeedback(app){
   if(event.type==='rain')say(t('arcRain'));
   if(event.type.startsWith('mischief-'))app.mischief?.event(event);
   if(event.type==='anniversary'){say(t('arcAnniversary'));audio.effect('secret')}
+  if(event.type==='musicbox-dusk')say(t(event.first?'musicDuskFirst':'musicDusk'));
+  if(event.type==='musicbox-midnight'){for(const id of event.stilled)say(t('musicStopped-'+id));
+   if(!event.stilled.length&&event.danced.length)say(t('musicAllDance'));
+   if(event.danced.length)audio.effect('musicbox')}
  }
  function showError(kind){app.fatal=true;app.syncPause();save();app.homeUI?.hide();
  document.querySelector('#loading')?.remove();if(app.ui?.panel)app.ui.close();

@@ -44,6 +44,15 @@ export default {
   mischiefJournalIntro:'At night the little visitor borrows one small thing and hides it. '+
    'Found by the next nightfall, it comes home.',
   mischiefCameHome:'Safely home',mischiefLost:'An elegy',
+  musicDuskFirst:'The music boxes have run down. There is one key in the house: carry it to a box and wind it '+
+   'before midnight.',
+  musicDusk:'The music boxes are running down.',musicKeyElsewhere:'The key is in another room.',
+  'musicWound-lina':'Lina’s box is wound.','musicWound-noor':'Noor’s box is wound.',
+  'musicWound-sami':'Sami’s box is wound.',
+  musicAllDance:'Midnight. All three boxes play to the end, and the house dances in the dark.',
+  'musicStopped-lina':'Lina’s box stopped halfway through the tune. Lina stayed waiting for the rest of it.',
+  'musicStopped-noor':'Noor’s box stopped halfway through the tune. Noor stayed waiting for the rest of it.',
+  'musicStopped-sami':'Sami’s box stopped halfway through the tune. Sami stayed waiting for the rest of it.',
  },
  ar:{
   'mischief-item-teaspoon':'ملعقة لينا الصغيرة','mischief-item-strainer':'مصفاة شاي لينا',
@@ -88,5 +97,13 @@ export default {
   mischiefJournalIntro:'في الليل يستعير الزائر الصغير شيئًا صغيرًا ويخبّئه. '+
    'إن وجدته قبل حلول الليل القادم عاد إلى مكانه.',
   mischiefCameHome:'عودة سالمة',mischiefLost:'رثاء',
+  musicDuskFirst:'توقّفت الصناديق الموسيقية. في البيت مفتاح واحد: احمله إلى صندوق وأدِره قبل منتصف الليل.',
+  musicDusk:'الصناديق الموسيقية تتباطأ.',musicKeyElsewhere:'المفتاح في غرفة أخرى.',
+  'musicWound-lina':'دار مفتاح صندوق لينا حتى آخره.','musicWound-noor':'دار مفتاح صندوق نور حتى آخره.',
+  'musicWound-sami':'دار مفتاح صندوق سامي حتى آخره.',
+  musicAllDance:'منتصف الليل. تعزف الصناديق الثلاثة حتى آخر اللحن، والبيت يرقص في العتمة.',
+  'musicStopped-lina':'توقّف صندوق لينا عند منتصف اللحن. بقيت لينا تنتظر بقيّته.',
+  'musicStopped-noor':'توقّف صندوق نور عند منتصف اللحن. بقيت نور تنتظر بقيّته.',
+  'musicStopped-sami':'توقّف صندوق سامي عند منتصف اللحن. بقي سامي ينتظر بقيّته.',
  },
 };

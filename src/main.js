@@ -47,6 +47,14 @@ function pickFromScene(data){
   if(!app.session.entered)return;
   const {storyUI,ui,dispatch}=app,focused=app.host.dataset.focusRoom;
   // A room touched on the whole house opens; a hiding place searches only once its room is the subject.
+  // The music box key: carried by a drag (keyTo) or by a touch on it and then on a box or a room; wound by a
+  // circle round its box (wind) or a touch on the box (a quarter turn).
+  if(data.wind)return dispatch('turn-key',data.wind);
+  if(data.keyTo)return dispatch('move-key',data.keyTo);
+  if(data.musicKey)return dispatch('hold-key');
+  if(data.musicBox)return app.keyHeld?dispatch('move-key',data.room):
+   dispatch('turn-key',{doll:data.musicBox,turns:.25});
+  if(app.keyHeld&&(data.roomTap||data.roomTouch))dispatch('move-key',data.roomTap||data.roomTouch);
   if(data.roomTap)return dispatch('focus-room',data.roomTap);
   // A bare wall or floor: the doll who lives in the room turns and waves (no sheet, nothing to read).
   if(data.roomTouch){const d=app.state.dolls.find(x=>x.room===data.roomTouch);if(d)dispatch('greet-doll',d.id);return}

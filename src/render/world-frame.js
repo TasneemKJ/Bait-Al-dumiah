@@ -1,5 +1,5 @@
 import * as T from 'three';
-import {isNight,stitchStatus} from '../simulation.js';
+import {isNight,stitchStatus,musicStatus} from '../simulation.js';
 import {ROOMS} from '../content.js';
 import {detail,pixelGovernor} from './visual-policy.js';
 import {applyLighting} from './world-lighting.js';
@@ -45,6 +45,7 @@ export function renderFrame(w,state,dt,selected){
  residents.update(state,dt,selected,Math.atan2(camera.position.x-controls.target.x,
    camera.position.z-controls.target.z));
  w.mischief.update(state,dt,{residents,hidden:working()});
+ st.music=musicStatus(state);w.musicBoxes.update(state,dt,residents);
  // Drawn rooms (rain night, idle visit), not saved ones, decide what a scene hides or follows.
  for(const doll of residents.dolls){const room=doll.room;
  doll.root.visible=!(st.teaActive&&room==='kitchen'||st.stitchActive&&room==='studio'||

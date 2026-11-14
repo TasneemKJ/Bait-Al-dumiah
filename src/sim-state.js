@@ -1,5 +1,6 @@
 import {freshArc} from './sim-arc.js';
 import {freshMischief} from './sim-mischief.js';
+import {freshMusic} from './sim-musicbox.js';
 import {DOLLS,ROOMS,ACTIVITIES,ACTIVITY_COOLDOWN} from './content.js';
 
 // A fresh house: the state every new game and every failed load starts from.
@@ -16,6 +17,6 @@ export function createState(){
       null,null],stitchRecords:[null,null,null,null],active:null},
   restoration:Object.fromEntries(ROOMS.map(r=>[r.id,0])),
   story:{chapter:0,step:0,lastAction:null,lastActionAt:-10},
-  introSeen:false,arc:freshArc(),mischief:freshMischief(),
+  introSeen:false,arc:freshArc(),mischief:freshMischief(),music:freshMusic(),
   settings:{locale:'en',muted:true,reducedMotion:false,quality:'auto',largeText:false}};
 }

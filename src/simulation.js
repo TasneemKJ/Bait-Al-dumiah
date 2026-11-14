@@ -12,6 +12,8 @@ import {ROOMS,DOLLS,CATALOG,SLOTS,SECRETS,ACTIONS,MILESTONES,SEW_SECONDS,DOOR_ST
 import {createState} from './sim-state.js';
 import {stepArc} from './sim-arc.js';
 import {stepMischief,quietDoll,QUIET_NEED,QUIET_BOND} from './sim-mischief.js';
+import {stepMusic} from './sim-musicbox.js';
+export {moveKey,turnKey,musicStatus,boxOf,windingOpen} from './sim-musicbox.js';
 export {search,missing,goneItem,quietDoll,spotForObject,spotDef,itemDef,scopeFor,ELEGIES,forecast,canaryWatch,
  visitorLastNight,CANARY_DUSK,CANARY_SLEEP} from './sim-mischief.js';
 export {ARC,markVisit,raining,gatherRoom,garlands,anniversary,arcGreeting} from './sim-arc.js';
@@ -78,7 +80,7 @@ export function step(s,dt){
  stepTea(s,dt);stepChimes(s,dt);const stitching=stitchActive(s);
  if(stitching)moveStitch(stitching,stitchSections(stitching),dt);
  if(s.clock>=240){s.clock-=240;newDay(s)}
- stepArc(s);stepMischief(s);
+ stepArc(s);stepMischief(s);stepMusic(s,dt);
  // One gentle pointer the first time night falls, for a player who has not met the visitor yet.
  if(isNight(s)&&!s.hints.night){s.hints.night=true;emit(s,{type:'first-night'})}
  // Day one is front-loaded: after the opening burst, one calm line makes the quiet stretch feel intended.

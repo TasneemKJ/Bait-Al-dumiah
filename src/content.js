@@ -154,3 +154,13 @@ export const MISCHIEF_SPOTS=[
 ];
 // One house-wide game day, in seconds of the night/day clock, must pass before a hidden thing is lost.
 export const MISCHIEF_GRACE=150,MISCHIEF_LOG=12;
+// The music box key (DESIGN.md #49, src/sim-musicbox.js): a small box in each doll's room (room-local x, y, z,
+// on the floor by the side wall), one brass key, and midnight. `KEY_REST` is where the key waits by day.
+export const MUSIC_BOXES=[
+ {doll:'lina',room:'kitchen',at:[-1.55,.12,.45]},
+ {doll:'sami',room:'studio',at:[1.35,.12,.40]},
+ {doll:'noor',room:'bedroom',at:[.72,.12,.6]},
+];
+export const KEY_REST={room:'parlor',at:[1.66,1.37,.25]};
+// Night is clock 120; midnight (hour 24) is clock 160. Two full turns wind a box; a half-wound box slips back.
+export const MUSIC_MIDNIGHT=160,WIND_TURNS=2,WIND_SLIP=.03,MUSIC_FIRST_DAY=2;

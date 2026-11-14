@@ -68,6 +68,10 @@ function fitViewport(canvas,camera,renderer,height){
  camera.updateProjectionMatrix();renderer.setSize(w,h,false);
 }
 
+// The music box key (src/render/music-boxes.js): carrying it lifts it, and where a box or the key is on screen.
+const musicApi=(boxes,canvas,camera)=>({holdKey:on=>boxes.hold(on),
+ musicPoint(kind,id){const p=boxes.point(kind,id);if(!p)return null;p.project(camera);
+  const r=canvas.getBoundingClientRect();return {x:r.left+(p.x+1)/2*r.width,y:r.top+(1-p.y)/2*r.height}}});
 export function createWorld(canvas,{onPick,onError}){
  const parts=buildScene(canvas);
  const {renderer,scene,camera,controls,house,residents,ghost,portraitCache,preview,objects,
@@ -97,7 +101,7 @@ export function createWorld(canvas,{onPick,onError}){
    moonChimes,isActive:id=>id==='tea'?st.teaActive:id==='stitch'?
    st.stitchActive:st.chimeActive,isLost:()=>st.lost,sections:()=>st.stitchSections});
  const unbindPointers=bindScenePointers({st,canvas,camera,controls,ray,mouse,residents,objects,ghost,
-   slots,tapGesture,scenePointers,mischief:parts.mischief,house},{onPick,onError});
+   slots,tapGesture,scenePointers,mischief:parts.mischief,musicBoxes:parts.musicBoxes,house},{onPick,onError});
  const resize=()=>fitViewport(canvas,camera,renderer,focusPose().height);
  let viewportWidth=0,viewportHeight=0;
  function syncViewport(){
@@ -121,6 +125,7 @@ export function createWorld(canvas,{onPick,onError}){
   setPreview(pose){st.previewPose=pose},picture:(s,use)=>takePicture(w,s,use),stirCurtain:parts.roomEffects.stir,
   ...mischiefApi(parts,canvas,camera,house,objects),
   ...canaryApi(parts.canary,canvas,camera,house),setVisit:parts.residents.setVisit,
+  ...musicApi(parts.musicBoxes,canvas,camera),
   render(state,dt,selected){renderFrame(w,state,dt,selected)},
   dispose(){st.disposed=true;portraitCache.dispose();
   controls.removeEventListener('start',cancelCameraMove);controls.dispose();

@@ -72,6 +72,15 @@ if(app.notify(result,result.favorite?'favoriteMoved':'placed'))app.ui.close();re
    if(sim.isNight(app.state))app.say(app.ui.t('nightHint'));return;
   },
 'search':(app,value)=>{app.mischief?.search(value);return;},
+'hold-key':app=>{app.keyHeld=!app.keyHeld;app.world?.holdKey?.(app.keyHeld);app.audio.effect('care');return;},
+'move-key':(app,room)=>{const r=sim.moveKey(app.state,room);if(!r.ok)return;
+   app.keyHeld=false;app.world?.holdKey?.(false);
+   if(r.from!==room)app.audio.effect('care');app.save();return;},
+'turn-key':(app,value)=>{const r=sim.turnKey(app.state,value?.doll,value?.turns);
+   if(!r.ok){if(r.reason==='keyElsewhere')app.say(app.ui.t('musicKeyElsewhere'));return}if(r.already)return;
+   const now=performance.now();
+   if(r.wound){app.audio.effect('musicbox');app.say(app.ui.t('musicWound-'+r.doll));app.save()}
+   else if(!(now-(app.windSoundAt??-1e9)<350)){app.windSoundAt=now;app.audio.effect('mobile')}return;},
 'greet-doll':(app,value)=>{app.world?.greet?.(value);app.audio.effect('mobile');
    app.ui.setSelected?.(value);return;},
 'discover':(app,value,origin)=>{
