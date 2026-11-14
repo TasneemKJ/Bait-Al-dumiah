@@ -242,3 +242,6 @@ Comparables: Simon (memory), Limbo (silhouette mood), the Levantine shadow theat
 
 ## #19b «رسائل صاحبة البيت»
 Letters from the grown girl who once owned the dollhouse, now far away, asking after each doll by name. Your care that week is what the reply says.
+- **The ghost's cobwebs (بيت العنكبوت), random stimulus #25:** rooms left untouched for a few days gather dust and fine cobwebs in their corners (drawn as pale silver threads that catch the lamplight). Wiping them (a sweep of the finger across the corner) pleases the dolls; Lina hums. But the ghost has been collecting them: each wiped web makes it sulk for a night (it hides, no visit, no gift), and each web left alone becomes a tiny lace curtain it hangs in the attic. A house too clean is a lonely ghost; too dusty and the dolls cough. Dry line from the ghost: «هذا ليس غبارًا. هذا ديكور».
+- **The music box (صندوق الموسيقى), #25b:** wind it with a circular drag; while it plays the dolls dance and the visitor stays away. Overwind and the spring snaps; mend it with the needle.
+- Comparables: Unpacking (care through objects), Animal Crossing (a house that reacts), Luigi's Mansion (a ghost with tastes). Ours: two kinds of tenants who want opposite houses.
