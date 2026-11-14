@@ -138,7 +138,7 @@ const arcKeepsakeMarkup=(s,t,button)=>s.arc?.keepsake?`<h3 class="section-headin
 const mischiefMarkup=(s,t)=>s.mischief?.log?.length?`<h3 class="section-heading">${t('mischiefJournal')}</h3><p
  class="sheet-intro">${t('mischiefJournalIntro')}</p><div class="journal-entries mischief-entries">${[...s.mischief.log]
  .reverse().map(e=>`<article class="${e.found?'came-home':'elegy'}"><span class="entry-number" aria-hidden="true"
- >${e.found?'✓':'✦'}</span><div><h4>${t('mischief-item-'+e.item)} <small>${t(e.found?'mischiefCameHome':
+ >${e.found?'✓':'✦'}</span><div><h4>${t('mischief-item-'+e.item)} <small>· ${t(e.found?'mischiefCameHome':
  'mischiefLost')}</small></h4><p>${t(e.found?'mischief-found-'+e.item:`elegy-${e.item}-${e.elegy}`)}</p></div>
  </article>`)
  .join('')}</div>`:'';

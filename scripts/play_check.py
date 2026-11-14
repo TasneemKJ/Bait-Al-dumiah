@@ -61,7 +61,9 @@ try:
   page.locator('[data-room=studio]').click();page.wait_for_timeout(500);capture(page,'desktop-room-closeup')
   check('room closeup targets the sewing room',page.evaluate('window.dollhouse.visual().focusedRoom')=='studio')
   click(page,'camera');check('whole-house camera resets room focus',page.evaluate('window.dollhouse.visual().focusedRoom') is None)
+  # A first touch on a doll greets (she waves); the second opens her sheet (DESIGN.md, first touch, 2026-11-13).
   point=page.evaluate('window.dollhouse.project("lina")');page.mouse.click(point['x'],point['y'])
+  page.wait_for_timeout(300);page.mouse.click(point['x'],point['y'])
   check('3D doll picking survives the remodel',page.locator('dialog[open]').count()==1)
   page.wait_for_function('document.querySelectorAll(".has-portrait img").length===4 && [...document.querySelectorAll(".has-portrait img")].every(i=>i.complete&&i.naturalWidth===192)',timeout=60000)
   check('resident sheet uses three cached actual-model portraits',page.evaluate('window.dollhouse.visual().portraitCount===3'))

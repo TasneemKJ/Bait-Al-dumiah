@@ -59,7 +59,8 @@ export function installMischief(app){
    item:event.item,...extra})}
  function event(e){
   if(e.type==='mischief-take')line(e);
-  if(e.type==='mischief-lost'){line(e,{doll:e.doll});app.audio.effect('elegy')}
+  // A loss retires any stale 'where to look' still waiting behind a notice.
+  if(e.type==='mischief-lost'){queue.length=0;line(e,{doll:e.doll});app.audio.effect('elegy')}
  }
  // A touch on a hiding place in the focused room.
  function search(spot){

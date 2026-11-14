@@ -167,3 +167,15 @@ test('a search the browser cannot save still brings the thing home and warns, wi
  game.dispatch()('search','kettle');assert.equal(game.state().mischief.item,'');
  assert.ok(game.notices.some(n=>/Saving is unavailable/.test(n)));
 });
+
+test('touching the house: a room opens from the whole house, and a hiding place searches only in its own room',async()=>{
+ const {bootHome}=await import('./helpers/main-home-harness.mjs');
+ const s=fresh();s.cares=1;toNight(s);s.events.length=0;
+ const game=bootHome({saved:JSON.stringify(s)});game.button('play').click();
+ game.pick({room:'studio'});assert.equal(game.focuses.at(-1),'studio');
+ game.host.dataset.focusRoom='parlor';
+ game.pick({nook:'kettle',room:'kitchen'});assert.equal(game.focuses.at(-1),'kitchen','another room opens first');
+ assert.equal(game.state().mischief.item,'teaspoon','and nothing is searched yet');
+ game.host.dataset.focusRoom='kitchen';game.pick({nook:'kettle',room:'kitchen'});
+ assert.equal(game.state().mischief.item,'','in its own room, the touch finds it');
+});

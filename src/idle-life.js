@@ -11,6 +11,8 @@ export const IDLE=Object.freeze({after:25,stay:16,rest:40,lines:3});
 // The room a heart drifts to: her favourite if she is elsewhere, else the liwan, else the kitchen.
 export function visitRoom(s,id){
  const d=s.dolls.find(x=>x.id===id),fav=DOLLS.find(x=>x.id===id)?.favRoom;if(!d)return null;
+ // A heart whose thing the midnight visitor took stays home, looking for it.
+ if(sim.missing(s)?.doll===id)return null;
  return [fav,'parlor','kitchen'].find(r=>r&&r!==d.room)??null;
 }
 export function installIdleLife(app,store=appStore){

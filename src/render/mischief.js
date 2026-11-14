@@ -5,7 +5,7 @@ import {softTexture} from './textiles.js';
 import {buildItem,keepingPlaces,hatbox,footprints,STANDS} from './mischief-art.js';
 
 // The midnight visitor in the house (src/sim-mischief.js). Every borrowed thing lives at its keeping place;
-// when one is missing, its place shows the shape it left, a soft lavender glow (the visitor's own colour,
+// when one is missing, its place shows the thing's ghost, a soft lavender glow (the visitor's own colour,
 // so it is never mistaken for the gold wish ring or the story glint) and small footprints walking away,
 // and its owner keeps glancing at the empty place. Hiding places are invisible touch volumes; a wrong
 // one breathes out dust (or a cold breath when the thing is in this room); the right one lifts the thing
@@ -34,10 +34,12 @@ function place(root,def){
  item.scale.setScalar(1.3);item.position.copy(home);root.add(item);
  const ghost=ghostOf(item);ghost.scale.setScalar(2.1);root.add(ghost);
  const glow=sprite(root,LAVENDER,.8);glow.position.copy(home);glow.position.z+=stand?.06:-.03;
- glow.scale.setScalar(stand?.95:1.15);
+ glow.scale.setScalar(stand?1.2:1.5);
+ // A small moonlit core over the ghost, so the place reads across the whole house by day and by night.
+ const core=sprite(root,0xf3e8ff,.9,true);core.position.copy(glow.position);core.scale.setScalar(.42);
  const steps=footprints(root),floor=roomAt(def.room);
  const [tx,tz]=TRAILS[def.room];steps.position.set(floor.x+tx,floor.y+.128,tz);
- ghost.visible=false;steps.visible=false;return {def,home,item,ghost,glow,steps,goneAt:null};
+ ghost.visible=false;steps.visible=false;return {def,home,item,ghost,glow,core,steps,goneAt:null};
 }
 function createPuffs(root){
  const pool=Array.from({length:7},()=>sprite(root,DUST,0));let born=-1,at=new T.Vector3(),kind='dust';
@@ -72,12 +74,13 @@ export function createMischief(parent){
   if(gone&&p.goneAt===null)p.goneAt=now;if(!gone)p.goneAt=null;
   const leaving=gone&&!still&&now-p.goneAt<3.5,k=leaving?(now-p.goneAt)/3.5:0;
   p.item.visible=!(taken||gone)||flying;p.ghost.visible=(taken&&!flying)||leaving;
-  p.glow.visible=taken&&!flying;p.steps.visible=p.glow.visible;
+  p.glow.visible=taken&&!flying;p.steps.visible=p.core.visible=p.glow.visible;
   if(!flying&&!(taken||gone))p.item.position.copy(p.home);
   if(p.ghost.visible){const bob=still?0:Math.sin(now*1.3)*.025;p.ghost.position.copy(p.home);
    p.ghost.position.y+=bob+k*.9;p.ghost.rotation.z=still?0:Math.sin(now*.9)*.12;
    GHOST.opacity=leaving?.66*(1-k):.66}
-  if(p.glow.visible)p.glow.material.opacity=still?.85:.72+.2*Math.sin(now*1.6);
+  if(p.glow.visible){p.glow.material.opacity=still?.85:.72+.2*Math.sin(now*1.6);
+   p.core.material.opacity=still?.8:.6+.3*Math.sin(now*1.6+.6)}
  }
  function fly(now,still){
   const f=flight;if(!f)return;const t=still?1:Math.min(1,(now-f.born)/1.7),item=f.place.item;

@@ -181,3 +181,39 @@ here by our canary), Unpacking's "the room tells the story" (strands of jasmine 
   `?debug=1` seam (`src/debug-seam.js`) is replaced by an empty function in production. `npm run build:debug`
   keeps it for the python browser checks.
 
+
+## 1.2: The Midnight Visitor (الزائر عند منتصف الليل) (2026-11-14)
+Players found the house easy and the creepy half nearly invisible; nothing could be lost and most taps on the 3D
+house did nothing. Now the little visitor has a face the player acts against, every night.
+- **One thing a night** (`src/sim-mischief.js`): at nightfall, after a lived day (the wish rule: the light control
+  never takes or loses anything), the visitor borrows one of the dolls' things (Lina's teaspoon or tea strainer,
+  Sami's thimble, blue button or spool, Noor's ribbon, hairpin or little bell) and hides it in one of twelve places
+  (eleven nooks: behind the kettle, among the jars, in the oven, the hearth, the floor lamp, behind the portrait, the
+  yarn basket, between the books, the thread rack, the curtain, the hatbox; and under Noor's quilt). Its owner's turn
+  rotates; the same thing is never taken twice running; choices use the game's own integer scramble, never a
+  random source.
+- **The sign, in the world** (`src/render/mischief.js`): each thing lives at a keeping place (Lina's brass hook rail by
+  the stove, Sami's wooden tray, brass pegs on Noor's headboard). Missing, its place holds the thing's ghost in the
+  visitor's own pale porcelain, a lavender glow (never the gold of wishes and story clues), and small lavender
+  footprints walking away; its owner stays home from idle visits, walks over and keeps glancing at the place.
+  A short paper slip beside the place says what is missing and where to look, then fades. No sheet, list or button.
+- **Searching is touching the house:** a touch on a room of the whole house opens it; in a room, each nook answers. A
+  wrong one breathes out dust, or a cold breath and a high glassy note when the thing is in this room. The right one
+  lifts the thing out, carries it home in an arc and its owner waves: +10 comfort and +4 closeness, never buttons.
+- **Pacing:** the visitor's own night count, so an old save starts gently. Night 1 is taught: the teaspoon, behind the
+  kettle, with a glint and "Touch the kitchen". Nights 2-3: the owner's room. 4-5: the owner's floor. Then anywhere.
+- **Missed by the next nightfall** (at least 150 s of play later and a lived day): a dry, kind elegy on a plum slip
+  by the doll ("The little spoon departed under mysterious circumstances. No one attended its funeral."), the ghost
+  drifts up and fades, and the owner is quiet for a day: head bowed, care lands at three quarters and closeness at
+  half. Never refused, never blocking, and the thing is back on its hook at dawn. No mischief that night.
+- **Memory:** the journal's *Borrowed by the visitor* keeps the last twelve, safely home or with its elegy.
+- **Save:** `mischief` (nights, what and where, deadline, quiet days, log), whitelisted and clamped in `restore()`;
+  everything shown is drawn from it, so a reload mid-night shows the same house. Never sold, nothing to buy.
+- **Comparables, learned not copied:** *Hidden Folks* answers every tap with a little sound or rustle and keeps the
+  search inside the picture; ours does too, but hunts one thing with an owner and a deadline, and wrong touches
+  say warmer or colder by room. *Toca Life* makes every object touchable with no failure; ours keeps that
+  generosity (every nook answers) but adds a small, kind stake. *Animal Crossing*'s lost items return to a neighbour
+  for friendship; ours is hidden on purpose by a creature you can see, on a clock, and its loss gets a funeral. The
+  dry elegies, the thing's ghost and the footprints are this house's own.
+- **Budgets:** whole house at 390x844 374 draw calls (ceiling 388) and 394k triangles (ceiling 400k); the keeping
+  places and things are batched per material and cast no shadows.
