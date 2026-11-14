@@ -25,6 +25,7 @@ export function installLoop(app){
     (sim.dollRoom(app.state,app.host.dataset.focusDoll)??''),
     app.world?.project(app.ui.selected,.05),Boolean(app.ui.panel||app.ui.placement||
       app.state.paused||app.storyUI?.selected||app.physicalActivity()));
+  app.mischief?.tick(now);
   if(app.physicalActivity()!=='lullaby')app.audio.tick(sim.isNight(app.state),sim.raining(app.state));
   if(now-lastUI>250){app.ui.tick();app.roomViews.update();app.objectControls.update();
   app.storyUI.update();lastUI=now}if(now-app.lastSave>8000){app.save();app.lastSave=now}}

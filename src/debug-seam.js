@@ -15,6 +15,12 @@ export function installDebug(app){
     height)=>app.world?.projectStitch(x,y,height),chimes:()=>sim.chimeStatus(app.state),
       chimeObjects:()=>app.world?.chimePositions(),chimePullSpan:()=>app.world?.chimePullSpan(),
       film:()=>app.film?.status()??null,
-      intro:()=>({active:Boolean(app.intro?.active),beat:app.intro?.beat??-1})};
+      intro:()=>({active:Boolean(app.intro?.active),beat:app.intro?.beat??-1}),
+    // The midnight visitor: what is missing, where its places are on screen, the line showing, and a
+    // way to let simulated time pass (the light control's hurry rule still applies to it).
+    mischief:()=>({missing:sim.missing(app.state),gone:sim.goneItem(app.state),line:app.mischief?.line??null,
+      spots:app.world?.mischiefSpots()??[]}),
+    mischiefPoint:(kind,id)=>app.world?.mischiefPoint(kind,id),
+    advance:seconds=>{for(let i=0;i<Math.min(2000,seconds);i++)sim.step(app.state,1);return sim.missing(app.state)}};
  }
 }

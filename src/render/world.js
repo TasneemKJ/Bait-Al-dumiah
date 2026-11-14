@@ -45,6 +45,19 @@ function pickObject({canvas,camera,ray,mouse,objects},x,y){
  }
  return best;
 }
+// A point in the house's own space, in CSS pixels on the page (null when there is none).
+function screenPoint(canvas,camera,house,p){if(!p)return null;house.root.updateWorldMatrix(true,false);
+ p.applyMatrix4(house.root.matrixWorld).project(camera);const r=canvas.getBoundingClientRect();
+ return {x:r.left+(p.x+1)/2*r.width,y:r.top+(1-p.y)/2*r.height}}
+// The midnight visitor: a found thing flies home, a wrong place puffs; points are for the caption.
+function mischiefApi({mischief},canvas,camera,house,objects){
+ // A story object that doubles as a hiding place (the quilt) answers from its own touch volume.
+ mischief.setPropPoint(id=>objects.targets.find(o=>o.userData.object==='prop:'+id)?.position.clone()??null);
+ return {mischiefFound(item,spot){mischief.found(item,spot)},mischiefPuff(spot,near){mischief.puff(spot,near)},
+  mischiefPoint(kind,id){return screenPoint(canvas,camera,house,mischief.point(kind,id))},
+  mischiefSpots(){return mischief.targets.map(t=>({key:t.userData.nook,room:t.userData.room,
+   ...screenPoint(canvas,camera,house,t.position.clone())}))}};
+}
 function fitViewport(canvas,camera,renderer,height){
  const w=canvas.clientWidth,h=canvas.clientHeight,aspect=w/Math.max(1,h);
  camera.left=-height*aspect/2;camera.right=height*aspect/2;camera.top=height/2;camera.bottom=-height/2;
@@ -80,7 +93,7 @@ export function createWorld(canvas,{onPick,onError}){
    moonChimes,isActive:id=>id==='tea'?st.teaActive:id==='stitch'?
    st.stitchActive:st.chimeActive,isLost:()=>st.lost,sections:()=>st.stitchSections});
  const unbindPointers=bindScenePointers({st,canvas,camera,controls,ray,mouse,residents,objects,ghost,
-   slots,tapGesture,scenePointers},{onPick,onError});
+   slots,tapGesture,scenePointers,mischief:parts.mischief,house},{onPick,onError});
  const resize=()=>fitViewport(canvas,camera,renderer,focusPose().height);
  let viewportWidth=0,viewportHeight=0;
  function syncViewport(){
@@ -97,13 +110,13 @@ export function createWorld(canvas,{onPick,onError}){
   welcomeBack(times){residents.greetAll(times)},greet(id){residents.greet(id)},
     selectObject(key){return objects.select(key)},clearObjectSelection(){objects.clear()},objectAt,
     objectPositions(){return objects.project(camera,canvas.clientWidth,canvas.clientHeight)},
-  getPortraits(){return portraitCache.getAll()},
   setPresentation(value,viewport){if(!working())presentation.update(value,viewport)},
-  visualStatus(){return visualStatus(w)},
+  visualStatus(){return visualStatus(w)},getPortraits(){return portraitCache.getAll()},
   ...cameraApi(w),
   setPlacement(item){st.placement=item;slots.setActive(item);if(!item){st.previewPose=null;preview.clear()}},
   setPreview(pose){st.previewPose=pose},picture:(s,use)=>takePicture(w,s,use),stirCurtain:parts.roomEffects.stir,
   // The canary is the App Store's answer, read each time it changes; it is never saved.
+  ...mischiefApi(parts,canvas,camera,house,objects),
   setCanary(on){parts.canary.setPresent(on)},canarySing(t){parts.canary.sing(t)},setVisit:parts.residents.setVisit,
   render(state,dt,selected){renderFrame(w,state,dt,selected)},
   dispose(){st.disposed=true;portraitCache.dispose();

@@ -134,6 +134,14 @@ const arcKeepsakeMarkup=(s,t,button)=>s.arc?.keepsake?`<h3 class="section-headin
  class="gift-grid"><div class="gift"><span class="gift-picture">${giftArt('jasmine-ribbon')}</span><strong
  >${t('arcKeepsakeTitle')}</strong><small>${t('arcKeepsakeText')}</small></div></div>${appStore.inApp?
  button('share-house',t('arcShare'),'heart','class="wide"'):''}`:'';
+// What the midnight visitor borrowed, newest first: the only place the mischief is listed.
+const mischiefMarkup=(s,t)=>s.mischief?.log?.length?`<h3 class="section-heading">${t('mischiefJournal')}</h3><p
+ class="sheet-intro">${t('mischiefJournalIntro')}</p><div class="journal-entries mischief-entries">${[...s.mischief.log]
+ .reverse().map(e=>`<article class="${e.found?'came-home':'elegy'}"><span class="entry-number" aria-hidden="true"
+ >${e.found?'✓':'✦'}</span><div><h4>${t('mischief-item-'+e.item)} <small>${t(e.found?'mischiefCameHome':
+ 'mischiefLost')}</small></h4><p>${t(e.found?'mischief-found-'+e.item:`elegy-${e.item}-${e.elegy}`)}</p></div>
+ </article>`)
+ .join('')}</div>`:'';
 export function journalMarkup(s,{t,n,button}){
   return `<h2 id="sheet-title">${t('journal')} <small>${n(s.journal.length)}/${n(SECRETS.length)}</small></h2><p
     class="sheet-intro">${t('whispersIntro')}</p><div
@@ -146,7 +154,7 @@ export function journalMarkup(s,{t,n,button}){
     'class="primary wide"')):`<p class="ending-note">${t('complete')}</p>`}${isNight(s)&&
       secretsLeft(s)&&coziness(s)<secretCozyNeeded(s)?
     `<p class="shy-note">${t('shyNeed')} ${n(secretCozyNeeded(s))}% · ${t('cozy')} ${n(coziness(s))}%</p>`:''}
-   ${storyMemoriesMarkup(s,t)}${arcKeepsakeMarkup(s,t,button)}${doorMarkup(s,{t,n,button})}
+   ${storyMemoriesMarkup(s,t)}${mischiefMarkup(s,t)}${arcKeepsakeMarkup(s,t,button)}${doorMarkup(s,{t,n,button})}
    <h3 class="section-heading">${t('milestones')} <small
      >${n(s.milestones.length)}/${n(MILESTONES.length)}</small></h3><p
      class="sheet-intro">${t('milestonesIntro')} ${t('streakLabel')}: <strong>${n(currentStreak(s))}</strong></p><div

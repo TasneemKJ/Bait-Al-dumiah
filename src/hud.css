@@ -172,3 +172,20 @@ html[lang=ar] #ui .dock[data-expanded=true]>button{font-size:max(16px,1rem)}
 /* 2026-11-14 play test: a toast never covers an open object card's button, and the HUD reads as resting while the intro owns the screen. */
 #app:has(.object-ribbon:not([hidden])) #toast{top:auto;bottom:calc(178px + env(safe-area-inset-bottom))}
 #ui[inert]{opacity:.45;transition:opacity .4s}
+/* The midnight visitor's line (src/mischief-ui.js): a slip of cream paper with a rose-thread edge, beside the
+   empty place or the doll, that fades by itself. Never a sheet, never under a finger. */
+.mischief-line{position:absolute;z-index:5;margin:0;transform:translate(-50%,6px);opacity:0;pointer-events:none;
+ width:max-content;max-width:min(272px,calc(100% - 32px));padding:8px 14px 9px;border:1px solid #d6bfa9;
+ border-inline-start:3px solid #a9627e;border-radius:4px 14px 14px 4px;background:#fbf4e9f5;color:#4f3d4a;
+ font:italic 15px/1.4 Georgia,"Times New Roman",serif;text-align:start;box-shadow:0 8px 22px #3a253a24;
+ transition:opacity .45s ease,transform .45s ease}
+.mischief-line[dir=rtl]{border-radius:14px 4px 4px 14px;font:15px/1.6 Tahoma,Arial,sans-serif}
+.mischief-line[data-state=shown]{opacity:1;transform:translate(-50%,0)}
+.mischief-line[data-state=fading]{opacity:0;transform:translate(-50%,-4px)}
+.mischief-line[data-kind=lost]{background:#463446f5;color:#f6e8da;border-color:#7d6577;border-inline-start-color:#c9a4d8}
+.mischief-line[data-kind=found]{border-inline-start-color:#c59b60}
+#ui[data-chime-active=true] .mischief-line,#ui[data-tea-active=true] .mischief-line{display:none}
+@media (prefers-reduced-motion:reduce){.mischief-line,.mischief-line.shown,.mischief-line[data-state=fading]{transition:none;
+ transform:translate(-50%,0)}}
+.reduced-motion .mischief-line,.reduced-motion .mischief-line.shown,.reduced-motion .mischief-line[data-state=fading]{
+ transition:none;transform:translate(-50%,0)}

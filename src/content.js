@@ -124,3 +124,33 @@ export const INTRO_BEATS=[
  {id:'reveal',seconds:4,line:'introReveal',voice:null},
  {id:'settle',seconds:4,line:'introSettle',voice:null},
 ];
+// The midnight visitor (src/sim-mischief.js): each night it borrows one small thing from a doll and hides it.
+// `home` is where the thing lives in its owner's room (room-local, src/render/mischief.js draws it there).
+export const MISCHIEF_ITEMS=[
+ {id:'teaspoon',doll:'lina',room:'kitchen',home:[.93,1.50,-1.40]},
+ {id:'strainer',doll:'lina',room:'kitchen',home:[1.13,1.52,-1.40]},
+ {id:'thimble',doll:'sami',room:'studio',home:[.52,.88,-.62]},
+ {id:'blue-button',doll:'sami',room:'studio',home:[.64,.865,-.70]},
+ {id:'spool',doll:'sami',room:'studio',home:[.70,.90,-.52]},
+ {id:'ribbon',doll:'noor',room:'bedroom',home:[-.78,1.56,-1.32]},
+ {id:'hairpin',doll:'noor',room:'bedroom',home:[-.48,1.58,-1.32]},
+ {id:'bell',doll:'noor',room:'bedroom',home:[-.18,1.52,-1.32]},
+];
+// Where it can hide: a nook is a touchable place of its own (room-local centre and size); `prop` hides inside
+// an existing story object instead. Nothing hides behind the closed door.
+export const MISCHIEF_SPOTS=[
+ {id:'kettle',room:'kitchen',at:[1.40,1.24,-1.13],size:[.44,.44,.40]},
+ {id:'jars',room:'kitchen',at:[-.34,2.47,-1.32],size:[1.5,.38,.36]},
+ {id:'oven',room:'kitchen',at:[1.25,.45,-.66],size:[.62,.50,.16]},
+ {id:'hearth',room:'parlor',at:[-1.32,.45,-1.12],size:[.62,.62,.22]},
+ {id:'floor-lamp',room:'parlor',at:[-1.67,1.52,-.83],size:[.52,.44,.52]},
+ {id:'portrait',room:'parlor',at:[.35,2.08,-1.44],size:[.90,1.05,.12]},
+ {id:'yarn',room:'studio',at:[-1.62,.42,-.37],size:[.52,.42,.44]},
+ {id:'books',room:'studio',at:[1.45,.62,-.63],size:[.70,.60,.78]},
+ {id:'spools',room:'studio',at:[.50,2.08,-1.36],size:[1.3,.60,.16]},
+ {id:'curtain',room:'bedroom',at:[1.03,1.95,-1.28],size:[.32,1.1,.22]},
+ {id:'hatbox',room:'bedroom',at:[-1.72,.20,.40],size:[.42,.40,.42]},
+ {id:'quilt',room:'bedroom',prop:'moon-bed'},
+];
+// One house-wide game day, in seconds of the night/day clock, must pass before a hidden thing is lost.
+export const MISCHIEF_GRACE=150,MISCHIEF_LOG=12;

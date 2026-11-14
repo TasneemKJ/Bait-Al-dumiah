@@ -71,6 +71,7 @@ if(app.notify(result,result.favorite?'favoriteMoved':'placed'))app.ui.close();re
    if(app.ui.panel)app.ui.close();sim.changeLight(app.state);app.save();app.refreshUI();
    if(sim.isNight(app.state))app.say(app.ui.t('nightHint'));return;
   },
+'search':(app,value)=>{app.mischief?.search(value);return;},
 'greet-doll':(app,value)=>{app.world?.greet?.(value);app.audio.effect('mobile');
    app.ui.setSelected?.(value);return;},
 'discover':(app,value,origin)=>{

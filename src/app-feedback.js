@@ -34,6 +34,7 @@ export function installFeedback(app){
   if(event.type==='first-night')say(t('firstNightHint'));
   if(event.type==='calm')say(t('calmDayOne'));
   if(event.type==='rain')say(t('arcRain'));
+  if(event.type.startsWith('mischief-'))app.mischief?.event(event);
   if(event.type==='anniversary'){say(t('arcAnniversary'));audio.effect('secret')}
  }
  function showError(kind){app.fatal=true;app.syncPause();save();app.homeUI?.hide();

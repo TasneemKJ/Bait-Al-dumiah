@@ -133,10 +133,13 @@ export class DollhouseAudio{
    return;
   }
   if(kind==='mint-tin')return this.track(playTinTouch(this.context,this.master,this.context.currentTime));
-  if(kind==='moon-bed')return this.track(playClothTouch(this.context,this.master,this.context.currentTime));
+  if(kind==='moon-bed'||kind==='search-dust')return this.track(playClothTouch(this.context,this.master,
+    this.context.currentTime));
+  if(kind==='search-cold')return this.tone(1174.66,this.context.currentTime,.9,.012);
   const t=this.context.currentTime,notes=kind==='secret'?[293.665,311.127,
     392]:kind==='place'?[392,493.883]:kind==='musicbox'?[523.251,659.255,
-    783.991,659.255]:kind==='mobile'?[392,493.883,587.33]:[440,523.251];
+    783.991,659.255]:kind==='mobile'?[392,493.883,587.33]:kind==='found'?[587.33,739.989,880,1174.66]:
+    kind==='elegy'?[392,349.228,293.665]:[440,523.251];
   notes.forEach((f,i)=>this.tone(f,t+i*.16,1.2,.035));
  }
  // The canary's little song (the app's subscription): a soft high trill, quieter than the music box.

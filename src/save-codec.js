@@ -3,6 +3,7 @@ import {DOLLS,ROOMS,CATALOG,SLOTS,SECRETS,MILESTONES,SEW_DAILY,BASKET_MAX,DOOR_S
 import {createState} from './sim-state.js';
 import {clamp,integer,has} from './sim-util.js';
 import {restoreArc} from './sim-arc.js';
+import {restoreMischief} from './sim-mischief.js';
 
 // Reading, validating and migrating saves. restoreValid whitelists and clamps every field.
 export const SAVE_VERSION=1;
@@ -73,6 +74,7 @@ function restoreValid(v){
  if(v.hints?.fifthOffer===true)s.hints.fifthOffer=true;
  // A save from before the intro existed belongs to a player who has already arrived: never replay it.
  s.introSeen=typeof v.introSeen==='boolean'?v.introSeen:true;s.arc=restoreArc(v.arc);
+ s.mischief=restoreMischief(v.mischief,s.day,s.elapsed);
  if(v.settings&&typeof v.settings==='object'){s.settings.locale=v.settings.locale==='ar'?
    'ar':'en';s.settings.muted=v.settings.muted!==false;
  s.settings.reducedMotion=v.settings.reducedMotion===true;s.settings.largeText=v.settings.largeText===true;

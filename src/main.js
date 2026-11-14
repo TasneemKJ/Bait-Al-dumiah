@@ -24,6 +24,8 @@ import {inNativeApp} from './native-app.js';
 import {installStore} from './cmd-store.js';
 import {installTouchFeedback} from './app-touch.js';
 import {useAppWording} from './locale-data.js';
+import {installMischief} from './mischief-ui.js';
+import * as sim from './simulation.js';
 
 // In the iPhone app, lines about a browser read as the app (src/locale-data.js `<key>App`).
 useAppWording(inNativeApp());
@@ -43,7 +45,12 @@ const app={
 // A touch on the 3D scene: pick an object, a resident, the ghost or a placement slot.
 function pickFromScene(data){
   if(!app.session.entered)return;
-  const {storyUI,ui,dispatch}=app;
+  const {storyUI,ui,dispatch}=app,focused=app.host.dataset.focusRoom;
+  // A room touched on the whole house opens; a hiding place searches only once its room is the subject.
+  if(data.room&&!data.nook)return dispatch('focus-room',data.room);
+  if(data.nook)return dispatch(focused===data.room?'search':'focus-room',focused===data.room?data.nook:data.room);
+  const spot=data.object&&sim.spotForObject(data.object);
+  if(spot&&focused===spot.room&&sim.missing(app.state)?.spot===spot.id)return dispatch('search',spot.id);
   if(data.object)dispatch(storyUI?.selected===data.object?'activate-object':'select-object',data.object,'scene');
   // A first touch greets (she waves, a soft sound, nothing to read); touching her again opens her sheet.
   if(data.doll){if(app.touchedDoll===data.doll)ui.open('household',data.doll);
@@ -95,6 +102,7 @@ app.film=createFilmUI(document.querySelector('#app'),{getState:()=>app.state,
  onClose:()=>{app.ui.open('settings');
   app.host.querySelector('[data-action="watch-film"]')?.focus({preventScroll:true});},
 });
+installMischief(app);
 installLoop(app);installDebug(app);installStore(app);installTouchFeedback(app);installIdleLife(app);
 // The iPhone app flushes the save before it copies it (TasKit flushSaveScript); save() writes nothing before Play.
 window.__baitAlDumiahSave=()=>app.save();

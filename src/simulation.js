@@ -11,6 +11,8 @@ import {ROOMS,DOLLS,CATALOG,SLOTS,SECRETS,ACTIONS,MILESTONES,SEW_SECONDS,DOOR_ST
     SEW_DAILY,BASKET_MAX} from './content.js';
 import {createState} from './sim-state.js';
 import {stepArc} from './sim-arc.js';
+import {stepMischief,quietDoll,QUIET_NEED,QUIET_BOND} from './sim-mischief.js';
+export {search,missing,goneItem,quietDoll,spotForObject,spotDef,itemDef,scopeFor,ELEGIES} from './sim-mischief.js';
 export {ARC,markVisit,raining,gatherRoom,garlands,anniversary,arcGreeting} from './sim-arc.js';
 export {createState};
 export const SECRET_COUNT=SECRETS.length;
@@ -41,7 +43,10 @@ export function care(s,id,action){
  // A wished-for action is always welcome, even when the need is nearly full.
  if(!wished&&d[a.need]>92&&!(action==='soothe'&&s.unease>25))return fail('enough');
  if(s.buttons<a.cost)return fail('funds');
- s.buttons-=a.cost;d[a.need]=clamp(d[a.need]+a.amount);d.lastCare=s.elapsed;d.action=action;d.actionUntil=s.elapsed+4;
+ // A doll whose thing the visitor kept is quiet for a day: care lands a little softer, never refused.
+ const quiet=quietDoll(s,id);
+ s.buttons-=a.cost;d[a.need]=clamp(d[a.need]+a.amount*(quiet?QUIET_NEED:1));
+ d.lastCare=s.elapsed;d.action=action;d.actionUntil=s.elapsed+4;
  if(action==='tea')d.energy=clamp(d.energy+4);
  if(action==='play')d.energy=clamp(d.energy-4);
  s.unease=clamp(s.unease-(action==='soothe'?14:5));s.cares=Math.min(1e9,s.cares+1);
@@ -54,9 +59,9 @@ export function care(s,id,action){
   earn(s,bonus);emit(s,{type:'full-house',streak:s.streak,reward:bonus})}
  }
  const brave=action==='soothe'&&isNight(s)?2:0;
- growBond(s,d,Math.round((4+(reward?4:0)+brave)*(inFavoriteRoom(d)?1.5:1)));
+ growBond(s,d,Math.round((4+(reward?4:0)+brave)*(inFavoriteRoom(d)?1.5:1)*(quiet?QUIET_BOND:1)));
  checkMilestones(s);
- return {ok:true,reward,bonus,cost:a.cost};
+ return {ok:true,reward,bonus,cost:a.cost,quiet};
 }
 // Wishes and the sewing cap refresh only after a day actually spent in the house, so hurrying
 // dawn with the light control never farms rewards. Nothing is lost by hurrying either.
@@ -72,7 +77,7 @@ export function step(s,dt){
  stepTea(s,dt);stepChimes(s,dt);const stitching=stitchActive(s);
  if(stitching)moveStitch(stitching,stitchSections(stitching),dt);
  if(s.clock>=240){s.clock-=240;newDay(s)}
- stepArc(s);
+ stepArc(s);stepMischief(s);
  // One gentle pointer the first time night falls, for a player who has not met the visitor yet.
  if(isNight(s)&&!s.hints.night){s.hints.night=true;emit(s,{type:'first-night'})}
  // Day one is front-loaded: after the opening burst, one calm line makes the quiet stretch feel intended.

@@ -43,6 +43,7 @@ export function renderFrame(w,state,dt,selected){
  roomFrame.tint(st.nightMix,dt,st.reducedMotion);preview.update(st.previewPose,state);
  residents.update(state,dt,selected,Math.atan2(camera.position.x-controls.target.x,
    camera.position.z-controls.target.z));
+ w.mischief.update(state,dt,{residents,hidden:working()});
  // Drawn rooms (rain night, idle visit), not saved ones, decide what a scene hides or follows.
  for(const doll of residents.dolls){const room=doll.room;
  doll.root.visible=!(st.teaActive&&room==='kitchen'||st.stitchActive&&room==='studio'||
