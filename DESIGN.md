@@ -301,3 +301,19 @@ Comparables: Don't Starve (light as a resource that runs out), Kingdom Two Crown
   - First line, when the lights go out: «انقطعت الكهرباء. للبيت شمعة واحدة، ولكلّ غرفة رأي.»
   - The subscription is untouched: no extra wax for sale, ever. Running out is the point.
 - **Second idea (backlog): the weather vane.** A vane on the roof turns with the evening wind. Whichever way it points, that room's window rattles later that night. A player who reads the vane closes the right shutter in time, and the room keeps its warmth for the morning tea.
+
+## #67 (random-stimulus) «حلقة المفاتيح»: stimuli: a hotel night porter · a pocket watch on a chain · "not a single button"
+Comparables: Gone Home (the house is the interface), Return of the Obra Dinn (one object holds every tool), Unpacking (a home read through its things). Ours stays ours: a dollhouse whose doors open as the family trusts you.
+- **Idea (best): the key ring by the door.** This serves D7 (fold the bar into the house, pillar 1).
+  - The bottom bar goes. A brass key ring hangs on a hook inside the front door. Each tool is a key to a real place:
+    - the hall dresser drawer holds the keepsakes;
+    - the frame on the stair holds the album;
+    - the fuse box under the stairs holds the settings;
+    - the locked fifth room holds Full House, with its tag hanging from the lock.
+  - Night one has only two keys on the ring. A key is added when the house needs it (the first keepsake brings the drawer key), so a new player never meets nine choices on a first evening.
+  - Drag a key to its door, or tap the door itself once it is known. The ring is also the "back": hang the key up and the room closes.
+  - The challenge stays in the house: a key left in a door overnight is a door the Midnight Visitor can use.
+  - Subscription untouched: the night porter (below) is a voice, not power.
+  - First line, when the ring is first seen: «لكلّ باب مفتاح، ولكلّ مفتاح ليلة يُعطى فيها.»
+- **Second idea (backlog): the night porter's bell.** A small bell on the hall table rings when a doll has something to say. Tap it and the house turns to that room. This replaces the badge dots. For subscribers, the porter adds one quiet line about tomorrow's evening; it is never a hint about the Visitor.
+- **Pocket watch:** rejected as a mechanic, since it means a timer that nags (anti-pillar). It is kept only as a keepsake that stops at the hour the last guest left.
