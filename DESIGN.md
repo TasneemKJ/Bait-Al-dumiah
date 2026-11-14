@@ -289,3 +289,15 @@ Comparables: Monument Valley (a view that changes what is true), Unpacking (obje
 - **The canary (subscription):** on a mirror evening it hops to the sill of the room where the wrong object stands, a gentle hint for subscribers only. Free players find it by looking.
 - First line, when the mirror is first wiped: «المرآة تتذكّر البيت كما كان.»
 - Second idea (backlog): «مسرح الظلّ». By candlelight, moving the lamp throws the furniture's shadows on the walls, and one shadow shows the borrowed thing hidden behind something.
+
+## #61 (random-stimulus) «ليلة الشمعة الواحدة»: stimuli: a power cut · a weather vane · "only one of anything"
+Comparables: Don't Starve (light as a resource that runs out), Kingdom Two Crowns (the night presses in), Unpacking (rooms tell the story). Ours stays ours: one candle, and the house decides who you sit with tonight.
+- **Idea (best): the night of one candle.**
+  - Once a week the electricity goes out at dusk. The house goes dark except for one candle, which the player carries (drag) from room to room.
+  - The candle burns down over the night. Each room needs a little light to settle: a doll who can't sleep, the canary's cage, the tea kettle that must not boil dry.
+  - There is not enough wax for every room, so the player chooses, and the house remembers.
+  - A doll left in the dark is found in the morning sitting in a different place, holding something she wasn't holding before. It is not punishment; it is a small mystery to read.
+  - This gives Bait a real weekly challenge (choice under a running clock) without fail screens, and gives the rooms depth: each one has its own night need.
+  - First line, when the lights go out: «انقطعت الكهرباء. للبيت شمعة واحدة، ولكلّ غرفة رأي.»
+  - The subscription is untouched: no extra wax for sale, ever. Running out is the point.
+- **Second idea (backlog): the weather vane.** A vane on the roof turns with the evening wind. Whichever way it points, that room's window rattles later that night. A player who reads the vane closes the right shutter in time, and the room keeps its warmth for the morning tea.
