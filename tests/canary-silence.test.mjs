@@ -55,6 +55,15 @@ test('the canary is silent while it keeps watch and under its cloth; it sings at
  toClock(s,sim.CANARY_SLEEP+1);assert.equal(songGap(s),null,'asleep under the cloth');
 });
 
+test('the morning after: a visitor night counts after a find and a reload; a loss night does not',()=>{
+ const s=fresh();toClock(s,121);assert.ok(sim.search(s,sim.missing(s).spot).found);
+ const back=sim.restore(JSON.stringify(s));toClock(back,1);assert.equal(back.day,2);
+ assert.ok(sim.visitorLastNight(back),'found, saved, reopened: still a visitor night');
+ toClock(back,121);assert.ok(sim.missing(back));toClock(back,1);toClock(back,121);
+ assert.ok(sim.goneItem(back),'lost tonight');toClock(back,1);assert.equal(sim.visitorLastNight(back),false);
+ toClock(back,121);toClock(back,1);assert.ok(sim.visitorLastNight(sim.restore(JSON.stringify(back))));
+});
+
 function playNights(owned){
  const game=bootHome({store:owned?store({canaryMonthly:true}):store()});game.button('play').click();
  let t=0,lines=new Set();const frames=n=>{for(let i=0;i<n;i++){t+=100;game.frame(t);

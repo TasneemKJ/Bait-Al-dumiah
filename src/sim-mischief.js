@@ -82,8 +82,10 @@ export function canaryWatch(s){
  const f=forecast(s);if(f)return f.room;const m=s.mischief;
  return isNight(s)&&m?.item&&m.takenDay===s.day?itemDef(m.item).room:null;
 }
-// The morning after the visitor took something, the canary has a word to say about it.
-export const visitorLastNight=s=>Boolean(s.mischief?.nights)&&s.mischief.takenDay===s.day-1;
+// The morning after the visitor took something, the canary has a word to say about it. Read from what a reload
+// keeps (a night's take or loss sets lastDay; only a loss sets goneDay), so a found thing still counts.
+export const visitorLastNight=s=>{const m=s.mischief;return Boolean(m?.nights)&&m.lastDay===s.day-1&&
+ !(m.gone&&m.goneDay===s.day-1)};
 // A touch on a hiding place. Wrong places answer whether the thing is in this room (`near`), never where.
 export function search(s,spotId){
  const spot=spotDef(spotId);if(!spot)return fail('invalid');if(s.paused)return fail('paused');

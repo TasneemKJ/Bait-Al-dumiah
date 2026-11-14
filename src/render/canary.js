@@ -22,7 +22,8 @@ function buildCage(root){
  cylinder(root,radius*.55,.07,radius*.3,.035,.03,P.cream);
 }
 function buildBird(root){
- const bird=new T.Group();bird.position.set(0,.15,0);root.add(bird);
+ // Yaw first, then the body's lift, so a turned bird raises its beak toward the room it faces.
+ const bird=new T.Group();bird.rotation.order='YXZ';bird.position.set(0,.15,0);root.add(bird);
  const body=ball(bird,0,.045,0,.045,.04,.06,BIRD);body.rotation.x=-.35;
  const head=new T.Group();head.position.set(0,.095,.04);bird.add(head);
  ball(head,0,0,0,.032,.03,.032,BIRD);
@@ -34,9 +35,11 @@ function buildBird(root){
 }
 // How the bird stands to face each room from the liwan: the kitchen lies left along the floor, the
 // studio up and to the left, the bedroom straight overhead (a slide along the perch, a turn, a lift of the head).
-const WATCH=Object.freeze({kitchen:{x:-.1,yaw:-Math.PI/2,pitch:.08,lean:0},
- studio:{x:-.09,yaw:-Math.PI*.36,pitch:-.62,lean:-.12},bedroom:{x:.02,yaw:Math.PI*.08,pitch:-1.0,lean:-.28},
- parlor:{x:0,yaw:0,pitch:.25,lean:0}});
+// The kitchen: low and level along the perch. The studio: clinging high on the left bars, body and beak raised.
+const WATCH=Object.freeze({kitchen:{x:-.1,y:.15,yaw:-Math.PI/2,pitch:.08,lean:.08},
+ studio:{x:-.11,y:.215,yaw:-Math.PI*.42,pitch:-.75,lean:-.55},
+ bedroom:{x:.02,y:.15,yaw:Math.PI*.08,pitch:-1.0,lean:-.28},
+ parlor:{x:0,y:.15,yaw:0,pitch:.25,lean:0}});
 const NOTES=3,NOTE_LIFE=1.7;
 // Little gold notes that rise from the cage while it sings (gone when it is silent): the song made visible.
 function buildNotes(root){
@@ -74,7 +77,7 @@ export function createCanary(parent){
    cover.visible=asleep;bird.visible=!asleep;
    const age=!watch&&!asleep&&!still?t-songAt:-1,singing=age>=0&&age<1.6;showNotes(notes,age<2.5?age:-1,soft);
    if(pose){// Silent and still, feathers sleeked, facing the room: the warning reads only by looking at it.
-    bird.position.set(pose.x,.15,0);bird.rotation.set(pose.lean,pose.yaw,0);head.rotation.set(pose.pitch,0,0);
+    bird.position.set(pose.x,pose.y,0);bird.rotation.set(pose.lean,pose.yaw,0);head.rotation.set(pose.pitch,0,0);
     body.scale.set(.04,.042,.064);root.rotation.z=0;return}
    const react=night&&!still?ghostReaction(t):null,dusk=!night&&state.clock>=CANARY_DUSK;
    bird.position.set(0,.15+(singing?Math.abs(Math.sin(t*14))*.008:0),0);bird.rotation.set(0,0,0);
