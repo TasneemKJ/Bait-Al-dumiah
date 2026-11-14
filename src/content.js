@@ -159,7 +159,7 @@ export const MISCHIEF_GRACE=150,MISCHIEF_LOG=12;
 export const MUSIC_BOXES=[
  {doll:'lina',room:'kitchen',at:[-1.55,.12,.45]},
  {doll:'sami',room:'studio',at:[1.35,.12,.40]},
- {doll:'noor',room:'bedroom',at:[.72,.12,.6]},
+ {doll:'noor',room:'bedroom',at:[-.75,.12,1.0]},
 ];
 export const KEY_REST={room:'parlor',at:[1.66,1.37,.25]};
 // Night is clock 120; midnight (hour 24) is clock 160. Two full turns wind a box; a half-wound box slips back.
