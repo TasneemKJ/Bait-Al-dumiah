@@ -49,7 +49,7 @@ function createPuffs(root){
   update(now,still){const t=born<0?1:(now-born)/.8;
    pool.forEach((s,i)=>{if(t>=1){s.visible=false;return}const a=i/pool.length*Math.PI*2,spread=still?.08:.08+.28*t;
     s.position.set(at.x+Math.cos(a)*spread,at.y+Math.sin(a)*spread*.6+(kind==='cold'?.1*t:0),at.z+.12);
-    s.scale.setScalar((still?.2:.14+.16*t)*(i%2?1:.8));s.material.opacity=(1-t)*(kind==='cold'?.75:.6)})},
+    s.scale.setScalar((still?.42:.32+.3*t)*(i%2?1:.8));s.material.opacity=(1-t)*(kind==='cold'?.9:.85)})},
   get kind(){return kind},get active(){return born>=0},
  };
 }
@@ -102,7 +102,9 @@ export function createMischief(parent){
    return spotPoint(id,propPoint)},
   found(itemId,spotId){const p=places.find(x=>x.def.id===itemId);if(!p)return;
    const from=spotPoint(spotId,propPoint)??p.home;flight={place:p,from,lift:from.clone().setY(from.y+.45),born:clock}},
-  puff(spotId,near){const at=spotPoint(spotId,propPoint);if(at)puffs.start(at,near,clock)},
+  // The breath leaves the place's open front: from its centre it hid inside the furniture and never showed.
+  puff(spotId,near){const at=spotPoint(spotId,propPoint),size=MISCHIEF_SPOTS.find(p=>p.id===spotId)?.size;
+   if(!at)return;if(size)at.z+=size[2]/2;puffs.start(at,near,clock)},
   get flying(){return Boolean(flight)},get puffing(){return puffs.active},
   update(state,dt,{residents,hidden=false}={}){
    const still=state.settings.reducedMotion;if(!state.paused)clock+=Math.min(dt,.1);
