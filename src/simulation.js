@@ -12,7 +12,8 @@ import {ROOMS,DOLLS,CATALOG,SLOTS,SECRETS,ACTIONS,MILESTONES,SEW_SECONDS,DOOR_ST
 import {createState} from './sim-state.js';
 import {stepArc} from './sim-arc.js';
 import {stepMischief,quietDoll,QUIET_NEED,QUIET_BOND} from './sim-mischief.js';
-export {search,missing,goneItem,quietDoll,spotForObject,spotDef,itemDef,scopeFor,ELEGIES} from './sim-mischief.js';
+export {search,missing,goneItem,quietDoll,spotForObject,spotDef,itemDef,scopeFor,ELEGIES,forecast,canaryWatch,
+ visitorLastNight,CANARY_DUSK,CANARY_SLEEP} from './sim-mischief.js';
 export {ARC,markVisit,raining,gatherRoom,garlands,anniversary,arcGreeting} from './sim-arc.js';
 export {createState};
 export const SECRET_COUNT=SECRETS.length;

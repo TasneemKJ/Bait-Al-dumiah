@@ -112,9 +112,9 @@ At 681–1000px desktop widths, use the existing localized short room labels so 
 The owner asked for Souq's earning model in the iPhone app. The web game is unchanged and stays fully open.
 
 - **The Fifth Room** (`Tas.BaitAlDumiah.fifthRoom`, non-consumable, $4.99): the closed door between the four rooms, its five mendings, the fifth room behind it and the visitor's eight nightly gifts (with the *A room for everyone* and *all gifts* milestones). The mendings are still paid in earned buttons. The free app is a whole arc: three dolls, the rituals, all three stories (*Tea for someone shy* still ends at the doorstep with the guest), six whispers, decoration and restoration of every room.
-- **The canary** (`Tas.BaitAlDumiah.canary.monthly` $1.99 / `.yearly` $14.99, one group "The Canary"): a canary in a brass cage hangs by the liwan window, sings a soft trill now and then by day and sleeps under a cloth at night. The game has no offline earning to extend, so the benefit is company only: it is never picked, saved or counted and touches no buttons, comfort, coziness or whispers. When the plan ends the canary simply leaves.
+- **The canary** (`Tas.BaitAlDumiah.canary.monthly` $1.99 / `.yearly` $14.99, one group "The Canary"): a canary in a brass cage hangs by the liwan window. It sings by day, more at dusk, softly in the first half of the night, then sleeps under a cloth; and before the midnight visitor comes it falls silent (*The canary's silence*, below). It is never picked, saved or counted and touches no buttons, comfort, coziness or whispers. When the plan ends the canary simply leaves.
 - **Asked at the moment of use, never saved** (`src/access.js`, `src/app-store.js`): the door section and the mend/gift commands ask the App Store each time. A door already begun in a save (a web copy opened in the app) stays the player's. The next-step clue never points at a door this copy has not opened; the door section shows what opens it and leads to the card, which is also reachable from Settings.
-- **The card** (`src/store-ui.js`) says what each one opens before paying, prints the App Store's price inside `<bdi dir="ltr">`, and carries Restore, Manage subscription, Terms (Apple's standard EULA) and Privacy, in Levantine Arabic and English.
+- **The card** (`src/store-ui.js`) says what each one opens before paying, prints the App Store's price inside `<bdi dir="ltr">`, and carries Restore, Manage subscription, Terms (Apple's standard EULA) and Privacy, in plain fusha and English.
 
 ## First touch and the found secrets — owner council (2026-11-13)
 - A first touch on a doll greets: she waves and a soft chime sounds, with nothing to read; touching her again opens her sheet (the same "once to select, again to act" rule as objects).
@@ -185,6 +185,28 @@ here by our canary), Unpacking's "the room tells the story" (strands of jasmine 
 ## Backlog from random stimulus (2026-11-14)
 - **(Built in 1.2, see below.) The midnight visitor takes something.** Each night the little visitor takes one small thing (a button, a ribbon, the teaspoon) and hides it somewhere in the house. Tapping rooms and objects searches (this also gives scene taps a purpose: in a WebKit play test most scene taps did nothing). Found by the next night: the doll who owned it brightens. Missed: she is quiet for a day. Each loss gets a short dry elegy in fusha with gentle dark humour, e.g. «رحلت الملعقة الصغيرة في ظروف غامضة، ولم يحضر جنازتها أحد». Makes the "creepy" half visible, gives stakes and a reason to return daily. Comparables: Hidden Folks (tap-to-search), Toca Boca (touch exploration), Animal Crossing (mischief, never cruel).
 - Also from the play test: the decor placement card stays open across other actions; offer a clear cancel/close.
+
+## 1.2: The canary's silence (صمت الكناري) (2026-11-14)
+A design review found nobody renews a subscription that changes nothing they can see. The canary now has a role
+in the world, read only by looking at it, and holds nothing back from free players.
+- **The warning:** from dusk (clock 96, when the golden hour begins) on a night the midnight visitor will come, the
+  canary stops singing, sleeks its feathers, slides along its perch and turns to face the room the visitor comes to
+  first: the borrowed thing's own room (the kitchen lies left, the studio up and left, the bedroom overhead). It
+  keeps that still watch, uncovered, while the thing is out, and relaxes when it is found. `forecast()` in
+  `src/sim-mischief.js` reads the very choice nightfall will make, without changing anything; it never knows the
+  hiding place, so the search is the same for everyone. Free players get the visitor exactly as before, and see the
+  same room seconds later from the empty place, its glow and its owner.
+- **Ordinary evenings:** it sings more often at dusk (little gold notes drift out through the bars), softly in the
+  first half of the night, and now and then ruffles or tilts its head up at the ghost. Silence is the signal.
+- **The morning after:** a visitor night gives one dry line on the paper slip beside the cage (ten, EN and plain
+  fusha), e.g. "The canary has decided it saw nothing. It is lying." / «قرّر الكناري أنه لم يرَ شيئاً. إنه يكذب.»
+- **Comparables, craft not content:** the canary in the coal mine (silence, not noise, is the alarm); *Alien:
+  Isolation*'s motion tracker (a diegetic device that gives a direction, never an answer, and must be looked at);
+  the dog in *Fable II* (an animal's body points at what you cannot see yet). Ours is a tiny bird in a brass cage
+  who would rather not be involved.
+- **Tests:** `tests/canary-silence.test.mjs` (forecast equals nightfall over sixteen nights, never the spot, never at
+  night or on an unlived day; silent while watching and asleep; only the keeper gets the morning line; the house
+  state is identical with and without the canary).
 
 ## 1.2: The Midnight Visitor (الزائر عند منتصف الليل) (2026-11-14)
 Players found the house easy and the creepy half nearly invisible; nothing could be lost and most taps on the 3D

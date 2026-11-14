@@ -69,6 +69,21 @@ export function stepMischief(s){
  if(m.item){if(s.day>m.takenDay&&s.elapsed-m.takenAt>=MISCHIEF_GRACE)lose(s);return}
  if(m.lastDay!==s.day)take(s);
 }
+// The canary's silence (the app's subscription, drawn only for it): at dusk it knows tonight's visitor
+// from the very choice nightfall will make, and faces the room the visitor comes to first: the borrowed
+// thing's own room, which every player sees moments later. Never the hiding place. Read-only, never saved.
+export const CANARY_DUSK=96,CANARY_SLEEP=180;
+export function forecast(s){
+ const m=s.mischief;if(!m||isNight(s)||s.clock<CANARY_DUSK||m.item||m.lastDay===s.day||!lived(s))return null;
+ const item=itemDef(pickItem(s,Math.min(9999,m.nights+1)));return {item:item.id,doll:item.doll,room:item.room};
+}
+// Where the canary keeps watch: from dusk until the visitor has come, then that night while the thing is out.
+export function canaryWatch(s){
+ const f=forecast(s);if(f)return f.room;const m=s.mischief;
+ return isNight(s)&&m?.item&&m.takenDay===s.day?itemDef(m.item).room:null;
+}
+// The morning after the visitor took something, the canary has a word to say about it.
+export const visitorLastNight=s=>Boolean(s.mischief?.nights)&&s.mischief.takenDay===s.day-1;
 // A touch on a hiding place. Wrong places answer whether the thing is in this room (`near`), never where.
 export function search(s,spotId){
  const spot=spotDef(spotId);if(!spot)return fail('invalid');if(s.paused)return fail('paused');

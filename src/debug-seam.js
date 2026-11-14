@@ -21,6 +21,9 @@ export function installDebug(app){
     mischief:()=>({missing:sim.missing(app.state),gone:sim.goneItem(app.state),line:app.mischief?.line??null,
       spots:app.world?.mischiefSpots()??[]}),
     mischiefPoint:(kind,id)=>app.world?.mischiefPoint(kind,id),
+    // The canary (drawn only for a subscriber): where it keeps watch, and a song on demand to see its notes.
+    canary:()=>({watch:sim.canaryWatch(app.state),forecast:sim.forecast(app.state),point:app.world?.canaryPoint?.()}),
+    canarySing:()=>app.world?.canarySing?.(app.state.elapsed,sim.isNight(app.state)),
     advance:seconds=>{for(let i=0;i<Math.min(2000,seconds);i++)sim.step(app.state,1);return sim.missing(app.state)}};
  }
 }

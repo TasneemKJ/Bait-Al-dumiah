@@ -25,7 +25,7 @@ export function installIdleLife(app,store=appStore){
   !app.ui?.placement&&!app.physicalActivity?.()&&!app.intro?.active&&!app.filmActive&&!sim.gatherRoom(s)};
  const end=()=>{if(!visit)return;visit=null;app.world?.setVisit?.(null)};
  function sing(id){
-  if(!store.canary()||sim.isNight(app.state))return;
+  if(!store.canary()||sim.isNight(app.state)||sim.canaryWatch(app.state))return;
   const n=sung[id]=((sung[id]??-1)+1)%IDLE.lines,t=app.ui.t;
   const [open,close]=app.state.settings.locale==='ar'?['«','»']:['“','”'];
   app.say(`${t('canaryFor-'+id)} ${open}${t(`canaryMemory-${id}-${n}`)}${close}`);

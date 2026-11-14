@@ -29,7 +29,8 @@ export function installFeedback(app){
     audio.effect('secret')}
   if(event.type==='full-house')say(`${t('fullHouse')} +${n(event.reward)} ${t('buttons')} `+
    `· ${t('streakLabel')}: ${n(event.streak)}`);
-  if(event.type==='dawn')say(event.fresh?`${t('dawnRecap')} ${n(event.wishes)} / ${n(DOLLS.length)}`:t('dawnTooSoon'));
+  if(event.type==='dawn'){say(event.fresh?`${t('dawnRecap')} ${n(event.wishes)} / ${n(DOLLS.length)}`:t('dawnTooSoon'));
+   app.canaryMorning?.()}
   if(event.type==='sewn')say(t('sewnHint'));
   if(event.type==='first-night')say(t('firstNightHint'));
   if(event.type==='calm')say(t('calmDayOne'));

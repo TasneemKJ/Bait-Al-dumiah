@@ -49,6 +49,10 @@ function pickObject({canvas,camera,ray,mouse,objects},x,y){
 function screenPoint(canvas,camera,house,p){if(!p)return null;house.root.updateWorldMatrix(true,false);
  p.applyMatrix4(house.root.matrixWorld).project(camera);const r=canvas.getBoundingClientRect();
  return {x:r.left+(p.x+1)/2*r.width,y:r.top+(1-p.y)/2*r.height}}
+// The canary (the App Store's answer, never saved): present or not, a song, and a point above its cage.
+const canaryApi=(canary,canvas,camera,house)=>({setCanary(on){canary.setPresent(on)},
+ canarySing(t,soft){canary.sing(t,soft)},canaryPoint(){return canary.root.visible?screenPoint(canvas,camera,house,
+  canary.root.position.clone().add(new T.Vector3(0,.55,0))):null}});
 // The midnight visitor: a found thing flies home, a wrong place puffs; points are for the caption.
 function mischiefApi({mischief},canvas,camera,house,objects){
  // A story object that doubles as a hiding place (the quilt) answers from its own touch volume.
@@ -115,9 +119,8 @@ export function createWorld(canvas,{onPick,onError}){
   ...cameraApi(w),
   setPlacement(item){st.placement=item;slots.setActive(item);if(!item){st.previewPose=null;preview.clear()}},
   setPreview(pose){st.previewPose=pose},picture:(s,use)=>takePicture(w,s,use),stirCurtain:parts.roomEffects.stir,
-  // The canary is the App Store's answer, read each time it changes; it is never saved.
   ...mischiefApi(parts,canvas,camera,house,objects),
-  setCanary(on){parts.canary.setPresent(on)},canarySing(t){parts.canary.sing(t)},setVisit:parts.residents.setVisit,
+  ...canaryApi(parts.canary,canvas,camera,house),setVisit:parts.residents.setVisit,
   render(state,dt,selected){renderFrame(w,state,dt,selected)},
   dispose(){st.disposed=true;portraitCache.dispose();
   controls.removeEventListener('start',cancelCameraMove);controls.dispose();

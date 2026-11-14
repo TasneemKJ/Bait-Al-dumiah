@@ -184,6 +184,7 @@ html[lang=ar] #ui .dock[data-expanded=true]>button{font-size:max(16px,1rem)}
 .mischief-line[data-state=fading]{opacity:0;transform:translate(-50%,-4px)}
 .mischief-line[data-kind=lost]{background:#463446f5;color:#f6e8da;border-color:#7d6577;border-inline-start-color:#c9a4d8}
 .mischief-line[data-kind=found]{border-inline-start-color:#c59b60}
+.mischief-line[data-kind=canary]{border-inline-start-color:#e2b93f}
 #ui[data-chime-active=true] .mischief-line,#ui[data-tea-active=true] .mischief-line{display:none}
 @media (prefers-reduced-motion:reduce){.mischief-line,.mischief-line.shown,.mischief-line[data-state=fading]{transition:none;
  transform:translate(-50%,0)}}

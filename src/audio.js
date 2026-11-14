@@ -142,10 +142,12 @@ export class DollhouseAudio{
     kind==='elegy'?[392,349.228,293.665]:[440,523.251];
   notes.forEach((f,i)=>this.tone(f,t+i*.16,1.2,.035));
  }
- // The canary's little song (the app's subscription): a soft high trill, quieter than the music box.
- canary(){
-  if(!this.ready)return false;const t=this.context.currentTime;
-  [1319,1480,1319,1568,1397,1760].forEach((f,i)=>this.tone(f,t+i*.085,.09,.007,'sine',.01));return true;
+ // The canary's little song (the app's subscription): a soft high trill, quieter than the music box. At
+ // night it is softer still, slower and a step lower, half asleep.
+ canary(soft=false){
+  if(!this.ready)return false;const t=this.context.currentTime,k=soft?.89:1;
+  [1319,1480,1319,1568,1397,1760].forEach((f,i)=>this.tone(f*k,t+i*(soft?.12:.085),.09,soft?.0045:.007,'sine',.01));
+  return true;
  }
  // A control under the finger: a soft wooden tap, quieter than any reward.
  press(){if(this.ready)this.track(playWoodTap(this.context,this.master,this.context.currentTime,.012))}

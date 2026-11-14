@@ -4,6 +4,13 @@ import {appStore} from './app-store.js';
 import {welcomeFifthRoom} from './access.js';
 import {composeCard,cardLines} from './share-card.js';
 
+// Lines the canary has, the morning after the visitor (copy keys `canaryMorning-<n>`).
+export const CANARY_MORNINGS=10;
+// Seconds until the canary's next song, or null while it is silent: keeping watch for the visitor, or asleep.
+export function songGap(s){
+ const night=sim.isNight(s);if(sim.canaryWatch(s)||night&&s.clock>=sim.CANARY_SLEEP)return null;
+ return night?45:s.clock>=sim.CANARY_DUSK?12:38;
+}
 export const storeCommands={
 'store-buy':(app,value)=>{appStore.buy(value);app.ui.renderPanel?.();return;},
 'store-restore':app=>{appStore.restore();app.ui.renderPanel?.();return;},
@@ -39,13 +46,17 @@ export function installStore(app){
   if(app.ui?.panel)app.ui.renderPanel?.();app.ui?.tick?.();
  };
  appStore.onChange(sync);
- // By day the canary sings now and then while the house is open and the sound is on.
+ // The canary sings now and then while the house is open and the sound is on: by day, more often at dusk,
+ // softly in the first half of the night. Silent while it keeps watch for the visitor, and under its cloth.
  let nextSong=0;
  const song=setInterval(()=>{
   const s=app.state;if(!appStore.canary()||!app.session.entered||s.paused||app.fatal)return;
-  if(s.elapsed<nextSong||sim.isNight(s))return;nextSong=s.elapsed+38+Math.random()*30;
-  if(app.audio.canary?.())app.world?.canarySing?.(s.elapsed);
+  const gap=songGap(s);if(s.elapsed<nextSong||gap===null)return;nextSong=s.elapsed+gap+Math.random()*20;
+  const night=sim.isNight(s);if(app.audio.canary?.(night))app.world?.canarySing?.(s.elapsed,night);
  },1000);song?.unref?.();
+ // The morning after the visitor took something, the canary has one short line beside its cage.
+ app.canaryMorning=()=>{const s=app.state;if(!appStore.canary()||!sim.visitorLastNight(s))return;
+  app.mischief?.aside?.(app.ui.t('canaryMorning-'+s.mischief.nights%CANARY_MORNINGS),'canary')};
  app.world?.setCanary?.(canary);app.deliverFifthRoom=()=>deliverFifthRoom(app);
  app.openStore=()=>{appStore.clearStatus();appStore.refresh();app.ui.open('store')};
  // The app's tests (and a debug launch) open the card directly.

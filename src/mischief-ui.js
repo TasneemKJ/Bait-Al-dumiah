@@ -33,6 +33,7 @@ export function installMischief(app){
  const blocked=()=>Boolean(app.ui?.panel||app.physicalActivity?.()||app.state.paused||app.intro?.active||
    app.filmActive);
  function anchor(entry){const w=app.world;if(!w)return null;
+  if(entry.at==='canary')return w.canaryPoint?.()??null;
   if(entry.doll){const p=w.project(entry.doll,1.75);if(p&&p.x>0&&p.x<window.innerWidth&&p.y>0&&
    p.y<window.innerHeight)return p}
   return w.mischiefPoint?.('home',entry.item)??null}
@@ -71,5 +72,7 @@ export function installMischief(app){
   else{app.world?.mischiefPuff?.(result.spot,result.near);app.audio.effect(result.near?'search-cold':'search-dust')}
   return result;
  }
- app.mischief={event,search,tick,get line(){return current?.text??null},get node(){return node}};
+ // A line of the house's own beside something in it (the canary's morning word), on the same paper slip.
+ const aside=(text,at)=>{if(queue.length<6)queue.push({text,kind:at,at})};
+ app.mischief={event,search,tick,aside,get line(){return current?.text??null},get node(){return node}};
 }
