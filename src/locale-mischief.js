@@ -58,7 +58,7 @@ export default {
   'mischief-missing-ribbon':'شريط نور ليس في مكانه.',
   'mischief-missing-hairpin':'مشبك شعر نور ليس في مكانه.',
   'mischief-missing-bell':'جرس نور الصغير ليس في مكانه.',
-  'mischief-first':'آثار أقدام صغيرة تبتعد. المس أركان المطبخ لتبحث قبل حلول الليل القادم.',
+  'mischief-first':'آثار أقدام صغيرة تبتعد. انقر أركان المطبخ لتبحث قبل حلول الليل القادم.',
   'mischief-where-room-kitchen':'ابحث في المطبخ.','mischief-where-room-studio':'ابحث في غرفة التطريز.',
   'mischief-where-room-bedroom':'ابحث في غرفة النوم.','mischief-where-floor-0':'ابحث في الطابق الأرضي.',
   'mischief-where-floor-1':'ابحث في الطابق العلوي.','mischief-where-house':'ابحث في البيت كلّه.',
