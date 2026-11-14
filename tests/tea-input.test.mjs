@@ -239,3 +239,15 @@ test('while tilting, the spout glides onto the nearest cup in reach; aiming befo
  assert.equal(teaHit(st)?.x,-.23,'and the stream lands in that cup');
  assert.equal(pourAssist(.9,[-.23,.23]),.9,'out of reach: no help');
 });
+
+// iOS WebKit gives touches large negative pointer ids (seen: -987579067). Rejecting them made the pot ignore
+// most real iPhone touches while every desktop and Chromium check passed.
+test('iOS negative pointer ids hold, move and release the pot and the needle',async()=>{
+ const g=createTeaGesture(),id=-987579067;
+ assert.equal(g.down(pointer(100,100,id),'pot',pouring,.2),true);
+ assert.equal(g.move(pointer(100,150,id),.2).tilt>0,true);
+ assert.deepEqual(g.up(pointer(100,150,id),'pot'),{type:'release'});
+ const {createStitchGesture}=await import('../src/stitch-input.js'),s=createStitchGesture();
+ assert.equal(s.down(pointer(100,100,id),'needle',{phase:'sew',needle:{x:0,y:0}},{x:0,y:0}),true);
+ assert.equal(s.pointerId,id);
+});

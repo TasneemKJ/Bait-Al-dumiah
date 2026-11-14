@@ -10,7 +10,10 @@ function teaPointer(ctx){
  function pointerdown(e){
   const tea=active();if(!tea||blocked())return;stop(e);
   if(gesture.pointerId!==null)return;
-  const target=pick(e.clientX,e.clientY),projected=aimAt(e.clientX,e.clientY);
+  // 2026-11-14 (owner, on iPhone: "still cannot move or drag the tea pot"): the pot is small on a phone, so
+  // while pouring a touch that misses the cups and the tray takes the pot. Aim is relative, so it never jumps.
+  const hit=pick(e.clientX,e.clientY),projected=aimAt(e.clientX,e.clientY),
+   target=hit===null&&tea.phase==='pour'?'pot':hit;
   if(!gesture.down(e,target,tea,projected))return;
   keyboard.cancel();if(tea.pressed||tea.tilt)dispatch('tea-release');
   setInputMode('pointer');clearFeedback();canvas.focus({preventScroll:true});

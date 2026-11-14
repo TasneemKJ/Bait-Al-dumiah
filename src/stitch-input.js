@@ -4,7 +4,7 @@ export const STITCH_INPUT=Object.freeze({dragThreshold:8,keyboardSpeed:.9});
 const clamp=value=>Math.max(-1,Math.min(1,value));
 const point=value=>Number.isFinite(value?.x)&&Number.isFinite(value?.y);
 const bounded=value=>point(value)&&Math.abs(value.x)<=1&&Math.abs(value.y)<=1;
-const validPointer=e=>Number.isInteger(e.pointerId)&&e.pointerId>=0&&
+const validPointer=e=>Number.isInteger(e.pointerId)&&
   Number.isFinite(e.clientX)&&Number.isFinite(e.clientY);
 const targets=new Set(['needle','spool','cloth']);
 

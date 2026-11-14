@@ -15,7 +15,7 @@ export function pourAssist(aim,cups){
  for(const x of cups||[]){const d=Math.abs(x-aim);if(d<=POUR_ASSIST&&(best===null||d<Math.abs(best-aim)))best=x}
  return best===null?aim:best+(aim-best)*.1;
 }
-const validPointer=e=>Number.isInteger(e.pointerId)&&e.pointerId>=0&&
+const validPointer=e=>Number.isInteger(e.pointerId)&&
   Number.isFinite(e.clientX)&&Number.isFinite(e.clientY);
 const validTarget=target=>target==='pot'||target==='tray'||/^cup:[0-2]$/.test(target??'');
 
