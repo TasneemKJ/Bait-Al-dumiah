@@ -234,3 +234,11 @@ house did nothing. Now the little visitor has a face the player acts against, ev
 
 ## #12 (random-stimulus, creepiness) the dollhouse mirror
 The hallway mirror shows one doll more than the room holds, standing where a doll stood last night. Pour well and it fades; a missed pour and it is a step closer in the next night's mirror. It never moves when watched. The ghost, amused: «ليست مني. أنا أطرق قبل الدخول».
+
+## Backlog from random stimulus (2026-11-14, round 3)
+## #19 (random-stimulus) «خيال الظل»
+Some nights Noor's lamp throws the dolls' shadows on the bedroom wall. The ghost casts a shape (a bird, a cat, a camel); you drag a doll's arms to answer it with the same shadow before the lamp gutters. Get the sequence right and the shadows play a short scene of how the house came to be (the girl who owned it, the first tea, the night the ghost arrived), one scene per success, in warm silhouette on the plaster. A miss: the ghost's shadow laughs silently and the lamp goes out. Subscription (the canary): a new shadow story each month. Dry line: «الأشباح لا تملك ظلًّا. هذا ظلّ مستعار».
+Comparables: Simon (memory), Limbo (silhouette mood), the Levantine shadow theatre (Karagöz / Haci Ivat tradition). Ours: the dolls' own hands make the story.
+
+## #19b «رسائل صاحبة البيت»
+Letters from the grown girl who once owned the dollhouse, now far away, asking after each doll by name. Your care that week is what the reply says.
