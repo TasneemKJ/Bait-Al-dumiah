@@ -317,3 +317,13 @@ Comparables: Gone Home (the house is the interface), Return of the Obra Dinn (on
   - First line, when the ring is first seen: «لكلّ باب مفتاح، ولكلّ مفتاح ليلة يُعطى فيها.»
 - **Second idea (backlog): the night porter's bell.** A small bell on the hall table rings when a doll has something to say. Tap it and the house turns to that room. This replaces the badge dots. For subscribers, the porter adds one quiet line about tomorrow's evening; it is never a hint about the Visitor.
 - **Pocket watch:** rejected as a mechanic, since it means a timer that nags (anti-pillar). It is kept only as a keepsake that stops at the hour the last guest left.
+
+## #74 (random-stimulus) «ليلة المطر»: stimuli: a rain gutter · a tin of sewing buttons · "what if the house kept a diary of you?"
+- **Best idea: the night of rain.** On some autumn nights rain finds the old roof. Drips fall in three rooms at once, and the house has only two bowls and one towel. Drag a bowl under a drip; the towel only slows one.
+  - When the wind turns, a drip moves to the next beam, so the bowls must follow it. A drip left alone darkens the floor, and then the thing beneath it: Noor's drawing, the tea tin, the grandmother's letters.
+  - A wet thing is not lost. It dries by morning with a mark that stays (a stain on the drawing, a curled letter), so the house remembers the night you couldn't cover.
+  - The house says it plainly: «المطر يعرف طريقه إلى السقف. عندك وعاءان فقط.» At dawn, the count of dry rooms.
+  - Act in the house (pillar 1), a ritual with a small cost (pillar 2), and a real choice of which thing to save. Challenge comes from triage under a moving threat, with no timer bar: the drip sound is the clock.
+  - Comparables, learned from but not copied: Mini Metro (demand that moves), A Little to the Left (household objects as the puzzle), Unpacking (a life told through things). Ours is one roof, two bowls, and things that keep their marks.
+- **Second idea (subscription value, not power): the canary's songbook.** Each night the canary learns a short tune from what happened in the house (the kettle, the rain on the bowls, the music box, the visitor's steps), made in code from that night's events. On the seventh night it sings the week back, and the songbook keeps every week. Something new every night for a subscriber; it never changes a search, a forecast or a score.
+- Test: the rain night must be losable without being cruel. A bot that moves bowls after the wind should keep at least 2 of 3 rooms dry; a bot that never moves them should keep 1. If both keep 3, add a drip.
