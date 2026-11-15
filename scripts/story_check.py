@@ -143,6 +143,8 @@ try:
     page.goto(BASE+'/?debug=1'); enter_game(page)
     ready()
     initial = state()
+    sound_at_entry = initial['settings']['muted']
+    check('a first launch starts with sound on', sound_at_entry is False)
     check('new player starts with no inventory, progress or open tools',
           progress() == 0 and not page.locator('.held-item').count() and page.locator('.key-ring').count() == 1)
     capture('01-open-house')
@@ -216,7 +218,12 @@ try:
     page.keyboard.press('Enter')
     check('keyboard inspection opens optional details', page.locator('dialog[open]').count() == 1)
     page.keyboard.press('Escape')
-    check('optional details restore focus to a visible control', page.evaluate('document.activeElement.matches("#ui button,#world") && document.activeElement.getClientRects().length>0'))
+    # 56f0fdd: the opener (the ribbon's inspect button) gets focus back; if it is gone, the House key on the ring.
+    check('optional details return focus to their opener, or the House key when it is gone', page.evaluate('''() => {
+        const a = document.activeElement, shown = e => e && e.isConnected && e.getClientRects().length > 0;
+        const opener = document.querySelector('[data-scene-action="inspect"]');
+        return shown(opener) ? a === opener : a.matches('.key-ring [data-key="house"]') && shown(a);
+    }'''))
     room('parlor')
     select('prop:parlor-sofa')
     tap_object('prop:parlor-sofa')
@@ -293,7 +300,8 @@ try:
         page.locator('[data-action="light"]').click()
     page.wait_for_function('window.dollhouse.visual().nightMix>.99')
     capture('10-phone-night-welcome')
-    check('story path kept audio muted', state()['settings']['muted'])
+    # A first launch starts with sound on (2425eb1, #51); the story path must leave the player's choice alone.
+    check('story path kept the sound setting it started with', state()['settings']['muted'] == sound_at_entry)
     panel('journal')
     check('three completed story memories are available in Arabic', page.locator('.story-memories article').count() == 3 and 'الخيط' in page.locator('.story-memories').inner_text())
     page.locator('#sheet [data-action="close"]').click()
