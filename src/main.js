@@ -62,7 +62,10 @@ function pickFromScene(data){
   if(data.nook)return dispatch(focused===data.room?'search':'focus-room',focused===data.room?data.nook:data.room);
   const spot=data.object&&sim.spotForObject(data.object);
   if(spot&&focused===spot.room&&sim.missing(app.state)?.spot===spot.id)return dispatch('search',spot.id);
-  if(data.object)dispatch(storyUI?.selected===data.object?'activate-object':'select-object',data.object,'scene');
+  // A new household's first tea needs no second touch: the tea set opens its ritual at once.
+  const firstTea=data.object==='prop:tea-set'&&app.state.cares===0&&!sim.wishGranted(app.state,'lina');
+  if(data.object)dispatch(firstTea||storyUI?.selected===data.object?'activate-object':'select-object',
+   data.object,'scene');
   // A first touch greets (she waves, a soft sound, nothing to read); touching her again opens her sheet.
   if(data.doll){if(app.touchedDoll===data.doll)ui.open('household',data.doll);
   else{app.touchedDoll=data.doll;dispatch('greet-doll',data.doll)}}

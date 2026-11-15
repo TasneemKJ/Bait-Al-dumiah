@@ -55,3 +55,11 @@ test('a touch on a bare wall or floor of a room is answered: the doll who lives 
  const src=readFileSync(new URL('../src/render/world-pointers.js',import.meta.url),'utf8');
  assert.match(src,/else if\(!hit&&!st\.placement&&st\.focusedRoom\)onPick\(\{roomTouch:st\.focusedRoom\}\)/);
 });
+
+test('a new household\'s first touch on the tea set opens the ritual, and the served tea is Lina\'s wish',()=>{
+ const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
+ assert.match(main,/const firstTea=data\.object==='prop:tea-set'&&app\.state\.cares===0&&!sim\.wishGranted\(app\.state,'lina'\);/);
+ assert.match(main,/dispatch\(firstTea\|\|storyUI\?\.selected===data\.object\?'activate-object':'select-object',/);
+ const src=readFileSync(new URL('../src/cmd-activities.js',import.meta.url),'utf8');
+ assert.match(src,/result\.mode==='ritual'&&sim\.wishFor\(app\.state,'lina'\)==='tea'&&!sim\.wishGranted\(app\.state,'lina'\)/);
+});
