@@ -405,3 +405,5 @@ The jar fills before your eyes. To spend, you take buttons out of it with your h
 - **Subscription rule (owner, 2026-11-15):** free for everyone; the canary brings nothing extra here and promises nothing.
 - **Art:** the drops as small lit points that dry over 2 minutes (a real clock for the hunt); the umbrella's black cloth beaded with light; the pot's sprout drawn leaf by leaf.
 - **Second idea (backlog):** the seed alone: a pot that grows only from what the dolls tell it at night.
+
+**next to build: #100 «السنّ تحت الوسادة»** because players asked for challenge and tension (they liked Souq's thief), and #100 brings the first real way to fail in the house (three creaks wake Noor, and the coin waits a night). It also gives the day a purpose (you watch which boards creak) and gives a hidden act of kindness emotional weight. It reuses the music boxes and the buttons already in the game, so no new panel is needed. #115 (the rain trail) comes second.
