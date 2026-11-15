@@ -1,4 +1,5 @@
-import {earn,emit,checkMilestones,growBond,activityDef,activityLevel,completeActivity,storyStatus} from './sim-core.js';
+import {earn,emit,grantWish,checkMilestones,growBond,activityDef,activityLevel,completeActivity,
+  storyStatus} from './sim-core.js';
 import {createTea,stepTea,releaseTea} from './sim-tea.js';
 import {stitchActive,stitchSections,createStitch,releaseStitch} from './sim-stitch.js';
 import {stepChimes,cancelChime,replayChimes} from './sim-chimes.js';
@@ -56,10 +57,7 @@ export function care(s,id,action){
  const reward=wished?wishReward(d):0;
  let bonus=0;
  if(reward){
-  s.wishes.push(id);earn(s,reward);
-  if(s.wishes.length===DOLLS.length){s.streak=s.lastFullDay===s.day-1?Math.min(999,
-    s.streak+1):1;s.lastFullDay=s.day;bonus=4+2*Math.min(s.streak,5);
-  earn(s,bonus);emit(s,{type:'full-house',streak:s.streak,reward:bonus})}
+  earn(s,reward);bonus=grantWish(s,id);
  }
  const brave=action==='soothe'&&isNight(s)?2:0;
  growBond(s,d,Math.round((4+(reward?4:0)+brave)*(inFavoriteRoom(d)?1.5:1)*(quiet?QUIET_BOND:1)));

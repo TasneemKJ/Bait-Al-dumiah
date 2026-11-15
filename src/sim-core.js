@@ -1,7 +1,7 @@
 // Shared rule helpers: earning buttons, notices, milestones, bonds and the economic close of an activity.
 import {clamp} from './sim-util.js';
 import {bondLevel,currentStreak,fullRooms,coziness} from './sim-queries.js';
-import {ROOMS,SECRETS,MILESTONES,DOOR_STEPS,VISITOR_GIFTS,ACTIVITIES,ACTIVITY_THRESHOLDS,
+import {DOLLS,ROOMS,SECRETS,MILESTONES,DOOR_STEPS,VISITOR_GIFTS,ACTIVITIES,ACTIVITY_THRESHOLDS,
   STORY_CHAPTERS,ACTIVITY_DAILY_CAP,ACTIVITY_COOLDOWN} from './content.js';
 export const earn=(s,amount)=>{s.buttons=Math.min(9999,s.buttons+amount);
 s.earnedToday=Math.min(99999,s.earnedToday+amount)};
@@ -38,6 +38,14 @@ export const activityLevel=(s,id)=>activityDef(id)?ACTIVITY_THRESHOLDS.reduce((l
 export const activityReward=(s,id)=>7+activityLevel(s,id)*2;
 export function activityRewardReady(s,id){return Boolean(activityDef(id))&&
   s.activities.completed[id]<ACTIVITY_DAILY_CAP&&s.elapsed-s.activities.lastReward[id]>=ACTIVITY_COOLDOWN}
+// A wish granted. When it is the household's last wish of the day, the day is complete: its streak and its
+// full-house bonus, whichever act granted it. Returns that bonus (0 otherwise).
+export function grantWish(s,id){
+ if(s.wishes.includes(id))return 0;s.wishes.push(id);if(s.wishes.length!==DOLLS.length)return 0;
+ s.streak=s.lastFullDay===s.day-1?Math.min(999,s.streak+1):1;s.lastFullDay=s.day;
+ const bonus=4+2*Math.min(s.streak,5);earn(s,bonus);emit(s,{type:'full-house',streak:s.streak,reward:bonus});
+ return bonus;
+}
 // Sequence and physical rituals share one economic boundary.
 export function completeActivity(s,id){
  const a=activityDef(id),before=activityLevel(s,id),rewarded=activityRewardReady(s,id),base=activityReward(s,id);

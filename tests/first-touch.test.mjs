@@ -60,6 +60,5 @@ test('a new household\'s first touch on the tea set opens the ritual, and the se
  const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
  assert.match(main,/const firstTea=data\.object==='prop:tea-set'&&app\.state\.cares===0&&!sim\.wishGranted\(app\.state,'lina'\);/);
  assert.match(main,/dispatch\(firstTea\|\|storyUI\?\.selected===data\.object\?'activate-object':'select-object',/);
- const src=readFileSync(new URL('../src/cmd-activities.js',import.meta.url),'utf8');
- assert.match(src,/result\.mode==='ritual'&&sim\.wishFor\(app\.state,'lina'\)==='tea'&&!sim\.wishGranted\(app\.state,'lina'\)/);
+ // The served tea granting Lina's wish is a simulation rule now (one act, one reward): tests/tea-wish.test.mjs.
 });

@@ -26,10 +26,7 @@ export const activitiesCommands={
 'tea-serve':(app,value,origin)=>{
    const result=sim.serveTea(app.state);app.teaUI?.respond(result.ok?null:result.reason);
    if(result.ok){app.audio.effect('place');
-    // The tea poured at the table is Lina's tea: on a day she wishes for tea, serving it grants the wish
-    // through the ordinary care rule (its cost and reward), so the house moves on to the next one waiting.
-    if(result.mode==='ritual'&&sim.wishFor(app.state,'lina')==='tea'&&!sim.wishGranted(app.state,'lina'))
-     app.dispatch('care',{id:'lina',action:'tea'});
+    // A ritual tea on Lina's tea day grants her wish inside serveTea (one act, one reward: the ritual's own).
     app.save();app.ui.tick();app.storyUI?.update()}app.teaUI?.update(0);return;
   },
 'tea-replay':app=>replayWork(app,'tea'),

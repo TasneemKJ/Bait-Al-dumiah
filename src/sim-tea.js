@@ -1,5 +1,6 @@
 // The physical tea ritual: pour, aim, serve.
-import {activityLevel,completeActivity,storyStatus,advanceStory} from './sim-core.js';
+import {activityDef,activityLevel,completeActivity,storyStatus,advanceStory,grantWish} from './sim-core.js';
+import {wishFor} from './sim-queries.js';
 import {integer,fail} from './sim-util.js';
 import {TEA_TABLE} from './content.js';
 export const TEA_TOLERANCE=.07;
@@ -59,7 +60,12 @@ export function serveTea(s){
  let result;
  if(a.mode==='guest')result={ok:true,complete:true,id:'tea',mode:'guest',reward:0,bonus:0,level:a.level,
    practice:true,score,storyResult:advanceStory(s,storyStatus(s))};
- else{result={...completeActivity(s,'tea'),mode:'ritual',score};
+ else{
+  // One act, one reward: the tea poured at the table is the resident's tea. On a day she wishes for tea it grants
+  // that wish (the tea was given, so it counts as care) and pays only the ritual's own reward.
+  const lina=activityDef('tea').resident,wish=wishFor(s,lina)==='tea'&&!s.wishes.includes(lina);
+  if(wish){s.cares=Math.min(1e9,s.cares+1);grantWish(s,lina)}
+  result={...completeActivity(s,'tea'),mode:'ritual',score,...(wish?{wish:lina}:{})};
  s.activities.teaRecords[a.level]=Math.max(s.activities.teaRecords[a.level]??0,score)}
  a.pressed=false;a.tilt=0;a.phase='served';a.result=result;return structuredClone(result);
 }
