@@ -6,7 +6,9 @@ from game_entry import enter_game
 from house_routes import focus_room,press_key
 ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'artifacts/levantine';OUT.mkdir(parents=True,exist_ok=True)
 URL='http://127.0.0.1:4189';results=[];errors=[]
-server=subprocess.Popen(['node','scripts/serve.mjs','dist'],cwd=ROOT,env={**os.environ,'PORT':'4189'},stdout=subprocess.DEVNULL)
+# The fixtures import the game's own modules (createState, the audio synth), which the bundled dist/ no longer
+# exposes, so the check serves the source tree; ?debug=1 gives it the same seam.
+server=subprocess.Popen(['node','scripts/serve.mjs','.'],cwd=ROOT,env={**os.environ,'PORT':'4189'},stdout=subprocess.DEVNULL)
 def check(name,passed):
  results.append({'name':name,'passed':bool(passed)})
  if not passed:raise AssertionError(name)
@@ -43,8 +45,11 @@ try:
   page.set_viewport_size({'width':390,'height':844});capture(page,'courtyard-shami-phone')
   check('Shami phone layout has no horizontal scrolling',page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
   check('sound remains off before a user gesture',page.evaluate('dollhouse.state().settings.muted'))
-  page.locator('[data-action=sound]:visible').click();page.wait_for_function('!dollhouse.state().settings.muted');check('sound can be enabled through its actual button',True)
-  page.locator('[data-action=sound]:visible').click();check('the same control mutes sound',page.evaluate('dollhouse.state().settings.muted'))
+  # Sound lives in the fuse box now (the Settings key).
+  press_key(page,'panel-settings')
+  page.locator('#sheet [data-action=sound]').click();page.wait_for_function('!dollhouse.state().settings.muted');check('sound can be enabled through its actual button',True)
+  page.locator('#sheet [data-action=sound]').click();check('the same control mutes sound',page.evaluate('dollhouse.state().settings.muted'))
+  page.locator('#sheet [data-action=close]').click()
   # Export an actual offline synthesis sample, not a claim of listening review.
   samples=page.evaluate('''async()=>{const {playPluck,playWoodTap}=await import('/src/audio.js');const c=new OfflineAudioContext(1,22050*6,22050);[196,207.65,246.94,261.63].forEach((f,i)=>playPluck(c,c.destination,f,.1+i*.82,1.6,.052));playWoodTap(c,c.destination,4.6,.023);playWoodTap(c,c.destination,5.02,.018);return Array.from((await c.startRendering()).getChannelData(0));}''')
   with wave.open(str(OUT/'original-plucked-night-sample.wav'),'wb') as wav:

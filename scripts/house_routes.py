@@ -68,8 +68,12 @@ def open_household(page, doll='lina'):
 
 
 def open_rituals(page):
-    """The rituals sheet opens from a ritual's own object (the tea set's 'Lina's mint tea' practice) or the clue."""
-    page.locator('[data-action="objective"]').click()
+    """The rituals sheet is the album's second page: Album key, then 'Records and restorations'. Without the album
+    key yet, the house list's last entry opens it (the keyboard and VoiceOver route)."""
+    if press_key(page, 'panel-journal'):
+        page.locator('#sheet [data-action="panel-activities"]').click()
+        return
+    page.locator('.house-access [data-access]').last.evaluate('b=>{b.focus();b.click()}')
 
 
 def open_panel(page, action):

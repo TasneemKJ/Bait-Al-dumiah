@@ -230,7 +230,7 @@ try:
    finally:page.keyboard.up('Space')
   else:page.locator('.chime-exit').click()
   page.wait_for_function('!window.dollhouse.visual().chimeActive',timeout=60000);settled()
-  check('an unfinished replay restores canvas controls and keeps earned progress',status() is None and snapshot()['buttons']==stable and snapshot()['activities']['mastery']['lullaby']==1 and page.locator('.room-views').is_visible() and page.evaluate('document.activeElement.id==="world"&&document.querySelector("#world").getAttribute("role")!=="application"'))
+  check('an unfinished replay restores canvas controls and keeps earned progress',status() is None and snapshot()['buttons']==stable and snapshot()['activities']['mastery']['lullaby']==1 and page.locator('.key-ring').is_visible() and page.evaluate('document.activeElement.id==="world"&&document.querySelector("#world").getAttribute("role")!=="application"'))
   check('leaving retains an earned star in the bedroom',page.evaluate('window.dollhouse.visual().chimes.earnedStars===1'))
   house_hud_fit('returned house')
   capture('05-earned-constellation')
