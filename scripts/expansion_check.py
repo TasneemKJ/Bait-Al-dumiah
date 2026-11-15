@@ -6,6 +6,7 @@ from game_entry import enter_game
 from scene_gestures import scene_ready
 from chime_gestures import finish_chimes
 from tea_check import complete_tea, tea_ready, tea_status, tap_tea
+import house_routes
 from stitch_gestures import NeedleDrag, finish_stitch, stitch_ready, stitch_status, tap_stitch, trace_stitch
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'artifacts'/'expansion'; OUT.mkdir(parents=True,exist_ok=True)
@@ -18,17 +19,16 @@ def check(name,ok):
  print(('PASS ' if ok else 'FAIL ')+name,flush=True)
  assert ok,name
 def open_panel(page,name):
- target=page.locator(f'[data-action="panel-{name}"]')
- if not target.is_visible():page.locator('[data-action="toggle-tools"]').click()
- target.click()
+ # The bar's sheets now live in the house (scripts/house_routes.py): ring keys, a doll, the clue.
+ house_routes.open_panel(page,'panel-'+name)
+ if name=='activities':check('the clue leads to the rituals sheet here',page.locator('.ritual-card').count()>0)
 def select_object(page,key,inspect=False):
- target=page.locator(f'[data-object="{key}"]')
- if not target.is_visible():page.locator('[data-object-toggle]').click()
- target.click()
+ house_routes.select_object(page,key)
  if inspect:page.locator('[data-scene-action="inspect"]').click()
 def check_whole_house_selection(page):
  # Explicit navigation owns framing. Direct object selection must leave the
  # original scene target still under the pointer, with actual canvas ownership.
+ # The House key on the ring carries data-action="camera", so the whole-house route is unchanged.
  page.locator('[data-action="camera"]:visible').click()
  scene_ready(page)
  point=next(o for o in page.evaluate('window.dollhouse.objects()') if o['key']=='prop:tea-set')
@@ -57,8 +57,8 @@ def check_whole_house_selection(page):
  return observed
 
 def expose_objects(page):
- page.wait_for_function('document.querySelector(".object-controls") && !document.querySelector(".object-controls").hidden')
- if page.locator('[data-object-toggle]').get_attribute('aria-expanded')!='true':page.locator('[data-object-toggle]').click()
+ # The object list is the hidden house list now; it is present whenever the house is (src/house-access.js).
+ page.wait_for_function('document.querySelector(".house-access") && !document.querySelector(".house-access").parentElement.hidden')
 try:
  for _ in range(80):
   try:urllib.request.urlopen(BASE,timeout=1);break
@@ -82,7 +82,7 @@ try:
    check('night entry is deterministic even across a natural clock transition',state()['clock']>=120)
   (OUT/'00-whole-house-selection.json').write_text(json.dumps(check_whole_house_selection(page),indent=2))
   page.locator('[data-scene-action="close"]').click()
-  page.locator('[data-room="kitchen"]').click();page.wait_for_function('!window.dollhouse.visual().cameraMoving')
+  house_routes.focus_room(page,'kitchen');page.wait_for_function('!window.dollhouse.visual().cameraMoving')
   point=next(o for o in page.evaluate('window.dollhouse.objects()') if o['key']=='prop:tea-set')
   page.mouse.click(point['x'],point['y'])
   check('actual tea-set ray pick selects its scene ribbon',page.locator('.object-ribbon').is_visible())
@@ -103,7 +103,7 @@ try:
   page.screenshot(path=str(OUT/'03-earned-reward.png'),timeout=60000)
   tap_tea(page,'tray');page.wait_for_function('window.dollhouse.tea()===null')
   expose_objects(page)
-  check('ritual camera and accessible objects agree after completion',page.locator('[data-object="prop:tea-set"]').is_visible() and page.locator('[data-room="kitchen"]').get_attribute('aria-pressed')=='true')
+  check('ritual camera and accessible objects agree after completion',page.locator('.house-access button').count()>0 and page.evaluate('window.dollhouse.visual().focusedRoom')=='kitchen')
   page.reload(); enter_game(page);page.wait_for_function('window.dollhouse && !document.querySelector("#loading")')
   check('mastery survives reload',state()['activities']['mastery']['tea']==1)
   # Seed an earned-state fixture to inspect restoration and all-tier rendering.
@@ -131,7 +131,7 @@ try:
   stitch_ready(page)
   page.screenshot(path=str(OUT/'07-mobile-arabic.png'))
   check('embroidery opens physical sewing with no answer grid or modal',stitch_status(page)['phase']=='sew' and stitch_status(page)['mode']=='ritual' and not page.locator('.ritual-choice:visible,dialog[open]').count())
-  check('mobile sewing controls all have reachable 44px targets',page.locator('[data-stitch-action]:visible,.dock button:visible').evaluate_all('els=>els.length>0&&els.every(e=>{const r=e.getBoundingClientRect(),hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return r.width>=44&&r.height>=44&&r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight&&(hit===e||e.contains(hit))})'))
+  check('mobile sewing controls all have reachable 44px targets',page.locator('[data-stitch-action]:visible,.key-ring button:visible').evaluate_all('els=>els.length>0&&els.every(e=>{const r=e.getBoundingClientRect(),hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return r.width>=44&&r.height>=44&&r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight&&(hit===e||e.contains(hit))})'))
   check('empty sewing exposes only the actual reachable needle and spool',page.evaluate('()=>{const points=window.dollhouse.stitchObjects(),targets=points.filter(p=>["needle","spool"].includes(p.key));return targets.length===2&&!points.some(p=>p.key==="cloth")&&targets.every(p=>p.x>0&&p.x<innerWidth&&p.y>0&&p.y<innerHeight&&document.elementFromPoint(p.x,p.y)?.id==="world")}'))
   before=state()['buttons']
   stitched=trace_stitch(page,until_section=1)
@@ -161,19 +161,19 @@ try:
   tap_stitch(page,'cloth');page.wait_for_function('window.dollhouse.stitch()===null',polling=100)
   page.wait_for_function('!window.dollhouse.visual().cameraMoving',timeout=60000,polling=100)
   expose_objects(page)
-  check('stitch launched from another view exposes studio objects after exit',page.locator('[data-object="prop:sewing-machine"]').is_visible() and page.locator('[data-room="studio"]').get_attribute('aria-pressed')=='true' and page.evaluate('window.dollhouse.visual().focusedRoom==="studio"'))
+  check('stitch launched from another view exposes studio objects after exit',page.locator('.house-access button').count()>0 and page.evaluate('window.dollhouse.visual().focusedRoom')=='studio' and page.evaluate('window.dollhouse.visual().focusedRoom==="studio"'))
   open_panel(page,'settings');page.locator('[data-field="motion"]').check()
   check('reduced motion setting applies',state()['settings']['reducedMotion'])
   page.locator('[data-action="close"]').click()
   page.set_viewport_size({'width':1280,'height':900})
   open_panel(page,'decorate');page.locator('[data-action="choose-item"][data-id="bear"]').click();page.locator('[data-action="place-confirm"]').click()
   decor=state()['decor'][-1];key='decor:'+str(decor['id']);buttons=state()['buttons']
-  page.locator('[data-room="kitchen"]').click();page.wait_for_function('!window.dollhouse.visual().cameraMoving')
+  house_routes.focus_room(page,'kitchen');page.wait_for_function('!window.dollhouse.visual().cameraMoving')
   point=next(o for o in page.evaluate('window.dollhouse.objects()') if o['key']==key)
   page.mouse.move(point['x'],point['y']);page.mouse.down();page.mouse.move(point['x']+50,point['y']);page.mouse.move(point['x'],point['y']);page.mouse.up()
   check('a camera drag cannot select a decoration',page.locator('.object-ribbon').count()==0 and page.locator('.object-detail').count()==0 and page.evaluate('!window.dollhouse.visual().selectedObject'))
   # Recenter after the drag before selecting the physical object.
-  page.locator('[data-room="kitchen"]').click();page.wait_for_function('!window.dollhouse.visual().cameraMoving')
+  house_routes.focus_room(page,'kitchen');page.wait_for_function('!window.dollhouse.visual().cameraMoving')
   point=next(o for o in page.evaluate('window.dollhouse.objects()') if o['key']==key);page.mouse.click(point['x'],point['y'])
   check('owned decoration is selectable in the scene ribbon',page.locator('.object-ribbon').is_visible())
   page.locator('[data-scene-action="inspect"]').click()
@@ -185,7 +185,7 @@ try:
   page.wait_for_function('!window.dollhouse.visual().cameraMoving');page.screenshot(path=str(OUT/'10-moved-keepsake.png'))
   page.reload(); enter_game(page);page.wait_for_function('window.dollhouse && !document.querySelector("#loading")')
   check('manipulated object survives reload',state()['decor'][-1]['room']=='studio' and state()['decor'][-1]['rotation']==1)
-  page.locator('[data-room="bedroom"]').click();page.wait_for_function('!window.dollhouse.visual().cameraMoving')
+  house_routes.focus_room(page,'bedroom');page.wait_for_function('!window.dollhouse.visual().cameraMoving')
   select_object(page,'prop:moon-bed',inspect=True);page.locator('[data-action="begin-activity"][data-id="lullaby"]').click()
   finish_chimes(page)
   check('physical moon echo completes through real object plucks',state()['activities']['mastery']['lullaby']==7)
@@ -198,7 +198,7 @@ try:
   ];s.nextId=5;sessionStorage.setItem('expansion-fixture',JSON.stringify(s));}''')
   page.reload(); enter_game(page);page.wait_for_function('window.dollhouse && !document.querySelector("#loading")')
   baseline=state();progress=(baseline['buttons'],baseline['cares'],baseline['earnedToday'],baseline['activities']['mastery'].copy(),[(d['id'],d['bond']) for d in baseline['dolls']])
-  page.locator('[data-room="kitchen"]').click();page.wait_for_function('!window.dollhouse.visual().cameraMoving')
+  house_routes.focus_room(page,'kitchen');page.wait_for_function('!window.dollhouse.visual().cameraMoving')
   point=next(o for o in page.evaluate('window.dollhouse.objects()') if o['key']=='decor:1');page.mouse.click(point['x'],point['y'])
   page.locator('[data-scene-action="inspect"]').click()
   use=page.locator('[data-action="use-object"]')
@@ -210,14 +210,14 @@ try:
   select_object(page,'decor:1',inspect=True)
   check('watered plant reports completion and blocks same-day repetition',page.locator('[data-action="use-object"]').is_disabled() and 'Watered today' in page.locator('.object-detail').inner_text())
   page.locator('[data-action="close"]').click()
-  page.locator('[data-room="parlor"]').click();page.wait_for_function('!window.dollhouse.visual().cameraMoving');select_object(page,'decor:2');page.locator('[data-scene-action="activate"]').click()
+  house_routes.focus_room(page,'parlor');page.wait_for_function('!window.dollhouse.visual().cameraMoving');select_object(page,'decor:2');page.locator('[data-scene-action="activate"]').click()
   check('lamp action toggles persistent active state',state()['decor'][1]['active'])
-  check('keepsake action retains meaningful visible keyboard focus',page.evaluate('document.activeElement.matches("[data-scene-action=activate],[data-object-toggle]") && document.activeElement.getBoundingClientRect().width>=44'))
+  check('keepsake action retains meaningful visible keyboard focus',page.evaluate('document.activeElement.matches("[data-scene-action=activate],.house-access button") && document.activeElement.getBoundingClientRect().width>=44'))
   open_panel(page,'settings');page.locator('[data-field="motion"]').check();page.locator('[data-action="close"]').click()
   ensure_night();page.wait_for_function('window.dollhouse.visual().nightMix > .99 && window.dollhouse.visual().activeOwnedLights === 1')
   page.screenshot(path=str(OUT/'13-active-lamp-night.png'))
   open_panel(page,'settings');page.locator('[data-field="motion"]').uncheck();page.locator('[data-action="close"]').click()
-  page.locator('[data-room="studio"]').click();page.wait_for_function('!window.dollhouse.visual().cameraMoving');select_object(page,'decor:3');page.locator('[data-scene-action="activate"]').click()
+  house_routes.focus_room(page,'studio');page.wait_for_function('!window.dollhouse.visual().cameraMoving');select_object(page,'decor:3');page.locator('[data-scene-action="activate"]').click()
   check('music-box action records a current animation timestamp',state()['elapsed']-state()['decor'][2]['lastUse']<1)
   page.wait_for_function('Math.abs(window.dollhouse.visual().reactivePoses[3]?.turn??0) > .02')
   turn=page.evaluate('window.dollhouse.visual().reactivePoses[3].turn')
@@ -225,7 +225,7 @@ try:
   check('wound music box visibly turns in the rendered room',True)
   page.screenshot(path=str(OUT/'14-wound-music-box.png'))
   open_panel(page,'settings');page.locator('[data-field="motion"]').check();page.locator('[data-action="close"]').click()
-  page.locator('[data-room="bedroom"]').click();page.wait_for_function('!window.dollhouse.visual().cameraMoving');select_object(page,'decor:4');page.locator('[data-scene-action="activate"]').click()
+  house_routes.focus_room(page,'bedroom');page.wait_for_function('!window.dollhouse.visual().cameraMoving');select_object(page,'decor:4');page.locator('[data-scene-action="activate"]').click()
   check('mobile action works with reduced motion enabled',state()['settings']['reducedMotion'] and state()['elapsed']-state()['decor'][3]['lastUse']<1)
   page.wait_for_function('Math.abs(window.dollhouse.visual().reactivePoses[4]?.rock-.06)<.0001')
   rock=page.evaluate('window.dollhouse.visual().reactivePoses[4].rock');page.wait_for_timeout(350)

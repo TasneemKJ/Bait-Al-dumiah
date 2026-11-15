@@ -5,6 +5,7 @@ from playwright.sync_api import sync_playwright
 from game_entry import enter_game
 from scene_gestures import scene_ready
 from chime_gestures import wait_for_echo,pluck_chime
+from house_routes import focus_room
 ROOT=Path(__file__).resolve().parents[1]
 SCENARIO=os.environ.get('CHIME_SCENARIO','desktop')
 assert SCENARIO in ['desktop','phone']
@@ -35,7 +36,7 @@ def targets_fit(label):
  settled()
  result=page.evaluate('''()=>{
   const points=window.dollhouse.chimeObjects();
-  const papers=[...document.querySelectorAll('.chime-heading,.chime-work-strip,#ui .dock')].filter(e=>e.getClientRects().length).map(e=>e.getBoundingClientRect());
+  const papers=[...document.querySelectorAll('.chime-heading,.chime-work-strip,#ui .key-ring,#ui .porter-bell')].filter(e=>e.getClientRects().length).map(e=>e.getBoundingClientRect());
   const overlap=(a,b)=>a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top;
   return {count:points.length,keys:points.map(p=>p.key),valid:points.every(p=>{
    const b=p.bounds;
@@ -61,52 +62,45 @@ def house_hud_fit(label):
    const px=Math.max(0,Math.min(innerWidth-1,x)),py=Math.max(0,Math.min(innerHeight-1,y)),hit=document.elementFromPoint(px,py);
    return {x:px,y:py,hit:identity(hit),button:identity(hit?.closest('button,a,[role="button"]'))};
   }));
-  const roomButtons=[...document.querySelectorAll('.room-views [data-room]')];
-  const dockButtons=[...document.querySelectorAll('.dock[data-expanded=false]>button')].filter(visible);
-  const discovery=document.querySelector('[data-object-toggle]'),discoveryRect=discovery?rect(discovery):null;
-  const panels={clue,rooms:rect(document.querySelector('.room-views')),dock:rect(document.querySelector('.dock[data-expanded=false]'))};
-  const controls=[...roomButtons,...dockButtons,...objectives,discovery].filter(Boolean).map(e=>{
+  // The bar became the key ring and the porter's bell (DESIGN.md #67); rooms are touched in the house itself.
+  const ringKeys=[...document.querySelectorAll('.key-ring [data-key]')].filter(visible);
+  const bell=document.querySelector('.porter-bell'),bellShown=bell&&!bell.hidden&&visible(bell)?[bell]:[];
+  const panels={clue};
+  const discovery=null,discoveryRect=null;const roomButtons=[];void roomButtons;
+  const controls=[...ringKeys,...bellShown,...objectives].filter(Boolean).map(e=>{
    const r=rect(e),cx=(r.left+r.right)/2,cy=(r.top+r.bottom)/2;
    const hits=[[0,0],[-20,0],[20,0],[0,-20],[0,20]].map(([dx,dy])=>{const hit=document.elementFromPoint(cx+dx,cy+dy);return Boolean(hit&&e.contains(hit))});
-   return {key:e.hasAttribute('data-object-toggle')?'discovery':e.dataset.room??e.dataset.action,rect:r,hits,reachable:visible(e)&&inside(r)&&r.width>=44&&r.height>=44&&hits.every(Boolean)};
+   return {key:e.dataset.key??(e.classList.contains('porter-bell')?'bell':e.dataset.action),rect:r,hits,reachable:visible(e)&&inside(r)&&r.width>=44&&r.height>=44&&hits.every(Boolean)};
   });
   const controlsSeparate=controls.every((a,i)=>controls.slice(i+1).every(b=>!overlap(a.rect,b.rect)));
-  return {viewport:{width:innerWidth,height:innerHeight},title,clue,objectiveRects,labelCopies,topEdge,discoveryRect,panels,discoveryClear:Boolean(discoveryRect&&visible(discovery)&&inside(discoveryRect)&&Object.values(panels).every(r=>!overlap(discoveryRect,r))),singleObjective:objectives.length===1&&visible(objectives[0])&&inside(objectiveRects[0])&&objectiveRects[0].left>=clue.left&&objectiveRects[0].right<=clue.right&&objectiveRects[0].top>=clue.top&&objectiveRects[0].bottom<=clue.bottom,clearTitle:visible(titleElement)&&visible(clueElement)&&inside(title)&&inside(clue)&&!overlap(title,clue),roomKeys:roomButtons.map(e=>e.dataset.room),controls,controlsSeparate};
+  return {viewport:{width:innerWidth,height:innerHeight},title,clue,objectiveRects,labelCopies,topEdge,discoveryRect,panels,ringClear:controls.filter(c=>c.key!=='objective').every(c=>!overlap(c.rect,clue)),singleObjective:objectives.length===1&&visible(objectives[0])&&inside(objectiveRects[0])&&objectiveRects[0].left>=clue.left&&objectiveRects[0].right<=clue.right&&objectiveRects[0].top>=clue.top&&objectiveRects[0].bottom<=clue.bottom,clearTitle:visible(titleElement)&&visible(clueElement)&&inside(title)&&inside(clue)&&!overlap(title,clue),ringKeys:ringKeys.map(e=>e.dataset.key),controls,controlsSeparate};
  }''')
  print('SCENE_HUD_BOUNDS '+json.dumps({'label':label,**result}),flush=True)
  check(label+' title and clue stay fully visible without overlap',result['clearTitle'])
  check(label+' has one visible objective action inside its clue card',result['singleObjective'])
- check(label+' nine scene controls retain separate reachable 44px areas',set(result['roomKeys'])=={'kitchen','parlor','studio','bedroom'} and len(result['controls'])==9 and result['controlsSeparate'] and all(c['reachable'] for c in result['controls']))
- check(label+' discovery stays clear of the clue, room grid and dock',result['discoveryClear'])
+ check(label+' key ring, bell and clue keep separate reachable 44px areas',{'house','fuse'}<=set(result['ringKeys']) and result['controlsSeparate'] and all(c['reachable'] for c in result['controls']))
+ check(label+' the key ring and bell stay clear of the clue',result['ringClear'])
 
 def discover_objects(label,frame):
- toggle=page.locator('[data-object-toggle]')
- before_box=toggle.bounding_box()
+ # The bar's object list became the hidden house list (src/house-access.js): it shows only while it holds focus.
  before_progress=(snapshot()['buttons'],snapshot()['activities']['mastery']['lullaby'])
- page.touchscreen.tap(before_box['x']+before_box['width']/2,before_box['y']+before_box['height']/2)
- page.locator('.object-list').wait_for(state='visible')
- opened=page.locator('.object-list').evaluate('''e=>{const r=e.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}}''')
- expanded=page.locator('.object-list').evaluate('''e=>{
+ hidden=page.locator('.house-access').evaluate('e=>{const r=e.getBoundingClientRect();return r.width<=1&&r.height<=1}')
+ check(label+' the house list takes no room on screen until it holds focus',hidden)
+ first=page.locator('.house-access button').first;first.focus()
+ expanded=page.locator('.house-access').evaluate('''e=>{
   const rect=n=>{const r=n.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}};
-  const bounds=rect(e),overlap=(a,b)=>a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top;
-  const panels=['.objective','.room-views','.dock'].map(selector=>({selector,bounds:rect(document.querySelector(selector))}));
-  return {bounds,panels,overlaps:panels.filter(panel=>overlap(bounds,panel.bounds)).map(panel=>panel.selector)};
- }''')
+  const bounds=rect(e);return {bounds,inView:bounds.left>=0&&bounds.top>=0&&bounds.right<=innerWidth+1&&bounds.bottom<=innerHeight+1}}''')
  print('SCENE_DISCOVERY_BOUNDS '+json.dumps({'label':label,**expanded}),flush=True)
- check(label+' expanded discovery stays clear of the clue, room grid and dock',not expanded['overlaps'])
- after_box=toggle.bounding_box()
- check(label+' touch opens an in-bounds list without moving discovery',opened['left']>=0 and opened['right']<=page.viewport_size['width'] and opened['top']>=0 and opened['bottom']<=page.viewport_size['height'] and all(abs(before_box[k]-after_box[k])<.01 for k in before_box))
+ check(label+' focused, the house list opens in bounds',expanded['inView'] and expanded['bounds']['width']>44)
  reachable=[]
- for item in [page.locator('.object-list button').first,page.locator('.object-list button').last]:
-  item.scroll_into_view_if_needed()
-  reachable.append(item.evaluate('''e=>{
-   const r=e.getBoundingClientRect(),p=e.parentElement.getBoundingClientRect(),cx=(r.left+r.right)/2,cy=(r.top+r.bottom)/2;
-   return r.width>=44&&r.height>=44&&r.left>=0&&r.right<=innerWidth&&r.top>=Math.max(0,p.top)&&r.bottom<=Math.min(innerHeight,p.bottom)&&[[0,0],[-20,0],[20,0],[0,-20],[0,20]].every(([dx,dy])=>{const hit=document.elementFromPoint(cx+dx,cy+dy);return Boolean(hit&&e.contains(hit))});
-  }'''))
- check(label+' first and last discovery objects have real reachable 44px areas',all(reachable))
+ for item in [page.locator('.house-access button').first,page.locator('.house-access button').last]:
+  item.focus();item.scroll_into_view_if_needed()
+  reachable.append(item.evaluate('''e=>{const r=e.getBoundingClientRect(),p=e.parentElement.getBoundingClientRect();
+   return r.width>=44&&r.height>=44&&r.left>=0&&r.right<=innerWidth&&r.top>=Math.max(0,p.top)&&r.bottom<=Math.min(innerHeight,p.bottom)}'''))
+ check(label+' first and last house-list entries have real reachable 44px areas',all(reachable))
  capture(frame)
- page.touchscreen.tap(after_box['x']+after_box['width']/2,after_box['y']+after_box['height']/2)
- check(label+' closing discovery restores the house without starting or paying a ritual',toggle.get_attribute('aria-expanded')=='false' and not page.locator('.object-list').is_visible() and status() is None and (snapshot()['buttons'],snapshot()['activities']['mastery']['lullaby'])==before_progress)
+ page.locator('#world').focus()
+ check(label+' leaving the list restores the house without starting or paying a ritual',page.locator('.house-access').evaluate('e=>e.getBoundingClientRect().width<=1') and status() is None and (snapshot()['buttons'],snapshot()['activities']['mastery']['lullaby'])==before_progress)
 
 def paint_probe():
  # These explicitly named diagnostics are not canonical game screenshots.
@@ -131,7 +125,7 @@ def paint_probe():
  check('temporary paint probe preserves HUD bounds and restores source styling',restored['style']==original['style'] and all(o['card']==original['card'] and o['button']==original['button'] and o['label']==original['label'] for o in observations))
 
 def start_from_scene():
- page.locator('[data-room=bedroom]').click()
+ focus_room(page,'bedroom')
  scene_ready(page)
  house_hud_fit('bedroom entry')
  capture('00-bedroom-mobile')

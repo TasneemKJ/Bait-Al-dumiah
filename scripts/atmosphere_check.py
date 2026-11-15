@@ -3,6 +3,7 @@ import json, os, subprocess, time, urllib.request, wave, struct
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 from game_entry import enter_game
+from house_routes import focus_room,press_key
 ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'artifacts/levantine';OUT.mkdir(parents=True,exist_ok=True)
 URL='http://127.0.0.1:4189';results=[];errors=[]
 server=subprocess.Popen(['node','scripts/serve.mjs','dist'],cwd=ROOT,env={**os.environ,'PORT':'4189'},stdout=subprocess.DEVNULL)
@@ -33,14 +34,11 @@ try:
   (OUT/'night-initial-state.json').write_text(json.dumps(initial,indent=2))
   check('the night fixture survives pagehide autosave and loads before the app',initial['state']['clock']>=120 and initial['state']['settings']['locale']=='ar')
   page.wait_for_function('dollhouse.visual().nightMix>.99',timeout=60000)
-  if not page.locator('[data-action=panel-household]').is_visible():page.locator('[data-action=toggle-tools]').click()
-  check('Shami labels are rendered right-to-left in the shipped game',page.locator('html').get_attribute('dir')=='rtl' and 'أهل البيت' in page.locator('.dock [data-action=panel-household]').inner_text())
-  page.locator('[data-action=toggle-tools]').click()
+  check('Arabic labels are rendered right-to-left in the shipped game',page.locator('html').get_attribute('dir')=='rtl' and 'الإعدادات' in page.locator('.key-ring [data-key=fuse]').inner_text())
   check('night cue appears in the actual scene, not only in a construction fixture',page.evaluate('dollhouse.visual().courtyard.shadow>0 && dollhouse.visual().courtyard.shadow<=.24'))
   capture(page,'courtyard-shami-night')
-  page.locator('[data-room=studio]').click();capture(page,'window-night-closeup');page.locator('[data-action=camera]').click()
-  if not page.locator('[data-action=panel-settings]').is_visible():page.locator('[data-action=toggle-tools]').click()
-  page.locator('[data-action=panel-settings]').click();page.locator('[data-field=motion]').check();page.locator('[data-action=close]').click()
+  focus_room(page,'studio');capture(page,'window-night-closeup');press_key(page,'camera')
+  press_key(page,'panel-settings');page.locator('[data-field=motion]').check();page.locator('[data-action=close]').click()
   check('reduced motion removes the passing silhouette',page.evaluate('dollhouse.visual().courtyard.shadow===0'))
   page.set_viewport_size({'width':390,'height':844});capture(page,'courtyard-shami-phone')
   check('Shami phone layout has no horizontal scrolling',page.evaluate('document.documentElement.scrollWidth<=innerWidth'))

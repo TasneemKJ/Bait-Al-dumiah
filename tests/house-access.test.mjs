@@ -81,3 +81,14 @@ test('the story\'s end asks for a rating once; a replayed keepsake, a purchase a
  for(let t=0;t<3000;t+=100)night.frame(t);
  assert.ok(night.state().mischief.losses>=1,'the visitor kept it');assert.equal(night.reviews(),0,'a loss never asks');
 });
+
+test('the browser checks rebuild the list in the same order as the game (scripts/house_routes.py)',()=>{
+ const s=sim.createState();s.buttons=99;sim.place(s,'plant','parlor',1);
+ const order=[];const boxes={kitchen:'lina',studio:'sami',bedroom:'noor'};void boxes;
+ for(const r of ['kitchen','parlor','studio','bedroom']){order.push(JSON.stringify({roomTap:r}));
+  for(const d of s.dolls.filter(x=>x.room===r))order.push(JSON.stringify({doll:d.id}));
+  for(const p of INTERACTIVE_PROPS.filter(x=>x.room===r))order.push(JSON.stringify({object:'prop:'+p.id,room:r}));
+  for(const d of s.decor.filter(x=>x.room===r))order.push(JSON.stringify({object:'decor:'+d.id,room:r}))}
+ assert.deepEqual(access.accessEntries(s).map(e=>JSON.stringify(e.pick)),order);
+ assert.deepEqual(ROOMS.map(r=>r.id),['kitchen','parlor','studio','bedroom']);
+});

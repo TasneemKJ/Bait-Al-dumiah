@@ -1,60 +1,54 @@
-"""Rendered House Tools contracts; simulation and WebGL are tested separately."""
+"""Rendered key ring contracts (it replaced House Tools); simulation and WebGL are tested separately."""
 from pathlib import Path
 import os
 
 
 def run_tools_ui_checks(page, results):
+    """The key ring (DESIGN.md #67) replaced the House Tools dock: same contracts, now for the ring's keys."""
     output = os.environ.get('TOOLS_UI_EVIDENCE')
     if output:
         Path(output).mkdir(parents=True, exist_ok=True)
     for locale in ('en', 'ar'):
         for width, height, large in ((320,568,False),(390,844,False),(844,390,False),(1440,900,False),(320,568,True),(390,844,True),(844,390,True),(1440,900,True)):
-            case = f'{locale} {width}x{height} '+('200% text' if large else 'normal text')+' House Tools'
+            case = f'{locale} {width}x{height} '+('200% text' if large else 'normal text')+' key ring'
             page.set_viewport_size({'width': width, 'height': height})
             page.evaluate('''({locale,large}) => {
-                fixtureUI.close(); fixtureUI.collapseTools();
+                fixtureUI.close();
                 fixtureState.settings.locale=locale;
                 fixtureState.settings.largeText=large;
                 document.documentElement.style.fontSize=large?'32px':'16px';
                 fixtureState.paused=false;
-                fixtureUI.refresh(); fixtureViews.update();
-                fixtureObjects.update(); fixtureStory.clear();
+                fixtureUI.refresh(); fixtureRing.update(); fixtureStory.clear();
             }''', {'locale':locale,'large':large})
-            toggle = page.locator('[data-action="toggle-tools"]')
-            toggle.click()
-            dock = page.locator('.dock')
-            observed = dock.evaluate('''dock => {
-                const rect=dock.getBoundingClientRect();
-                const buttons=[...dock.querySelectorAll('[data-action^="panel-"]')];
-                const labels=buttons.map(button=>{
-                    const label=button.querySelector('span');
-                    const r=label.getBoundingClientRect(), s=getComputedStyle(label);
-                    return {action:button.dataset.action,text:label.textContent,
-                        visible:r.width>1&&r.height>1&&s.visibility!=='hidden'&&s.display!=='none',
-                        font:parseFloat(getComputedStyle(button).fontSize),
-                        fits:label.scrollWidth<=label.clientWidth+1};
+            ring = page.locator('.key-ring')
+            observed = ring.evaluate('''ring => {
+                const rect=ring.getBoundingClientRect();
+                const keys=[...ring.querySelectorAll('[data-key]')].map(key=>{
+                    const tag=key.querySelector('.ring-tag'),r=key.getBoundingClientRect(),s=getComputedStyle(tag);
+                    return {key:key.dataset.key,text:tag.textContent,w:r.width,h:r.height,
+                        visible:tag.getBoundingClientRect().width>1&&s.visibility!=='hidden'&&s.display!=='none',
+                        fits:tag.scrollWidth<=tag.clientWidth+1};
                 });
-                const hit=document.elementFromPoint(rect.x+4,rect.y+4);
-                return {labels, width:rect.width,height:rect.height,
+                const hit=document.elementFromPoint(rect.x+rect.width/2,rect.y+rect.height-6);
+                return {keys,width:rect.width,height:rect.height,
                     inView:rect.left>=0&&rect.top>=0&&rect.right<=innerWidth+1&&rect.bottom<=innerHeight+1,
-                    catchesPointer:hit===dock||dock.contains(hit),
+                    catchesPointer:hit===ring||ring.contains(hit),
                     pageOverflow:document.documentElement.scrollWidth-innerWidth};
             }''')
-            results.append({'name':case+' keeps all five destinations visibly named',
-                            'passed':len(observed['labels'])==5 and all(x['visible'] and x['font']>=14 and x['fits'] for x in observed['labels']),
+            results.append({'name':case+' keeps all five keys visibly named, each at least 44 px',
+                            'passed':len(observed['keys'])==5 and all(x['visible'] and x['fits'] and x['w']>=44 and x['h']>=44 for x in observed['keys']),
                             'observed':observed})
             results.append({'name':case+' stays onscreen and stops taps reaching the house',
                             'passed':observed['inView'] and observed['catchesPointer'] and observed['pageOverflow']<=1,
                             'observed':observed})
             if output and width==390 and not large:
                 page.screenshot(path=str(Path(output)/f'tools-{locale}.png'))
-            settings=page.locator('[data-action="panel-settings"]')
-            settings.click()
+            page.locator('.key-ring [data-key="fuse"]').click()
             results.append({'name':case+' opens settings through its real command router',
-                            'passed':page.locator('#sheet').is_visible() and toggle.get_attribute('aria-expanded')=='false'})
+                            'passed':page.locator('#sheet').is_visible()})
             page.locator('#sheet [data-action="close"]').click()
-            results.append({'name':case+' returns to the same single collapsed tools entry',
-                            'passed':toggle.is_visible() and page.locator('[data-action^="panel-"]:visible').count()==0})
+            results.append({'name':case+' returns to the house with the ring in place',
+                            'passed':ring.is_visible() and not page.locator('#sheet').is_visible()})
 
 
 if __name__ == '__main__':
@@ -72,18 +66,17 @@ if __name__ == '__main__':
 <script type="module">
 import {createState} from '/src/simulation.js';
 import {createUI} from '/src/ui.js';
-import {createRoomViews} from '/src/room-views.js';
+import {createKeyRing} from '/src/key-ring.js';
 import {createStoryUI} from '/src/story-ui.js';
-import {createObjectControls} from '/src/object-controls.js';
+import {translate} from '/src/i18n.js';
 const host=document.querySelector('#ui');
-window.fixtureState=createState();
+window.fixtureState=Object.assign(createState(),{day:3,journal:['music-box']});
 window.fixtureUI=createUI(host,()=>fixtureState,(action,value)=>{
  if(action==='panel-state')fixtureState.paused=Boolean(value&&value!=='activities');
  if(action==='inspect-object')fixtureUI.openObject(value);
 });
-window.fixtureViews=createRoomViews(host,()=>fixtureState,()=>{});
+window.fixtureRing=createKeyRing(host,()=>fixtureState,{t:k=>translate(fixtureState.settings.locale,k),store:()=>true});
 window.fixtureStory=createStoryUI(host,()=>fixtureState,()=>{});
-window.fixtureObjects=createObjectControls(host,()=>fixtureState,()=>{});
 window.fixtureReady=true;
 </script></body></html>'''
 

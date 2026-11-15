@@ -7,6 +7,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 from scene_gestures import scene_ready
 from game_entry import skip_intro
+from house_routes import select_object,focus_room
 
 ROOT=Path(__file__).resolve().parent.parent
 PORT=os.environ.get('PORT','4413')
@@ -26,17 +27,16 @@ def main():
    page.on('console',lambda m:errors.append(m.text) if m.type=='error' else None)
    page.goto(f'http://127.0.0.1:{PORT}/?debug=1')
    page.wait_for_selector('[data-home-action=play]:not([disabled])',timeout=60000)
-   page.click('[data-home-action=play]');skip_intro(page);page.wait_for_selector('.dock',timeout=30000)
+   page.click('[data-home-action=play]');skip_intro(page);page.wait_for_selector('.key-ring',timeout=30000)
    page.wait_for_function('window.dollhouse.objects()?.length>0',timeout=30000)
    page.keyboard.press('Space');page.wait_for_timeout(300);assert state(page)['paused'] is True,'Space pauses'
    page.keyboard.press('Space');page.wait_for_timeout(300);assert state(page)['paused'] is False,'Space resumes'
-   if not page.locator('[data-object="prop:mint-tin"]').is_visible():page.locator('[data-object-toggle]').click()
-   page.locator('[data-object="prop:mint-tin"]').click()
+   select_object(page,'prop:mint-tin')
    page.wait_for_selector('[data-scene-action="activate"]',timeout=10000)
    page.locator('[data-scene-action="activate"]').click();page.wait_for_timeout(800)
    assert state(page)['story']['lastAction']=='prop:mint-tin','activating the tin advances the story'
    assert page.locator('.held-item').count()==1,'the red thread is carried'
-   page.locator('[data-room=studio]').click()
+   focus_room(page,'studio')
    # Software WebGL advances the flight by rendered frames, not wall time.
    # Wait for measured HUD/camera stability before choosing the one drop point.
    scene_ready(page)
