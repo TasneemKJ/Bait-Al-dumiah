@@ -24,7 +24,9 @@ export function box(p,x,y,z,w,h,d,c,rounded=false){const g=geometry(rounded?'rou
 for(let i=0;i<a.count;i++){v.fromBufferAttribute(a,i);inner.copy(v).clampScalar(-.40,.40);
 v.sub(inner).normalize().multiplyScalar(.10).add(inner);
 a.setXYZ(i,v.x,v.y,v.z)}g.computeVertexNormals()}return g});return mesh(p,g,c,x,y,z,w,h,d)}
-export function ball(p,x,y,z,rx,ry,rz,c){const small=Math.max(rx,ry,rz)<=.13;
+// A ball's tessellation follows its drawn size: `extent` is its largest radius as it appears, which a caller that
+// scales its group (a plant in the garden at half size) passes so a small leaf gets the small sphere.
+export function ball(p,x,y,z,rx,ry,rz,c,extent=Math.max(rx,ry,rz)){const small=extent<=.13;
 return mesh(p,geometry(small?'detail-sphere':'sphere',()=>new T.SphereGeometry(1,small?
   10:16,small?7:12)),c,x,y,z,rx,ry,rz)}
 export function cylinder(p,x,y,z,r,h,c,bottom=1){return mesh(p,geometry(`cyl:${bottom}`,
@@ -47,7 +49,7 @@ cylinder(g,0,.17,0,.19,.34,0xba827b,.72);ring(g,0,.34,0,.19,.025,palette.cream,t
 cylinder(g,0,.34,0,.155,.015,0x68534d);
 for(let i=0;i<7;i++){const a=i*2.4;
 const end=[Math.cos(a)*.22,.65+(i%3)*.13,Math.sin(a)*.22];line(g,[0,.32,0],end,.014,0x718b62);
-const leaf=ball(g,...end,.13,.065,.22,i%2?0x91ad82:0x698b72);leaf.rotation.set(.45,a,.45)}return g}
+const leaf=ball(g,...end,.13,.065,.22,i%2?0x91ad82:0x698b72,.22*scale);leaf.rotation.set(.45,a,.45)}return g}
 export function lamp(p,x,y,z,scale=1){const g=new T.Group();g.position.set(x,y,z);g.scale.setScalar(scale);p.add(g);
 cylinder(g,0,.035,0,.25,.07,palette.gold);cylinder(g,0,.47,0,.027,.9,palette.gold);const shade=pleatedShade(g,0,.98,0);
 ring(g,0,.79,0,.36,.022,palette.gold,true);ball(g,0,1.2,0,.04,.06,.04,palette.gold);return {group:g,shade}}
