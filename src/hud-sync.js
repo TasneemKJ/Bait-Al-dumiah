@@ -95,6 +95,8 @@ export function createToaster(host,panelOpen=()=>false){
    render();
   },
   refresh:render,
+  // A closed sheet's notice ends with it: the toast keeps its time, a reopened sheet starts clean.
+  leave(){transientPanel=''},
   dispose(){clearTimeout(timer)},
  };
 }

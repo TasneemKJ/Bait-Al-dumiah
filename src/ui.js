@@ -26,6 +26,7 @@ export function createUI(host,getState,dispatch){
   renderPanel();host.querySelector('#sheet').showModal();dispatch('panel-state',name);
   host.querySelector('#sheet [data-action="close"]').focus()}
  function close(){host.querySelector('#sheet')?.close();panel=null;renderedPanel=null;resetConfirm=false;
+  toaster.leave();
   dispatch('panel-state',null);restoreFocus(host,previousFocus,Boolean(physicalActivity(getState())))}
  function renderPanel(){
   const s=getState(),root=host.querySelector('#sheet-content');if(!panel)return;

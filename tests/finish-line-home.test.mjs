@@ -36,6 +36,18 @@ test('transient sheet notices stay with the sheet where they originated',t=>{
  assert.equal(dom.note.textContent,'','a transient from Settings must not appear in Household');
 });
 
+// ui_check "reopening a sheet does not repeat a stale notice": a notice belongs to the sheet's visit that caused it.
+test('closing a sheet ends its notice: reopening the same sheet starts clean, the toast keeps its time',t=>{
+ t.mock.timers.enable({apis:['setTimeout']});
+ const dom=toastDOM(),previousDocument=globalThis.document;globalThis.document=dom.document;
+ let panel='journal';const toaster=createToaster(dom.host,()=>panel);
+ t.after(()=>{toaster.dispose();globalThis.document=previousDocument});
+ toaster.show('Milestone reward collected');assert.equal(dom.note.textContent,'Milestone reward collected');
+ panel=null;toaster.leave();panel='journal';dom.newSheet();toaster.refresh();
+ assert.equal(dom.note.textContent,'','a closed sheet\'s notice must not return when it reopens');
+ assert.equal(dom.host.querySelector('#toast').textContent,'Milestone reward collected');
+});
+
 test('persistent save warnings remain global across sheet changes',t=>{
  t.mock.timers.enable({apis:['setTimeout']});
  const dom=toastDOM(),previousDocument=globalThis.document;globalThis.document=dom.document;
