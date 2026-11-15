@@ -24,3 +24,15 @@ test('every key carries a short paper tag in both languages, and its touch targe
  assert.match(css,/#ui \.porter-bell\{[^}]*width:48px;height:48px/);
  assert.match(css,/@media \(prefers-reduced-motion:reduce\)\{[^}]*#ui \.porter-bell\.ringing/);
 });
+test('five keys and the bell fit a 375 px phone: the ring stops short of the bell corner and each key is 54 px',()=>{
+ const css=readFileSync(new URL('../src/hud.css',import.meta.url),'utf8');
+ assert.match(css,/#ui \.key-ring\{[^}]*max-width:calc\(100% - 100px\)/);
+ assert.match(css,/#ui \.key-ring \.ring-key\{[^}]*width:54px;flex:0 1 54px/);
+ assert.ok(5*44+4*3+8<=375-100,'five keys at their 44 px minimum fit the ring at 375 px');
+ assert.doesNotMatch(css,/#ui \.key-ring \.ring-key\{[^}]*transform:rotate/,'upright keys never lean into each other');
+});
+test('a key tag wraps only between words, never inside one',()=>{
+ const css=readFileSync(new URL('../src/hud.css',import.meta.url),'utf8');
+ assert.match(css,/#ui \.key-ring \.ring-tag\{[^}]*overflow-wrap:normal;word-break:normal/);
+ assert.doesNotMatch(css,/#ui \.key-ring \.ring-tag\{[^}]*overflow-wrap:anywhere/);
+});
