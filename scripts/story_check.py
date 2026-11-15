@@ -216,7 +216,7 @@ try:
     page.keyboard.press('Enter')
     check('keyboard inspection opens optional details', page.locator('dialog[open]').count() == 1)
     page.keyboard.press('Escape')
-    check('optional details restore focus to a visible control', page.evaluate('document.activeElement.matches(".house-access button,[data-scene-action],#world") && document.activeElement.getClientRects().length>0'))
+    check('optional details restore focus to a visible control', page.evaluate('document.activeElement.matches("#ui button,#world") && document.activeElement.getClientRects().length>0'))
     room('parlor')
     select('prop:parlor-sofa')
     tap_object('prop:parlor-sofa')

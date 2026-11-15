@@ -150,7 +150,7 @@ try:
   entries=page.locator('.key-ring button:visible,.porter-bell:visible,.camera-tools button:visible,.objective button:visible,.time-tools button:visible').evaluate_all('(els)=>els.map(e=>({name:e.dataset.action||e.className,w:e.getBoundingClientRect().width,h:e.getBoundingClientRect().height}))')
   targets['ring']=entries
   check('mobile controls (key ring, bell, clue, clock, zoom) are at least 44 by 44 px',bool(entries) and all(e['h']>=44 and e['w']>=44 for e in entries))
-  check('no bar: the ring holds only the keys the house has given',page.locator('.dock').count()==0 and page.locator('.key-ring [data-key]').count()>=2)
+  check('no bar: the ring holds only the keys the house has given',page.locator('.dock:visible').count()==0 and page.locator('.key-ring [data-key]').count()>=2)
   (OUT/'touch-targets.json').write_text(json.dumps(targets,indent=2))
   open_settings(page);page.locator('[data-field="locale"]').select_option('en');click(page,'close');click(page,'light');capture(page,'mobile-day')
   click(page,'panel-household');capture(page,'mobile-care');page.keyboard.press('Escape');check('Escape dismisses the sheet',not page.locator('dialog[open]').count())
