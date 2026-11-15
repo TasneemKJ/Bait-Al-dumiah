@@ -124,7 +124,9 @@ try:
   check('restoration spends displayed cost and persists tier',state()['buttons']==955 and state()['restoration']['kitchen']==1)
   page.wait_for_function('!window.dollhouse.visual().cameraMoving')
   page.screenshot(path=str(OUT/'04-restored-kitchen.png'))
-  page.evaluate('''() => {const s=window.dollhouse.state();s.restoration={kitchen:3,parlor:3,studio:3,bedroom:3};s.settings.reducedMotion=true;sessionStorage.setItem('expansion-fixture',JSON.stringify(s));}''')
+  # 98769b8: the keepsake drawer joins the key ring after a day's three wishes (or on day two); this restored
+  # household has had its full day, so its drawer is on the ring for the keepsake steps below.
+  page.evaluate('''() => {const s=window.dollhouse.state();s.restoration={kitchen:3,parlor:3,studio:3,bedroom:3};s.lastFullDay=s.day;s.settings.reducedMotion=true;sessionStorage.setItem('expansion-fixture',JSON.stringify(s));}''')
   page.reload(); enter_game(page);page.wait_for_function('window.dollhouse && !document.querySelector("#loading")')
   page.screenshot(path=str(OUT/'05-restored-house.png'))
   stats=page.evaluate('window.dollhouse.stats()')
@@ -178,12 +180,15 @@ try:
   page.set_viewport_size({'width':1280,'height':900})
   open_panel(page,'decorate');page.locator('[data-action="choose-item"][data-id="bear"]').click();page.locator('[data-action="place-confirm"]').click()
   decor=state()['decor'][-1];key='decor:'+str(decor['id']);buttons=state()['buttons']
-  house_routes.focus_room(page,'kitchen');page.wait_for_function('!window.dollhouse.visual().cameraMoving')
+  # b57cd08: a new keepsake goes to the room in view (here the studio, after sewing), not always the kitchen.
+  house_routes.focus_room(page,decor['room']);page.wait_for_function('!window.dollhouse.visual().cameraMoving')
+  # The new keepsake becomes a scene target on the next rendered frame; with its room already in view nothing moves.
+  page.wait_for_function('k=>window.dollhouse.objects().some(o=>o.key===k)',arg=key,timeout=20000)
   point=next(o for o in page.evaluate('window.dollhouse.objects()') if o['key']==key)
   page.mouse.move(point['x'],point['y']);page.mouse.down();page.mouse.move(point['x']+50,point['y']);page.mouse.move(point['x'],point['y']);page.mouse.up()
   check('a camera drag cannot select a decoration',page.locator('.object-ribbon').count()==0 and page.locator('.object-detail').count()==0 and page.evaluate('!window.dollhouse.visual().selectedObject'))
   # Recenter after the drag before selecting the physical object.
-  house_routes.focus_room(page,'kitchen');page.wait_for_function('!window.dollhouse.visual().cameraMoving')
+  house_routes.focus_room(page,decor['room']);page.wait_for_function('!window.dollhouse.visual().cameraMoving')
   point=next(o for o in page.evaluate('window.dollhouse.objects()') if o['key']==key);page.mouse.click(point['x'],point['y'])
   check('owned decoration is selectable in the scene ribbon',page.locator('.object-ribbon').is_visible())
   page.locator('[data-scene-action="inspect"]').click()
