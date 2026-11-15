@@ -300,6 +300,10 @@ def run():
         foreground()
         ready()
         chime_ready()
+        # Photograph the mobile before the pull, as the table (01) and the cloth (03) are photographed before their
+        # holds: with another tab in the window, a headed screenshot brings the page to the front and Chromium drops
+        # the page's pointer capture (lostpointercapture with no release from the game), which cancelled the hold.
+        capture('05-foreground-chimes')
         note = page.evaluate('window.dollhouse.chimes().pattern.at(-1)')
         point = next(p for p in page.evaluate('window.dollhouse.chimeObjects()')
                      if p['key'] == note)
@@ -316,7 +320,6 @@ def run():
         page.wait_for_function('note=>{const a=window.dollhouse.chimes();return a?.held===note&&a.pull>=.65}',
                                arg=note, timeout=20000, polling=100)
         chime_ready()
-        capture('05-held-chime')
         chime_before = observe('chime-before-hidden')
         check('the foreground mobile has a genuinely pulled charm before tab loss',
               not chime_before['visibility']['hidden'] and chime_before['visibility']['focus']
