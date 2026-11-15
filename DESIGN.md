@@ -327,3 +327,31 @@ Comparables: Gone Home (the house is the interface), Return of the Obra Dinn (on
   - Comparables, learned from but not copied: Mini Metro (demand that moves), A Little to the Left (household objects as the puzzle), Unpacking (a life told through things). Ours is one roof, two bowls, and things that keep their marks.
 - **Second idea (subscription value, not power): the canary's songbook.** Each night the canary learns a short tune from what happened in the house (the kettle, the rain on the bowls, the music box, the visitor's steps), made in code from that night's events. On the seventh night it sings the week back, and the songbook keeps every week. Something new every night for a subscriber; it never changes a search, a forecast or a score.
 - Test: the rain night must be losable without being cruel. A bot that moves bowls after the wind should keep at least 2 of 3 rooms dry; a bot that never moves them should keep 1. If both keep 3, add a drip.
+
+## #80 (random-stimulus) «ثقب الباب»: stimuli: a moth at a lamp · an echo in a stairwell · "you may only see the house through a keyhole"
+Comparables, learned from but not copied:
+- Five Nights at Freddy's: limited looks at rooms you cannot enter freely. Ours inverts it: you look in to care, not to survive.
+- Return of the Obra Dinn: deduce from small signs.
+- Gone Home: a house read through its details.
+
+Ours stays ours: a gentle bedtime round where opening a door has a cost.
+- **Idea (best): the bedtime round (جولة ما قبل النوم).** This is an everyday night challenge, not a weekly event, so Bait's evening always asks for a decision (owner: "easy, boring").
+  - **The round.** At bedtime every door in the house is shut. Some dolls sleep; some need something: a kettle left on, a nightmare, a window open to the cold.
+  - **Peeking.** Tap a keyhole to peek. The house dims to a small round view of the room. Each peek costs a little of the candle (the #61 candle, if that night has one), so you cannot peek everywhere.
+  - **Opening.** Opening a door fixes that room's need, but it wakes whoever sleeps inside. A woken doll starts the morning tired: tea takes longer and her line is shorter. It is a small cost, never a fail screen.
+  - **Signs outside a door.** These tell you where to look before you peek:
+    - light under the door: a lamp left burning;
+    - moths gathered at the frame: the lamp is guttering;
+    - a shadow that moves across the gap;
+    - a sound from that room. Phones often play muted, so every sound has a visual twin: a faint ripple of dust under that door.
+  - **The skill.** Read the signs, peek where they are unclear, and open only the doors that truly need you. At dawn the house says how the night went, plainly: how many slept through, and how many needs were met.
+  - **Rules it keeps:**
+    - It is played in the house (pillar 1).
+    - Each choice has a small cost (pillar 2).
+    - The answer is found by noticing (pillar 3).
+    - There is no timer bar: the candle is the clock.
+  - **First line:** «البيت نائم. انظر من ثقب الباب قبل أن تفتحه، فكلّ بابٍ يُفتح يوقظ من خلفه.»
+  - **Instruction:** «انقر ثقب الباب لتنظر.»
+  - **The subscription is untouched.** No extra peeks or candle are for sale. The canary's watch and the songbook (#74) remain the D9 stream.
+- **Second idea (backlog): the moths as the house's memory.** A room you never open over a week gathers moths. On the seventh night they lift together and settle on one thing in that room (a dress, a letter, a toy). That thing becomes the next keepsake to find. Neglect becomes a mystery, not a penalty.
+- **Test.** A bot that reads the signs should meet ≥ 80% of needs and wake at most 1 doll. A bot that opens every door should meet 100% of needs but wake ≥ 3. A bot that opens none should meet ≤ 30%. If the sign-reader cannot beat open-all on the total of needs met minus dolls woken, the signs are too faint.
