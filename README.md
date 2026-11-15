@@ -50,7 +50,7 @@ On launch, choose **Play** or **Continue** to enter the actual house. **Preferen
 
 Follow the clue into a room. **Touch an object once to select it, then touch the same object again to act.** When something is in your hand, drag it onto an object in the room; a wrong destination leaves it safely in your hand. Tap the held item to find the next room. Story progress and carried items survive reloads.
 
-For keyboard play, choose a room, open **Things to touch**, select an object and activate its scene action. **Look closer** opens optional details. **House tools** opens the household, ritual, decoration, journal and settings controls. Tap a doll to check its care and wishes. Practice rituals for mastery and earn room restorations; choose and place keepsakes through Decorate. After dark, greet the visitor to hear a whisper.
+There is no bottom bar: a brass **key ring** by the door holds the tools, each key a place in the house (Settings with sound and pause, Keepsakes, Album, and from day 2 the Fifth room); the **House** key hangs them up and shows the whole house, and a key is added only when the house first needs it. Touch a room to enter it. The **porter's bell** rings when someone is waiting; touch it to go there. **Look closer** opens optional details; a doll's second touch opens her sheet. Tap a doll to check its care and wishes. Practice rituals for mastery and earn room restorations; choose and place keepsakes through Decorate. After dark, greet the visitor to hear a whisper.
 
 Drag the room to turn; pinch/scroll to zoom. Arrow keys turn, `+`/`-` zoom, `H` resets the camera, `Space` pauses, and `Escape` cancels a carry, dismisses selection or closes a sheet. DOM controls provide keyboard alternatives to 3D picking.
 
