@@ -9,8 +9,8 @@ KEYS = {'panel-settings': 'fuse', 'panel-decorate': 'drawer', 'panel-journal': '
         'camera': 'house'}
 
 
-def press_access(page, pick):
-    """Press the hidden house-list entry whose pick matches (e.g. {'roomTap': 'studio'})."""
+def access_index(page, pick):
+    """The index of the hidden house-list entry whose pick matches (e.g. {'roomTap': 'studio'})."""
     # The built game bundles its modules, so the list's order (src/house-access.js accessEntries) is rebuilt
     # here from the debug seam: per room, the room, its dolls, its story objects, its keepsakes, then on a music
     # night its music box and the key. tests/house-access.test.mjs pins that order on the game side.
@@ -25,6 +25,12 @@ def press_access(page, pick):
       return out.findIndex(x=>Object.entries(want).every(([k,v])=>x[k]===v))}""", pick)
     if index < 0:
         raise AssertionError(f'no house-list entry for {pick}')
+    return index
+
+
+def press_access(page, pick):
+    """Press the hidden house-list entry whose pick matches (e.g. {'roomTap': 'studio'})."""
+    index = access_index(page, pick)
     # Activate it as VoiceOver's double-tap does (a click on the focused button), then give focus back to the
     # house so the list folds away again, as it does for a keyboard player who moves on.
     page.locator(f'.house-access [data-access="{index}"]').evaluate('b=>{b.focus();b.click()}')

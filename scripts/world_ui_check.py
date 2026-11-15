@@ -18,6 +18,7 @@ import json,os,subprocess,sys,time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 import caption_contrast
+import house_routes
 
 ROOT=Path(__file__).resolve().parent.parent
 PORT=os.environ.get('PORT','4715')
@@ -84,19 +85,21 @@ def journey(page,locale,shoot,caption):
  shoot('home')
  page.locator('[data-home-action=play]').click()
  watch_intro(page,shoot,skip=locale=='ar',caption=lambda n,go:caption(page,f'{locale}-{n}',go))
- page.wait_for_selector('.dock',timeout=30000)
+ page.wait_for_selector('.key-ring',timeout=30000)
  page.wait_for_function('window.dollhouse.objects()?.length>0',timeout=60000);settle(page,800)
  shoot('house',True)
- page.locator('[data-room=kitchen]').tap();settle(page)
+ house_routes.focus_room(page,'kitchen');settle(page)
  shoot('room',True)
- if not page.locator('[data-object="prop:mint-tin"]').is_visible():page.locator('[data-object-toggle]').tap()
+ # The objects list is the hidden house list now: keyboard focus shows it (the VoiceOver and keyboard route).
+ page.locator('.house-access button').first.focus();page.wait_for_timeout(300)
  shoot('objects')
- page.locator('[data-object="prop:mint-tin"]').tap();page.wait_for_selector('[data-scene-action="activate"]')
+ house_routes.select_object(page,'prop:mint-tin');page.wait_for_selector('[data-scene-action="activate"]')
  settle(page);shoot('selected',True)
  page.locator('[data-scene-action="activate"]').tap();page.wait_for_selector('.held-item');settle(page,800)
  shoot('carrying',True)
- page.locator('.tools-toggle').tap();page.wait_for_timeout(500);shoot('tools')
- page.locator('[data-action="panel-household"]:visible').first.tap();page.wait_for_selector('#sheet[open]')
+ # The tools are the key ring by the door; the household sheet is a doll's second touch.
+ page.wait_for_timeout(500);shoot('tools')
+ house_routes.open_household(page);page.wait_for_selector('#sheet[open]')
  page.wait_for_timeout(500);shoot('sheet')
  no_replay(page)
 
@@ -124,7 +127,7 @@ def watch_intro(page,shoot,skip=False,prefix='intro',caption=None):
 def no_replay(page):
  """A reload goes straight to play: the intro is first-launch only."""
  page.reload();page.wait_for_selector('[data-home-action=play]:not([disabled])',timeout=90000)
- page.locator('[data-home-action=play]').click();page.wait_for_selector('.dock',timeout=30000)
+ page.locator('[data-home-action=play]').click();page.wait_for_selector('.key-ring',timeout=30000)
  page.wait_for_timeout(600)
  if page.evaluate(f'{INTRO}.active') or page.locator('.intro-layer:not([hidden])').count():
   raise AssertionError('the intro replayed after a reload')
@@ -147,7 +150,7 @@ def intro_pass(browser,name,shoot_into,viewport,reduced=False,locale='en',captio
  watch_intro(page,lambda shot:shoot_into(page,f'{name}-{shot}'),prefix='intro',
   caption=lambda n,go:caption(page,f'{name}-{n}',go))
  # Software WebGL draws a few frames a second here, and the glide advances per frame, so allow it time to land.
- page.wait_for_selector('.dock',timeout=30000)
+ page.wait_for_selector('.key-ring',timeout=30000)
  page.wait_for_function('!window.dollhouse?.visual()?.cameraMoving',timeout=180000);page.wait_for_timeout(600)
  shoot_into(page,f'{name}-play')
  context.close();return errors

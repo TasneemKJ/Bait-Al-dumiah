@@ -10,7 +10,7 @@ ROOT=Path(__file__).resolve().parents[1]
 SCENARIO=os.environ.get('CHIME_SCENARIO','desktop')
 assert SCENARIO in ['desktop','phone']
 OUT=ROOT/'artifacts'/'chimes'/SCENARIO;OUT.mkdir(parents=True,exist_ok=True)
-BASE=os.environ.get('PLAY_URL','http://127.0.0.1:4196')
+BASE=os.environ.get('PLAY_URL','http://127.0.0.1:'+os.environ.get('PORT','4196'))
 server=None;checks=[];errors=[];page=None
 
 def check(name,value):
@@ -140,7 +140,7 @@ def start_from_scene():
 
 try:
  if not os.environ.get('PLAY_URL'):
-  server=subprocess.Popen(['node','scripts/serve.mjs','dist'],cwd=ROOT,env={**os.environ,'PORT':'4196'},stdout=(OUT/'server.log').open('w'),stderr=subprocess.STDOUT)
+  server=subprocess.Popen(['node','scripts/serve.mjs','dist'],cwd=ROOT,env={**os.environ,'PORT':os.environ.get('PORT','4196')},stdout=(OUT/'server.log').open('w'),stderr=subprocess.STDOUT)
   for _ in range(100):
    try:urllib.request.urlopen(BASE,timeout=1);break
    except Exception:time.sleep(.1)

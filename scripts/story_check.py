@@ -6,6 +6,7 @@ submits synthetic rewards, calls simulation functions or bypasses hit testing.
 import json, os, subprocess, time, urllib.request
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+import house_routes
 from game_entry import enter_game
 from scene_gestures import scene_ready
 from tea_check import complete_tea, tea_ready, tea_status, tap_tea
@@ -14,7 +15,7 @@ from stitch_gestures import finish_stitch, stitch_ready, stitch_status
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'artifacts' / 'stories'
 OUT.mkdir(parents=True, exist_ok=True)
-BASE = os.environ.get('PLAY_URL', 'http://127.0.0.1:4190')
+BASE = os.environ.get('PLAY_URL', 'http://127.0.0.1:'+os.environ.get('PORT','4190'))
 checks, errors = [], []
 server = None
 page = None
@@ -53,7 +54,7 @@ def capture(name):
 
 
 def room(name):
-    page.locator(f'[data-room="{name}"]').click()
+    house_routes.focus_room(page, name)
     ready()
 
 
@@ -112,16 +113,14 @@ def drag_to(key, touch=False):
 
 
 def panel(name):
-    target = page.locator(f'[data-action="panel-{name}"]')
-    if not target.is_visible():
-        page.locator('[data-action="toggle-tools"]').click()
-    target.click()
+    # The bar's sheets live in the house now (scripts/house_routes.py): ring keys, a doll, the album.
+    house_routes.open_panel(page, 'panel-' + name)
 
 
 try:
     if not os.environ.get('PLAY_URL'):
         server = subprocess.Popen(['node', 'scripts/serve.mjs', 'dist'], cwd=ROOT,
-                                  env={**os.environ, 'PORT': '4190'},
+                                  env={**os.environ, 'PORT': os.environ.get('PORT', '4190')},
                                   stdout=(OUT/'server.log').open('w'), stderr=subprocess.STDOUT)
     for _ in range(80):
         try:
@@ -145,7 +144,7 @@ try:
     ready()
     initial = state()
     check('new player starts with no inventory, progress or open tools',
-          progress() == 0 and not page.locator('.held-item').count() and page.locator('.dock').get_attribute('data-expanded') == 'false')
+          progress() == 0 and not page.locator('.held-item').count() and page.locator('.key-ring').count() == 1)
     capture('01-open-house')
     # Preserve a full-detail baseline; use the actual player quality setting for
     # the long interaction journey. High-detail rendering has a separate gate.
@@ -153,6 +152,11 @@ try:
     page.locator('[data-field="quality"]').select_option('low')
     page.locator('#sheet [data-action="close"]').click()
     page.wait_for_function('window.dollhouse.visual().quality==="low"')
+    # A new household's first clue is Lina's tea (dfbae13): one tap pays it, then the story clues begin.
+    if state()['cares'] == 0:
+        page.locator('#objective-action').click()
+        ready()
+        initial = state()
     page.locator('#objective-action').click()
     ready()
     check('a clue focuses the kitchen without doing the action', progress() == 0 and state()['buttons'] == initial['buttons'])
@@ -174,7 +178,7 @@ try:
     page.keyboard.press('Escape')
     page.mouse.up()
     check('Escape cancels a live carry gesture without dropping inventory', progress() == 1 and not page.locator('.carry-ghost').is_visible())
-    page.locator('.dock [data-action="pause"]').click()
+    page.keyboard.press('Space')
     frozen = state()['elapsed']
     check('pause hides item input and scene selection', not page.locator('.held-item').is_visible() and not page.locator('.object-ribbon').count())
     page.wait_for_timeout(300)
@@ -199,19 +203,20 @@ try:
     # Keyboard discovery remains optional; inspecting returns visible focus.
     stamp = state()['story']['lastActionAt']
     page.wait_for_function('t=>window.dollhouse.state().elapsed>t+.1', arg=stamp)
-    page.locator('[data-object-toggle]').focus()
+    # The keyboard route is the hidden house list (src/house-access.js): Enter selects, Enter again acts.
+    entry = page.locator(f'.house-access [data-access="{house_routes.access_index(page, {"object": "prop:moon-bed"})}"]')
+    entry.focus()
+    check('keyboard discovery reaches the room object by name', 'moon' in entry.inner_text().lower() or 'القمر' in entry.inner_text())
     page.keyboard.press('Enter')
-    check('keyboard discovery focuses the first room object', page.evaluate('document.activeElement.dataset.object==="prop:moon-bed"'))
-    page.keyboard.press('Enter')
-    check('keyboard discovery collapses after selection and focuses its action',
-          page.locator('[data-object-toggle]').get_attribute('aria-expanded') == 'false' and page.evaluate('document.activeElement.matches("[data-scene-action=activate]")'))
+    check('keyboard discovery selects the object', page.evaluate('window.dollhouse.visual().selectedObject==="prop:moon-bed"'))
+    if not page.evaluate('document.activeElement?.closest?.(".house-access")'):entry.focus()
     page.keyboard.press('Enter')
     check('keyboard activation replays the bear without spending anything', state()['story']['lastActionAt'] > stamp and state()['buttons'] == initial['buttons'] + 12)
-    page.keyboard.press('Tab')
+    page.locator('[data-scene-action="inspect"]').focus()
     page.keyboard.press('Enter')
     check('keyboard inspection opens optional details', page.locator('dialog[open]').count() == 1)
     page.keyboard.press('Escape')
-    check('optional details restore focus to a visible control', page.evaluate('document.activeElement.matches("[data-object-toggle],[data-action=toggle-tools],#world") && document.activeElement.getClientRects().length>0'))
+    check('optional details restore focus to a visible control', page.evaluate('document.activeElement.matches(".house-access button,[data-scene-action],#world") && document.activeElement.getClientRects().length>0'))
     room('parlor')
     select('prop:parlor-sofa')
     tap_object('prop:parlor-sofa')
@@ -300,13 +305,13 @@ try:
         page.set_viewport_size({'width': width, 'height': height})
         room('parlor')
         check(f'{width}×{height} controls fit without horizontal overflow', page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
-        check(f'{width}×{height} visible play controls meet 44px targets', page.locator('.dock button:visible,.room-views button:visible,[data-object-toggle]:visible,.camera-tools button:visible').evaluate_all('(els)=>els.every(e=>{const b=e.getBoundingClientRect();return b.width>=44&&b.height>=44&&b.left>=0&&b.right<=innerWidth&&b.top>=0&&b.bottom<=innerHeight})'))
-        check(f'{width}×{height} controls can actually receive a touch', page.locator('.dock button:visible,.room-views button:visible,[data-object-toggle]:visible,.camera-tools button:visible').evaluate_all('(els)=>els.every(e=>{const b=e.getBoundingClientRect(),hit=document.elementFromPoint(b.left+b.width/2,b.top+b.height/2);return hit===e||e.contains(hit)})'))
+        check(f'{width}×{height} visible play controls meet 44px targets', page.locator('.key-ring button:visible,.porter-bell:visible,.camera-tools button:visible').evaluate_all('(els)=>els.every(e=>{const b=e.getBoundingClientRect();return b.width>=44&&b.height>=44&&b.left>=0&&b.right<=innerWidth&&b.top>=0&&b.bottom<=innerHeight})'))
+        check(f'{width}×{height} controls can actually receive a touch', page.locator('.key-ring button:visible,.porter-bell:visible,.camera-tools button:visible').evaluate_all('(els)=>els.every(e=>{const b=e.getBoundingClientRect(),hit=document.elementFromPoint(b.left+b.width/2,b.top+b.height/2);return hit===e||e.contains(hit)})'))
     page.set_viewport_size({'width': 1280, 'height': 900})
     panel('settings')
     page.locator('[data-field="quality"]').select_option('high')
     page.locator('#sheet [data-action="close"]').click()
-    page.locator('[data-action="camera"]').click()
+    page.locator('[data-action="camera"]:visible').click()
     page.wait_for_function('window.dollhouse.visual().quality==="high"')
     capture('11-house-remembers')
     stats = page.evaluate('window.dollhouse.stats()')

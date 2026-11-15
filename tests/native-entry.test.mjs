@@ -68,41 +68,47 @@ test('scene readiness remains observational and the stability whole-house case e
  assert.match(section,/fixture\(browser,locale,motion,360,640,4\)[\s\S]*page\.locator\('\[data-action="camera"\]:visible'\)\.click\(\)[\s\S]*scene_ready\(page\)[\s\S]*select_at\(page,'prop:mint-tin'\)/);
 });
 
-test('expansion whole-house oracle rejects camera drift, occlusion and a UI-owned scene click',()=>{
+test('expansion whole-house oracle: the first touch opens the room, the second selects, and drift, a missing room, occlusion or a UI-owned click fail it',()=>{
  python(`
 import ast
 from pathlib import Path
 source=Path('scripts/expansion_check.py').read_text(); tree=ast.parse(source)
-functions=[node for node in tree.body if isinstance(node,ast.FunctionDef) and node.name=='check_whole_house_selection']
-assert len(functions)==1, 'expansion must verify stable whole-house selection instead of reframe'
+keep=[node for node in tree.body if (isinstance(node,ast.FunctionDef) and node.name=='check_whole_house_selection') or
+ (isinstance(node,ast.Assign) and getattr(node.targets[0],'id','') in ('LISTEN','OBSERVE'))]
+assert len([n for n in keep if isinstance(n,ast.FunctionDef)])==1, 'expansion must verify the whole-house route to selection'
 assert 'after_distance/before_distance>1.5' not in source
 class Locator:
  def __init__(self,page): self.page=page
  def click(self): self.page.events.append('camera')
 class Mouse:
  def __init__(self,page): self.page=page
- def click(self,x,y): self.page.events.append(('click',x,y))
+ def click(self,x,y): self.page.events.append(('click',x,y)); self.page.clicks+=1
 class Page:
- def __init__(self, defect=None): self.defect=defect; self.events=[]; self.mouse=Mouse(self)
+ def __init__(self, defect=None): self.defect=defect; self.events=[]; self.clicks=0; self.mouse=Mouse(self)
  def locator(self,selector):
   assert selector=='[data-action="camera"]:visible';return Locator(self)
+ def tea(self): return {'key':'prop:tea-set','x':320,'y':420} if self.clicks==0 else {'key':'prop:tea-set','x':200,'y':500}
  def evaluate(self,expression,arg=None):
-  if expression=='window.dollhouse.objects()': return [{'key':'prop:tea-set','x':320,'y':420}]
+  if expression=='window.dollhouse.objects()': return [self.tea()]
   if 'addEventListener' in expression: self.events.append('listen');return None
   if 'const visual' not in expression: return True
-  return {'point':{'x':350 if self.defect=='drift' else 320,'y':420},'focusedRoom':'kitchen' if self.defect=='focus' else None,'selected':'prop:tea-set','ribbon':True,'modal':False,'paused':False,'owner':'ribbon' if self.defect=='occluded' else 'world','event':{'x':320,'y':420,'owner':'ribbon' if self.defect=='event' else 'world'}}
+  d=self.defect;first=self.clicks==1;p=self.tea()
+  return {'point':{'x':p['x']+(30 if d=='drift' and not first else 0),'y':p['y']},
+   'focusedRoom':None if d=='focus' and first else 'kitchen','selected':None if first else 'prop:tea-set',
+   'ribbon':not first,'modal':False,'paused':False,'owner':'ribbon' if d=='occluded' and not first else 'world',
+   'event':{'x':arg['x'],'y':arg['y'],'owner':'ribbon' if d=='event' and first else 'world'}}
 def check(name,value): assert value,name
 def ready(page): page.events.append('ready')
 namespace={'check':check,'scene_ready':ready}
-exec(compile(ast.Module(body=functions,type_ignores=[]),'expansion-selection','exec'),namespace)
+exec(compile(ast.Module(body=keep,type_ignores=[]),'expansion-selection','exec'),namespace)
 run=namespace['check_whole_house_selection']; page=Page(); result=run(page)
-assert page.events==['camera','ready','listen',('click',320,420),'ready'],page.events
-assert result['point']=={'x':320,'y':420}
+assert page.events==['camera','ready','listen',('click',320,420),'ready','listen',('click',200,500),'ready'],page.events
+assert result['selected']=='prop:tea-set' and result['point']=={'x':200,'y':500}
 for defect in ['drift','focus','occluded','event']:
  page=Page(defect)
  try: run(page)
  except AssertionError: pass
  else: raise AssertionError('oracle accepted '+defect)
- assert [event for event in page.events if isinstance(event,tuple)]==[('click',320,420)],'must never re-aim or retry'
+ assert [e for e in page.events if isinstance(e,tuple)][0]==('click',320,420),'never re-aims the first touch'
 `);
 });

@@ -13,6 +13,7 @@ import time
 import urllib.request
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+import house_routes
 from game_entry import enter_game
 from scene_gestures import scene_ready
 from stitch_gestures import finish_stitch, stitch_ready, stitch_status
@@ -166,7 +167,7 @@ def run(scenario):
     assert scenario in ('desktop', 'phone', 'progression')
     out = ROOT / 'artifacts' / 'tea' / scenario
     out.mkdir(parents=True, exist_ok=True)
-    base = os.environ.get('PLAY_URL', 'http://127.0.0.1:4192')
+    base = os.environ.get('PLAY_URL', 'http://127.0.0.1:'+os.environ.get('PORT','4192'))
     checks, errors, waits = [], [], []
     outside_stats = working_high_stats = working_stats = None
     working_visual = None
@@ -274,13 +275,11 @@ def run(scenario):
         check(label + ' heading has a visible paper background', page.locator('.tea-heading').evaluate('e=>{const b=getComputedStyle(e).backgroundColor;return b!=="transparent"&&b!=="rgba(0, 0, 0, 0)"}'))
 
     def panel(name):
-        target = page.locator(f'[data-action="panel-{name}"]')
-        if not target.is_visible():
-            page.locator('[data-action="toggle-tools"]').click()
-        target.click()
+        # The bar's sheets live in the house now (scripts/house_routes.py): ring keys, a doll, the album.
+        house_routes.open_panel(page, 'panel-' + name)
 
     def room(name):
-        page.locator(f'[data-room="{name}"]').click()
+        house_routes.focus_room(page, name)
         ready()
 
     def object_point(key):
@@ -351,7 +350,10 @@ def run(scenario):
 
     def enter():
         room('kitchen')
-        touch_object('prop:tea-set', twice=True)
+        # A new household's first touch on the tea set opens the ritual (2794ef8); otherwise select, then act.
+        touch_object('prop:tea-set')
+        if page.evaluate('window.dollhouse.tea()===null'):
+            touch_object('prop:tea-set')
         tea_ready(page)
 
     def exit_tea():
@@ -369,7 +371,7 @@ def run(scenario):
     try:
         if not os.environ.get('PLAY_URL'):
             server = subprocess.Popen(['node', 'scripts/serve.mjs', 'dist'], cwd=ROOT,
-                                      env={**os.environ, 'PORT': '4192'}, stdout=(out/'server.log').open('w'), stderr=subprocess.STDOUT)
+                                      env={**os.environ, 'PORT': os.environ.get('PORT', '4192')}, stdout=(out/'server.log').open('w'), stderr=subprocess.STDOUT)
         for _ in range(100):
             try:
                 urllib.request.urlopen(base, timeout=1)

@@ -10,8 +10,8 @@ import house_routes
 from stitch_gestures import NeedleDrag, finish_stitch, stitch_ready, stitch_status, tap_stitch, trace_stitch
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'artifacts'/'expansion'; OUT.mkdir(parents=True,exist_ok=True)
-BASE=os.environ.get('PLAY_URL','http://127.0.0.1:4188')
-env={**os.environ,'PORT':'4188'}
+BASE=os.environ.get('PLAY_URL','http://127.0.0.1:'+os.environ.get('PORT','4188'))
+env={**os.environ,'PORT':os.environ.get('PORT','4188')}
 server=None if os.environ.get('PLAY_URL') else subprocess.Popen(['node','scripts/serve.mjs','dist'],cwd=ROOT,env=env,stdout=(OUT/'server.log').open('w'),stderr=subprocess.STDOUT)
 checks=[]
 def check(name,ok):
@@ -25,35 +25,43 @@ def open_panel(page,name):
 def select_object(page,key,inspect=False):
  house_routes.select_object(page,key)
  if inspect:page.locator('[data-scene-action="inspect"]').click()
-def check_whole_house_selection(page):
- # Explicit navigation owns framing. Direct object selection must leave the
- # original scene target still under the pointer, with actual canvas ownership.
- # The House key on the ring carries data-action="camera", so the whole-house route is unchanged.
- page.locator('[data-action="camera"]:visible').click()
- scene_ready(page)
- point=next(o for o in page.evaluate('window.dollhouse.objects()') if o['key']=='prop:tea-set')
- check('whole-house tea target starts exposed on canvas',page.evaluate('point=>document.elementFromPoint(point.x,point.y)?.id==="world"',point))
- page.evaluate('''() => {
+LISTEN='''() => {
   window.expansionScenePick=null;
   window.addEventListener('pointerdown',event=>{
    window.expansionScenePick={x:event.clientX,y:event.clientY,owner:event.target.id};
   },{capture:true,once:true});
- }''')
- page.mouse.click(point['x'],point['y'])
- scene_ready(page)
- observed=page.evaluate('''point => {
+ }'''
+OBSERVE='''point => {
   const visual=window.dollhouse.visual();
   return {point:window.dollhouse.objects().find(p=>p.key==='prop:tea-set'),
    focusedRoom:visual.focusedRoom,selected:visual.selectedObject,
    ribbon:Boolean(document.querySelector('.object-ribbon')?.getClientRects().length),
    modal:Boolean(document.querySelector('dialog[open]')),paused:window.dollhouse.state().paused,
    owner:document.elementFromPoint(point.x,point.y)?.id,event:window.expansionScenePick};
- }''',point)
- check('whole-house selection keeps its original view and nonmodal tea ribbon',observed['focusedRoom'] is None and observed['selected']=='prop:tea-set' and observed['ribbon'] and not observed['modal'] and not observed['paused'])
- check('scene selection preserves the original tea coordinates',observed['point'] is not None and abs(observed['point']['x']-point['x'])<.25 and abs(observed['point']['y']-point['y'])<.25)
- event=observed['event']
+ }'''
+def check_whole_house_selection(page):
+ # Since 1d38231 a whole-house touch opens the room under it, and in the room a touch selects. Both touches are
+ # owned by the actual canvas at the object's own coordinates, and selection stays nonmodal.
+ # The House key on the ring carries data-action="camera", so the whole-house route is unchanged.
+ page.locator('[data-action="camera"]:visible').click()
+ scene_ready(page)
+ tea=lambda:next(o for o in page.evaluate('window.dollhouse.objects()') if o['key']=='prop:tea-set')
+ def touch(point):
+  page.evaluate(LISTEN)
+  page.mouse.click(point['x'],point['y'])
+  scene_ready(page)
+  return page.evaluate(OBSERVE,point)
+ point=tea()
+ check('whole-house tea target starts exposed on canvas',page.evaluate('point=>document.elementFromPoint(point.x,point.y)?.id==="world"',point))
+ opened=touch(point)
+ event=opened['event']
  check('the first original-coordinate click is owned by the actual canvas',event is not None and event['owner']=='world' and abs(event['x']-point['x'])<.25 and abs(event['y']-point['y'])<.25)
- check('selection paper leaves that unchanged tea target exposed',observed['owner']=='world')
+ check('a whole-house touch on the tea set opens its room and selects nothing yet',opened['focusedRoom']=='kitchen' and opened['selected'] is None and not opened['modal'])
+ point=tea()
+ observed=touch(point)
+ check('in the room a touch selects the tea set with its nonmodal ribbon',observed['focusedRoom']=='kitchen' and observed['selected']=='prop:tea-set' and observed['ribbon'] and not observed['modal'] and not observed['paused'])
+ check('scene selection preserves the room\'s tea coordinates',observed['point'] is not None and abs(observed['point']['x']-point['x'])<.25 and abs(observed['point']['y']-point['y'])<.25)
+ check('selection paper leaves that tea target exposed',observed['owner']=='world')
  return observed
 
 def expose_objects(page):
@@ -80,6 +88,8 @@ try:
     if state()['clock']>=120:return
     page.locator('[data-action="light"]').click()
    check('night entry is deterministic even across a natural clock transition',state()['clock']>=120)
+  # A new household's first touch on the tea set pours (2794ef8); the clue's one-tap tea comes first here.
+  if state()['cares']==0:page.locator('[data-action="objective"]').click()
   (OUT/'00-whole-house-selection.json').write_text(json.dumps(check_whole_house_selection(page),indent=2))
   page.locator('[data-scene-action="close"]').click()
   house_routes.focus_room(page,'kitchen');page.wait_for_function('!window.dollhouse.visual().cameraMoving')

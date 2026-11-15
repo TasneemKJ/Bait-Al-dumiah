@@ -34,47 +34,45 @@ with sync_playwright() as p:
   const map=document.createElement('script');map.type='importmap';map.textContent=JSON.stringify({imports});document.head.append(map);
   const {createState}=await import('fixture/simulation.js');const {createUI}=await import('fixture/ui.js');
   window.fixtureState=createState();window.fixtureUI=createUI(document.querySelector('#ui'),()=>fixtureState,(action,value)=>{window.lastAction={action,value};if(action==='panel-state'){fixtureState.paused=Boolean(value&&value!=='activities');window.fixtureStory?.clear();window.fixtureObjects?.update()}if(action==='inspect-object')fixtureUI.openObject(value)});
-  try {const {createRoomViews}=await import('fixture/room-views.js');window.fixtureViews=createRoomViews(document.querySelector('#ui'),()=>fixtureState,id=>{window.lastAction={action:'focus-room',value:id}})} catch {}
+  {const {createKeyRing}=await import('fixture/key-ring.js');const {translate}=await import('fixture/i18n.js');window.fixtureViews=createKeyRing(document.querySelector('#ui'),()=>fixtureState,{t:k=>translate(fixtureState.settings.locale,k),store:()=>true})}
   const {createStoryUI}=await import('fixture/story-ui.js');window.fixtureStory=createStoryUI(document.querySelector('#ui'),()=>fixtureState,(action,value)=>{window.lastAction={action,value};if(action==='inspect-object')fixtureUI.openObject(value)});
-  const {createObjectControls}=await import('fixture/object-controls.js');window.fixtureObjects=createObjectControls(document.querySelector('#ui'),()=>fixtureState,key=>{window.lastAction={action:'select-object',value:key};fixtureStory.select(key);fixtureObjects.collapse?.()});
+  const {createHouseAccess}=await import('fixture/house-access.js');const {translate:tr}=await import('fixture/i18n.js');window.fixtureObjects=createHouseAccess(document.querySelector('#ui'),()=>fixtureState,{t:k=>tr(fixtureState.settings.locale,k),onPick:pick=>{if(pick?.object){window.lastAction={action:'select-object',value:pick.object};fixtureStory.select(pick.object)}else window.lastAction={action:'access',value:pick}}});window.fixtureObjects.collapse=()=>{};
  }''',modules)
  page.evaluate("fixtureUI.open('settings');fixtureUI.refresh();fixtureUI.close();fixtureUI.tick()")
- actual=page.locator('.dock [data-action="pause"]').get_attribute('aria-pressed')
- results=[{'name':'pause button follows effective state after settings close','passed':actual=='false','actual':actual}]
+ actual=page.evaluate('[fixtureState.paused,document.querySelector(".pause-overlay").hidden]')
+ results=[{'name':'closing settings (the fuse box, where Pause lives) leaves the house unpaused','passed':actual==[False,True],'actual':actual}]
  page.evaluate('fixtureState.clock=120;fixtureUI.tick()');page.locator('#light-button').hover();page.wait_for_timeout(220)
  colors=page.locator('#light-button').evaluate('(el)=>[getComputedStyle(el).color,getComputedStyle(el).backgroundColor]')
  ratio=contrast(*colors)
  results.append({'name':'night light-toggle hover has 4.5:1 contrast','passed':ratio>=4.5,'contrast':round(ratio,2),'colors':colors})
- page.evaluate('window.fixtureViews?.update()')
- buttons=page.locator('.room-views button')
- results.append({'name':'four distinct room closeup controls are present','passed':buttons.count()==4})
- if buttons.count()==4:
-  page.locator('[data-room=studio]').click()
-  results.append({'name':'closeup control dispatches stable room ID','passed':page.evaluate('lastAction.action==="focus-room" && lastAction.value==="studio"')})
-  page.set_viewport_size({'width':390,'height':844})
-  bounds=buttons.evaluate_all('(els)=>els.map(e=>({width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height}))')
-  results.append({'name':'room closeup controls meet mobile 44px targets','passed':all(b['width']>=44 and b['height']>=44 for b in bounds)})
-  clue=page.evaluate('''()=>{const toggle=document.querySelector('.clue-toggle'),copy=document.querySelector('#objective-detail'),r=toggle.getBoundingClientRect(),before=getComputedStyle(copy).display;toggle.click();const after=getComputedStyle(copy).display,expanded=toggle.getAttribute('aria-expanded');toggle.click();return {w:r.width,h:r.height,before,after,expanded,back:getComputedStyle(copy).display}}''')
-  results.append({'name':'phone clue chip toggle is a 44px target and opens/closes the clue text','passed':clue['w']>=44 and clue['h']>=44 and clue['before']=='none' and clue['after']!='none' and clue['expanded']=='true' and clue['back']=='none','clue':clue})
-  page.evaluate("fixtureUI.open('decorate')")
-  page.locator('[data-action=choose-item][data-id=plant]').click()
-  page.evaluate('fixtureViews.update()')
-  results.append({'name':'room navigation never covers decoration placement controls','passed':not page.locator('.room-views').is_visible()})
-  page.locator('[data-action=placement-cancel]').click();page.evaluate('fixtureViews.update()')
-  results.append({'name':'room navigation returns after placement cancellation','passed':page.locator('.room-views').is_visible()})
-  page.evaluate("fixtureState.settings.locale='ar';fixtureUI.refresh();fixtureViews.update()")
-  results.append({'name':'room buttons survive HUD rebuilds and translate to Arabic','passed':page.locator('.room-views button').count()==4 and page.locator('[data-room=kitchen]').get_attribute('aria-label')=='مطبخ الشاي' and 'المطبخ' in page.locator('.room-views').inner_text()})
-  for locale in ['en','ar']:
-   page.evaluate("locale=>{fixtureState.settings.locale=locale;fixtureUI.refresh();fixtureViews.update()}",locale)
-   readable=page.locator('.room-views .room-short').evaluate_all('(els)=>els.length===4&&els.every(e=>getComputedStyle(e).display!=="none"&&parseFloat(getComputedStyle(e).fontSize)>=10.5&&e.getBoundingClientRect().width<=e.parentElement.getBoundingClientRect().width)')
-   results.append({'name':f'{locale} phone room names are visible without tiny type or overflow','passed':readable})
-  for height in [390,320]:
-   page.set_viewport_size({'width':844,'height':height})
-   overlaps=page.evaluate("""()=>{
-    const a=document.querySelector('.room-views').getBoundingClientRect();
-    return ['.time-tools','.house-status','.camera-tools','.objective','.dock'].filter(selector=>{const b=document.querySelector(selector).getBoundingClientRect();return a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top})
-   }""")
-   results.append({'name':f'landscape {height}px room controls do not obscure other HUD controls','passed':not overlaps,'overlaps':overlaps})
+ # Rooms are reached through the house itself and the hidden house list; the key ring replaced the bar.
+ page.evaluate('fixtureViews.update();fixtureObjects.update()')
+ results.append({'name':'the house list names all four rooms','passed':page.evaluate("[...document.querySelectorAll('.house-access button')].length")>=4})
+ studio=page.evaluate('''async()=>{const m=await import('fixture/house-access.js');return m.accessEntries(fixtureState).findIndex(e=>e.pick.roomTap==='studio')}''')
+ page.locator(f'.house-access [data-access="{studio}"]').evaluate('b=>{b.focus();b.click()}')
+ results.append({'name':'the house list dispatches the stable room ID','passed':page.evaluate('lastAction.action==="access" && lastAction.value.roomTap==="studio"')})
+ page.set_viewport_size({'width':390,'height':844})
+ bounds=page.locator('.key-ring [data-key]').evaluate_all('(els)=>els.map(e=>({width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height}))')
+ results.append({'name':'key ring keys meet mobile 44px targets','passed':bool(bounds) and all(b['width']>=44 and b['height']>=44 for b in bounds)})
+ clue=page.evaluate('''()=>{const toggle=document.querySelector('.clue-toggle'),copy=document.querySelector('#objective-detail'),r=toggle.getBoundingClientRect(),before=getComputedStyle(copy).display;toggle.click();const after=getComputedStyle(copy).display,expanded=toggle.getAttribute('aria-expanded');toggle.click();return {w:r.width,h:r.height,before,after,expanded,back:getComputedStyle(copy).display}}''')
+ results.append({'name':'phone clue chip toggle is a 44px target and opens/closes the clue text','passed':clue['w']>=44 and clue['h']>=44 and clue['before']=='none' and clue['after']!='none' and clue['expanded']=='true' and clue['back']=='none','clue':clue})
+ page.evaluate("fixtureUI.open('decorate')")
+ page.locator('[data-action=choose-item][data-id=plant]').click()
+ page.evaluate('fixtureViews.update()')
+ results.append({'name':'the key ring never covers decoration placement controls','passed':not page.locator('.key-ring').is_visible()})
+ page.locator('[data-action=placement-cancel]').click();page.evaluate('fixtureViews.update()')
+ results.append({'name':'the key ring returns after placement cancellation','passed':page.locator('.key-ring').is_visible()})
+ for locale in ['en','ar']:
+  page.evaluate("locale=>{fixtureState.settings.locale=locale;fixtureUI.refresh();fixtureViews.update()}",locale)
+  readable=page.locator('.key-ring .ring-tag').evaluate_all('(els)=>els.length>=2&&els.every(e=>getComputedStyle(e).display!=="none"&&parseFloat(getComputedStyle(e).fontSize)>=9.5&&e.scrollWidth<=e.clientWidth+1)')
+  results.append({'name':f'{locale} key tags are visible without overflow','passed':readable})
+ for height in [390,320]:
+  page.set_viewport_size({'width':844,'height':height})
+  overlaps=page.evaluate("""()=>{
+   const a=document.querySelector('.key-ring').getBoundingClientRect();
+   return ['.time-tools','.house-status','.camera-tools','.objective'].filter(selector=>{const b=document.querySelector(selector).getBoundingClientRect();return a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top})
+  }""")
+  results.append({'name':f'landscape {height}px key ring does not obscure other HUD controls','passed':not overlaps,'overlaps':overlaps})
  page.set_viewport_size({'width':1440,'height':1000})
  page.evaluate("fixtureState.settings.locale='en';fixtureState.achieved=['first-care'];fixtureUI.refresh();fixtureUI.open('journal');fixtureUI.toast('Milestone reward collected')")
  page.locator('#sheet [data-action="claim"]').click()
@@ -96,27 +94,23 @@ with sync_playwright() as p:
  for locale in ['en','ar']:
   page.set_viewport_size({'width':320,'height':740})
   page.evaluate("locale=>{fixtureState.settings.locale=locale;fixtureUI.refresh();fixtureViews.update()}",locale)
-  for expanded in [False,True]:
-   toggle=page.locator('[data-action="toggle-tools"]')
-   if (toggle.get_attribute('aria-expanded')=='true')!=expanded:toggle.click()
-   valid=page.locator('.dock button:visible').evaluate_all('(els)=>els.length>0&&els.every(e=>{const b=e.getBoundingClientRect();return b.width>=44&&b.height>=44&&b.left>=0&&b.right<=innerWidth})')
-   results.append({'name':f'320px {locale} {"expanded" if expanded else "collapsed"} dock stays in bounds with 44px targets','passed':valid and page.locator('.dock [data-action^="panel-"]:visible').count()==(5 if expanded else 0)})
-  page.locator('[data-action="toggle-tools"]').click()
+  valid=page.locator('.key-ring button:visible').evaluate_all('(els)=>els.length>=2&&els.every(e=>{const b=e.getBoundingClientRect();return b.width>=44&&b.height>=44&&b.left>=0&&b.right<=innerWidth})')
+  results.append({'name':f'320px {locale} key ring stays in bounds with 44px targets','passed':valid and page.locator('.dock').count()==0})
  for locale in ['en','ar']:
   page.set_viewport_size({'width':667,'height':375})
   page.evaluate("locale=>{fixtureState.settings.locale=locale;fixtureUI.refresh();fixtureViews.update()}",locale)
-  reachable=page.locator('.dock button:visible,.room-views button:visible').evaluate_all('(els)=>els.every(e=>{const b=e.getBoundingClientRect(),hit=document.elementFromPoint(b.left+b.width/2,b.top+b.height/2);return hit===e||e.contains(hit)})')
-  results.append({'name':f'{locale} 667px landscape room and dock controls receive actual pointer input','passed':reachable})
+  reachable=page.locator('.key-ring button:visible').evaluate_all('(els)=>els.length>0&&els.every(e=>{const b=e.getBoundingClientRect(),hit=document.elementFromPoint(b.left+b.width/2,b.top+b.height/2);return Boolean(hit&&e.contains(hit))})')
+  results.append({'name':f'{locale} 667px landscape key ring receives actual pointer input','passed':reachable})
  page.set_viewport_size({'width':390,'height':844})
  page.evaluate("fixtureState.settings.locale='ar';fixtureUI.refresh();document.querySelector('#ui').dataset.focusRoom='kitchen';fixtureObjects.update()")
- page.locator('[data-object-toggle]').click()
- page.locator('[data-object="prop:tea-set"]').click()
+ tea=page.evaluate('''async()=>{const m=await import('fixture/house-access.js');return m.accessEntries(fixtureState).findIndex(e=>e.pick.object==='prop:tea-set')}''')
+ page.locator(f'.house-access [data-access="{tea}"]').evaluate('b=>{b.focus();b.click()}')
  results.append({'name':'accessible object control dispatches stable selection key','passed':page.evaluate('lastAction.action==="select-object" && lastAction.value==="prop:tea-set"')})
  results.append({'name':'accessible selection shows nonmodal localized object ribbon','passed':page.locator('.object-ribbon').is_visible() and not page.locator('dialog[open]').count() and not page.evaluate('fixtureState.paused') and 'الشاي' in page.locator('.object-ribbon').inner_text()})
  page.locator('[data-scene-action="inspect"]').click()
  results.append({'name':'selected prop offers localized activity and care actions','passed':page.locator('.object-detail [data-id="tea"]').count()==1 and page.locator('.object-detail [data-care="tea"]').count()==1 and 'الشاي' in page.locator('#sheet-title').inner_text()})
  page.locator('[data-action="close"]').click()
- results.append({'name':'closing optional object inspection restores meaningful visible scene focus','passed':page.evaluate('document.activeElement.matches("[data-scene-action],[data-object-toggle]") && document.activeElement.getBoundingClientRect().width>=44')})
+ results.append({'name':'closing optional object inspection restores meaningful visible scene focus','passed':page.evaluate('document.activeElement.matches("[data-scene-action],.house-access button") && document.activeElement.getBoundingClientRect().width>=44')})
  page.evaluate("fixtureState.decor=[{id:1,item:'plant',room:'kitchen',slot:0,rotation:0,originRoom:'kitchen',active:false,tendedDay:0,lastUse:-10}];fixtureUI.refresh();fixtureUI.openObject('decor:1')")
  action=page.locator('.object-detail [data-action="use-object"]')
  results.append({'name':'owned keepsake use is a bilingual mobile-safe primary action','passed':action.count()==1 and action.get_attribute('data-id')=='1' and action.evaluate('(e)=>{const b=e.getBoundingClientRect();return b.width>=44&&b.height>=44}')})
@@ -126,19 +120,18 @@ with sync_playwright() as p:
  for locale in ['en','ar']:
   page.set_viewport_size({'width':320,'height':740})
   page.evaluate("locale=>{fixtureState.settings.locale=locale;fixtureUI.refresh();fixtureObjects.update()}",locale)
-  for expanded in [False,True]:
-   toggle=page.locator('[data-object-toggle]')
-   if (toggle.get_attribute('aria-expanded')=='true')!=expanded:toggle.click()
-   valid=page.locator('.object-controls button:visible').evaluate_all('(els)=>els.length>0&&els.every(e=>{const b=e.getBoundingClientRect();return b.width>=44&&b.height>=44&&b.left>=0&&b.right<=innerWidth})')
-   results.append({'name':f'{locale} {"expanded" if expanded else "collapsed"} object controls fit 320px phones with 44px targets','passed':valid and (page.locator('[data-object]:visible').count()>0 if expanded else page.locator('[data-object]:visible').count()==0)})
-  page.locator('[data-object-toggle]').click()
+  page.locator('.house-access button').first.focus()
+  valid=page.locator('.house-access button:visible').evaluate_all('(els)=>els.length>0&&els.every(e=>{const b=e.getBoundingClientRect();return b.height>=44&&b.left>=0&&b.right<=innerWidth})')
+  results.append({'name':f'{locale} the focused house list fits 320px phones with 44px targets','passed':valid})
+  page.evaluate("document.activeElement.blur()")
+  results.append({'name':f'{locale} unfocused, the house list takes no room on screen','passed':page.locator('.house-access').evaluate('e=>e.getBoundingClientRect().width<=1')})
  for locale in ['en','ar']:
   page.set_viewport_size({'width':667,'height':375})
   page.evaluate("locale=>{fixtureState.settings.locale=locale;fixtureState.decor=[{id:1,item:'plant',room:'kitchen',slot:0},{id:2,item:'bear',room:'kitchen',slot:1},{id:3,item:'lamp',room:'kitchen',slot:2}];fixtureUI.refresh();fixtureObjects.update()}",locale)
-  if page.locator('[data-object-toggle]').get_attribute('aria-expanded')!='true':page.locator('[data-object-toggle]').click()
-  page.locator('.object-list button').last.scroll_into_view_if_needed()
-  visible=page.locator('.object-list button').last.evaluate('(e)=>{const b=e.getBoundingClientRect(),n=e.parentElement.getBoundingClientRect(),d=document.querySelector(".dock").getBoundingClientRect();return b.top>=n.top&&b.bottom<=n.bottom&&b.bottom<d.top&&b.left>=0&&b.right<=innerWidth}')
-  results.append({'name':f'{locale} populated room object list remains reachable on 667px landscape phone','passed':visible})
+  last=page.locator('.house-access button').last;last.focus();last.scroll_into_view_if_needed()
+  visible=last.evaluate('(e)=>{const b=e.getBoundingClientRect(),n=e.parentElement.getBoundingClientRect();return b.top>=n.top-1&&b.bottom<=n.bottom+1&&b.bottom<=innerHeight&&b.left>=0&&b.right<=innerWidth}')
+  results.append({'name':f'{locale} populated house list keeps its last entry reachable on a 667px landscape phone','passed':visible})
+  page.evaluate("document.activeElement.blur()")
  page.evaluate("fixtureUI.beginMove(1);fixtureUI.open('settings')")
  results.append({'name':'opening a menu cancels relocation UI and stale move identity','passed':page.evaluate('fixtureUI.moveId===null') and not page.locator('.placement').is_visible()})
  # Unchanged HUD content must preserve the real parsed DOM across ticks.
@@ -202,33 +195,26 @@ with sync_playwright() as p:
   }''',locale)
    hud=page.evaluate(r'''() => {
    const visible=el=>el.getClientRects().length&&getComputedStyle(el).display!=='none'&&getComputedStyle(el).visibility==='visible';
-   const rooms=[...document.querySelectorAll('.room-views [data-room]')],dock=[...document.querySelectorAll('.dock[data-expanded=false]>button')].filter(visible);
-   const discovery=document.querySelector('[data-object-toggle]'),outer=fixtureHudRect(document.querySelector('.object-controls'));
-   const controls=[document.querySelector('#objective-action'),discovery,...rooms,...dock].map(fixtureHudProbe);
-   const overlaps=['.objective','.room-views','.dock'].filter(selector=>{const b=fixtureHudRect(document.querySelector(selector));return outer.left<b.right&&outer.right>b.left&&outer.top<b.bottom&&outer.bottom>b.top});
-   return {controls,outer,overlaps,passed:controls.length===9&&new Set(controls.map(c=>c.key)).size===9&&controls.every(c=>c.valid)&&rooms.length===4&&['kitchen','parlor','studio','bedroom'].every(room=>rooms.some(button=>button.dataset.room===room))&&discovery.getAttribute('aria-expanded')==='false'&&!overlaps.length};
+   const keys=[...document.querySelectorAll('.key-ring [data-key]')].filter(visible),ring=fixtureHudRect(document.querySelector('.key-ring'));
+   const controls=[document.querySelector('#objective-action'),...keys].map(fixtureHudProbe);
+   const clue=fixtureHudRect(document.querySelector('.objective'));
+   const overlaps=ring.left<clue.right&&ring.right>clue.left&&ring.top<clue.bottom&&ring.bottom>clue.top;
+   return {controls,ring,overlaps,passed:controls.length>=3&&new Set(controls.map(c=>c.key+c.label)).size===controls.length&&controls.every(c=>c.valid)&&!overlaps&&fixtureHudInside(ring)};
   }''')
-   hud['namedTools']=page.get_by_role('button',name=page.evaluate("fixtureUI.t('houseTools')"),exact=True).count()==1
-   hud['namedDiscovery']=page.get_by_role('button',name=page.evaluate("fixtureUI.t('roomObjects')"),exact=True).count()==1
-   results.append({'name':f'{locale} {width}x320 normal HUD has nine clear 44px controls with five reachable points','passed':hud['passed'] and hud['namedTools'] and hud['namedDiscovery'],'observed':hud})
-   page.locator('[data-object-toggle]').click()
-   expanded=page.locator('.object-list').evaluate(r'''el=>{
-    const bounds=fixtureHudRect(el),overlap=(a,b)=>a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top;
-    const panels=['.objective','.room-views','.dock'].map(selector=>({selector,bounds:fixtureHudRect(document.querySelector(selector))}));
-    return {bounds,panels,overlaps:panels.filter(panel=>overlap(bounds,panel.bounds)).map(panel=>panel.selector),inside:fixtureHudInside(bounds)};
-   }''')
-   results.append({'name':f'{locale} {width}x320 expanded discovery does not obscure the clue, room grid or dock','passed':expanded['inside'] and not expanded['overlaps'],'observed':expanded})
-   entries=page.locator('.object-list [data-object]')
+   hud['namedRing']=page.get_by_role('navigation',name=page.evaluate("fixtureUI.t('keyRing')"),exact=True).count()==1
+   hud['namedHouseList']=page.get_by_role('navigation',name=page.evaluate("fixtureUI.t('houseAccess')"),exact=True).count()==1
+   results.append({'name':f'{locale} {width}x320 the clue and the key ring are clear 44px controls with five reachable points','passed':hud['passed'] and hud['namedRing'] and hud['namedHouseList'],'observed':hud})
+   page.evaluate('fixtureObjects.update()')
+   entries=page.locator('.house-access button')
    ends=[]
    for endpoint in [entries.first,entries.last]:
-    endpoint.scroll_into_view_if_needed()
+    endpoint.focus();endpoint.scroll_into_view_if_needed()
     ends.append(endpoint.evaluate(r'''el=>{
-    const target=fixtureHudProbe(el),list=el.closest('.object-list'),bounds=fixtureHudRect(list),dock=fixtureHudRect(document.querySelector('.dock')),r=target.rect;
-    const contained=r.left>=bounds.left-1e-6&&r.right<=bounds.right+1e-6&&r.top>=bounds.top-1e-6&&r.bottom<=bounds.bottom+1e-6;
-    return {target,bounds,scrollTop:list.scrollTop,clientHeight:list.clientHeight,scrollHeight:list.scrollHeight,passed:target.valid&&contained&&fixtureHudInside(bounds)&&bounds.bottom<=dock.top+1e-6&&document.querySelector('[data-object-toggle]').getAttribute('aria-expanded')==='true'};
+    const r=fixtureHudRect(el),list=fixtureHudRect(el.closest('.house-access'));
+    return {r,list,passed:r.height>=44&&fixtureHudInside(list)&&r.top>=list.top-1&&r.bottom<=list.bottom+1}
    }'''))
-   results.append({'name':f'{locale} {width}x320 discovery list keeps its first and last objects reachable above the dock','passed':entries.count()>=2 and all(end['passed'] for end in ends) and ends[1]['scrollTop']>ends[0]['scrollTop'],'observed':ends})
-   page.locator('[data-object-toggle]').click()
+   results.append({'name':f'{locale} {width}x320 the focused house list keeps its first and last entries reachable','passed':entries.count()>=2 and all(end['passed'] for end in ends),'observed':ends})
+   page.evaluate("document.activeElement.blur()")
  # Folded clue and measured playfield contract, exercised in the real DOM.
  page.evaluate('''async()=>{
   const {createPlayfieldLayout}=await import('fixture/playfield-layout.js');

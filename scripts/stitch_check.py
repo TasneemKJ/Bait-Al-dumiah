@@ -16,6 +16,7 @@ import urllib.request
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
+import house_routes
 from game_entry import enter_game
 from scene_gestures import scene_ready
 from stitch_gestures import (
@@ -51,7 +52,7 @@ def run(scenario):
     assert scenario in ('desktop', 'phone', 'progression')
     out = ROOT / 'artifacts' / 'stitch' / scenario
     out.mkdir(parents=True, exist_ok=True)
-    base = os.environ.get('PLAY_URL', 'http://127.0.0.1:4195')
+    base = os.environ.get('PLAY_URL', 'http://127.0.0.1:'+os.environ.get('PORT','4195'))
     checks, errors, waits = [], [], []
     outside_stats = working_high_stats = working_stats = working_visual = None
     server = server_log = browser = context = runtime = page = None
@@ -119,10 +120,8 @@ def run(scenario):
                 resize(previous)
 
     def panel(name):
-        target = page.locator(f'[data-action="panel-{name}"]')
-        if not target.is_visible():
-            page.locator('[data-action="toggle-tools"]').click()
-        target.click()
+        # The bar's sheets live in the house now (scripts/house_routes.py): ring keys, a doll, the album.
+        house_routes.open_panel(page, 'panel-' + name)
 
     def configure(arabic=False):
         panel('settings')
@@ -138,7 +137,7 @@ def run(scenario):
                                    timeout=60000, polling=100)
 
     def room(name):
-        page.locator(f'[data-room="{name}"]').click()
+        house_routes.focus_room(page, name)
         ready()
 
     def object_point(key):
@@ -342,7 +341,7 @@ def run(scenario):
         if not os.environ.get('PLAY_URL'):
             server_log = (out / 'server.log').open('w')
             server = subprocess.Popen(['node', 'scripts/serve.mjs', 'dist'], cwd=ROOT,
-                env={**os.environ, 'PORT': '4195'}, stdout=server_log, stderr=subprocess.STDOUT)
+                env={**os.environ, 'PORT': os.environ.get('PORT', '4195')}, stdout=server_log, stderr=subprocess.STDOUT)
         for _ in range(100):
             try:
                 with urllib.request.urlopen(base, timeout=1):
@@ -667,7 +666,7 @@ def run(scenario):
             ready()
             check('Escape exits a touch-owned needle and restores the house controls',
                   not page.locator('.stitch-playfield').is_visible() and
-                  page.locator('.room-views').is_visible())
+                  page.locator('.key-ring').is_visible())
             no_payout('cancelled phone ritual', phone_before)
 
             room('kitchen')

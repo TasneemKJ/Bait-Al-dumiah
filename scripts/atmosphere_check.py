@@ -5,10 +5,10 @@ from playwright.sync_api import sync_playwright
 from game_entry import enter_game
 from house_routes import focus_room,press_key
 ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'artifacts/levantine';OUT.mkdir(parents=True,exist_ok=True)
-URL='http://127.0.0.1:4189';results=[];errors=[]
+URL='http://127.0.0.1:'+os.environ.get('PORT','4189');results=[];errors=[]
 # The fixtures import the game's own modules (createState, the audio synth), which the bundled dist/ no longer
 # exposes, so the check serves the source tree; ?debug=1 gives it the same seam.
-server=subprocess.Popen(['node','scripts/serve.mjs','.'],cwd=ROOT,env={**os.environ,'PORT':'4189'},stdout=subprocess.DEVNULL)
+server=subprocess.Popen(['node','scripts/serve.mjs','.'],cwd=ROOT,env={**os.environ,'PORT':os.environ.get('PORT','4189')},stdout=subprocess.DEVNULL)
 def check(name,passed):
  results.append({'name':name,'passed':bool(passed)})
  if not passed:raise AssertionError(name)

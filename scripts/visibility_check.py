@@ -18,6 +18,7 @@ from importlib.metadata import version
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
+import house_routes
 from game_entry import enter_game
 from tea_check import PotDrag, tea_ready, tea_status
 from stitch_gestures import NeedleDrag, stitch_ready, stitch_status
@@ -28,7 +29,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def run():
     out = ROOT / 'artifacts' / 'visibility'
     out.mkdir(parents=True, exist_ok=True)
-    base = os.environ.get('PLAY_URL', 'http://127.0.0.1:4193').rstrip('/')
+    base = os.environ.get('PLAY_URL', 'http://127.0.0.1:'+os.environ.get('PORT','4193')).rstrip('/')
     cdp_port = int(os.environ.get('VISIBILITY_CDP_PORT', '4194'))
     checks, errors, observations = [], [], {}
     runtime_info = {'playwright': version('playwright'), 'headed': True,
@@ -107,7 +108,7 @@ def run():
             server_log = (out / 'server.log').open('w')
             server = subprocess.Popen(
                 ['node', 'scripts/serve.mjs', 'dist'], cwd=ROOT,
-                env={**os.environ, 'PORT': '4193'},
+                env={**os.environ, 'PORT': os.environ.get('PORT', '4193')},
                 stdout=server_log, stderr=subprocess.STDOUT,
             )
         for _ in range(100):
@@ -147,16 +148,13 @@ def run():
         ready()
 
         # Retain the original phone check's Arabic, low-detail, reduced-motion UI.
-        settings = page.locator('[data-action="panel-settings"]')
-        if not settings.is_visible():
-            page.locator('[data-action="toggle-tools"]').click()
-        settings.click()
+        house_routes.open_panel(page, 'panel-settings')
         page.locator('[data-field="quality"]').select_option('low')
         page.locator('[data-field="locale"]').select_option('ar')
         page.locator('[data-field="motion"]').check()
         page.locator('#sheet [data-action="close"]').click()
         page.wait_for_function('window.dollhouse.visual().quality==="low" && document.documentElement.dir==="rtl"')
-        page.locator('[data-room="kitchen"]').click()
+        house_routes.focus_room(page, 'kitchen')
         ready()
         for _ in range(2):
             point = next(p for p in page.evaluate('window.dollhouse.objects()') if p['key'] == 'prop:tea-set')
@@ -211,7 +209,7 @@ def run():
 
         # The original six tea checks above stay intact. A fresh story has no
         # carried thread, so this double scene tap opens standard physical sewing.
-        page.locator('[data-room="studio"]').click()
+        house_routes.focus_room(page, 'studio')
         ready()
         for _ in range(2):
             point = next(p for p in page.evaluate('window.dollhouse.objects()') if p['key'] == 'prop:sewing-machine')
@@ -286,7 +284,7 @@ def run():
 
         # Keep both earlier visibility journeys intact. This independent
         # permanent scene target opens the instrument at every story stage.
-        page.locator('[data-room="bedroom"]').click()
+        house_routes.focus_room(page, 'bedroom')
         ready()
         for _ in range(2):
             point = next(p for p in page.evaluate('window.dollhouse.objects()')
@@ -383,7 +381,7 @@ def run():
               chime_exited['state']['activities']['active'] is None
               and not chime_exited['visual']['chimeActive']
               and not page.locator('.chime-playfield').is_visible()
-              and page.locator('.room-views').is_visible()
+              and page.locator('.key-ring').is_visible()
               and page.evaluate('document.activeElement.id==="world"')
               and chime_economy(chime_exited) == chime_economy(chime_before))
         check('genuine held-chime visibility journey has no JavaScript or console errors', not errors)
