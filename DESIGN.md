@@ -373,3 +373,26 @@ Ours stays ours: a gentle bedtime round where opening a door has a cost.
 - **D9:** free for everyone. The canary's subscription gets no creak warning and no extra cover. The canary's song (#74) may mark the night, as atmosphere only.
 - **Art:** the coin is a gold dot carried on the fingertip, and a creaking board flashes a faint ring of moonlight. Noor's room is lit only by the window light. No new panel; one line in the morning.
 - **Second idea (backlog):** "the house must be smaller at the end of the day", where the rooms are packed into boxes for a move. It is too large for now and is kept for review.
+
+## #107 (random-stimulus, 2026-11-15) «جرّة الأزرار»: stimuli: a glass jar of buttons on the shelf · a clock that ticks backwards for one hour · "a currency that remembers where it came from"
+**Kernel:** the house's buttons (its currency) become things in a glass jar on the kitchen shelf, not a number. Every button remembers what earned it in shape and colour:
+- a green wooden one from the garden;
+- a red one from the tea;
+- a brass one from a visitor;
+- a mother-of-pearl one only from a secret.
+The jar fills before your eyes. To spend, you take buttons out of it with your hand.
+- **Play (pillar 1, in the house):**
+  - A long press on the jar opens its mouth.
+  - Drag the buttons to the thing wanted (a curtain, a repair).
+  - The number stays in the corner as now, but the jar is the truth.
+- **The decision (pillar 2, rituals with a small cost):** some purchases ask for a particular colour (the red curtain wants three red buttons), so the evening's ritual is chosen for what it brings, not for its count. A mother-of-pearl button can buy anything, but whoever spends it loses the memory of a secret from the jar. Hold it or spend it?
+- **Secrets found by noticing (pillar 3):** when the jar is full of a single colour, a doll stops at it and says something about the past of the house.
+- **Gentle dark humour:** «الجرّة لا تنسى من أين جاء كلّ زرّ، حتى حين تنسى الدمى».
+- **Comparables (learn, not copy):**
+  - Animal Crossing's bells are a number;
+  - Unpacking tells a life through things;
+  - A Little to the Left sorts by colour.
+  - None makes the currency things you sort and hold, with a memory you can keep or spend.
+- **D9:** free for everyone. The canary's subscription gives no extra button and no rare colour.
+- **Art:** the glass jar is drawn in 3D with refraction from the existing material; buttons are small discs with two or four holes, in the colours of their sources. Their sound on the glass is a soft tap. No new panel.
+- **Second idea (backlog):** a clock that runs backwards for one hour a week, where what was undone that day returns. It is close to the rewind of a game like Braid, so it stays for review only.
