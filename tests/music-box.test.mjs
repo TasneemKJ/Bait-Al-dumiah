@@ -72,3 +72,16 @@ test('in the house: touch the key, touch a box to carry it there, circle to wind
  game.pick({keyTo:'kitchen'});assert.equal(game.state().music.key,'kitchen','a drag carries it');
  game.pick({musicKey:true});game.pick({roomTap:'studio'});assert.equal(game.state().music.key,'studio');
 });
+
+test('the music boxes stay light: under 2,000 triangles, 400 casting shadows, 32 draws (round 9 budget)',async()=>{
+ const ctx=new Proxy({},{get:(t,k)=>k==='createRadialGradient'||k==='createLinearGradient'?()=>({addColorStop(){}}):
+  k==='getImageData'?()=>({data:new Uint8ClampedArray(4)}):()=>{},set:()=>true});
+ const prior=globalThis.document;globalThis.document={createElement:()=>({width:0,height:0,getContext:()=>ctx,style:{}})};
+ try{const T=await import('three');const {createMusicBoxes}=await import('../src/render/music-boxes.js');
+  const g=new T.Group();createMusicBoxes(g);let tri=0,shadow=0,draws=0;
+  g.traverse(o=>{if(o.isMesh&&o.material?.visible!==false){draws++;const geo=o.geometry;
+   const n=(geo.index?geo.index.count:geo.attributes.position.count)/3;tri+=n;if(o.castShadow)shadow+=n}});
+  assert.ok(tri<=2000,`${tri} triangles (was 4,496)`);assert.ok(shadow<=400,`${shadow} shadow triangles (was 4,496)`);
+  assert.ok(draws<=32,`${draws} draws (was 44)`);
+ }finally{globalThis.document=prior}
+});

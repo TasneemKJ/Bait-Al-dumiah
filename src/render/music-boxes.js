@@ -1,8 +1,9 @@
 import * as T from 'three';
 import {ROOMS,MUSIC_BOXES,KEY_REST,WIND_TURNS} from '../content.js';
 import {musicStatus,isNight} from '../simulation.js';
-import {box,ball,cylinder,ring,palette} from './primitives.js';
+import {box,ball,cylinder,palette} from './primitives.js';
 import {softTexture} from './textiles.js';
+import {compactStatic} from './batching.js';
 
 // The music box key (DESIGN.md #49, src/sim-musicbox.js): a small walnut box in each doll's room, one brass
 // key. The key sits in the box of the room it was carried to (or lies on the music cabinet by day) and turns
@@ -15,18 +16,23 @@ function buildBox(root,def){
  const g=new T.Group();g.position.copy(local(def.room,def.at));g.rotation.y=def.at[0]<0?.5:-.5;
  // Mirrored on the right-hand walls, so the winding stem always faces into the room, never the wall.
  const mirror=def.at[0]>0;g.scale.set(mirror?-BOX_SCALE:BOX_SCALE,BOX_SCALE,BOX_SCALE);root.add(g);
- box(g,0,.11,0,.34,.19,.24,WALNUT,true);box(g,0,.12,.122,.30,.03,.006,palette.gold);
- for(const x of [-.14,.14])for(const z of [-.09,.09])ball(g,x,.012,z,.022,.016,.022,palette.gold);
+ // The still body (walnut, a brass band, four brass feet, the winding stem) is merged into one draw per material;
+ // only the lid and the dancer move. Small parts cast no shadow (round 9: the restored house's triangle budget).
+ const body=new T.Group();g.add(body);
+ box(body,0,.11,0,.34,.19,.24,WALNUT);box(body,0,.12,.122,.30,.03,.006,palette.gold);
+ for(const x of [-.14,.14])for(const z of [-.09,.09])box(body,x,.012,z,.04,.024,.04,palette.gold);
  // The lid hinges at the back; a rose inlay on top and a brass clasp at the front.
  const lid=new T.Group();lid.position.set(0,.205,-.12);g.add(lid);
- box(lid,0,.018,.12,.36,.036,.26,WALNUT,true);box(lid,0,.038,.12,.22,.006,.15,palette.rose);
+ box(lid,0,.018,.12,.36,.036,.26,WALNUT);box(lid,0,.038,.12,.22,.006,.15,palette.rose);
  box(lid,0,.012,.252,.04,.03,.008,palette.gold);
  // The dancer inside, on her brass pin: a cream skirt and a small porcelain head.
  const dancer=new T.Group();dancer.position.set(0,.2,0);g.add(dancer);
  cylinder(dancer,0,.035,0,.045,.07,palette.cream,1.6);ball(dancer,0,.09,0,.022,.024,.022,0xf2dcd0);
  cylinder(dancer,0,.0,0,.006,.04,BRASS);
  // The winding stem on the side the key fits into.
- const stem=new T.Vector3(.2,.11,0);cylinder(g,.185,.11,0,.018,.03,BRASS).rotation.z=Math.PI/2;
+ const stem=new T.Vector3(.2,.11,0);cylinder(body,.185,.11,0,.018,.03,BRASS).rotation.z=Math.PI/2;
+ for(const part of [body,lid,dancer]){part.traverse(o=>{if(o.isMesh)o.castShadow=false});compactStatic(part)}
+ body.children[0]&&(body.children[0].castShadow=true);
  const glint=new T.Sprite(new T.SpriteMaterial({map:softTexture(),color:GLINT,transparent:true,opacity:0,
    depthWrite:false,blending:T.AdditiveBlending}));glint.scale.setScalar(.75);glint.position.set(0,.3,.05);g.add(glint);
  const hit=new T.Mesh(new T.BoxGeometry(.62,.5,.5),new T.MeshBasicMaterial({visible:false}));
@@ -36,7 +42,10 @@ function buildBox(root,def){
 function buildKey(root){
  const key=new T.Group();key.scale.setScalar(KEY_SCALE);root.add(key);const spin=new T.Group();key.add(spin);
  // Bow, shaft and bit, along +x: the shaft goes into a box's stem and the bow turns outside it.
- ring(spin,.17,0,0,.045,.011,BRASS).rotation.y=Math.PI/2;cylinder(spin,.07,0,0,.011,.13,BRASS).rotation.z=Math.PI/2;
+ const brass=new T.MeshStandardMaterial({color:BRASS,metalness:.48,roughness:.39});
+ const bow=new T.Mesh(new T.TorusGeometry(.045,.011,5,16),brass);
+ bow.position.x=.17;bow.rotation.y=Math.PI/2;spin.add(bow);
+ cylinder(spin,.07,0,0,.011,.13,BRASS).rotation.z=Math.PI/2;
  box(spin,.01,-.022,0,.03,.03,.012,BRASS);ball(spin,.125,0,0,.016,.016,.016,BRASS);
  const halo=new T.Sprite(new T.SpriteMaterial({map:softTexture(),color:GLINT,transparent:true,opacity:0,
    depthWrite:false,blending:T.AdditiveBlending}));halo.scale.setScalar(.55);halo.position.x=.1;key.add(halo);
