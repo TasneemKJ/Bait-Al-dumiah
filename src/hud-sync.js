@@ -119,14 +119,11 @@ export function wireSheet(host,close){
 }
 
 // Where focus should return after a sheet closes: the control that opened it, not a hidden dock button.
-export function focusOrigin(host){
- const active=document.activeElement;
- if(active?.matches('[data-action^="panel-"]'))return host.querySelector('[data-action="toggle-tools"]');
- if(active?.closest('.object-ribbon'))return host.querySelector('[data-object-toggle]');
- return active;
-}
+// The control that opened a sheet gets focus back when it closes (a ring key, the ribbon's inspect button); if it
+// is gone or hidden, the House key on the ring, or the house itself during a ritual or without a ring.
+export function focusOrigin(){return document.activeElement}
 export function restoreFocus(host,origin,ritualActive){
- const fallback=ritualActive?document.querySelector('#world'):host.querySelector('[data-action="toggle-tools"]');
+ const fallback=(!ritualActive&&host.querySelector('.key-ring [data-key="house"]'))||document.querySelector('#world');
  const target=origin?.isConnected&&origin.getClientRects().length?origin:fallback;
  target?.focus({preventScroll:true});
 }
