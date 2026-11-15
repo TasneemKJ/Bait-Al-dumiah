@@ -423,10 +423,27 @@ def run(scenario):
                 cups = tea_status(page)['cups']
                 left, right = [tea_point(page, 'cup:' + str(c['id'])) for c in cups]
                 drag.move(drag.start['x'] + (left['x'] + right['x']) / 2 - drag.spout['x'], drag.start['y'] + 60)
-                page.wait_for_function('window.dollhouse.tea().spills>.08')
-                check('a real miss spills without filling either opening', all(c['fill'] == 0 for c in tea_status(page)['cups']))
+                # Pour assist (2026-11-14, src/tea-input.js POUR_ASSIST): while tilting, a spout within 0.6 aim units
+                # (0.27 table units) of a cup glides onto it. At two cups that covers the whole table, so a pointer
+                # pour between them is steered into the nearer cup and spills nothing.
+                page.wait_for_function('window.dollhouse.tea().poured>.08')
+                steered = tea_status(page)
+                check('a pointer pour between the cups is steered into the nearer cup, spilling nothing',
+                      sum(1 for c in steered['cups'] if c['fill'] > 0) == 1 and steered['spills'] < .02)
             finally:
                 drag.release()
+            # The keyboard has no assist, so a pour aimed between the cups is still a real miss.
+            fills = [c['fill'] for c in tea_status(page)['cups']]
+            page.locator('#world').focus()
+            key = 'ArrowLeft' if tea_status(page)['aim'] > 0 else 'ArrowRight'
+            page.keyboard.down(key)
+            page.wait_for_function('Math.abs(window.dollhouse.tea().aim)<.06', timeout=10000, polling=16)
+            page.keyboard.up(key)
+            page.keyboard.down('Space')
+            page.wait_for_function('window.dollhouse.tea().spills>.08', timeout=20000)
+            page.keyboard.up('Space')
+            check('a keyboard pour between the cups is a real miss: it spills without filling either opening',
+                  [c['fill'] for c in tea_status(page)['cups']] == fills)
             page.wait_for_function('window.dollhouse.visual().tea.spillVisible')
             check('missed tea leaves a real visible spill patch', page.evaluate('window.dollhouse.visual().tea.spillVisible'))
             capture('02-desktop-spill')
