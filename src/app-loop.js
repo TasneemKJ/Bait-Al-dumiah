@@ -27,7 +27,9 @@ export function installLoop(app){
       app.state.paused||app.storyUI?.selected||app.physicalActivity()));
   app.mischief?.tick(now);
   if(app.physicalActivity()!=='lullaby')app.audio.tick(sim.isNight(app.state),sim.raining(app.state));
-  if(now-lastUI>250){app.ui.tick();app.roomViews.update();app.objectControls.update();
+  if(now-lastUI>250){app.ui.tick();app.roomViews.update();app.objectControls?.update();
+  const a=app.state.activities?.active;app.bell?.tick(Boolean(a&&!['served','finished'].includes(a.phase))||
+   app.manualPause||Boolean(app.ui.panel||app.ui.placement||app.intro?.active));
   app.storyUI.update();lastUI=now}if(now-app.lastSave>8000){app.save();app.lastSave=now}}
   requestAnimationFrame(frame);
  }

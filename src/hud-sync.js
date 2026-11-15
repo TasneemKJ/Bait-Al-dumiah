@@ -1,6 +1,6 @@
 import {nextStep} from './objective-ui.js';
 import {daySweepDegrees} from './readouts.js';
-import {isNight,coziness,unclaimed,storyStatus,hasBasket,visitorWaiting} from './simulation.js';
+import {isNight,coziness,storyStatus,visitorWaiting} from './simulation.js';
 import {updateActivityStatus} from './activities-ui.js';
 import {icon} from './icons.js';
 
@@ -40,11 +40,10 @@ export function syncHud(host,s,{t,n,panel,placement,selected}){
  const light=host.querySelector('#light-button'),lightHtml=icon(isNight(s)?
    'sun':'moon')+`<span>${t(isNight(s)?'dawn':'night')}</span>`;setMarkup(light,lightHtml);
  host.querySelector('.visitor-hint').hidden=!visitorWaiting(s)||Boolean(placement);
- host.querySelector('.dock [data-action="panel-household"]')?.classList.toggle('has-news',hasBasket(s));
- host.querySelector('.dock [data-action="panel-journal"]')?.classList.toggle('has-news',unclaimed(s).length>0);
  host.querySelector('.pause-overlay').hidden=!s.paused||Boolean(panel);
- const pauseButton=host.querySelector('.dock [data-action="pause"]'),pauseLabel=t(s.paused?'resume':'pause');
- if(pauseButton.getAttribute('aria-pressed')!==String(s.paused)||pauseButton.title!==pauseLabel){
+ // Pause now lives in the fuse box (the settings sheet); the porter's bell replaced the badge dots.
+ const pauseButton=host.querySelector('.settings-list [data-action="pause"]'),pauseLabel=t(s.paused?'resume':'pause');
+ if(pauseButton&&(pauseButton.getAttribute('aria-pressed')!==String(s.paused)||pauseButton.title!==pauseLabel)){
   pauseButton.setAttribute('aria-pressed',String(s.paused));pauseButton.title=pauseLabel;
   pauseButton.innerHTML=icon(s.paused?'resume':'pause')+`<span>${pauseLabel}</span>`;
  }
@@ -134,8 +133,8 @@ export function restoreFocus(host,origin,ritualActive){
 
 // Opens or folds the dock of sheet shortcuts and keeps its toggle's aria state in step.
 export function setDock(host,expanded){
- host.querySelector('.dock').dataset.expanded=String(expanded);
- host.querySelector('[data-action="toggle-tools"]').setAttribute('aria-expanded',String(expanded));
+ const dock=host.querySelector('.dock');if(dock)dock.dataset.expanded=String(expanded);
+ host.querySelector('[data-action="toggle-tools"]')?.setAttribute('aria-expanded',String(expanded));
 }
 
 // A status line at the top of a sheet, so a message stays visible behind the dialog.

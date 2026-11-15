@@ -11,23 +11,23 @@ const button=(action,label,ico,extra='')=>`<button type="button" data-action="${
 const view=(s)=>({t:key=>translate(s.settings.locale,key),n:value=>number(s.settings.locale,value),button});
 const count=(text,pattern)=>(text.match(pattern)||[]).length;
 
-test('the shell offers every sheet from the dock in both languages and never prints a missing value',()=>{
+test('the shell never prints a missing value in either language',()=>{
  for(const locale of ['en','ar']){
   const s=createState();s.settings.locale=locale;
   const html=shellMarkup(s,{...view(s),clueExpanded:false,toolsExpanded:false});
-  for(const panel of ['household','activities','decorate','journal','settings'])assert.match(html,new RegExp(`data-action="panel-${panel}"`),`${locale} dock lacks ${panel}`);
+  // The sheets moved to the key ring (src/key-ring.js); the shell keeps none of the old bar.
+  assert.doesNotMatch(html,/data-action="panel-/,`${locale} shell still has a bar`);
   assert.match(html,/<dialog id="sheet"/);
   assert.match(html,new RegExp(view(s).t('title')));
   assert.doesNotMatch(html,/undefined|NaN|\[object/,`${locale} shell prints a missing value`);
  }
 });
 
-test('the shell reports whether the dock and the clue card are open',()=>{
+test('the shell reports whether the clue card is open',()=>{
  const s=createState(),v=view(s);
  const flat=text=>text.replace(/\s+/g,' ');
  const closed=flat(shellMarkup(s,{...v,clueExpanded:false,toolsExpanded:false}));
  const open=flat(shellMarkup(s,{...v,clueExpanded:true,toolsExpanded:true}));
- assert.match(closed,/class="dock" data-expanded="false"/);assert.match(open,/class="dock" data-expanded="true"/);
  assert.match(closed,/<aside class="objective" data-expanded="false"/);assert.match(open,/<aside class="objective" data-expanded="true"/);
  assert.match(closed,/<div id="objective-detail" hidden>/);assert.doesNotMatch(open,/<div id="objective-detail" hidden>/);
 });

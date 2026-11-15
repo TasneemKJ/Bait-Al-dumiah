@@ -6,11 +6,12 @@ import {createPlayfieldLayout} from './playfield-layout.js';
 import {createTeaUI} from './tea-ui.js';
 import {createStitchUI} from './stitch-ui.js';
 import {createChimeUI} from './chime-ui.js';
-import {createObjectControls} from './object-controls.js';
 import {createWorld} from './render/world.js';
 import {createUI} from './ui.js';
 import {createResidentLabel} from './resident-label.js';
-import {createRoomViews} from './room-views.js';
+import {createKeyRing} from './key-ring.js';
+import {appStore} from './app-store.js';
+import {createPorterBell} from './porter-bell.js';
 import {createIntroUI} from './intro-ui.js';
 import {createIntroSound} from './intro-sound.js';
 import {DollhouseAudio} from './audio.js';
@@ -77,7 +78,10 @@ function buildViews(){
     {canContinue:session.canContinue,loadStatus:session.loadStatus});
   app.syncPause();
   app.residentLabel=createResidentLabel(host);
-  app.roomViews=createRoomViews(host,getState,id=>dispatch('focus-room',id));
+  // The key ring by the door and the porter's bell replace the bottom bar (DESIGN.md #67).
+  app.roomViews=createKeyRing(host,getState,{t:key=>app.ui.t(key),say:text=>app.say?.(text),store:()=>appStore.inApp});
+  app.bell=createPorterBell(host,getState,{t:key=>app.ui.t(key),sound:()=>app.audio.effect('mobile'),
+    onTap:call=>dispatch('answer-bell',call)});
   try{
     app.world=createWorld(canvas,{onPick:pickFromScene,onError:app.showError});
     app.world.setEnabled(false);app.homeUI.ready();document.querySelector('#loading')?.remove();
@@ -88,7 +92,6 @@ function buildViews(){
     frame:(seconds,still)=>{const shot=world()?.introFrame(seconds,still)??null;if(shot)sound.advance(seconds);
       return shot},orbit:amount=>world()?.orbit(amount),
     onFinish:result=>{sound.finish(result);dispatch('intro-done',result)}});
-  app.objectControls=createObjectControls(host,getState,key=>dispatch('select-object',key));
   app.storyUI=createStoryUI(host,getState,dispatch,key=>world()?.objectPositions().find(point=>point.key===key));
   app.teaUI=createTeaUI(host,canvas,getState,dispatch,{pick:(x,y)=>world()?.teaAt(x,y),
     aimAt:(x,y)=>world()?.teaAimAt(x,y)});

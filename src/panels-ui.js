@@ -174,7 +174,9 @@ export function settingsMarkup(s,{t,button,resetConfirm}){
     'selected':''}>${t('languageArabic')}</option></select></label><div
       class="setting-row"><span>${t('sound')}</span>${button('sound',t(s.settings.muted?
     'soundOff':'soundOn'),s.settings.muted?'muted':'volume',
-    `aria-pressed="${!s.settings.muted}"`)}</div><p>${t('soundHelp')}</p><label><span
+    `aria-pressed="${!s.settings.muted}"`)}</div><p>${t('soundHelp')}</p><div class="setting-row"><span
+    >${t('pause')}</span>${button('pause',t(s.paused?'resume':'pause'),s.paused?'resume':'pause',
+    `aria-pressed="${s.paused}"`)}</div><label><span
       >${t('motion')}</span><input data-field="motion" type="checkbox"
     ${s.settings.reducedMotion?
     'checked':''}></label><p>${t('motionHelp')}</p><label><span>${t('largeText')}</span

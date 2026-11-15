@@ -18,9 +18,10 @@ test('the first playable phone row contains the folded story clue and the house 
  assert.match(html,/class="clue-toggle"\s+data-action="toggle-clue"/);
  assert.match(storyCss,/\.objective \.clue-toggle\{[^}]*width:44px;min-width:44px;min-height:52px/);
 });
-test('the complete house keeps its existing controls and options',()=>{
- for(const name of ['household','activities','decorate','journal','settings'])assert.ok(html.includes("'"+name+"'")||html.includes(name),'keeps '+name);
- assert.match(html,/button\('toggle-tools'/);
- assert.match(html,/button\('pause'/);
+test('the complete house keeps its existing controls and options, now in the house itself',()=>{
+ const ring=readFileSync(new URL('../src/key-ring.js',import.meta.url),'utf8');
+ const panels=readFileSync(new URL('../src/panels-ui.js',import.meta.url),'utf8');
+ for(const name of ['settings','decorate','journal','store'])assert.match(ring,new RegExp(`'panel-${name}'`),'keeps '+name);
+ assert.match(panels,/button\('pause'/);assert.match(panels,/button\('sound'/);
  assert.match(html,/data-action="light"/);
 });

@@ -81,6 +81,10 @@ if(app.notify(result,result.favorite?'favoriteMoved':'placed'))app.ui.close();re
    const now=performance.now();
    if(r.wound){app.audio.effect('musicbox');app.say(app.ui.t('musicWound-'+r.doll));app.save()}
    else if(!(now-(app.windSoundAt??-1e9)<350)){app.windSoundAt=now;app.audio.effect('mobile')}return;},
+// The porter's bell: leave a finished ritual or a sheet, turn to the room that called, and its doll looks up.
+'answer-bell':(app,call)=>{if(!call?.room)return;if(app.physicalActivity())app.leaveWork();
+   if(app.ui.panel)app.ui.close();
+   app.dispatch('focus-room',call.room);if(call.doll)app.world?.greet?.(call.doll);return;},
 'greet-doll':(app,value)=>{app.world?.greet?.(value);app.audio.effect('mobile');
    app.ui.setSelected?.(value);return;},
 'discover':(app,value,origin)=>{
