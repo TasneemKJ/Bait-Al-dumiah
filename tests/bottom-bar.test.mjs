@@ -49,3 +49,13 @@ test('a ritual hides the key ring, the bell and the house list, as it hid the ro
  const css=readFileSync(new URL('../src/hud.css',import.meta.url),'utf8');
  assert.match(css,/#ui:is\(\[data-tea-active=true\],\[data-stitch-active=true\],\[data-chime-active=true\]\) :is\(\.key-ring-holder,\.porter-bell,\.house-access\)\{\s*display:none\}/);
 });
+// stitch_check, round 10: the old phone bar's portrait rule still stretched the dock to three bar columns and grew
+// each button, so the rituals' pair spread under the heading (390px Arabic: Sound at 188-232 under a 160-378 heading).
+// The pair is placed only by the ritual rules: 96px wide, two 44px buttons, at the top inline end.
+test('no leftover bar rule widens the rituals\' Sound and Pause pair on a phone',()=>{
+ const css=readFileSync(new URL('../src/hud.css',import.meta.url),'utf8');
+ assert.doesNotMatch(css,/\.dock\[data-expanded=false\]\{[^}]*width/);
+ assert.doesNotMatch(css,/\.dock\[data-expanded=false\]>:is\([^)]*\[data-action=sound\][^)]*\)\{[^}]*flex:1/);
+ for(const f of ['tea.css','stitch.css','chime.css'])
+  assert.match(readFileSync(new URL('../src/'+f,import.meta.url),'utf8'),/\] \.dock\{[^}]*width:96px/,f);
+});
