@@ -34,3 +34,24 @@ test('direct camera input still cancels a glide',()=>{
  api.focusRoom('studio');cameraMove.tick(.1);api.zoom(1.2);
  assert.equal(cameraMove.active,false);
 });
+
+// Round 7: "the camera never settles on night one". Logged cause: the night-one pose is inside every limit (below);
+// the glide was frozen, not lost: renderFrame ticked the camera only while the game was unpaused, and any sheet
+// pauses the game, so a glide caught by a sheet stayed "moving" until the sheet closed.
+test('the night-one tea-set pose lies inside the camera\'s angle and zoom limits',async()=>{
+ const {TEA_TABLE}=await import('../src/content.js');
+ const pose=framing(390,844,'kitchen',{subject:[TEA_TABLE.x,.85]}),eye=[5.8,5.6,24],r=Math.hypot(...eye);
+ const polar=Math.acos(eye[1]/r),azimuth=Math.atan2(eye[0],eye[2]);
+ assert.ok(polar>=1.10&&polar<=1.50,`polar ${polar}`);assert.ok(Math.abs(azimuth)<=.48,`azimuth ${azimuth}`);
+ assert.ok(pose.zoom>=.8&&pose.zoom<=3.5,`zoom ${pose.zoom}`);
+});
+test('the night-one glide settles within two seconds of frames, and a sheet never freezes it',async()=>{
+ const {readFileSync}=await import('node:fs');const {TEA_TABLE}=await import('../src/content.js');
+ const {camera,cameraMove}=rig();camera.zoom=1;
+ cameraMove.moveTo(framing(390,844,'kitchen',{subject:[TEA_TABLE.x,.85]}));let t=0;
+ while(cameraMove.active&&t<10){cameraMove.tick(1/60);t+=1/60}
+ assert.ok(t<2,`settled after ${t.toFixed(2)} s`);
+ const frame=readFileSync(new URL('../src/render/world-frame.js',import.meta.url),'utf8');
+ assert.match(frame,/\n cameraMove\.tick\(dt,st\.reducedMotion\);/,'the camera glides on while a sheet pauses the game');
+ assert.doesNotMatch(frame,/if\(!state\.paused\)cameraMove\.tick/);
+});

@@ -14,7 +14,9 @@ export function renderFrame(w,state,dt,selected){
  if(st.disposed||st.lost)return;st.reducedMotion=state.settings.reducedMotion;
  setWorkActivity(state.activities.active?.id);
  st.stitchSections=st.stitchActive?(stitchStatus(state)?.sections??[]):[];
- if(!state.paused)cameraMove.tick(dt,st.reducedMotion);
+ // The camera is presentation, not time: a glide finishes even while a sheet pauses the game (round 7: a glide
+ // caught by a sheet used to stay frozen, and the house kept reporting itself as moving).
+ cameraMove.tick(dt,st.reducedMotion);
  const budget=detail(canvas.clientWidth,canvas.clientHeight,state.settings.quality,window.devicePixelRatio||1);
  st.pixels??=pixelGovernor();budget.pixelRatio=st.pixels.ratio(budget.pixelRatio,dt);
  const densityChanged=st.pixelRatio!==budget.pixelRatio;
