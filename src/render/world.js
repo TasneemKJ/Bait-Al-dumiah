@@ -23,7 +23,7 @@ function focusPoseFor(st,canvas,residents,house,presentation){
  if(st.stitchActive)return stitchFraming(w,h);
  const p=st.focusedDoll?residents.position(st.focusedDoll):null;
  if(p){p.add(house.root.position);return portraitFraming(w,h,p.toArray())}
- return houseFraming(w,h,st.focusedRoom,presentation.value);
+ return houseFraming(w,h,st.focusedRoom,st.subject?{...presentation.value,subject:st.subject}:presentation.value);
 }
 // The story object under a screen point, or null outside the canvas.
 // A finger is wider than a doll's teacup: a tap that misses every object still takes the nearest one whose

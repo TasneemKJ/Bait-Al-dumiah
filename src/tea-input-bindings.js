@@ -49,7 +49,8 @@ function teaPointer(ctx){
   if(result.target==='pot'&&tea.phase==='served')invoke('tea-replay');
   // Served: a tap anywhere but the pot goes home (a cup, the tray, the table).
   else if(tea.phase==='served')invoke('tea-exit');
-  else if(result.target==='tray')invoke('tea-serve');
+  // The tray serves a ready table; before that a tap on it pours, like the pot (a first tap is never refused).
+  else if(result.target==='tray'){if(tea.ready)invoke('tea-serve');else tapPour(tea)}
   else if(result.target.startsWith('cup:')&&tea.phase==='pour'){const cup=tea.cups[Number(result.target.slice(4))];
    if(cup?.overfilled)invoke('tea-empty',cup.id);else if(cup&&!cup.ready)startPour([cup.id])}
   update(0);

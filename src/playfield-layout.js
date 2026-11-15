@@ -16,7 +16,10 @@ export function playfieldInsets(width,height,regions=[]){
 }
 const upper='.brand,.house-status,.time-tools,.objective,.visitor-hint,'+
   '.story-playfield[data-ribbon-edge="top"] .object-ribbon';
-const lower='.room-views,.dock,.camera-tools,.object-controls>[data-object-toggle],.object-ribbon,'+
+// The key ring and the porter's bell sit on the bottom edge, so a room is framed above them (night one opens
+// on the kitchen with the tea set where the first touch lands, as it did above the old bar).
+const lower='.key-ring,.porter-bell,.room-views,.dock,'+
+  '.camera-tools,.object-controls>[data-object-toggle],.object-ribbon,'+
   '.held-item,.scene-response';
 export function createPlayfieldLayout(host,onChange,prepare=()=>{}){
  let pending=0,signature='',disposed=false;

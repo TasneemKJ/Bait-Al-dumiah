@@ -41,3 +41,8 @@ test('one tap pours every cup in turn and serves, well inside the first fifteen 
  assert.equal(sim.teaStatus(s).phase,'served');assert.ok(frames<60*4,`${(frames/60).toFixed(1)} s`);
  assert.ok(sim.teaStatus(s).result.score>=70,'a tap pour is a good pour, not a perfect one');
 });
+
+test('a tap on the tray before the cups are ready pours instead of refusing',async()=>{
+ const src=(await import('node:fs')).readFileSync(new URL('../src/tea-input-bindings.js',import.meta.url),'utf8');
+ assert.match(src,/else if\(result\.target==='tray'\)\{if\(tea\.ready\)invoke\('tea-serve'\);else tapPour\(tea\)\}/);
+});

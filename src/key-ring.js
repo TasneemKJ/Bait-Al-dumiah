@@ -3,13 +3,14 @@
 // settings, sound and pause, the hall dresser drawer the keepsakes, the frame on the stair the album, and the locked
 // fifth room Full House, its tag on the lock. Rooms are reached by touching the room itself. A key is added only when
 // the house first needs it, so a first evening meets two keys, never nine choices.
+import {unclaimed} from './simulation.js';
 export const RING_KEYS=Object.freeze([
  {id:'house',action:'camera',has:()=>true},
  {id:'fuse',action:'panel-settings',has:()=>true},
  // The first keepsake: once the day's three wishes are granted (the objective then asks for one), or the next day.
  {id:'drawer',action:'panel-decorate',has:s=>s.lastFullDay>0||s.decor.length>0||s.day>=2},
- // Something to read: the first whisper heard at night, or the second day (milestones are collected from the clue).
- {id:'album',action:'panel-journal',has:s=>s.journal.length>0||s.day>=2},
+ // Something to read or collect: a reward waiting (the greeting points here), the first whisper, or day two.
+ {id:'album',action:'panel-journal',has:s=>unclaimed(s).length>0||s.milestones.length>0||s.journal.length>0||s.day>=2},
  // Full House is sold only where there is a store, and only from the second day.
  {id:'fifth',action:'panel-store',has:(s,o)=>Boolean(o.store)&&(s.day>=2||s.door>0)},
 ]);

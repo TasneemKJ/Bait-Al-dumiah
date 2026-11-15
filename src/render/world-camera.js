@@ -12,9 +12,12 @@ export function cameraApi(w){
    velocity:introVelocity(introKeys(canvas.clientWidth,canvas.clientHeight,presentation.value),seconds)})}
  return {
   focusRoom(id,immediate=false){if(working()||!ROOMS.some(r=>r.id===id))return false;
-  st.focusedRoom=id;st.focusedDoll=null;
+  st.focusedRoom=id;st.focusedDoll=null;st.subject=null;
   cameraMove.moveTo(framing(canvas.clientWidth,canvas.clientHeight,id,presentation.value),
     st.reducedMotion||immediate);return true},
+  // Centre a room-local point of the focused room (night one: the tea set); the next focus clears it.
+  frameSubject(subject){if(working()||!st.focusedRoom)return false;st.subject=subject;
+   cameraMove.moveTo(focusPose(),st.reducedMotion);return true},
   focusDoll(id){const p=residents.position(id);if(working()||!p)return false;st.focusedDoll=id;
   st.focusedRoom=null;cameraMove.moveTo(focusPose(),st.reducedMotion);return true},
   zoom(amount){if(working())return;cameraMove.cancel();

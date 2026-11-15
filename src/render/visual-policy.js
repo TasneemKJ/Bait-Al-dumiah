@@ -85,6 +85,11 @@ export function framing(width,height,roomId=null,presentation={}){
  // safe edge, keeping adjoining-room context above instead of blank canvas.
  const roomPixels=4.25/effectiveSpan*h,slack=Math.max(0,usable-roomPixels);
  const center=top+roomPixels/2+slack*(phone?.8:.5),offset=(center/h-.5)*effectiveSpan/upY;
+ // A subject (room-local [x, y]) is put at the centre of the screen at the same scale: a new household's first
+ // view centres the tea set, the first thing the house asks for.
+ const subject=presentation?.subject;
+ if(Array.isArray(subject)&&subject.length===2&&subject.every(Number.isFinite))
+  return {height:heightWorld,aspect,zoom,target:[room.x+subject[0],room.y+subject[1],.325]};
  return {height:heightWorld,aspect,zoom,target:[room.x,room.y+1.875+offset,.325]};
 }
 

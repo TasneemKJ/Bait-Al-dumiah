@@ -1,7 +1,7 @@
 // Commands: Home screen and entering play, sound and settings.
 import * as sim from './simulation.js';
 import {setHaptics} from './app-info.js';
-import {DOLLS} from './content.js';
+import {DOLLS,TEA_TABLE} from './content.js';
 import {returnGreeting,waveSchedule,waveRoom} from './return-greeting.js';
 
 // Leaving Home: show the play shell, start sound and greet a returning player.
@@ -30,10 +30,14 @@ function startIntro(app){
 // Play begins inside the intro's last motion: the camera is already gliding into the kitchen on the play spring,
 // so asking for the kitchen keeps that glide. A skip starts the glide from the live pose and velocity; a grab
 // leaves the camera in the player's hands where they caught it.
+// The first view of a new household (no care given yet) centres the tea set: Lina's wish is the first thing the
+// house asks for, and the bell's first call is the kitchen too. Any later room focus frames rooms as usual.
+function openingRoom(app){app.dispatch('focus-room','kitchen');
+ if(app.state.cares===0)app.world?.frameSubject?.([TEA_TABLE.x,.85])}
 function finishIntro(app,{skipped=false,grab=false,seconds=0,still=false}={}){
  app.host.inert=false;app.world?.setEnabled(!app.panelOpen&&!app.manualPause&&!app.carrying&&!app.fatal);
  if(grab){app.host.dataset.focusRoom='';app.host.dataset.focusDoll='';app.roomViews?.update()}
- else{if(skipped)app.world?.introSkip(seconds,still);app.dispatch('focus-room','kitchen')}
+ else{if(skipped)app.world?.introSkip(seconds,still);openingRoom(app)}
  app.last=performance.now();if(!grab)app.canvas.focus({preventScroll:true});
  app.deliverFifthRoom?.();
 }
@@ -45,7 +49,7 @@ function enterPlay(app){
  showPlayShell(app);
  app.last=performance.now();app.lastSave=app.last;app.canvas.focus({preventScroll:true});
  // First launch only: claiming the intro is saved with the entry write below, so a reload never replays it.
- if(!(sim.claimIntro(app.state)&&startIntro(app))&&!app.session.canContinue)app.dispatch('focus-room','kitchen');
+ if(!(sim.claimIntro(app.state)&&startIntro(app))&&!app.session.canContinue)openingRoom(app);
  sim.markVisit(app.state,localDate());let entrySaved=false;
  if(!app.state.settings.muted&&!app.audio.enabled)void app.audio.enable().then(ok=>{if(!ok)app.ui.toast((entrySaved?
    '':app.ui.t('savingFailed')+' ')+app.ui.t('audioUnavailable'));app.audio.setPaused(app.state.paused)});
