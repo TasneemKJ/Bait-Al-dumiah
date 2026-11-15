@@ -12,6 +12,7 @@ import {createResidentLabel} from './resident-label.js';
 import {createKeyRing} from './key-ring.js';
 import {appStore} from './app-store.js';
 import {createPorterBell} from './porter-bell.js';
+import {createHouseAccess} from './house-access.js';
 import {createIntroUI} from './intro-ui.js';
 import {createIntroSound} from './intro-sound.js';
 import {DollhouseAudio} from './audio.js';
@@ -42,6 +43,15 @@ const app={
   roomViews:null,residentLabel:null,playfieldLayout:null,intro:null,
   manualPause:false,panelOpen:false,fatal:false,saveWarning:false,carrying:false,lastChimeTone:null,
 };
+
+// The keyboard and VoiceOver list (src/house-access.js): the same as a touch, except that a story object chosen
+// from the list also turns the camera to its room (a touch already sees it).
+function accessPick(data){
+  if(!data||!app.session.entered)return;
+  if(data.object&&!(data.object==='prop:tea-set'&&app.state.cares===0)){
+   app.dispatch(app.storyUI?.selected===data.object?'activate-object':'select-object',data.object);return}
+  pickFromScene(data);
+}
 
 // A touch on the 3D scene: pick an object, a resident, the ghost or a placement slot.
 function pickFromScene(data){
@@ -83,6 +93,7 @@ function buildViews(){
   app.residentLabel=createResidentLabel(host);
   // The key ring by the door and the porter's bell replace the bottom bar (DESIGN.md #67).
   app.roomViews=createKeyRing(host,getState,{t:key=>app.ui.t(key),say:text=>app.say?.(text),store:()=>appStore.inApp});
+  app.access=createHouseAccess(host,getState,{t:key=>app.ui.t(key),onPick:accessPick});
   app.bell=createPorterBell(host,getState,{t:key=>app.ui.t(key),sound:()=>app.audio.effect('mobile'),
     onTap:call=>dispatch('answer-bell',call)});
   try{

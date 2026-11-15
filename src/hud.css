@@ -214,3 +214,12 @@ html[lang=ar] #ui .dock[data-expanded=true]>button{font-size:max(16px,1rem)}
 #ui .porter-bell.ringing{animation:porter-swing .4s ease-in-out 4}
 @keyframes porter-swing{0%,100%{transform:rotate(0)}25%{transform:rotate(14deg)}75%{transform:rotate(-14deg)}}
 @media (prefers-reduced-motion:reduce){#ui .porter-bell.ringing{animation:none;outline:3px solid #c59b60}}
+/* The house for keyboard and VoiceOver (src/house-access.js): read by screen readers and in the tab order, shown
+   only while it holds focus, as a paper list at the top of the house. */
+#ui .house-access:not(:focus-within){position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);
+ white-space:nowrap}
+#ui .house-access:focus-within{position:absolute;z-index:30;inset-inline:12px;top:max(12px,env(safe-area-inset-top));
+ display:flex;flex-wrap:wrap;gap:6px;padding:10px;background:#f7ecd9f2;border:1px solid #d9c3a5;border-radius:12px;
+ max-height:60vh;overflow:auto}
+#ui .house-access button{min-height:44px;padding:6px 10px;border:1px solid #d9c3a5;border-radius:8px;background:#fffaf2;
+ color:#5d4250;font:15px/1.2 Georgia,"Times New Roman",serif}
