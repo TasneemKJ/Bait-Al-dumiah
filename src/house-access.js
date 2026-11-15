@@ -18,10 +18,13 @@ export function accessEntries(s){
    out.push({room:r.id,label:'musicBox-'+b.doll,pick:{musicBox:b.doll,room:r.id}});
   if(music?.open&&music.key===r.id)out.push({room:r.id,label:'musicKeyName',pick:{musicKey:true}});
  }
+ // The album's second page, the rituals sheet (records and restorations), on demand.
+ out.push({room:null,label:'ritualsPage',pick:{panel:'activities'}});
  return out;
 }
 // "The tea kitchen · The shared tea set"; a room alone is its own name. Two keepsakes of a kind are numbered.
-export function accessName(e,t){return e.label?`${t(e.room)} · ${t(e.label)}${e.n?' '+e.n:''}`:t(e.room)}
+export function accessName(e,t){if(!e.room)return t(e.label);
+ return e.label?`${t(e.room)} · ${t(e.label)}${e.n?' '+e.n:''}`:t(e.room)}
 export function accessMarkup(entries,t){
  return `<nav class="house-access" aria-label="${t('houseAccess')}">`+entries.map((e,i)=>`<button type="button"`+
   ` data-access="${i}">${accessName(e,t)}</button>`).join('')+'</nav>';

@@ -144,7 +144,8 @@ const mischiefMarkup=(s,t)=>s.mischief?.log?.length?`<h3 class="section-heading"
  .join('')}</div>`:'';
 export function journalMarkup(s,{t,n,button}){
   return `<h2 id="sheet-title">${t('journal')} <small>${n(s.journal.length)}/${n(SECRETS.length)}</small></h2><p
-    class="sheet-intro">${t('whispersIntro')}</p><div
+    class="sheet-intro">${t('whispersIntro')}</p>${button('panel-activities',t('ritualsPage'),'play',
+    'class="album-page"')}<div
       class="journal-illustration">${icon('ghost')}<span>✦</span>${icon('moon')}</div>${!s.journal.length?
     `<p class="empty-note">${t('noSecrets')}</p>`:''}<div class="journal-entries">${s.journal.map((id,
     i)=>`<article><span class="entry-number">${n(i+1).padStart(2,

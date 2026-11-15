@@ -48,6 +48,7 @@ const app={
 // from the list also turns the camera to its room (a touch already sees it).
 function accessPick(data){
   if(!data||!app.session.entered)return;
+  if(data.panel){app.ui.open(data.panel);return}
   if(data.object&&!(data.object==='prop:tea-set'&&app.state.cares===0)){
    app.dispatch(app.storyUI?.selected===data.object?'activate-object':'select-object',data.object);return}
   pickFromScene(data);

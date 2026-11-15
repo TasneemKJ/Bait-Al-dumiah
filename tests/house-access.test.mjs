@@ -89,6 +89,22 @@ test('the browser checks rebuild the list in the same order as the game (scripts
   for(const d of s.dolls.filter(x=>x.room===r))order.push(JSON.stringify({doll:d.id}));
   for(const p of INTERACTIVE_PROPS.filter(x=>x.room===r))order.push(JSON.stringify({object:'prop:'+p.id,room:r}));
   for(const d of s.decor.filter(x=>x.room===r))order.push(JSON.stringify({object:'decor:'+d.id,room:r}))}
+ order.push(JSON.stringify({panel:'activities'}),);
  assert.deepEqual(access.accessEntries(s).map(e=>JSON.stringify(e.pick)),order);
  assert.deepEqual(ROOMS.map(r=>r.id),['kitchen','parlor','studio','bedroom']);
+});
+
+// Round 7: the rituals sheet lives behind the Album key, as the album's second page, and in the house list.
+test('the album opens "Records and restorations" in one tap, in every state the album key exists, EN and AR',async()=>{
+ const {journalMarkup}=await import('../src/panels-ui.js');const {button}=await import('../src/shell-markup.js');
+ const {ringKeys}=await import('../src/key-ring.js');
+ const states=[Object.assign(sim.createState(),{journal:['music-box']}),Object.assign(sim.createState(),{day:2}),
+  (()=>{const s=sim.createState();sim.care(s,'lina','tea');return s})()];
+ for(const s of states){assert.ok(ringKeys(s,{}).some(k=>k.id==='album'));
+  for(const lang of ['en','ar']){const t=k=>translate(lang,k),html=journalMarkup(s,{t,n:String,button});
+   assert.match(html,/data-action="panel-activities"/);assert.ok(html.includes(t('ritualsPage')))}}
+ assert.equal(translate('ar','ritualsPage'),'السجلّات والترميم');assert.equal(translate('en','ritualsPage'),'Records and restorations');
+ const e=access.accessEntries(sim.createState()).at(-1);assert.deepEqual(e.pick,{panel:'activities'});
+ for(const lang of ['en','ar'])assert.equal(access.accessName(e,k=>translate(lang,k)),translate(lang,'ritualsPage'));
+ const game=bootHome();game.button('play').click();game.access(e.pick);assert.ok(game.opens.includes('activities'));
 });
