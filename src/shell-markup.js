@@ -34,6 +34,11 @@ export function shellMarkup(s,{t,n,button,clueExpanded,toolsExpanded}){
     data-action="discover">${icon('ghost')}<span>${t('investigate')}</span></button></div>
   <div class="scene-caption"><span class="desktop-hint">${t('hint')}</span><span
     class="mobile-hint">${t('mobileHint')}</span></div>
+  <nav class="dock work-dock" data-expanded="false" aria-label="${t('sound')} · ${t('pause')}">${button('sound',
+    t(s.settings.muted?'soundOff':'soundOn'),s.settings.muted?'muted':'volume',
+    `class="icon-button" title="${t('sound')}" aria-pressed="${!s.settings.muted}"`)}${button('pause',
+    t(s.paused?'resume':'pause'),s.paused?'resume':'pause',
+    `class="icon-button" title="${t('pause')}" aria-pressed="${s.paused}"`)}</nav>
   <div class="saved-note">${icon('check')}<span>${t('saved')}</span></div>
   <div class="placement" hidden></div><div id="toast" role="status" aria-live="polite"></div>
   <div class="pause-overlay"

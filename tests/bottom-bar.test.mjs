@@ -10,7 +10,10 @@ import {translate,number} from '../src/i18n.js';
 test('the bar is gone: the shell has no dock, room buttons or house button, only zoom and the clock',()=>{
  for(const lang of ['en','ar']){
   const t=k=>translate(lang,k),html=shellMarkup(createState(),{t,n:v=>number(lang,v),button,clueExpanded:false,toolsExpanded:false});
-  assert.doesNotMatch(html,/class="dock"|data-action="toggle-tools"|data-action="camera"|data-short=/);
+  assert.doesNotMatch(html,/data-action="toggle-tools"|data-action="camera"|data-short=|data-action="panel-/);
+  // The only dock left is the rituals' Sound and Pause pair, hidden outside a ritual (hud.css).
+  const dock=html.match(/<nav class="dock work-dock"[\s\S]*?<\/nav>/)?.[0]??'';
+  assert.deepEqual([...dock.matchAll(/data-action="(\w+)"/g)].map(m=>m[1]),['sound','pause']);
   assert.match(html,/data-action="zoom-in"/);assert.match(html,/data-action="light"/);
  }
 });
@@ -35,4 +38,14 @@ test('a key tag wraps only between words, never inside one',()=>{
  const css=readFileSync(new URL('../src/hud.css',import.meta.url),'utf8');
  assert.match(css,/#ui \.key-ring \.ring-tag\{[^}]*overflow-wrap:normal;word-break:normal/);
  assert.doesNotMatch(css,/#ui \.key-ring \.ring-tag\{[^}]*overflow-wrap:anywhere/);
+});
+test('a ritual keeps its touch Sound and Pause pair; the house keeps them in the fuse box',()=>{
+ const css=readFileSync(new URL('../src/hud.css',import.meta.url),'utf8');
+ assert.match(css,/#ui:not\(\[data-tea-active=true\]\):not\(\[data-stitch-active=true\]\):not\(\[data-chime-active=true\]\) \.work-dock\{display:none\}/);
+ for(const f of ['tea.css','stitch.css','chime.css'])
+  assert.match(readFileSync(new URL('../src/'+f,import.meta.url),'utf8'),/\.dock>button(:is\()?\[data-action=sound\]/,f);
+});
+test('a ritual hides the key ring, the bell and the house list, as it hid the room buttons',()=>{
+ const css=readFileSync(new URL('../src/hud.css',import.meta.url),'utf8');
+ assert.match(css,/#ui:is\(\[data-tea-active=true\],\[data-stitch-active=true\],\[data-chime-active=true\]\) :is\(\.key-ring-holder,\.porter-bell,\.house-access\)\{\s*display:none\}/);
 });

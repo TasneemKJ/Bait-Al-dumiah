@@ -223,3 +223,9 @@ html[lang=ar] #ui .dock[data-expanded=true]>button{font-size:max(16px,1rem)}
  max-height:60vh;overflow:auto}
 #ui .house-access button{min-height:44px;padding:6px 10px;border:1px solid #d9c3a5;border-radius:8px;background:#fffaf2;
  color:#5d4250;font:15px/1.2 Georgia,"Times New Roman",serif}
+/* The rituals keep a touch Sound and Pause pair at the top (tea.css, stitch.css, chime.css place it); the house
+   itself keeps them in the fuse box, so outside a ritual the pair is not shown. */
+#ui:not([data-tea-active=true]):not([data-stitch-active=true]):not([data-chime-active=true]) .work-dock{display:none}
+/* A ritual owns the screen: the key ring, the bell and the house list step aside, as the room buttons did. */
+#ui:is([data-tea-active=true],[data-stitch-active=true],[data-chime-active=true]) :is(.key-ring-holder,.porter-bell,.house-access){
+ display:none}

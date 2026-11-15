@@ -42,7 +42,7 @@ export function syncHud(host,s,{t,n,panel,placement,selected}){
  host.querySelector('.visitor-hint').hidden=!visitorWaiting(s)||Boolean(placement);
  host.querySelector('.pause-overlay').hidden=!s.paused||Boolean(panel);
  // Pause now lives in the fuse box (the settings sheet); the porter's bell replaced the badge dots.
- const pauseButton=host.querySelector('.settings-list [data-action="pause"]'),pauseLabel=t(s.paused?'resume':'pause');
+ const pauseButton=host.querySelector('.work-dock [data-action="pause"]'),pauseLabel=t(s.paused?'resume':'pause');
  if(pauseButton&&(pauseButton.getAttribute('aria-pressed')!==String(s.paused)||pauseButton.title!==pauseLabel)){
   pauseButton.setAttribute('aria-pressed',String(s.paused));pauseButton.title=pauseLabel;
   pauseButton.innerHTML=icon(s.paused?'resume':'pause')+`<span>${pauseLabel}</span>`;

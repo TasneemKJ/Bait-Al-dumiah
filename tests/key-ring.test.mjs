@@ -34,7 +34,7 @@ test('the ring is the only bar: no room buttons, no Things, Tools, Sound or Paus
  for(const k of ring.ringKeys(Object.assign(sim.createState(),{day:3,journal:['x']}),{store:true}))
   for(const lang of ['en','ar'])assert.ok(translate(lang,'key-'+k.id).length>1,`${lang} key-${k.id}`);
  const shell=src('shell-markup.js');
- assert.doesNotMatch(shell,/class="dock"/);assert.doesNotMatch(shell,/data-short="\$\{t\('barHouse'\)\}"/);
+ assert.doesNotMatch(shell,/class="dock"(?! work-dock)/);assert.doesNotMatch(shell,/data-short="\$\{t\('barHouse'\)\}"/);
  const main=src('main.js');assert.doesNotMatch(main,/createRoomViews\(/);assert.doesNotMatch(main,/createObjectControls\(/);
  assert.match(main,/createKeyRing\(/);
  assert.match(src('panels-ui.js'),/button\('pause'/,'Pause in the fuse box');
@@ -76,4 +76,13 @@ test('a new household\'s first view puts the tea set at the centre of the screen
  const home=src('cmd-home.js');assert.match(home,/openingRoom\(app\)/);
  assert.match(home,/function openingRoom\(app\)\{[^}]*app\.state\.cares===0/);
  assert.match(src('render/world-camera.js'),/frameSubject\(/);
+});
+
+test('the key ring steps aside while a keepsake is being placed, as the room buttons did',()=>{
+ let placing=false;const host={append(){},querySelector:s=>s==='.placement'?{hidden:!placing}:null,
+  ownerDocument:{createElement(){return {set innerHTML(v){this.html=v},isConnected:true,hidden:false}}}};
+ const state=sim.createState(),r=ring.createKeyRing(host,()=>state,{t:k=>translate('en',k)});
+ const holder=r.holder;r.update();assert.equal(holder.hidden,false);
+ placing=true;r.update();assert.equal(holder.hidden,true,'never over the placement controls');
+ placing=false;r.update();assert.equal(holder.hidden,false);
 });

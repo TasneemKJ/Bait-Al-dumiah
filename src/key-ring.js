@@ -32,6 +32,8 @@ export function createKeyRing(host,getState,{t,say=()=>{},store=()=>false}={}){
  let known=null,signature='',toldFirst=false;
  function update(){
   if(!holder.isConnected)host.append(holder);
+  // Like the room buttons it replaced, the ring steps aside while a keepsake is being placed.
+  holder.hidden=host.querySelector('.placement')?.hidden===false;
   const s=getState(),keys=ringKeys(s,{store:store()}),ids=keys.map(k=>k.id),next=ids.join(',')+'|'+s.settings.locale;
   // The first time the ring grows past its two night-one keys, the house says what the ring is.
   if(known)for(const id of ids)if(!known.includes(id)){
@@ -39,5 +41,5 @@ export function createKeyRing(host,getState,{t,say=()=>{},store=()=>false}={}){
    say(t('ringNewKey').replace('{key}',t('key-'+id)))}
   known=ids;if(next===signature)return;signature=next;holder.innerHTML=keyRingMarkup(keys,t);
  }
- update();return {update,dispose(){holder.remove?.()}};
+ update();return {update,holder,dispose(){holder.remove?.()}};
 }
