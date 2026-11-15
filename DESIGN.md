@@ -396,3 +396,12 @@ The jar fills before your eyes. To spend, you take buttons out of it with your h
 - **D9:** free for everyone. The canary's subscription gives no extra button and no rare colour.
 - **Art:** the glass jar is drawn in 3D with refraction from the existing material; buttons are small discs with two or four holes, in the colours of their sources. Their sound on the glass is a soft tap. No new panel.
 - **Second idea (backlog):** a clock that runs backwards for one hour a week, where what was undone that day returns. It is close to the rewind of a game like Braid, so it stays for review only.
+
+## #115 (random-stimulus, 2026-11-15) «مظلّة الغريب»: stimuli: a stranger's umbrella left by the door · a seed in a flowerpot · "it has to happen in the rain"
+**Kernel:** on rainy nights a black umbrella stands dripping in the hall that no doll owns. Its owner is another shy guest, hiding somewhere in the house until dawn, and the drips are the only trail.
+- **Play (no menu):** follow the drops: on tiles they shine, on the rug they darken, on the stairs they stop where the owner hesitated. Tap the room where you think the guest hides; open its cupboard, lift its sheet.
+- **Challenge, a gentle deduction:** two trails cross on the second rainy night (the visitor's own and the stranger's), and only one leads to a room with a cold draught. A right guess before dawn: the guest leaves a seed in the window pot, and it grows a little each rainy night after. A wrong guess: the umbrella is gone at dawn, and the next rainy night has no guest.
+- **Comparables (learn, not copy):** Animal Crossing has visitors who simply arrive; Unpacking tells a story through objects; A Little to the Left has tidy puzzles. None hides a guest you find by reading rain on the floor.
+- **Subscription rule (owner, 2026-11-15):** free for everyone; the canary brings nothing extra here and promises nothing.
+- **Art:** the drops as small lit points that dry over 2 minutes (a real clock for the hunt); the umbrella's black cloth beaded with light; the pot's sprout drawn leaf by leaf.
+- **Second idea (backlog):** the seed alone: a pot that grows only from what the dolls tell it at night.
