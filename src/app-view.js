@@ -18,7 +18,7 @@ export function installView(app){
  }
  // Reattach scene controls synchronously; a slow graphics frame must not hide the UI.
  function refreshUI(){app.ui.refresh();app.updateSaveStatus?.();app.roomViews.update();
- app.objectControls?.update();app.storyUI?.update();updateWorkUI();app.homeUI?.refresh()}
+ app.objectControls?.update();app.access?.update();app.storyUI?.update();updateWorkUI();app.homeUI?.refresh()}
  function syncPause(){app.state.paused=!session.entered||app.manualPause||
    Boolean(app.panelOpen&&app.panelOpen!=='activities')||
    document.hidden||app.fatal||Boolean(app.filmActive);

@@ -108,3 +108,9 @@ test('the album opens "Records and restorations" in one tap, in every state the 
  for(const lang of ['en','ar'])assert.equal(access.accessName(e,k=>translate(lang,k)),translate(lang,'ritualsPage'));
  const game=bootHome();game.button('play').click();game.access(e.pick);assert.ok(game.opens.includes('activities'));
 });
+
+// ui_check: a language change rebuilds the HUD; the house list must come back with it, not a loop tick later.
+test('rebuilding the HUD reattaches the house list at once, like the other scene controls',async()=>{
+ const src=(await import('node:fs')).readFileSync(new URL('../src/app-view.js',import.meta.url),'utf8');
+ assert.match(src,/function refreshUI\(\)\{[^}]*app\.access\?\.update\(\)/);
+});
