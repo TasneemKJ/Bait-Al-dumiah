@@ -29,11 +29,12 @@ with sync_playwright() as p:
    target=posixpath.normpath(posixpath.join(posixpath.dirname(name),match[2]))
    return 'from '+json.dumps(target)
   modules[name]=re.sub(r'from\s*([\'\"])(\.{1,2}/[^\'\"]+)\1',resolve,file.read_text())
+ # A household past its first care: a new house's first clue is Lina's wish (dfbae13); these checks read the story clue.
  page.evaluate('''async modules=>{
   const imports={};for(const [id,source] of Object.entries(modules))imports[id]=URL.createObjectURL(new Blob([source],{type:'text/javascript'}));
   const map=document.createElement('script');map.type='importmap';map.textContent=JSON.stringify({imports});document.head.append(map);
   const {createState}=await import('fixture/simulation.js');const {createUI}=await import('fixture/ui.js');
-  window.fixtureState=createState();window.fixtureUI=createUI(document.querySelector('#ui'),()=>fixtureState,(action,value)=>{window.lastAction={action,value};if(action==='panel-state'){fixtureState.paused=Boolean(value&&value!=='activities');window.fixtureStory?.clear();window.fixtureObjects?.update()}if(action==='inspect-object')fixtureUI.openObject(value)});
+  window.fixtureState=createState();fixtureState.cares=1;window.fixtureUI=createUI(document.querySelector('#ui'),()=>fixtureState,(action,value)=>{window.lastAction={action,value};if(action==='panel-state'){fixtureState.paused=Boolean(value&&value!=='activities');window.fixtureStory?.clear();window.fixtureObjects?.update()}if(action==='inspect-object')fixtureUI.openObject(value)});
   {const {createKeyRing}=await import('fixture/key-ring.js');const {translate}=await import('fixture/i18n.js');window.fixtureViews=createKeyRing(document.querySelector('#ui'),()=>fixtureState,{t:k=>translate(fixtureState.settings.locale,k),store:()=>true})}
   const {createStoryUI}=await import('fixture/story-ui.js');window.fixtureStory=createStoryUI(document.querySelector('#ui'),()=>fixtureState,(action,value)=>{window.lastAction={action,value};if(action==='inspect-object')fixtureUI.openObject(value)});
   const {createHouseAccess}=await import('fixture/house-access.js');const {translate:tr}=await import('fixture/i18n.js');window.fixtureObjects=createHouseAccess(document.querySelector('#ui'),()=>fixtureState,{t:k=>tr(fixtureState.settings.locale,k),onPick:pick=>{if(pick?.object){window.lastAction={action:'select-object',value:pick.object};fixtureStory.select(pick.object)}else window.lastAction={action:'access',value:pick}}});window.fixtureObjects.collapse=()=>{};
@@ -95,14 +96,15 @@ with sync_playwright() as p:
   page.set_viewport_size({'width':320,'height':740})
   page.evaluate("locale=>{fixtureState.settings.locale=locale;fixtureUI.refresh();fixtureViews.update()}",locale)
   valid=page.locator('.key-ring button:visible').evaluate_all('(els)=>els.length>=2&&els.every(e=>{const b=e.getBoundingClientRect();return b.width>=44&&b.height>=44&&b.left>=0&&b.right<=innerWidth})')
-  results.append({'name':f'320px {locale} key ring stays in bounds with 44px targets','passed':valid and page.locator('.dock').count()==0})
+  # a214d88: the rituals' Sound and Pause pair is the one dock left, hidden in the house; none is visible here.
+  results.append({'name':f'320px {locale} key ring stays in bounds with 44px targets','passed':valid and page.locator('.dock:visible').count()==0})
  for locale in ['en','ar']:
   page.set_viewport_size({'width':667,'height':375})
   page.evaluate("locale=>{fixtureState.settings.locale=locale;fixtureUI.refresh();fixtureViews.update()}",locale)
   reachable=page.locator('.key-ring button:visible').evaluate_all('(els)=>els.length>0&&els.every(e=>{const b=e.getBoundingClientRect(),hit=document.elementFromPoint(b.left+b.width/2,b.top+b.height/2);return Boolean(hit&&e.contains(hit))})')
   results.append({'name':f'{locale} 667px landscape key ring receives actual pointer input','passed':reachable})
  page.set_viewport_size({'width':390,'height':844})
- page.evaluate("fixtureState.settings.locale='ar';fixtureUI.refresh();document.querySelector('#ui').dataset.focusRoom='kitchen';fixtureObjects.update()")
+ page.evaluate("fixtureState.settings.locale='ar';fixtureUI.refresh();document.querySelector('#ui').dataset.focusRoom='kitchen';fixtureViews.update();fixtureObjects.update()")
  tea=page.evaluate('''async()=>{const m=await import('fixture/house-access.js');return m.accessEntries(fixtureState).findIndex(e=>e.pick.object==='prop:tea-set')}''')
  page.locator(f'.house-access [data-access="{tea}"]').evaluate('b=>{b.focus();b.click()}')
  results.append({'name':'accessible object control dispatches stable selection key','passed':page.evaluate('lastAction.action==="select-object" && lastAction.value==="prop:tea-set"')})
@@ -110,7 +112,9 @@ with sync_playwright() as p:
  page.locator('[data-scene-action="inspect"]').click()
  results.append({'name':'selected prop offers localized activity and care actions','passed':page.locator('.object-detail [data-id="tea"]').count()==1 and page.locator('.object-detail [data-care="tea"]').count()==1 and 'الشاي' in page.locator('#sheet-title').inner_text()})
  page.locator('[data-action="close"]').click()
- results.append({'name':'closing optional object inspection restores meaningful visible scene focus','passed':page.evaluate('document.activeElement.matches("[data-scene-action],.house-access button") && document.activeElement.getBoundingClientRect().width>=44')})
+ # 56f0fdd: focus returns to the opener (the ribbon's inspect button), or to the House key when the opener is gone.
+ results.append({'name':'closing optional object inspection returns focus to its opener, or the House key when it is gone','passed':page.evaluate('''()=>{const a=document.activeElement,o=document.querySelector('[data-scene-action="inspect"]'),shown=e=>e&&e.isConnected&&e.getClientRects().length>0;
+  return (shown(o)?a===o:a.matches('.key-ring [data-key="house"]'))&&a.getBoundingClientRect().width>=44}''')})
  page.evaluate("fixtureState.decor=[{id:1,item:'plant',room:'kitchen',slot:0,rotation:0,originRoom:'kitchen',active:false,tendedDay:0,lastUse:-10}];fixtureUI.refresh();fixtureUI.openObject('decor:1')")
  action=page.locator('.object-detail [data-action="use-object"]')
  results.append({'name':'owned keepsake use is a bilingual mobile-safe primary action','passed':action.count()==1 and action.get_attribute('data-id')=='1' and action.evaluate('(e)=>{const b=e.getBoundingClientRect();return b.width>=44&&b.height>=44}')})
@@ -191,7 +195,7 @@ with sync_playwright() as p:
    fixtureState.settings.locale=locale;fixtureState.story.chapter=0;fixtureState.story.step=0;
    fixtureState.decor=['plant','bear','lamp'].map((item,index)=>({id:index+1,item,room:'kitchen',slot:index,rotation:0,originRoom:'kitchen',active:false,tendedDay:0,lastUse:-10}));
    fixtureUI.refresh();const host=document.querySelector('#ui');host.dataset.focusRoom='kitchen';host.dataset.focusDoll='';
-   fixtureViews.update();fixtureObjects.collapse();fixtureStory.update();
+   fixtureViews.update();fixtureObjects.update();fixtureStory.update();
   }''',locale)
    hud=page.evaluate(r'''() => {
    const visible=el=>el.getClientRects().length&&getComputedStyle(el).display!=='none'&&getComputedStyle(el).visibility==='visible';
