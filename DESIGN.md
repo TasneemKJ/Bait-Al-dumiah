@@ -355,3 +355,21 @@ Ours stays ours: a gentle bedtime round where opening a door has a cost.
   - **The subscription is untouched.** No extra peeks or candle are for sale. The canary's watch and the songbook (#74) remain the D9 stream.
 - **Second idea (backlog): the moths as the house's memory.** A room you never open over a week gathers moths. On the seventh night they lift together and settle on one thing in that room (a dress, a letter, a toy). That thing becomes the next keepsake to find. Neglect becomes a mystery, not a penalty.
 - **Test.** A bot that reads the signs should meet ≥ 80% of needs and wake at most 1 doll. A bot that opens every door should meet 100% of needs but wake ≥ 3. A bot that opens none should meet ≤ 30%. If the sign-reader cannot beat open-all on the total of needs met minus dolls woken, the signs are too faint.
+
+## #100 (random-stimulus, 2026-11-15) «السنّ تحت الوسادة»: stimuli: a milk tooth wrapped in a handkerchief · floorboards that creak at night · "the kindest act must not be seen"
+**Kernel:** Noor loses a milk tooth at dinner. At night the player is the house's quiet hand: carry a coin from the kitchen to her pillow without waking her. The way runs through the dim house, and its creaking boards are the ones you noticed by day.
+- **Play (pillar 1, in the house):**
+  - Drag the coin room to room along the floor. A highlighted board means a creak, and a creak brings a sigh, a turn in bed, an eye half open.
+  - Three creaks wake her, and the coin waits for the next night.
+  - The music box (#49) can cover one creak if it is wound before you set off.
+- **Secrets found by noticing (pillar 3):** the boards that creak are the ones the dolls stepped on by day with a faint sound. Whoever watched the house during the day knows the way at night. The board map changes every week, so it cannot be memorised once and for all.
+- **A ritual with a small cost (pillar 2):** the coin comes from the day's buttons (3). In the morning Noor tells the family about «زائر الليل الذي لا يُرى»; the tooth enters the album (#43) in its handkerchief, and Noor's bond grows.
+- **Gentle dark humour:** «لم يستيقظ أحد. باستثناء القطّ، وهو لن يقول شيئاً… هذه المرّة».
+- **Comparables (learn, not copy):**
+  - Untitled Goose Game sneaks for mischief;
+  - Unpacking tells a life through things;
+  - A Little to the Left orders the house.
+  - None makes stealth an act of kindness inside a dollhouse, with a creak map learned by daylight.
+- **D9:** free for everyone. The canary's subscription gets no creak warning and no extra cover. The canary's song (#74) may mark the night, as atmosphere only.
+- **Art:** the coin is a gold dot carried on the fingertip, and a creaking board flashes a faint ring of moonlight. Noor's room is lit only by the window light. No new panel; one line in the morning.
+- **Second idea (backlog):** "the house must be smaller at the end of the day", where the rooms are packed into boxes for a move. It is too large for now and is kept for review.
