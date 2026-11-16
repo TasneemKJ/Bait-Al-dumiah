@@ -1,7 +1,7 @@
 import sys,base64
 from playwright.sync_api import sync_playwright
 RAW='/tmp/bait-shots'; OUT=sys.argv[1]
-C={'ar':[('01-night','بيتٌ صغير، وثلاث أرواح صغيرة'),('02-house','اعتنِ بالدمى في بيتها'),('03-kitchen','لكلّ دميةٍ غرفةٌ وحكاية'),('04-tea','حضّر الشاي بيدك'),('06-whispers','اكشف أسرار البيت ليلةً بعد ليلة')],
+C={'ar':[('01-night','بيتٌ صغير، وثلاث أرواح صغيرة'),('02-house','عنايةٌ بالدمى في بيتها'),('03-kitchen','لكلّ دميةٍ غرفةٌ وحكاية'),('04-tea','شايٌ يُصبّ باليد'),('06-whispers','أسرار البيت تنكشف ليلةً بعد ليلة')],
    'en':[('01-night','A tiny home. Three little souls.'),('02-house','Care for the dolls in their home'),('03-kitchen','Every doll has a room and a story'),('04-tea','Brew the tea by hand'),('06-whispers','Uncover the house\'s secrets, night by night')]}
 NAMES=['01-night','02-house','03-dolls','04-tea','05-whispers']
 with sync_playwright() as p:
