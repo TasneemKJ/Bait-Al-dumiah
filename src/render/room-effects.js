@@ -1,14 +1,18 @@
 import * as T from 'three';
 import {createKettleSteam} from './kettle-steam.js';
-import {poolOpacity} from './lamp-pool.js';
+import {createLampPool,poolOpacity} from './lamp-pool.js';
+import {duskGlow,roomPoolLook,sunbeamLook} from './visual-policy.js';
 
 export function createRoomEffects(parent){
  const root=new T.Group();root.name='quiet-room-effects';root.userData.noBatch=true;parent.add(root);
  const faceFill=new T.DirectionalLight(0xffdfbe,.18);faceFill.name='caretaker-face-fill';
  faceFill.position.set(0,5,12);faceFill.target.position.set(0,2.7,0);root.add(faceFill,faceFill.target);
- const patches=createWindowPatches(root);
+ const patches=createWindowPatches(root),beams=createWindowSunbeams(root);
  const curtains=[];parent.traverse(o=>{if(o.name==='draped-curtain')curtains.push(o)});
  const pools=[];parent.traverse(o=>{if(o.name==='lamp-pool-static')pools.push(o)});
+ for(const [room,x,y,z,r,c] of [['kitchen',-2.75,.128,-.08,1.55,0xffc27d],
+   ['studio',-2.65,3.328,-.38,1.55,0xf2c48f],['bedroom',3.55,3.328,-.58,1.50,0xffd9a8]])
+  pools.push(createLampPool(root,x,z,r,{y,stat:true,name:'lamp-pool-static',room,color:c}));
  // An idle stir (src/idle-life.js): one window's pair of curtains lifts and settles over four seconds.
  let gust=-Infinity,pair=-1;const stirOf=(i,t)=>{const k=(t-gust)/4;
   return Math.floor(i/2)===pair&&k>0&&k<1?Math.sin(Math.PI*k)*Math.sin((t-gust)*2.6):0};
@@ -29,18 +33,26 @@ export function createRoomEffects(parent){
  }
  return {root,stir(t){gust=t;pair=(pair+1)%Math.max(1,Math.ceil(curtains.length/2))},
   status(){return {pools:pools.length,poolOpacity:pools[0]?.material.opacity??null,
-   steam:Boolean(kettleSteam),steamVisible:kettleSteam?.root.visible??false}},update(state,mix){
-  const lit=Math.max(0,Math.min(1,mix));pools.forEach(p=>{p.material.opacity=poolOpacity(.15+lit*.85)});
+   sunbeams:beams.length,sunbeamOpacity:beams[0]?.material.opacity??null,
+   steam:Boolean(kettleSteam),steamVisible:kettleSteam?.root.visible??false}},
+  update(state,mix,{lampFocus=null,rainMix=0}={}){
+  const lit=Math.max(0,Math.min(1,mix)),dusk=duskGlow(state.clock)*(1-lit);
+  pools.forEach(p=>{const look=roomPoolLook(p.userData.room,lit,state.clock,lampFocus?.[p.userData.room]??0);
+   p.material.color.setHex(look.color);p.material.opacity=poolOpacity(look.level)});
   if(kettleSteam){const lina=state.dolls.find(d=>d.id==='lina');
   kettleSteam.update(state.elapsed,Boolean(lina)&&lina.action==='idle',state.settings.reducedMotion||state.paused)}
-  faceFill.intensity=.18+Math.max(0,Math.min(1,mix))*.48;
-  patches.forEach(p=>{p.material.color.set(0xf0d1a0).lerp(new T.Color(0xabc4ef),mix);p.material.opacity=.15-mix*.065});
+  faceFill.intensity=.18+lit*.48;
+  patches.forEach(p=>{p.material.color.set(0xf0d1a0).lerp(new T.Color(0xffae68),dusk*.75)
+   .lerp(new T.Color(0xabc4ef),lit);p.material.opacity=.15+dusk*.035-lit*.065});
+  const beam=sunbeamLook(lit,state.clock,rainMix);
+  beams.forEach(b=>{b.material.color.set(0xffe6be).lerp(new T.Color(0xffb26b),beam.dusk*.82)
+   .lerp(new T.Color(0x9cb8ec),beam.night);b.material.opacity=beam.opacity;b.visible=beam.opacity>.005});
   if(!state.paused){curtains.forEach((c,i)=>{const g=stirOf(i,state.elapsed),still=state.settings.reducedMotion;
   c.rotation.x=still?0:Math.sin(state.elapsed*.42+i*.8)*.014+g*.10;
   c.rotation.z=still?0:(Math.sin(state.elapsed*.35+i)*.009+Math.abs(g)*.05)*c.userData.curtainSide});
   const t=state.settings.reducedMotion?0:state.elapsed;
   flames.forEach((f,i)=>{f.scale.y=1+Math.sin(t*1.7+i*2.2)*.055;f.rotation.z=Math.sin(t*.9+i)*.025;
-  f.children[0].material.opacity=.68+Math.max(0,Math.min(1,mix))*.20})}
+  f.children[0].material.opacity=.68+lit*.20})}
  }};
 }
 
@@ -64,5 +76,29 @@ function createWindowPatches(parent){
     opacity:.15,depthWrite:false,blending:T.AdditiveBlending});
   const mesh=new T.Mesh(geometry,material);mesh.name='window-light-patch';
   mesh.userData.pattern='arched-lattice';mesh.position.fromArray(at);parent.add(mesh);return mesh;
+ });
+}
+let sunbeamMask=null;
+function createWindowSunbeams(parent){
+ if(!sunbeamMask){
+  const canvas=document.createElement('canvas');canvas.width=canvas.height=128;const c=canvas.getContext('2d');
+  const v=c.createLinearGradient(0,0,0,128);v.addColorStop(0,'rgba(255,255,255,.72)');
+  v.addColorStop(.55,'rgba(255,255,255,.28)');v.addColorStop(1,'rgba(255,255,255,0)');
+  c.fillStyle=v;c.fillRect(0,0,128,128);
+  c.globalCompositeOperation='destination-in';
+  const h=c.createLinearGradient(0,0,128,0);h.addColorStop(0,'rgba(255,255,255,0)');
+  h.addColorStop(.22,'rgba(255,255,255,1)');h.addColorStop(.78,'rgba(255,255,255,1)');
+  h.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=h;c.fillRect(0,0,128,128);
+  sunbeamMask=new T.CanvasTexture(canvas);sunbeamMask.userData.shared=true;
+ }
+ return [[-3.85,1.38,-.82],[-3.75,4.58,-.82],[2.90,4.58,-.82]].map(at=>{
+  const geometry=new T.PlaneGeometry(1.12,2.15,1,1);
+  const p=geometry.attributes.position;
+  for(let i=0;i<p.count;i++){const drop=.5-p.getY(i)/2.15;
+   p.setX(i,p.getX(i)*(1+drop*.28)+drop*.26);p.setZ(i,drop*1.18)}
+  const material=new T.MeshBasicMaterial({map:sunbeamMask,color:0xffe6be,transparent:true,
+    opacity:.085,side:T.DoubleSide,depthWrite:false,blending:T.AdditiveBlending});
+  const mesh=new T.Mesh(geometry,material);mesh.name='window-sunbeam';
+  mesh.position.fromArray(at);mesh.raycast=()=>{};parent.add(mesh);return mesh;
  });
 }

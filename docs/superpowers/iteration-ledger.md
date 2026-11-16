@@ -736,3 +736,31 @@ Final-card typography review: full-size Arabic portrait at 57 seconds showed unu
 
 ## Cinema final acceptance — 2026-10-14
 The original twenty-idea cinema exploration and its corrective grounding/title review are complete: four local EN/AR portrait/wide 60-second films, four sidecars, two covers and checksum manifest. Seven native decoded shot samples per composition and both language final cards were viewed; full-stream decode and actual audio measurement pass. Final verifier explicitly recognizes valid full-range 4:2:0 and records actual range instead of relabeling or re-encoding it. Final source gate: 546 tests, lint/build; combined native gates: 56 core checks, story smoke, eight film phone layouts, lifecycle and 4× fallback. See `docs/cinema/2026-10-12-size-of-memory.md` and `film/README.md` for exact evidence and limits. Shot samples, rendering batches, codecs, languages and corrective retries are not counted as additional iterations.
+
+## 2026-11-16 — Visual ultraboost: four-room practical pools, window sunbeams, enamel/cloth story finishes and night HUD craft
+
+**IDEAL:** Identify flat unpooled floors in the kitchen/studio/bedroom, unlit daytime window shafts, deferred matte story tin/bear finishes, and bright daytime key-ring tags at night; Define a zero-light, budget-safe visual upgrade across `src/render/` and `src/*.css`; Explore 20 candidates across the lenses; Act in small verified increments; Look back with unit tests, 324/324 art checks and rendered EN/AR day/dusk/night screenshots.
+**5Ws:** Who: mobile and desktop players in English and Arabic. What: experience warm room-tinted floor lamp pools, slanted window sunbeams, two-depth floating dust, glazed mint enamel and woven bear cloth with plush response, and cohesive night plum-and-brass key tags. When: across day, golden hour (clock 96–126) and night. Where: all four dollhouse rooms, story landmarks and the perimeter HUD. Why: deepens the tactile miniature-film atmosphere without adding menus, lights or draw-call pressure.
+
+**Twenty ideas:**
+1. Four-room static floor lamp pools tinted per room (`roomPoolLook`, visuals/atmosphere) — **selected**.
+2. Slanted arched-window sunbeams that warm at dusk and soften to moonbeams at night (`sunbeamLook`, atmosphere) — **selected**.
+3. Golden-hour warmth on the three arched-lattice floor patches (visuals) — **selected**.
+4. Near-field second dust-mote depth layer (`atmosphere-dust-near`, capped on low quality, atmosphere/performance) — **selected**.
+5. Studio backdrop stage glow and richer golden-hour horizon band in the sky shader (visuals) — **selected**.
+6. Glazed mint enamel finish (`glaze(P.mint)`) on the kitchen mint tin and lid (visuals/material) — **selected**.
+7. Woven honey-wool fabric finish (`craftMaterial(0xc19778, 'fabric')`) on Noor's mended bear (visuals/material) — **selected**.
+8. Bounded plush nod and squeeze on the mended bear when replayed (`prop:moon-bed`, game feel) — **selected**.
+9. Night-tightened CSS paper-grain vignette (`.night #app::after`, UI/UX) — **selected**.
+10. Dark plum-and-brass night styling for the front-door key ring tags and porter's bell (UI/UX, accessibility contrast) — **selected**.
+11. Gilt-bordered toast notice and subtle inner paper bevels on `.house-status` and `.resident-name` (UI/UX) — **selected**.
+12. Fix `createComfortHearts` initial negative `lastCare` timestamp handling so reassurance hearts appear reliably (stability/game feel) — **selected**.
+13. Share jasmine pollen vertex batch and merged enamel lid rim to keep story tableaux at 18 draws (<20 cap, performance) — **selected**.
+14. Preserve `reducedMotion` and `paused` stillness across sunbeams, near-dust and bear plush response (accessibility) — **selected**.
+15. Retain 44px touch targets and RTL layout on key ring and bell in both day and night (controls/Arabic RTL) — **selected**.
+16. Keep `bait-al-dumiah.v1` save format untouched (data safety) — **preserved invariant**.
+17. Keep gesture-gated tin/cloth foley untouched (audio) — **preserved invariant**.
+18. Keep first-clue and story progression unchanged (onboarding/loop) — **preserved invariant**.
+19. Keep earned bear replay free of currency payouts (replayability/balance) — **preserved invariant**.
+20. Verify Python 3 fallback in `tests/native-entry.test.mjs` and `runArtChecks` export in `tests/art-film-grounding-checks.js` (release readiness) — **selected**.
+

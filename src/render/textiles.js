@@ -109,7 +109,7 @@ export function craftMaterial(color,kind='fabric'){
  const hex='#'+new T.Color(color).getHexString();const map=paintedTexture(kind,[hex,kind==='wood'?'#eccfa5':'#f5dfc4']);
  const m=new T.MeshStandardMaterial({map,roughness:kind==='wood'?.72:.98});
  if(kind==='wood'||kind==='fabric'){m.bumpMap=surfaceFinish(kind);
- m.roughnessMap=m.bumpMap;m.bumpScale=kind==='wood'?.0075:.0025}m.userData.shared=true;cache.set(key,m);return m;
+ m.roughnessMap=m.bumpMap;m.bumpScale=kind==='wood'?.011:.0042}m.userData.shared=true;cache.set(key,m);return m;
 }
 export function softTexture(){
  if(radialMask)return radialMask;

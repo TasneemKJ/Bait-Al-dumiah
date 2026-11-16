@@ -108,3 +108,15 @@ export function duskGlow(clock){
  const c=Number.isFinite(clock)?clock:0,ramp=x=>{const t=clamp(x,0,1);return t*t*(3-2*t)};
  return ramp((c-96)/14)*(1-ramp((c-118)/8));
 }
+// Floor lamp pool look per room: matches the room's practical tint, warms at dusk, and lifts when focused.
+export function roomPoolLook(roomId,mix,clock=0,focused=false){
+ const p=roomLighting(roomId,1),n=Number.isFinite(mix)?clamp(mix,0,1):0,d=duskGlow(clock);
+ const warm=Math.max(n,d*.65),boost=1+.12*focusWeight(focused);
+ return {color:p.color,level:clamp((.15+warm*.85)*boost,0,1)};
+}
+// Slanted window sunbeams: warm cream by day, golden-apricot at dusk, soft moonbeam at night, dimmed in rain.
+export function sunbeamLook(mix,clock=0,rainMix=0){
+ const n=Number.isFinite(mix)?clamp(mix,0,1):0,d=duskGlow(clock),r=Number.isFinite(rainMix)?clamp(rainMix,0,1):0;
+ const base=(.085*(1-n)+.042*n+.055*d*(1-n))*(1-.65*r);
+ return {opacity:clamp(base,0,.16),dusk:d*(1-n),night:n};
+}

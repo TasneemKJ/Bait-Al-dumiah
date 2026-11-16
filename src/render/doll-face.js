@@ -1,4 +1,5 @@
 import * as T from 'three';
+import {surfaceFinish} from './atelier-surfaces.js';
 import {gridSurface} from './doll-couture.js';
 import {mat} from './primitives.js';
 
@@ -7,8 +8,10 @@ import {mat} from './primitives.js';
 const headGeometries = new Map();
 const faceMaps = new Map(), faceMaterials = new Map(), irises = new Map();
 const bisque = new T.MeshPhysicalMaterial({
- color: 0xf0cdb3, roughness: .68, clearcoat: .14,
- clearcoatRoughness: .62, metalness: 0,
+ color: 0xf0cdb3, roughness: .66, clearcoat: .18,
+ clearcoatRoughness: .52, sheen: .26, sheenRoughness: .72,
+ sheenColor: new T.Color(0xffe6d4), metalness: 0,
+ bumpMap: surfaceFinish('ceramic'), bumpScale: .00025,
  emissive: 0x8a4930, emissiveIntensity: .035,
 });
 export const bisqueMaterial = () => bisque;

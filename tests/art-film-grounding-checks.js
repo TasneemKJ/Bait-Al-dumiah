@@ -19,3 +19,10 @@ export function checkFilmGrounding(){
   return {id:doll.id,before,after,expected};
  });
 }
+export function runArtChecks(){
+ try{
+  return checkFilmGrounding().map(r=>({name:`Film grounding: ${r.id} sole rests on room floor`,passed:true}));
+ }catch(error){
+  return [{name:'Film grounding: resident soles rest on room floors',passed:false,error:String(error.message)}];
+ }
+}

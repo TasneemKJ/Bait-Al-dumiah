@@ -44,3 +44,15 @@ test('S7: earned music and guest replay physically then settle with stable pause
 test('S8: an initially paused restored view does not replay an expired basin input',async()=>{
  const v=await view(),state=createState();state.paused=true;state.elapsed=100;state.story={chapter:2,step:1,lastAction:'prop:wash-basin',lastActionAt:10};v.update(state,0);assert(!v.root.getObjectByName('story-basin-ripple').visible,'first paused update replays a long-expired wash ripple');
 });
+test('S9: mint tin uses glazed enamel finish and mended bear uses woven fabric with bounded plush response',async()=>{
+ const v=await view(),state=createState();state.story={chapter:3,step:0,lastAction:'prop:moon-bed',lastActionAt:0};state.elapsed=.9;v.update(state,0);
+ const lid=v.root.getObjectByName('story-mint-tin-lid');let enamel=0;
+ lid.traverse(o=>{if(o.isMesh&&o.material.isMeshPhysicalMaterial&&o.material.clearcoat>.2)enamel++});
+ assert(enamel>0,'mint tin lid is flat matte paint instead of glazed enamel');
+ const bear=v.root.getObjectByName('story-mended-bear');let woven=0;
+ bear.traverse(o=>{if(o.isMesh&&o.material.bumpMap?.name==='atelier-fabric-finish')woven++});
+ assert(woven>0,'mended bear lacks woven fabric relief');
+ assert(bear.position.y>.875&&bear.scale.x>1&&bear.scale.y<1,'replaying bear lacks plush cloth response');
+ state.settings.reducedMotion=true;v.update(state,0);
+ assert(Math.abs(bear.position.y-.875)<1e-6&&bear.scale.x===1&&bear.scale.y===1,'reduced motion keeps bear response active');
+});

@@ -39,7 +39,8 @@ export function renderFrame(w,state,dt,selected){
  applyLighting({renderer,depthFog,hemi,key,fill,house,courtyard},{state,
    nightMix:st.nightMix,focusedRoom:st.focusedRoom,lampFocus:st.lampFocus,rainMix:w.firstWeek.rainMix});
  details.update(st.nightMix);atmosphere.update(state,st.nightMix,st.quality);
- roomEffects.update(state,st.nightMix);restoration.update(state,st.nightMix);
+ roomEffects.update(state,st.nightMix,{lampFocus:st.lampFocus,rainMix:w.firstWeek.rainMix});
+ restoration.update(state,st.nightMix);
  storyProps.update(state,st.nightMix);teaTable.update(state);sewingPlay.update(state);
  moonChimes.update(state,st.chimeSelection);
  roomFrame.show(working()?null:st.focusedRoom);

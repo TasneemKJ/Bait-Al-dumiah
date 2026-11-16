@@ -202,12 +202,19 @@ html[lang=ar] #ui .dock[data-expanded=true]>button{font-size:max(16px,1rem)}
 #ui .key-ring .ring-key-art{width:16px;height:32px}
 #ui .key-ring .ring-tag{font:600 9.5px/1.15 Georgia,"Times New Roman",serif;letter-spacing:-.02em;color:#5d4250;
  background:#f7ecd9;border:1px solid #d9c3a5;border-radius:3px;padding:2px 2px;max-width:54px;text-align:center;
- overflow-wrap:normal;word-break:normal}
+ box-shadow:0 2px 5px #4a323018,inset 0 1px 0 #fffdf9b3;overflow-wrap:normal;word-break:normal}
 #ui .key-ring .ring-key:focus-visible{outline:2px solid #804a64;outline-offset:2px;border-radius:6px}
+.night #ui .key-ring{color:#dfc07c}
+.night #ui .key-ring .ring-hook{border-color:#a8844c}
+.night #ui .key-ring .ring-loop{border-color:#dfc07c}
+.night #ui .key-ring .ring-tag{background:#2e273bf2;color:#f6e7d3;border-color:#9b8062;
+ box-shadow:0 2px 6px #0f0b1855,inset 0 1px 0 #ffffff14}
 /* The porter's bell on the hall table: a brass bell that swings when someone in the house calls. */
 #ui .porter-bell{position:absolute;inset-inline-end:14px;bottom:max(14px,env(safe-area-inset-bottom));z-index:6;
  width:48px;height:48px;border-radius:50%;border:1px solid #d9c3a5;background:#f7ecd9e6;color:#b8873f;padding:9px;
- box-shadow:0 6px 16px #583b5522;transform-origin:50% 12%;cursor:pointer}
+ box-shadow:0 6px 16px #583b5522,inset 0 1px 0 #fffdf999;transform-origin:50% 12%;cursor:pointer}
+.night #ui .porter-bell{background:#2e273be6;color:#dfc07c;border-color:#9b8062;
+ box-shadow:0 6px 18px #0f0b1866,inset 0 1px 0 #ffffff18}
 #ui .porter-bell svg{width:100%;height:100%;display:block}
 #ui .porter-bell.ringing{animation:porter-swing .4s ease-in-out 4}
 @keyframes porter-swing{0%,100%{transform:rotate(0)}25%{transform:rotate(14deg)}75%{transform:rotate(-14deg)}}

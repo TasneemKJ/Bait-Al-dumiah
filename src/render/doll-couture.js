@@ -89,7 +89,7 @@ export function dollFabric(id) {
  const map=new T.CanvasTexture(image);map.colorSpace=T.SRGBColorSpace;map.anisotropy=4;
  if(id==='sami')map.userData.pattern='sami-woven-bib-band';
  const m=new T.MeshStandardMaterial({map,roughness:.88,bumpMap:surfaceFinish('fabric'),
-   roughnessMap:surfaceFinish('fabric'),bumpScale:.002,
+   roughnessMap:surfaceFinish('fabric'),bumpScale:.0035,
    side:T.DoubleSide});m.userData.shared=true;fabrics.set(id,m);return m;
 }
 

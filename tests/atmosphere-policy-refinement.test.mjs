@@ -81,3 +81,25 @@ test('each actual room keeps a finite monotonic practical across the day',()=>{
   for(const bad of [NaN,Infinity,-Infinity,undefined,null,'night',{},[]])assert.deepEqual(roomLighting(id,bad),night);
  }
 });
+test('four-room floor lamp pools match room practical colors, warm at golden hour and lift on focus',async()=>{
+ const {roomPoolLook,roomLighting}=await import('../src/render/visual-policy.js');
+ const ids=['kitchen','parlor','studio','bedroom'];
+ assert.equal(new Set(ids.map(id=>roomPoolLook(id,1).color)).size,4);
+ for(const id of ids){
+  const noon=roomPoolLook(id,0,40,false),dusk=roomPoolLook(id,0,112,false),night=roomPoolLook(id,1,160,false);
+  const focused=roomPoolLook(id,1,160,true);
+  assert.equal(noon.color,roomLighting(id,1).color);
+  assert.ok(dusk.level>noon.level&&night.level>dusk.level,`pool progression for ${id}`);
+  assert.ok(focused.level>=night.level&&focused.level<=1);
+ }
+ assert.equal(roomPoolLook('__proto__',NaN,NaN,NaN).color,roomLighting('kitchen',1).color);
+});
+test('slanted window sunbeams warm at golden hour, soften to moonbeams at night and dim in rain',async()=>{
+ const {sunbeamLook}=await import('../src/render/visual-policy.js');
+ const noon=sunbeamLook(0,40,0),dusk=sunbeamLook(0,112,0),night=sunbeamLook(1,160,0),rain=sunbeamLook(1,160,1);
+ assert.ok(noon.opacity>.06&&noon.opacity<.12);
+ assert.ok(dusk.opacity>noon.opacity&&dusk.opacity<=.16&&dusk.dusk>.8);
+ assert.ok(night.opacity<noon.opacity&&night.opacity>.02&&night.night===1&&night.dusk===0);
+ assert.ok(rain.opacity<night.opacity*.5);
+ for(const bad of [NaN,-5,Infinity])assert.ok(Number.isFinite(sunbeamLook(bad,bad,bad).opacity));
+});

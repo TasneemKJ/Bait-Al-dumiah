@@ -23,4 +23,4 @@ function paintedStrands(color){
 }
 export function scalpMaterial(color){if(!materials.has(color))materials.set(color,
   new T.MeshStandardMaterial({color:0xffffff,
-  map:paintedStrands(color),roughness:.66,bumpMap:strandRelief(),bumpScale:.0025}));return materials.get(color)}
+  map:paintedStrands(color),roughness:.64,bumpMap:strandRelief(),bumpScale:.0036}));return materials.get(color)}

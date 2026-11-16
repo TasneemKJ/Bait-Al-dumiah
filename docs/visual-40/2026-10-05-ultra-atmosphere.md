@@ -7,7 +7,7 @@ Branch: `visuals/ultra-atmosphere-2026-10-05`
 
 This is an unfinished forty-item roadmap, not a count of completed iterations. A numbered item is complete only after its real implementation and fresh verification evidence are recorded. Eight arrays of five numbers do not constitute forty improvements.
 
-Current 2026-10-05 slice: item 35 has a reproduced inherited-room-key regression and nine passing lighting-policy tests. Material work toward item 15 is deferred pending rendered baseline access; no mesh changes are shipped. The remaining roadmap items are not claimed complete by this batch.
+Current 2026-11-16 slice: item 35 has a reproduced inherited-room-key regression and passing lighting-policy tests; items 6–10, 13, 15, 16, 23 and 34 are implemented and verified with glazed mint-tin enamel, woven mended-bear cloth and plush response, four-room tinted floor lamp pools (`roomPoolLook`), slanted arched-window sunbeams (`sunbeamLook`), two-depth dust motes (`atmosphere-dust-near`), and night-tightened paper vignette. The remaining roadmap items are not claimed complete by this batch.
 
 1. Increase cutaway depth between front rooms and back wall.
 2. Add slightly stronger room-to-room fog separation.

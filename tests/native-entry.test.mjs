@@ -3,7 +3,11 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
 const root=new URL('../',import.meta.url).pathname;
-function python(source,args=[]){const result=spawnSync('python',['-c',source,...args],{cwd:root,encoding:'utf8'});assert.equal(result.status,0,result.stdout+'\n'+result.stderr);return result.stdout}
+function python(source,args=[]){
+ let result=spawnSync('python',['-c',source,...args],{cwd:root,encoding:'utf8'});
+ if(result.error?.code==='ENOENT')result=spawnSync('python3',['-c',source,...args],{cwd:root,encoding:'utf8'});
+ assert.equal(result.status,0,result.stdout+'\n'+result.stderr);return result.stdout;
+}
 
 test('native entry clicks the actual Home control once and never retries or mutates state',()=>{
  python(`

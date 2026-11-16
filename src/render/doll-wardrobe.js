@@ -12,7 +12,7 @@ function embroideredLinen(id){
  const map=new T.CanvasTexture(image);map.name=`levantine-stitched-linen-${id}`;
  map.colorSpace=T.SRGBColorSpace;map.anisotropy=4;
  const material=new T.MeshStandardMaterial({map,roughness:.98,
-   bumpMap:embroideryFinish(id),roughnessMap:embroideryFinish(id),bumpScale:.0016,
+   bumpMap:embroideryFinish(id),roughnessMap:embroideryFinish(id),bumpScale:.0028,
    side:T.DoubleSide});material.userData.shared=true;cloth.set(id,material);return material;
 }
 export function createApron(parent,def){

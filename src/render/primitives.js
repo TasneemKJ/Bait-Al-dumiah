@@ -8,8 +8,8 @@ export const palette={cream:0xeedac1,wood:0x96715e,dark:0x655061,gold:0xc59b60,
   rose:0xce91a4,mint:0x8fb9aa,lavender:0xb3a0c8,ink:0x352b3d};
 export function mat(color,extra={}){if(color===palette.wood&&
   !Object.keys(extra).length)return craftMaterial(color,'wood');
-if(color===palette.gold)extra={metalness:.48,roughness:.39,bumpMap:surfaceFinish('brass'),
-  roughnessMap:surfaceFinish('brass'),bumpScale:.0007,
+if(color===palette.gold)extra={metalness:.55,roughness:.33,bumpMap:surfaceFinish('brass'),
+  roughnessMap:surfaceFinish('brass'),bumpScale:.0009,
   ...extra};const key=JSON.stringify([color,
     Object.fromEntries(Object.entries(extra).map(([key,value])=>[key,value?.isTexture?value.uuid:value]))]);
 if(!materials.has(key))materials.set(key,new T.MeshStandardMaterial({color,roughness:.82,
@@ -55,9 +55,9 @@ cylinder(g,0,.035,0,.25,.07,palette.gold);cylinder(g,0,.47,0,.027,.9,palette.gol
 ring(g,0,.79,0,.36,.022,palette.gold,true);ball(g,0,1.2,0,.04,.06,.04,palette.gold);return {group:g,shade}}
 export function glaze(color){const key='glaze:'+color;
 if(!materials.has(key))materials.set(key,new T.MeshPhysicalMaterial({color:0xffffff,
-  map:ceramicColor(color),roughness:.28,metalness:0,clearcoat:.34,
-  clearcoatRoughness:.24,bumpMap:surfaceFinish('ceramic'),
-    roughnessMap:surfaceFinish('ceramic'),bumpScale:.0005}));return materials.get(key)}
+  map:ceramicColor(color),roughness:.25,metalness:0,clearcoat:.42,
+  clearcoatRoughness:.18,bumpMap:surfaceFinish('ceramic'),
+    roughnessMap:surfaceFinish('ceramic'),bumpScale:.0006}));return materials.get(key)}
 export function cup(p,x,y,z,color=palette.cream){color=typeof color==='number'?
   glaze(color):color;cylinder(p,x,y+.065,z,.075,.13,color,.8);
 cylinder(p,x,y+.132,z,.061,.004,0x775040);ring(p,x+.078,y+.07,z,.05,.012,color);cylinder(p,x,y+.009,z,.11,.012,color)}

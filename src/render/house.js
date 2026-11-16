@@ -2,8 +2,9 @@ import * as T from 'three';
 import {crescentGeometry} from './resident-effects.js';
 import {createLampPool} from './lamp-pool.js';
 import {drapedCurtain,valance,doily} from './fabric-shapes.js';
+import {craftMaterial} from './textiles.js';
 import {ROOMS} from '../content.js';
-import {palette as P,box,ball,cylinder,ring,line,arch,mat,texture,texturedPlane,plant,
+import {palette as P,box,ball,cylinder,ring,line,arch,mat,glaze,texture,texturedPlane,plant,
   lamp,cup,books,batch} from './primitives.js';
 const originalTeaPaint=new T.MeshStandardMaterial({vertexColors:true,roughness:.82});
 const housePaint=new T.MeshStandardMaterial({vertexColors:true,roughness:.82});housePaint.name='house-painted-matte';
@@ -87,7 +88,8 @@ function parlor(p){
  const table=cylinder(p,.15,.47,.45,.53,.07,P.wood);table.scale.z=.7;for(let i=0;i<3;i++){const a=i*2.1;
  line(p,[.15+Math.cos(a)*.4,.04,.45+Math.sin(a)*.27],[.15+Math.cos(a)*.25,.45,
    .45+Math.sin(a)*.18],.035,P.wood)}cup(p,-.18,.51,.38);
- lamp(p,-1.67,0,-.83,1.65);createLampPool(p,-1.67,-.83,1.8,{y:.128,stat:true,name:'lamp-pool-static'});
+ lamp(p,-1.67,0,-.83,1.65);createLampPool(p,-1.67,-.83,1.8,{y:.128,stat:true,
+   name:'lamp-pool-static',room:'parlor',color:0xffa88f});
  box(p,1.94,.82,-.85,.5,1.64,.54,P.wood);
  for(let i=0;i<3;i++){box(p,1.94,.18+i*.54,-.52,.44,.04,.56,P.cream);books(p,1.74,.2+i*.54,-.62)}
  box(p,.35,2.08,-1.51,.88,1.03,.09,P.gold,true);
@@ -133,19 +135,21 @@ export function makeFurniture(id){const g=new T.Group();
  if(id==='plant')plant(g,0,0,0,.8);
  if(id==='lamp'){lamp(g,0,0,0,.9);const pool=createLampPool(g,0,0,1.15,{y:.03});g.userData.pool=pool}
  if(id==='rug')texturedPlane(g,0,.025,0,1.02,.74,texture('rug',['#d4a7b5','#866477']),true);
- if(id==='bear'){const tan=0xc19778;ball(g,0,.33,0,.2,.23,.17,tan);ball(g,0,.62,0,.23,.21,.18,tan);
+ if(id==='bear'){const tan=craftMaterial(0xc19778,'fabric');
+ ball(g,0,.33,0,.2,.23,.17,tan);ball(g,0,.62,0,.23,.21,.18,tan);
  for(const x of [-.17,.17]){ball(g,x,.79,0,.08,.08,.06,tan);ball(g,x,.12,.04,.1,.10,.12,tan);
  ball(g,x*1.3,.35,.01,.09,.13,.10,tan)}ball(g,0,.56,.16,.10,.08,.045,P.cream);
  for(const x of [-.073,.073])ball(g,x,.65,.169,.024,.028,.016,P.ink);
- ball(g,0,.588,.203,.032,.023,.015,P.ink);box(g,0,.42,.164,.19,.06,.015,P.rose)}
- if(id==='musicbox'){box(g,0,.17,0,.55,.30,.44,0xbb94ab,true);box(g,0,.33,-.17,.54,.28,.05,P.gold,true).rotation.x=-.5;
+ ball(g,0,.588,.203,.032,.023,.015,P.ink);box(g,0,.42,.164,.19,.06,.015,craftMaterial(P.rose,'fabric'))}
+ if(id==='musicbox'){const caseWood=craftMaterial(0x9b7068,'wood');
+ box(g,0,.17,0,.55,.30,.44,caseWood,true);box(g,0,.33,-.17,.54,.28,.05,P.gold,true).rotation.x=-.5;
  box(g,0,.336,0,.5,.04,.39,P.cream);cylinder(g,0,.39,0,.12,.07,P.gold);
- ball(g,0,.58,0,.08,.10,.08,P.cream);cylinder(g,0,.47,0,.14,.15,P.rose,1.6);
- line(g,[.29,.21,0],[.39,.21,0],.02,P.gold);ball(g,.40,.23,0,.03,.05,.03,P.cream)}
+ ball(g,0,.58,0,.08,.10,.08,glaze(P.cream));cylinder(g,0,.47,0,.14,.15,craftMaterial(P.rose,'fabric'),1.6);
+ line(g,[.29,.21,0],[.39,.21,0],.02,P.gold);ball(g,.40,.23,0,.03,.05,.03,glaze(P.cream))}
  if(id==='mobile'){cylinder(g,0,.025,0,.2,.05,P.wood);
  line(g,[0,0,0],[0,1.10,0],.019,P.gold);line(g,[-.31,1.05,0],[.31,1.05,0],.018,P.gold);
  for(let i=0;i<3;i++){let x=-.27+i*.27;line(g,[x,1.05,0],[x,.85-(i%2)*.2,0],.007,P.gold);
- ball(g,x,.75-(i%2)*.2,0,.09,.12,.035,[P.gold,P.cream,P.rose][i])}}
+ ball(g,x,.75-(i%2)*.2,0,.09,.12,.035,[P.gold,glaze(P.cream),glaze(P.rose)][i])}}
  if(id==='cup')cup(g,0,.02,0,P.cream);
  g.name=`furniture-${id}`;
  return g;

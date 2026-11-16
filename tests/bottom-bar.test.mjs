@@ -38,6 +38,8 @@ test('a key tag wraps only between words, never inside one',()=>{
  const css=readFileSync(new URL('../src/hud.css',import.meta.url),'utf8');
  assert.match(css,/#ui \.key-ring \.ring-tag\{[^}]*overflow-wrap:normal;word-break:normal/);
  assert.doesNotMatch(css,/#ui \.key-ring \.ring-tag\{[^}]*overflow-wrap:anywhere/);
+ assert.match(css,/\.night #ui \.key-ring \.ring-tag\{[^}]*background:#2e273bf2/);
+ assert.match(css,/\.night #ui \.porter-bell\{[^}]*background:#2e273be6/);
 });
 test('a ritual keeps its touch Sound and Pause pair; the house keeps them in the fuse box',()=>{
  const css=readFileSync(new URL('../src/hud.css',import.meta.url),'utf8');

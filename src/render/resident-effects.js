@@ -21,7 +21,8 @@ export function createComfortHearts(parent){
  for(let i=0;i<3;i++)root.add(new T.Mesh(heartGeometry,new T.MeshBasicMaterial({color:0xe7b3ad,
    side:T.DoubleSide,transparent:true,opacity:.7,depthWrite:false})));
  return {root,update(time,active,still,started=time){
- const age=time-started;root.visible=active&&Number.isFinite(age)&&age>=0&&age<2;if(!root.visible)return;
+ const origin=Number.isFinite(started)&&started>=0?started:time,age=time-origin;
+ root.visible=active&&Number.isFinite(age)&&age>=0&&age<2;if(!root.visible)return;
  root.children.forEach((o,i)=>{const phase=still?.45:Math.max(0,Math.min(1,(age-i*.18)/1.45));
  o.position.set((i-1)*.16,still?.13:.30*phase,.04);o.rotation.z=Math.sin(i*2.4)*.18;
  o.material.opacity=still?.60:Math.sin(phase*Math.PI)*.75})}};

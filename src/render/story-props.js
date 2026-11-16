@@ -1,20 +1,20 @@
 import * as T from 'three';
 import {ROOMS} from '../content.js';
 import {storyStatus} from '../simulation.js';
-import {palette as P,box,cylinder,ring,line,mat,cup,batch} from './primitives.js';
-import {softTexture} from './textiles.js';
+import {palette as P,box,cylinder,ring,line,mat,glaze,cup,batch} from './primitives.js';
+import {craftMaterial,softTexture} from './textiles.js';
 
 // Authored story landmarks are a view of the save, never an inventory or clock.
-// Small painted parts share vertex colour; walnut and brass retain their finish.
+// Small painted parts share vertex colour; walnut, brass, enamel and cloth retain their finish.
 const painted=new T.MeshStandardMaterial({vertexColors:true,roughness:.72});
 const bead=new T.SphereGeometry(1,10,7);
-function ball(parent,x,y,z,rx,ry,rz,color){const mesh=new T.Mesh(bead,mat(color));
+function ball(parent,x,y,z,rx,ry,rz,color){const mesh=new T.Mesh(bead,typeof color==='number'?mat(color):color);
 mesh.position.set(x,y,z);mesh.scale.set(rx,ry,rz);parent.add(mesh);return mesh}
 function finish(group){
  group.traverse(o=>{
   if(!o.isMesh)return;o.castShadow=false;o.receiveShadow=true;
-  if(o.material.transparent||o.material.isMeshBasicMaterial||o.material===painted||o.material.map||
-    o.material.metalness>.3||o.material.emissive?.getHex())return;
+  if(o.material.transparent||o.material.isMeshBasicMaterial||o.material.isMeshPhysicalMaterial||
+    o.material===painted||o.material.map||o.material.metalness>.3||o.material.emissive?.getHex())return;
   const geometry=o.geometry.clone(),count=geometry.attributes.position.count,
     color=o.material.color,data=new Float32Array(count*3);
   for(let i=0;i<count;i++)data.set([color.r,color.g,color.b],i*3);
@@ -29,17 +29,17 @@ const petalGeometry=new T.CircleGeometry(1,8);
 function petals(parent,x,y,z,size=.035){for(let i=0;i<5;i++){const a=i*Math.PI*2/5,
   petal=new T.Mesh(petalGeometry,mat(P.cream));
 petal.position.set(x+Math.cos(a)*size*.58,y+Math.sin(a)*size*.58,z);petal.scale.set(size*.46,size*.46,1);
-parent.add(petal)}ball(parent,x,y,z+.008,.012,.012,.009,P.gold)}
+parent.add(petal)}ball(parent,x,y,z+.008,.012,.012,.009,0xd8b26e)}
 
 function buildTin(root,staticParts){
- const tin=anchor(root,'story-mint-tin','kitchen',[-.30,1.04,-1.04]);
- cylinder(tin,0,.115,0,.18,.23,P.mint);ring(tin,0,.232,0,.181,.012,P.gold,true);
+ const tin=anchor(root,'story-mint-tin','kitchen',[-.30,1.04,-1.04]),enamel=glaze(P.mint);
+ cylinder(tin,0,.115,0,.18,.23,enamel);ring(tin,0,.232,0,.181,.012,P.gold,true);
  cylinder(tin,0,.236,0,.159,.008,P.ink);box(tin,0,.125,.178,.16,.10,.012,P.cream);
  // A large pressed leaf reads at phone scale, without tiny typography.
- const emblem=ball(tin,0,.127,.191,.040,.029,.008,P.mint);emblem.rotation.z=.5;
+ const emblem=ball(tin,0,.127,.191,.040,.029,.008,enamel);emblem.rotation.z=.5;
  staticParts(tin);
  const tinLid=group(tin,'story-mint-tin-lid');tinLid.position.set(0,.25,-.155);
- cylinder(tinLid,0,0,.155,.19,.035,P.mint);ring(tinLid,0,.019,.155,.185,.009,P.gold,true);finish(tinLid);
+ cylinder(tinLid,0,0,.155,.19,.035,enamel);ring(tinLid,0,.019,.155,.185,.009,enamel,true);finish(tinLid);
  return {tinLid};
 }
 
@@ -91,10 +91,11 @@ function buildBasin(root,staticParts){
 }
 
 function buildBear(root,staticParts){
- const bear=anchor(root,'story-mended-bear','bedroom',[.09,.875,-1.03]);bear.rotation.y=-.22;
- ball(bear,0,.16,0,.115,.15,.085,P.wood);ball(bear,0,.35,0,.14,.12,.095,P.wood);
- for(const x of [-.10,.10]){ball(bear,x,.435,0,.052,.052,.034,P.wood);
- ball(bear,x,.045,.035,.063,.046,.063,P.wood);ball(bear,x*1.40,.19,.01,.038,.075,.04,P.wood)}
+ const bear=anchor(root,'story-mended-bear','bedroom',[.09,.875,-1.03]),cloth=craftMaterial(0xc19778,'fabric');
+ bear.rotation.y=-.22;
+ ball(bear,0,.16,0,.115,.15,.085,cloth);ball(bear,0,.35,0,.14,.12,.095,cloth);
+ for(const x of [-.10,.10]){ball(bear,x,.435,0,.052,.052,.034,cloth);
+ ball(bear,x,.045,.035,.063,.046,.063,cloth);ball(bear,x*1.40,.19,.01,.038,.075,.04,cloth)}
  ball(bear,0,.31,.085,.062,.041,.025,P.cream);
  for(const x of [-.043,.043])ball(bear,x,.37,.088,.011,.013,.009,P.ink);
  ball(bear,0,.324,.109,.015,.011,.008,P.ink);
@@ -179,6 +180,8 @@ export function createStoryProps(parent){
   const response=active?Math.sin(phase/2.2*Math.PI)*.04:0;
   tinLid.rotation.x=(snapshot.tinOpen?-2.1:0)-(state.story?.lastAction==='prop:mint-tin'?response:0);
   blooms.rotation.z=state.story?.lastAction==='prop:jasmine-window'?response:0;
-  bear.rotation.z=state.story?.lastAction==='prop:moon-bed'?response:0;
+  const bearCue=state.story?.lastAction==='prop:moon-bed'?response:0;
+  bear.rotation.z=bearCue;bear.position.y=.875+Math.abs(bearCue)*.18;
+  bear.scale.set(1+Math.abs(bearCue)*.22,1-Math.abs(bearCue)*.18,1+Math.abs(bearCue)*.22);
  },status(){return {...snapshot}}};
 }
