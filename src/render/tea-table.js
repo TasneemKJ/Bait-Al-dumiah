@@ -76,7 +76,7 @@ function buildCup(presentation,i,{brass,cream}){
  // A second interior engraving remains legible where the surface meets it.
  const band=torus(cup,inner-.005,.0028,brass.clone(),[0,fillY(.7),0],true);
  band.name='tea-target-band';band.material.emissiveIntensity=0;
- const liquid=cylinder(cup,inner-.009,.008,amber,[0,fillY(0)-.004,0]);liquid.name='tea-liquid-surface';
+ const liquid=cylinder(cup,inner-.009,.008,amber.clone(),[0,fillY(0)-.004,0]);liquid.name='tea-liquid-surface';
  return {root:cup,vessel,band,liquid,handle};
 }
 // Presentation-only cup response; the simulation supplies readiness and landing.
@@ -84,6 +84,7 @@ function updateTeaCupFeedback(v,c,tea,state,served){
   if(c.ready&&!v.wasReady)v.readyAt=state.elapsed;v.wasReady=c.ready;
   const pulse=state.settings.reducedMotion?0:Math.max(0,1-(state.elapsed-v.readyAt)/.65);
   v.band.material.emissive.set(0xe0bc7c);v.band.material.emissiveIntensity=c.ready?.12+pulse*.35:0;
+  v.liquid.material.emissive.set(0x6b3210);v.liquid.material.emissiveIntensity=c.ready?.14+pulse*.16:0;
   const contact=!served&&tea.aimedCup===c.id&&tea.flow>0&&c.fill>0;
   const ripple=contact&&!state.settings.reducedMotion?Math.sin(state.elapsed*18)*.014*Math.min(1,tea.flow/.55):0;
   v.liquid.scale.set(1+ripple,1,1+ripple);

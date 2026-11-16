@@ -18,6 +18,11 @@ export const wishReward=d=>8+2*bondLevel(d.bond);
 export const currentStreak=s=>s.lastFullDay>=s.day-1?s.streak:0;
 export const fullRooms=s=>ROOMS.filter(r=>s.decor.filter(d=>d.room===r.id).length>=SLOTS.length).length;
 export const inFavoriteRoom=d=>DOLLS.find(x=>x.id===d.id)?.favRoom===d.room;
+export function sharedRoomMates(s,id){
+ const d=s?.dolls?.find(x=>x.id===id);if(!d)return [];
+ return s.dolls.filter(x=>x.id!==id&&x.room===d.room).map(x=>x.id);
+}
+export const hasCompany=(s,id)=>sharedRoomMates(s,id).length>0;
 export const delighted=(s,d)=>{const fav=DOLLS.find(x=>x.id===d.id)?.favItem;
 return s.decor.some(k=>k.room===d.room&&k.item===fav)};
 export const contentThreshold=(s,d)=>delighted(s,d)?45:55;

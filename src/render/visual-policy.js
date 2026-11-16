@@ -1,5 +1,6 @@
 // Pure, testable presentation policy. It never mutates gameplay or save state.
 import {ROOMS} from '../content.js';
+import {coziness,secretCozyNeeded} from '../sim-queries.js';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,Number.isFinite(v)?v:a));
 export function lighting(mix){
  const t=clamp(mix,0,1),lerp=(a,b)=>a+(b-a)*t;
@@ -119,4 +120,23 @@ export function sunbeamLook(mix,clock=0,rainMix=0){
  const n=Number.isFinite(mix)?clamp(mix,0,1):0,d=duskGlow(clock),r=Number.isFinite(rainMix)?clamp(rainMix,0,1):0;
  const base=(.085*(1-n)+.042*n+.055*d*(1-n))*(1-.65*r);
  return {opacity:clamp(base,0,.16),dusk:d*(1-n),night:n};
+}
+// Rain-night window floor shimmer: a gentle drifting caustic modulation when rainMix > 0 and motion is on.
+export function rainCausticPulse(elapsed,rainMix=0,index=0,reducedMotion=false){
+ const r=Number.isFinite(rainMix)?clamp(rainMix,0,1):0;
+ if(reducedMotion||r<=0||!Number.isFinite(elapsed))return 0;
+ const wave=.5+.5*(Math.sin(elapsed*1.85+index*1.4)*.65+Math.cos(elapsed*2.9-index*.9)*.35);
+ return clamp(wave*r*.038,0,.038);
+}
+// Pre-visitor hush: in the early night arrival window (clock 124..142) when a whisper still awaits today,
+// lamps and floor pools dip gently by up to 8% as the shy visitor approaches the doorstep.
+export function visitorHush(state){
+ if(!state||typeof state!=='object')return 0;
+ const c=Number.isFinite(state.clock)?state.clock:0;
+ const waiting=c>=120&&state.lastSecretDay!==state.day&&(state.journal?.length??0)<6;
+ const cozyEnough=Array.isArray(state.dolls)&&Array.isArray(state.decor)?
+   coziness(state)>=secretCozyNeeded(state):true;
+ if(!waiting||!cozyEnough||c<124||c>142)return 0;
+ const ramp=x=>{const t=clamp(x,0,1);return t*t*(3-2*t)};
+ return .08*ramp((c-124)/6)*(1-ramp((c-136)/6));
 }

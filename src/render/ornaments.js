@@ -31,7 +31,7 @@ function borderShade(p){
    depthWrite:false}));o.position.set(0,1.61,-1.49);o.userData.noBatch=true;p.add(o);
 }
 function dressKitchen(g,room,halo){
-  vase(g,.30,1.04,-1.13,0xc48488);
+  vase(g,.56,1.04,-1.25,0xc48488);
   box(g,.60,1.93,-1.44,.48,.57,.04,P.gold);box(g,.60,1.93,-1.40,.39,.48,.02,0xebe1c7);
   rose(g,.60,1.96,-1.38,1.4);line(g,[.60,1.78,-1.38],[.60,1.94,-1.38],.012,0x7a956f);
   for(let i=0;i<5;i++){const x=.02+i*.20;line(g,[x,2.9,-1.41],[x,2.71,-1.40],.007,P.gold);

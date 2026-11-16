@@ -1,7 +1,7 @@
 import * as T from 'three';
 import {createKettleSteam} from './kettle-steam.js';
 import {createLampPool,poolOpacity} from './lamp-pool.js';
-import {duskGlow,roomPoolLook,sunbeamLook} from './visual-policy.js';
+import {duskGlow,roomPoolLook,sunbeamLook,rainCausticPulse,visitorHush} from './visual-policy.js';
 
 export function createRoomEffects(parent){
  const root=new T.Group();root.name='quiet-room-effects';root.userData.noBatch=true;parent.add(root);
@@ -36,14 +36,15 @@ export function createRoomEffects(parent){
    sunbeams:beams.length,sunbeamOpacity:beams[0]?.material.opacity??null,
    steam:Boolean(kettleSteam),steamVisible:kettleSteam?.root.visible??false}},
   update(state,mix,{lampFocus=null,rainMix=0}={}){
-  const lit=Math.max(0,Math.min(1,mix)),dusk=duskGlow(state.clock)*(1-lit);
+  const lit=Math.max(0,Math.min(1,mix)),dusk=duskGlow(state.clock)*(1-lit),hush=visitorHush(state);
   pools.forEach(p=>{const look=roomPoolLook(p.userData.room,lit,state.clock,lampFocus?.[p.userData.room]??0);
-   p.material.color.setHex(look.color);p.material.opacity=poolOpacity(look.level)});
+   p.material.color.setHex(look.color);p.material.opacity=poolOpacity(look.level)*(1-hush)});
   if(kettleSteam){const lina=state.dolls.find(d=>d.id==='lina');
   kettleSteam.update(state.elapsed,Boolean(lina)&&lina.action==='idle',state.settings.reducedMotion||state.paused)}
   faceFill.intensity=.18+lit*.48;
-  patches.forEach(p=>{p.material.color.set(0xf0d1a0).lerp(new T.Color(0xffae68),dusk*.75)
-   .lerp(new T.Color(0xabc4ef),lit);p.material.opacity=.15+dusk*.035-lit*.065});
+  patches.forEach((p,i)=>{p.material.color.set(0xf0d1a0).lerp(new T.Color(0xffae68),dusk*.75)
+   .lerp(new T.Color(0xabc4ef),lit);p.material.opacity=.15+dusk*.035-lit*.065+
+   rainCausticPulse(state.elapsed,rainMix,i,state.settings.reducedMotion||state.paused)});
   const beam=sunbeamLook(lit,state.clock,rainMix);
   beams.forEach(b=>{b.material.color.set(0xffe6be).lerp(new T.Color(0xffb26b),beam.dusk*.82)
    .lerp(new T.Color(0x9cb8ec),beam.night);b.material.opacity=beam.opacity;b.visible=beam.opacity>.005});

@@ -24,3 +24,10 @@ test('invalid score positions fall back to the first beat with finite fields',()
   const beat=score.lullabyBeat(value,true);assert.deepEqual(beat,score.lullabyBeat(0,true));
  }
 });
+test('golden-hour Maqam Hijaz phrase repeats deterministically with warm upper register',()=>{
+ assert.equal(typeof score.duskPhraseBeat,'function');
+ for(let i=0;i<32;i++){
+  const b=score.duskPhraseBeat(i);assert.deepEqual(b,score.duskPhraseBeat(i+16));
+  assert.ok(b.frequency>=200&&b.frequency<500&&b.volume>0&&b.volume<=.04);
+ }
+});

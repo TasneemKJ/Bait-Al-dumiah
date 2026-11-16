@@ -64,3 +64,13 @@
  background-size:100% 100%,160px 160px;opacity:.5}
 .night #app::after{opacity:.64}
 @media (prefers-contrast:more),(prefers-reduced-transparency:reduce){#app::after{display:none}}
+
+/* Diegetic stationery craft: mother-of-pearl button badge, wax milestone seals and paper-crease bevels. */
+.house-status>div:first-child .icon,.basket-row>.icon{filter:drop-shadow(0 1px 1px #4a323029);transition:transform .22s ease}
+.basket-row:hover>.icon{transform:rotate(14deg)}
+#ui .milestone>.icon{width:28px;height:28px;padding:5px;border-radius:50%;flex-shrink:0}
+#ui .milestone.claimed>.icon,#ui .milestone.ready>.icon{background:radial-gradient(circle at 35% 30%,#fff3d1,#d4a259);border:1.5px solid #b37e36;box-shadow:inset 0 1px 0 #fffdf9b3,0 2px 6px #4a323024;color:#5c3a1d}
+#ui .milestone.claimed>.icon{background:radial-gradient(circle at 35% 30%,#e8b4a6,#a85c52);border-color:#8c463e;color:#fff8f0}
+.objective[data-expanded=true]{box-shadow:inset 0 1px 0 #fffdf8b3,0 6px 20px #4a323018}
+.night .objective[data-expanded=true]{box-shadow:inset 0 1px 0 #e8ceb224,0 8px 24px #110d2045}
+.sheet-header{border-bottom:1px solid #dfcdbf88;padding-bottom:8px;box-shadow:0 1px 0 #fffdf980}

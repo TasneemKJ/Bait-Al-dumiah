@@ -47,3 +47,13 @@ const {view,state,doll,resident}=fixture();state.settings.reducedMotion=true;res
 test("D30: Sleeping breath",()=>{
 const {view,state,doll,resident}=fixture('noor');resident.action='rest';state.elapsed=1;view.update(state,.1,'noor');const first=doll.body.scale.y;state.elapsed=2;view.update(state,.1,'noor');assert(doll.body.scale.y!==first&&Math.abs(doll.body.scale.y-1)<.007,'sleep has no gentle breathing');doll.root.updateMatrixWorld(true);const hand=doll.body.worldToLocal(doll.arms[1].hand.getWorldPosition(new T.Vector3()));assert(hand.y>.87&&hand.z<.16,'sleeping cheek has no nearby hand');state.settings.reducedMotion=true;view.update(state,.1,'noor');assert(doll.body.scale.y===1,'reduced-motion breath still stretches clothing');state.paused=true;const q=doll.arms[1].hand.getWorldQuaternion(new T.Quaternion());state.elapsed=10;view.update(state,.1,'noor');assert(q.angleTo(doll.arms[1].hand.getWorldQuaternion(new T.Quaternion()))<1e-6,'paused sleeping hand drifts');
 });
+
+test("D31: Roommate chemistry and stop-motion cadence",()=>{
+const {view,state}=fixture();state.dolls[0].room='parlor';state.dolls[1].room='parlor';state.elapsed=2.4;
+view.update(state,.1,'sami');
+const lina=view.dolls[0],noor=view.dolls[1];
+assert(lina.sharedMoment&&noor.sharedMoment,'roommates sharing a room do not acknowledge each other');
+assert(lina.head.rotation.y>0&&noor.head.rotation.y<0,'roommates do not angle toward each other');
+state.settings.reducedMotion=true;view.update(state,.1,'sami');
+assert(!lina.sharedMoment&&!noor.sharedMoment,'reduced motion still runs roommate turn');
+});

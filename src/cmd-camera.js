@@ -12,14 +12,14 @@ app.world?.clearObjectSelection();app.objectControls?.collapse()}return;},
    if(app.panelOpen==='activities'&&value!=='activities'&&!app.physicalActivity())sim.endActivity(app.state);
    // The card asks the App Store again each time it opens, and forgets a dismissed sheet's wait.
    if(value==='store'&&app.panelOpen!=='store'){appStore.clearStatus();appStore.refresh()}
-   if(value)app.cancelWorkInput();app.panelOpen=value||false;app.syncPause();app.storyUI?.clear();
+   if(value){app.cancelWorkInput();app.audio?.paper?.()}app.panelOpen=value||false;app.syncPause();app.storyUI?.clear();
    app.world?.setEnabled(!app.panelOpen&&!app.manualPause&&!app.carrying&&!app.fatal);
    app.world?.clearObjectSelection();if(!value)app.ui.clearObject();app.objectControls?.update();app.updateWorkUI();
    if(value==='household'&&
      app.world){try{app.ui.setPortraits(app.world.getPortraits())}catch(error){
        console.warn('Resident portrait unavailable:',error)}}return;},
 'camera':(app,value,origin)=>{app.storyUI?.clear();app.world?.clearObjectSelection();app.world?.home();
-app.host.dataset.focusRoom='';app.host.dataset.focusDoll='';app.roomViews.update();
+app.host.dataset.focusRoom='';app.host.dataset.focusDoll='';app.audio?.setRoom?.(null);app.roomViews.update();
 app.objectControls?.update();return;},
 'focus-doll':(app,value,origin)=>{if(sim.dollRoom(app.state,value)){app.ui.close();
 if(app.world?.focusDoll(value)){app.host.dataset.focusDoll=value;
@@ -27,7 +27,7 @@ app.host.dataset.focusRoom='';app.roomViews.update()}}return;},
 'focus-room':(app,value,origin)=>{if(app.world?.focusRoom(value)){if(objectInfo(app.state,
   app.storyUI?.selected)?.room!==value){app.storyUI?.clear();
 app.world?.clearObjectSelection()}app.host.dataset.focusRoom=value;app.host.dataset.focusDoll='';
-app.ui.tick();app.roomViews.update();app.objectControls?.update()}return;},
+app.audio?.setRoom?.(value);app.ui.tick();app.roomViews.update();app.objectControls?.update()}return;},
 'zoom-in':(app,value,origin)=>{app.world?.zoom(1.2);return;},
 'zoom-out':(app,value,origin)=>{app.world?.zoom(1/1.2);return;},
 'pause':(app,value,origin)=>{app.cancelWorkInput();app.manualPause=!app.manualPause;app.storyUI?.clear();

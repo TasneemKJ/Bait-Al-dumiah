@@ -1,11 +1,11 @@
 import * as T from 'three';
-import {lighting,duskGlow,fog as fogPolicy,practicalLight,rainLook} from './visual-policy.js';
+import {lighting,duskGlow,fog as fogPolicy,practicalLight,rainLook,visitorHush} from './visual-policy.js';
 
 // Sets every light, the fog and the window glow from the blend between day and night.
 export function applyLighting(rig,{state,nightMix,focusedRoom,lampFocus=null,rainMix=0}){
  const {renderer,depthFog,hemi,key,fill,house,courtyard}=rig;
  const cue=courtyard.update(state,nightMix),look=lighting(nightMix),
-   haze=fogPolicy(nightMix);hemi.intensity=look.ambient;key.intensity=look.key;
+   haze=fogPolicy(nightMix),hush=visitorHush(state);hemi.intensity=look.ambient;key.intensity=look.key;
  fill.intensity=look.rim;renderer.toneMappingExposure=look.exposure;
  depthFog.density=haze.density;depthFog.color.setHex(haze.color);
  hemi.color.set(0xe9e0d5).lerp(new T.Color(0x849bc9),nightMix);const dusk=duskGlow(state.clock);
@@ -17,7 +17,7 @@ export function applyLighting(rig,{state,nightMix,focusedRoom,lampFocus=null,rai
  for(const l of house.lights){if(!l.isLight||!l.userData.room)continue;
  const p=practicalLight(l.userData.room,nightMix,look.lamps,cue.lamp,
    lampFocus?lampFocus[l.userData.room]??0:focusedRoom===l.userData.room);
- l.intensity=p.intensity;l.color.setHex(p.color);l.distance=p.distance}
+ l.intensity=p.intensity*(1-hush);l.color.setHex(p.color);l.distance=p.distance}
  house.windows.forEach(m=>{m.emissive.set(0x8baaca).lerp(new T.Color(0xffc27d),
    dusk*(1-nightMix));m.emissiveIntensity=.14+nightMix*.62+dusk*.30});
  if(rainMix>0)wet(rig,rainLook(rainMix));

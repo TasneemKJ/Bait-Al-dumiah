@@ -13,7 +13,7 @@ export function pastryTray(){
  }
  return g;
 }
-pieces.push({room:'kitchen',at:[-.46,1.04,-.99],build:pastryTray});
+pieces.push({room:'kitchen',at:[.18,1.04,-.95],build:pastryTray});
 export function createKeepsakeDetails(parent){
  const root=group('handmade-room-keepsakes');parent.add(root);
  for(const piece of pieces){const room=ROOMS.find(r=>r.id===piece.room),node=piece.build();
@@ -28,7 +28,7 @@ export function spoonCrock(){
  line(spoon,[0,0,0],[0,.24,0],.009,0xc49c72);ball(spoon,0,.285,0,.032,.053,.012,0xc49c72)}
  return g;
 }
-pieces.push({room:'kitchen',at:[.58,1.04,-1.18],build:spoonCrock});
+pieces.push({room:'kitchen',at:[.58,1.04,-.85],build:spoonCrock});
 let towelMaterial=null;
 export function teaTowel(){
  const g=group('kitchen-towel');

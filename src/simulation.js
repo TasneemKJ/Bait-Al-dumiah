@@ -5,7 +5,7 @@ import {stitchActive,stitchSections,createStitch,releaseStitch} from './sim-stit
 import {stepChimes,cancelChime,replayChimes} from './sim-chimes.js';
 import {clamp,has,fail} from './sim-util.js';
 import {isNight,wishFor,bondLevel,wishReward,currentStreak,inFavoriteRoom,isContent,
-  secretCozyNeeded,coziness} from './sim-queries.js';
+  secretCozyNeeded,coziness,sharedRoomMates} from './sim-queries.js';
 import {moveStitch} from './stitch-path.js';
 import {ROOMS,DOLLS,CATALOG,SLOTS,SECRETS,ACTIONS,MILESTONES,SEW_SECONDS,DOOR_STEPS,GIFT_COST,
   VISITOR_GIFTS,ACTIVITIES,RESTORATION_COSTS,RESTORATION_MASTERY,WISH_REFRESH_SECONDS,
@@ -62,7 +62,7 @@ export function care(s,id,action){
  const brave=action==='soothe'&&isNight(s)?2:0;
  growBond(s,d,Math.round((4+(reward?4:0)+brave)*(inFavoriteRoom(d)?1.5:1)*(quiet?QUIET_BOND:1)));
  checkMilestones(s);
- return {ok:true,reward,bonus,cost:a.cost,quiet};
+ return {ok:true,reward,bonus,cost:a.cost,quiet,company:sharedRoomMates(s,id)};
 }
 // Wishes and the sewing cap refresh only after a day actually spent in the house, so hurrying
 // dawn with the light control never farms rewards. Nothing is lost by hurrying either.

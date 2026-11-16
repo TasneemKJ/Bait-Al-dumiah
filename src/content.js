@@ -21,7 +21,7 @@ export const CATALOG = [
  {id:'mobile',price:16,cozy:8,icon:'moon'},
  {id:'musicbox',price:20,cozy:10,icon:'music'},
 ];
-export const SLOTS = [{x:-1.5,z:1.1},{x:0,z:1.25},{x:1.5,z:1.1}];
+export const SLOTS = [{x:-1.82,z:1.18},{x:0,z:1.34},{x:1.82,z:1.18}];
 export const SECRETS = ['music-box','small-footsteps','portrait','jasmine','tea-for-four','welcome-home'];
 export const ACTIONS = {
  tea:{need:'hunger',amount:38,cost:2},

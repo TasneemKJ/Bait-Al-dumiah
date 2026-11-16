@@ -102,4 +102,15 @@ test('slanted window sunbeams warm at golden hour, soften to moonbeams at night 
  assert.ok(night.opacity<noon.opacity&&night.opacity>.02&&night.night===1&&night.dusk===0);
  assert.ok(rain.opacity<night.opacity*.5);
  for(const bad of [NaN,-5,Infinity])assert.ok(Number.isFinite(sunbeamLook(bad,bad,bad).opacity));
+ const {rainCausticPulse,visitorHush}=await import('../src/render/visual-policy.js');
+ assert.equal(rainCausticPulse(5,0,0,false),0);
+ assert.equal(rainCausticPulse(5,1,0,true),0);
+ assert.ok(rainCausticPulse(5,1,0,false)>0&&rainCausticPulse(5,1,0,false)<=.038);
+ assert.ok(visitorHush({clock:131,day:2,lastSecretDay:1,journal:[]})>.04);
+ assert.equal(visitorHush({clock:131,day:2,lastSecretDay:2,journal:[]}),0);
+ assert.equal(visitorHush({clock:80,day:2,lastSecretDay:1,journal:[]}),0);
+ const {createState}=await import('../src/simulation.js');
+ const shyHouse=createState();shyHouse.clock=131;shyHouse.day=3;shyHouse.lastSecretDay=1;
+ shyHouse.journal=['jasmine','music-box'];for(const d of shyHouse.dolls)d.comfort=0;
+ assert.equal(visitorHush(shyHouse),0,'lamps must not dim when the visitor is too shy to come');
 });

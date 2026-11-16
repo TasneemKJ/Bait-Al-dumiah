@@ -67,4 +67,7 @@ test('interface rules: affordability, wishes, baskets, visitors, gifts and slots
  s.gifts=['pressed-jasmine'];assert.equal(sim.isNewestGift(s,'pressed-jasmine'),true);assert.equal(sim.isNewestGift(s,'brass-thimble'),false);
  s.decor.push({id:4,item:'plant',room:'kitchen',slot:1});
  assert.equal(sim.slotTaken(s,'kitchen',1),true);assert.equal(sim.slotTaken(s,'kitchen',1,4),false);assert.equal(sim.slotTaken(s,'parlor',1),false);
+ assert.deepEqual(sim.sharedRoomMates(s,'lina'),[]);assert.equal(sim.hasCompany(s,'lina'),false);
+ sim.moveDoll(s,'noor','kitchen');assert.deepEqual(sim.sharedRoomMates(s,'lina'),['noor']);assert.equal(sim.hasCompany(s,'lina'),true);
+ assert.deepEqual(sim.care(s,'lina','tea').company,['noor']);
 });

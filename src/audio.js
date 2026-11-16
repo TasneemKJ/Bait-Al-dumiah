@@ -1,4 +1,4 @@
-import {lullabyBeat} from './lullaby-score.js';
+import {lullabyBeat,duskPhraseBeat} from './lullaby-score.js';
 import {createRainSound} from './rain-sound.js';
 // Original synthesized music and room sounds. No samples, network requests or
 // claim of reproducing an acoustic instrument. Audio remains gesture-gated.
@@ -23,8 +23,8 @@ function voice(context,destination,frequency,start,length,volume,type,cutoff,att
  source.start(when);source.stop(when+duration+.03)}
  return record;
 }
-export function playPluck(context,destination,frequency,start,length=1.7,volume=.055){
- return voice(context,destination,frequency,start,length,volume,'triangle',1500);
+export function playPluck(context,destination,frequency,start,length=1.7,volume=.055,cutoff=1500){
+ return voice(context,destination,frequency,start,length,volume,'triangle',cutoff);
 }
 export function playWoodTap(context,destination,start,volume=.025){
  return voice(context,destination,126,start,.15,volume,'sine',420);
@@ -33,29 +33,53 @@ export function playWoodTap(context,destination,start,volume=.025){
 export function playTinTouch(context,destination,start){
  return voice(context,destination,880,start,.19,.027,'triangle',2800);
 }
-export function playClothTouch(context,destination,start){
- const when=Math.max(context.currentTime+.001,Number.isFinite(start)?start:context.currentTime),duration=.28;
+export function playPorcelainClink(context,destination,start){
+ return voice(context,destination,1480,start,.16,.022,'sine',3200);
+}
+export function playStitchPull(context,destination,start){
+ return voice(context,destination,1180,start,.14,.018,'triangle',2400);
+}
+function noiseVoice(context,destination,start,duration,cutoff,peak,seedInit,kind){
+ const when=Math.max(context.currentTime+.001,Number.isFinite(start)?start:context.currentTime);
  const buffer=context.createBuffer(1,Math.ceil(context.sampleRate*duration),
    context.sampleRate),data=buffer.getChannelData(0);
  // Deterministic, original broadband friction; no fetched samples or randomness
  // shared with gameplay. Filtering removes the brittle top of white noise.
- let seed=71;for(let i=0;i<data.length;i++){seed=(Math.imul(seed,1664525)+1013904223)>>>0;data[i]=(seed/4294967296)*2-1}
+ let seed=seedInit;
+ for(let i=0;i<data.length;i++){seed=(Math.imul(seed,1664525)+1013904223)>>>0;data[i]=(seed/4294967296)*2-1}
  const source=context.createBufferSource(),filter=context.createBiquadFilter(),gain=context.createGain();
- source.buffer=buffer;filter.type='lowpass';filter.frequency.value=1100;filter.Q.value=.3;
- gain.gain.setValueAtTime(0,when);gain.gain.linearRampToValueAtTime(.035,when+.045);
+ source.buffer=buffer;filter.type='lowpass';filter.frequency.value=cutoff;filter.Q.value=.3;
+ gain.gain.setValueAtTime(0,when);gain.gain.linearRampToValueAtTime(peak,when+.045);
  gain.gain.exponentialRampToValueAtTime(.00001,when+duration);gain.gain.setValueAtTime(0,when+duration+.01);
  source.connect(filter);filter.connect(gain);gain.connect(destination);let closed=false;
- const record={done:null,kind:'cloth',stop(){if(closed)return;try{source.stop()}catch{};cleanup()}};
+ const record={done:null,kind,stop(){if(closed)return;try{source.stop()}catch{};cleanup()}};
  function cleanup(){if(closed)return;closed=true;for(const n of [source,filter,gain])n.disconnect();record.done?.()}
  source.onended=cleanup;source.start(when);source.stop(when+duration+.02);return record;
 }
+export function playClothTouch(context,destination,start){
+ return noiseVoice(context,destination,start,.28,1100,.035,71,'cloth');
+}
+// Each sheet turns a little differently: the grain, brightness and length step through
+// a fixed cycle, so repeated panels never sound identical (still no Math.random).
+let paperTurn=0;
+export function paperRustleShape(turn){
+ const n=Number.isFinite(turn)?Math.abs(Math.floor(turn)):0;
+ return {seed:113+n*7919,cutoff:1650+((n*3)%5-2)*95,duration:.17+(n%3)*.02,peak:.022+(n%2)*.004};
+}
+export function playPaperRustle(context,destination,start,turn=paperTurn++){
+ const v=paperRustleShape(turn);
+ return noiseVoice(context,destination,start,v.duration,v.cutoff,v.peak,v.seed,'paper');
+}
+const ROOM_CUTOFFS=Object.freeze({kitchen:1950,parlor:1420,studio:1760,bedroom:1280});
+export const roomCutoff=roomId=>ROOM_CUTOFFS[roomId]||1800;
 
 // A soft D-minor chord that rises once as dusk turns to night: D3, A3, D4.
 export const DUSK_SWELL=[146.832,220,293.665];
 export class DollhouseAudio{
  constructor(){this.context=null;this.master=null;this.enabled=false;this.paused=false;
- this.next=0;this.index=0;this.night=false;this.nodes=new Set();
+ this.next=0;this.index=0;this.night=false;this.nodes=new Set();this.room=null;
  this.nextKnock=Infinity;this.sawDay=false;this.disposed=false;this.enableGeneration=0}
+ setRoom(roomId){this.room=typeof roomId==='string'&&Object.hasOwn(ROOM_CUTOFFS,roomId)?roomId:null}
  async enable(){
   if(this.disposed)return false;
   const generation=++this.enableGeneration;
@@ -83,14 +107,14 @@ export class DollhouseAudio{
  }
  tone(frequency,start,length,volume=.04,type='sine',attack){
   if(!this.context||!this.enabled||this.paused)return;
-  return this.track(voice(this.context,this.master,frequency,start,length,volume,type,1800,attack));
+  return this.track(voice(this.context,this.master,frequency,start,length,volume,type,roomCutoff(this.room),attack));
  }
  // Heard only when day turns to night while listening, never on load or after a resume.
  duskSwell(){
   if(!this.context)return;const t=this.context.currentTime;
   DUSK_SWELL.forEach((f,i)=>this.tone(f,t+i*.35,4,.022,'sine',1.8));
  }
- tick(night,rain=false){
+ tick(night,rain=false,dusk=false){
   if(!this.context||!this.enabled||this.paused||this.disposed)return;
   const now=this.context.currentTime;
   if(rain||this.rain){this.rain??=createRainSound(this.context,this.master);this.rain.set(rain)}
@@ -99,8 +123,9 @@ export class DollhouseAudio{
   if(night&&this.sawDay){this.sawDay=false;this.duskSwell()}}
   // One current beat only: an idle tab or resumed context never replays backlog.
   if(now>=this.next){
-   const beat=lullabyBeat(this.index,night);
-   if(!beat.rest)this.track(playPluck(this.context,this.master,beat.frequency,now,beat.duration,beat.volume));
+   const beat=dusk&&!night?duskPhraseBeat(this.index):lullabyBeat(this.index,night);
+   if(!beat.rest)this.track(playPluck(this.context,this.master,beat.frequency,now,
+     beat.duration,beat.volume,roomCutoff(this.room)));
    if(beat.drone)this.tone((night?146.832:196)/2,now,3.6,.018,'sine');
    this.index++;this.next=now+beat.delay;
   }
@@ -133,6 +158,9 @@ export class DollhouseAudio{
    return;
   }
   if(kind==='mint-tin')return this.track(playTinTouch(this.context,this.master,this.context.currentTime));
+  if(kind==='porcelain')return this.track(playPorcelainClink(this.context,this.master,this.context.currentTime));
+  if(kind==='paper')return this.track(playPaperRustle(this.context,this.master,this.context.currentTime));
+  if(kind==='stitch')return this.track(playStitchPull(this.context,this.master,this.context.currentTime));
   if(kind==='moon-bed'||kind==='search-dust')return this.track(playClothTouch(this.context,this.master,
     this.context.currentTime));
   if(kind==='search-cold')return this.tone(1174.66,this.context.currentTime,.9,.012);
@@ -151,6 +179,7 @@ export class DollhouseAudio{
  }
  // A control under the finger: a soft wooden tap, quieter than any reward.
  press(){if(this.ready)this.track(playWoodTap(this.context,this.master,this.context.currentTime,.012))}
+ paper(){if(this.ready)this.track(playPaperRustle(this.context,this.master,this.context.currentTime))}
  // A call or Siri leaves the context 'interrupted' (or suspended): the next touch brings sound back.
  wake(){const c=this.context;if(!c||!this.enabled||this.paused||this.disposed||c.state==='running')return;
   try{c.resume?.()?.catch?.(()=>{})}catch{/* resumed later */}}

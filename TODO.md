@@ -105,6 +105,7 @@ Chosen: nowrap counter (UI/UX, mobile), docs set (stability for later sessions).
 - [x] Brief bear cloth response (`prop:moon-bed` plush nod/squeeze, still under reduced motion or pause).
 - [x] Four-room tinted floor lamp pools (`roomPoolLook`), slanted window sunbeams (`sunbeamLook`), two-depth dust motes (`atmosphere-dust-near`), and studio stage backdrop glow.
 - [x] Night-tightened CSS vignette (`.night #app::after`), night plum-and-brass key ring tags and porter's bell, and gilt-bordered toast banner.
+- [x] Five-wave masterpiece pass: Wave 1 (glazed irises, 12 fps stop-motion 1.4% chest breath, roommate gaze chemistry, Levantine 8-point star doily under restorations), Wave 2 (button icon drop shadow, wax-embossed milestone seals, paper-crease highlights), Wave 3 (porcelain/paper/stitch foley wired to live commands, room acoustic cutoff, Maqam Hijaz dusk phrase), Wave 4 (rain-night window caustic shimmer, coziness-gated pre-visitor lamp hush), Wave 5 (shared-room care wave chemistry, ritual expressiveness in tea/sewing/chimes).
 - [x] Rendered desktop/phone, Arabic, reduced-motion and screenshot checks (`art_check.py` 324/324, `play_check.py` and `atmosphere_check.py`).
 - [ ] Continue the unfinished forty-item roadmap in `docs/visual-40/2026-10-05-ultra-atmosphere.md`; numeric arrays do not count as passes.
 

@@ -21,7 +21,7 @@ export const activitiesCommands={
 'tea-release':(app,value,origin)=>{sim.releaseTea(app.state);return;},
 'tea-empty':(app,value,origin)=>{
    const result=sim.emptyTeaCup(app.state,value);app.teaUI?.respond(result.ok?null:result.reason);
-   if(result.ok)app.audio.effect('care');app.teaUI?.update(0);return;
+   if(result.ok)app.audio.effect('porcelain');app.teaUI?.update(0);return;
   },
 'tea-serve':(app,value,origin)=>{
    const result=sim.serveTea(app.state);app.teaUI?.respond(result.ok?null:result.reason);
@@ -35,7 +35,7 @@ export const activitiesCommands={
 'stitch-release':(app,value,origin)=>{sim.releaseStitch(app.state);return;},
 'stitch-unpick':(app,value,origin)=>{
    const result=sim.unpickStitch(app.state);app.stitchUI?.respond(result.ok?null:result.reason);
-   if(result.ok)app.audio.effect('care');app.updateWorkUI();return;
+   if(result.ok)app.audio.effect('stitch');app.updateWorkUI();return;
   },
 'stitch-finish':(app,value,origin)=>{
    const result=sim.finishStitch(app.state);app.stitchUI?.respond(result.ok?null:result.reason);

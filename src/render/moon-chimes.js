@@ -99,9 +99,13 @@ export function createMoonChimes(parent){
  let view={active:false};
  return {root,targets,constellation,update(state,selected=-1){
   const a=chimeStatus(state),earned=[1,3,6,9].filter(n=>state.activities.mastery.lullaby>=n).length;
-  stars.forEach((star,i)=>star.visible=i<earned);constellation.visible=earned>0&&!a;
+  const still=state.settings.reducedMotion||state.paused,twinkle=!still&&(a?.phase==='finished'||!a);
+  stars.forEach((star,i)=>{star.visible=i<earned;
+   star.material.emissiveIntensity=.2+(twinkle?.12+Math.sin(state.elapsed*2.4+i)*.08:0)});
+  constellation.visible=earned>0&&(!a||a.phase==='finished');
   root.visible=Boolean(a);if(!a){view={active:false,earnedStars:earned};return}
-  const finished=a.phase==='finished',still=state.settings.reducedMotion;
+  const finished=a.phase==='finished';
+  inset.material.emissiveIntensity=finished?.36+(still?0:Math.sin(state.elapsed*3)*.12):.18;
   for(let i=0;i<charms.length;i++){
    const c=charms[i],held=a.held===i,y=c.rest-(held?a.pull*CHIME_LAYOUT.pull:0),lit=a.sounding===i||finished;
    c.charm.position.y=y;c.string.scale.y=Math.max(.01,c.top-y-.34);

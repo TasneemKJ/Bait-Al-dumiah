@@ -1,6 +1,7 @@
 // Original, repeating toy-house phrase. Sparse night rests leave room for the
 // courtyard and distant wood sounds; no claim of reproducing an acoustic oud.
 const phrase=Object.freeze([0,1,4,5,7,5,4,1,0,-5,0,1,4,5,1,0]);
+const hijazPhrase=Object.freeze([0,1,4,5,7,8,7,5,4,1,0,-5,0,1,4,0]);
 export function lullabyBeat(index,night=false){
  const beat=(Number.isFinite(index)?Math.max(0,Math.floor(index)):0)%phrase.length;
  const rest=Boolean(night)&&(beat===7||beat===15),base=night?146.832:196;
@@ -9,5 +10,13 @@ export function lullabyBeat(index,night=false){
   duration:night?2:1.6,volume:rest?0:night?.040:.052,
   delay:rest?2.6:night?1.15:beat===15?1.8:.82,
   drone:!rest&&beat%8===0,
+ };
+}
+// Golden-hour Maqam Hijaz phrase: warm upper-register intervals for dusk atmosphere.
+export function duskPhraseBeat(index){
+ const beat=(Number.isFinite(index)?Math.max(0,Math.floor(index)):0)%hijazPhrase.length;
+ return {
+  frequency:293.665*Math.pow(2,hijazPhrase[beat]/12),rest:false,
+  duration:1.85,volume:.034,delay:beat===15?1.6:.95,drone:beat%8===0,
  };
 }

@@ -9,5 +9,16 @@ export function runArtChecks(){
  result.push({name:'restoration reveals only earned tiers and never alters simulation state',passed:view.root.children.filter(c=>c.visible).length===2&&s.restoration.kitchen===2});
  s.restoration.kitchen=0;view.update(s,0);
  result.push({name:'restoration view resets when a new house replaces state',passed:view.root.children.every(c=>!c.visible)});
+ let doilies=0;view.root.traverse(o=>{if(o.isMesh&&o.material?.color?.getHex?.()===0xf3e5d0)doilies++});
+ result.push({name:'restoration stages include Levantine 8-point star crocheted doilies',passed:doilies>=4});
+ // Verify all three restoration tiers in every room keep distinct non-overlapping positions.
+ for(const room of ['kitchen','parlor','studio','bedroom']){
+  const boxes=[1,2,3].map(tier=>{
+   const g=view.root.getObjectByName(`restoration-${room}-${tier}`);g.visible=true;
+   const b=new T.Box3().setFromObject(g);g.visible=false;return b;
+  });
+  const clear=!boxes[0].intersectsBox(boxes[1])&&!boxes[0].intersectsBox(boxes[2])&&!boxes[1].intersectsBox(boxes[2]);
+  result.push({name:`restoration ${room}: all three tiers sit without overlapping`,passed:clear});
+ }
  return result;
 }

@@ -3,8 +3,8 @@ import * as T from 'three';
 import {createLaceHem,createCollar} from './doll-trimmings.js';
 import {createSpectacles} from './doll-spectacles.js';
 import {batchDoll} from './doll-rig-batch.js';
-import {createArm,levelCup,balanceWalk,gaze,express,carePose,greeting,nightCuriosity,hairFollow,
-  clothFollow,groundWalkingFeet} from './doll-acting.js';
+import {createArm,levelCup,balanceWalk,gaze,express,carePose,greeting,nightCuriosity,roommateChemistry,
+  hairFollow,clothFollow,groundWalkingFeet} from './doll-acting.js';
 import {createApron,createOveralls,createFoot,createSock} from './doll-wardrobe.js';
 import {createHair,fabricBow} from './doll-hair.js';
 import {createSculptedHead,createPortraitEye,createBrow,closePortraitEye,createPortraitMouth,createNose,
@@ -152,7 +152,7 @@ export function createDolls(parent){
    balanceWalk(v,d,t,i,motion);groundWalkingFeet(v,d,motion);
    gaze(v,selected,viewerYaw,motion,dt,d);express(v,d,!motion,dt);carePose(v,d,t,!motion);
    greeting(v,d,t,!motion);nightCuriosity(v,d,state,i,!motion);hairFollow(v,t,!motion,dt);
-   clothFollow(v,d,t,!motion,dt);levelCup(v);
+   roommateChemistry(v,d,mates,order,t,selected,!motion);clothFollow(v,d,t,!motion,dt);levelCup(v);
   });
  },position(id){return dolls.find(v=>v.id===id)?.root.position.clone()}};
 }

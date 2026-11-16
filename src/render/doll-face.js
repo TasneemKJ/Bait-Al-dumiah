@@ -97,7 +97,8 @@ function irisMaterial(id) {
  c.fillStyle = '#fff1d9'; c.beginPath(); c.ellipse(45, 38, 5.2, 6, -.2, 0, Math.PI * 2); c.fill();
  c.fillStyle = 'rgba(255,231,201,.35)'; c.beginPath(); c.arc(82, 85, 3, 0, Math.PI * 2); c.fill();
  const map = new T.CanvasTexture(canvas); map.colorSpace = T.SRGBColorSpace;
- const material = new T.MeshStandardMaterial({map, transparent: false, roughness: .64});
+ const material = new T.MeshPhysicalMaterial({map, transparent: false, roughness: .62,
+  clearcoat: .32, clearcoatRoughness: .35});
  irises.set(id, material); return material;
 }
 const irisGeometry = new T.CircleGeometry(.030, 32);

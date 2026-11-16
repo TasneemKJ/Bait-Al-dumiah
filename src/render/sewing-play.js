@@ -90,9 +90,9 @@ function buildNeedle(root,table,{cream,brass}){
 }
 
 // Feedback remembers renderer events only; contours and repairs remain simulation-owned.
-function updateSewingFeedback(stitch,state,guideBead,spoolBody,feedback){
+function updateSewingFeedback(stitch,state,guideBead,spoolBody,feedback,threadMaterial){
  if(!stitch){feedback.section=null;feedback.at=-Infinity;guideBead.scale.setScalar(1);
-   spoolBody.material.emissiveIntensity=0;return;}
+   spoolBody.material.emissiveIntensity=0;if(threadMaterial)threadMaterial.emissiveIntensity=0;return;}
   if(feedback.section!==null&&stitch.completedSections<feedback.section)feedback.at=-Infinity;
   if(feedback.section!==null&&stitch.completedSections>feedback.section)feedback.at=state.elapsed;
   feedback.section=stitch.completedSections;
@@ -101,6 +101,9 @@ function updateSewingFeedback(stitch,state,guideBead,spoolBody,feedback){
   guideBead.scale.setScalar(1+arrived*.6);guideBead.material.emissive.set(0xe0bc7c);
   guideBead.material.emissiveIntensity=.08+arrived*.35;
   spoolBody.material.emissive.set(0xf0c28a);spoolBody.material.emissiveIntensity=stitch.loose?.18:0;
+  if(threadMaterial){threadMaterial.emissive.set(0x6b2025);
+   threadMaterial.emissiveIntensity=stitch.completedSections>=stitch.sections.length?.16:
+     stitch.completedSections>0?.06:0;}
 }
 
 // The bead marks the next point the needle should reach, until the pattern is complete.
@@ -164,7 +167,7 @@ export function createSewingPlay(parent){
  return root.worldToLocal(o.getWorldPosition(new T.Vector3())).toArray()}
  return {root,targets,update(state){
   const stitch=stitchStatus(state);root.visible=Boolean(stitch);
-  updateSewingFeedback(stitch,state,guideBead,spoolBody,feedback);
+  updateSewingFeedback(stitch,state,guideBead,spoolBody,feedback,threadMaterial);
   if(!stitch){actual={...actual,active:false,phase:null,patternId:null,needle:null,loose:false,trail:[],
     nextGuidePoint:null,finishedClothVisible:false};return}
   const key=JSON.stringify([stitch.patternId,stitch.sections]);

@@ -79,9 +79,11 @@ function aimArm(arm,target,weight=1){
  arm.quaternion.slerp(upper,weight);arm.forearm.quaternion.slerp(bend,weight);
 }
 const smooth=x=>{x=T.MathUtils.clamp(x,0,1);return x*x*(3-2*x)};
+export const stopMotionTime=(t,fps=12)=>Number.isFinite(t)&&fps>0?Math.floor(t*fps)/fps:0;
 export function carePose(v,d,t,still){
  for(const arm of v.arms){arm.forearm.rotation.set(0,0,0);arm.hand.rotation.set(0,0,0)}
- v.teaPhase=0;v.body.scale.y=1;
+ v.teaPhase=0;const breath=d.action==='idle'&&!still?Math.sin(stopMotionTime(t,12)*1.8):0;
+ v.body.scale.set(1-breath*.005,1+breath*.014,1-breath*.005);
  if(d.action==='play'){
   const age=Math.max(0,t-(Number.isFinite(d.lastCare)?d.lastCare:0)),
     gap=still?.044:.028+.055*(.5+.5*Math.cos(age*Math.PI*3.2));
@@ -129,6 +131,13 @@ export function nightCuriosity(v,d,state,index,still){
  const glance=.145*smooth((phase-9.8)/.6)*(1-smooth((phase-11.4)/.8));
  v.curiosity=glance;v.head.rotation.y+=glance*(index%2?-1:1);
  if(glance>.01&&v.expression==='content'){v.brows[0].position.y+=glance*.04;v.expression='curious'}
+}
+
+export function roommateChemistry(v,d,mates,order,t,selected,still){
+ v.sharedMoment=false;if(still||!Array.isArray(mates)||mates.length<2||d.action!=='idle')return;
+ const center=(mates.length-1)/2,dir=Math.sign(center-order);if(!dir)return;
+ const stepT=stopMotionTime(t,12),turn=dir*(.26+Math.sin(stepT*1.1+order)*.03);
+ v.head.rotation.y=turn;v.head.rotation.z+=dir*.035;v.body.rotation.y+=dir*.16;v.sharedMoment=true;
 }
 
 export function hairFollow(v,t,still,dt){

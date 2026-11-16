@@ -7,5 +7,7 @@ test('vignette and grain layer sits under the HUD, never takes touches and is hi
  assert.match(rule,/pointer-events:none/);assert.match(rule,/z-index:1/);assert.doesNotMatch(rule,/url\(["']?https?:/);
  assert.match(css,/prefers-contrast:more\)[^{]*prefers-reduced-transparency:reduce\)\{#app::after\{display:none\}/);
  assert.match(css,/\.night #app::after\{opacity:\.64\}/);
+ assert.match(css,/#ui \.milestone\.claimed>\.icon,#ui \.milestone\.ready>\.icon\{/);
+ assert.match(css,/\.sheet-header\{border-bottom:1px solid #dfcdbf88/);
  assert.match(readFileSync(new URL('../src/styles.css',import.meta.url),'utf8'),/#ui\{[^}]*z-index:2/);
 });

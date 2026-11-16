@@ -9,7 +9,7 @@ export function runArtChecks(){
    eye.iris.geometry.computeBoundingBox();
    const size=eye.iris.geometry.boundingBox.getSize(new T.Vector3());
    check(`Face softness ${doll.id}: iris stays small and oval rather than bead-like`,size.x<=.066&&size.y<=.072);
-   check(`Face softness ${doll.id}: painted iris is matte and opaque`,eye.iris.material.roughness>=.60&&!eye.iris.material.transparent);
+   check(`Face softness ${doll.id}: painted iris is matte and opaque`,eye.iris.material.roughness>=.60&&!eye.iris.material.transparent&&eye.iris.material.clearcoat>=.25);
    const upper=eye.upperLid?.geometry?.parameters?.radius,closed=eye.closedLid?.geometry?.parameters?.radius;
    check(`Face softness ${doll.id}: eyelid lines stay finer than brows`,upper<=.00135&&closed<=.0023);
   }
