@@ -144,6 +144,7 @@
  .story-playfield:has(.held-item) .scene-response{bottom:calc(var(--edge-bottom) + 310px)}
  .story-playfield:not(:has(.object-ribbon)) .scene-response{bottom:calc(var(--edge-bottom) + 180px)}
  .visitor-hint{top:calc(132px + env(safe-area-inset-top));inset-inline-end:14px}
+ #ui:has(.objective[data-expanded="true"]) .visitor-hint{top:calc(216px + env(safe-area-inset-top))}
 }
 @media(max-height:560px) and (orientation:landscape){
  .objective,.night .objective{top:48px;width:176px;padding:0}
