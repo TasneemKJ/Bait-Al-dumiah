@@ -168,7 +168,8 @@ html[lang=ar] #ui .dock[data-expanded=true]>button{font-size:max(16px,1rem)}
 }
 @media(max-width:680px){#ui dialog h2>small,#ui dialog h3>small{font-size:15px}}
 /* 2026-11-14 play test: a toast never covers an open object card's button, and the HUD reads as resting while the intro owns the screen. */
-#app:has(.object-ribbon:not([hidden])) #toast{top:auto;bottom:calc(178px + env(safe-area-inset-bottom))}
+#app:has(.object-ribbon:not([hidden])) #toast{top:auto;bottom:calc(272px + env(safe-area-inset-bottom))}
+#app:has(.held-item):has(.object-ribbon:not([hidden])) #toast{top:auto;bottom:calc(334px + env(safe-area-inset-bottom))}
 #ui[inert]{opacity:.45;transition:opacity .4s}
 /* The midnight visitor's line (src/mischief-ui.js): a slip of cream paper with a rose-thread edge, beside the
    empty place or the doll, that fades by itself. Never a sheet, never under a finger. */
@@ -234,3 +235,16 @@ html[lang=ar] #ui .dock[data-expanded=true]>button{font-size:max(16px,1rem)}
 /* A ritual owns the screen: the key ring, the bell and the house list step aside, as the room buttons did. */
 #ui:is([data-tea-active=true],[data-stitch-active=true],[data-chime-active=true]) :is(.key-ring-holder,.porter-bell,.house-access){
  display:none}
+/* iPad & tablet: align the folded clue with the top status pill and honour safe-area insets. */
+@media(min-width:681px) and (min-height:561px){
+ #ui .objective,.night #ui .objective{top:max(18px,env(safe-area-inset-top));inset-inline-start:max(20px,env(safe-area-inset-left))}
+ #ui .house-status{top:max(18px,env(safe-area-inset-top));inset-inline-end:max(20px,env(safe-area-inset-right))}
+ #ui .time-tools{inset-inline-end:max(20px,env(safe-area-inset-right))}
+ #ui .key-ring{inset-inline-start:max(16px,env(safe-area-inset-left));bottom:max(16px,env(safe-area-inset-bottom))}
+ #ui .porter-bell{inset-inline-end:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom))}
+}
+#ui .key-ring button,#ui .porter-bell,#ui .house-access button{transition:transform .08s ease-out}
+#ui .key-ring button:active,#ui .porter-bell:active,#ui .house-access button:active{transform:scale(.95)}
+.reduced-motion #ui :is(.key-ring button,.porter-bell,.house-access button){transition:none}
+.reduced-motion #ui :is(.key-ring button,.porter-bell,.house-access button):active{transform:none}
+@media(prefers-reduced-motion:reduce){#ui :is(.key-ring button,.porter-bell,.house-access button){transition:none}#ui :is(.key-ring button,.porter-bell,.house-access button):active{transform:none}}

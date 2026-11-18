@@ -54,3 +54,12 @@ test('a day heard before Pause cannot produce a stale dusk swell on night resume
 test('muting retires the observed daytime so re-enabling at night cannot replay dusk',()=>{
  const {context}=graph();context.suspend=()=>Promise.resolve();const audio=new DollhouseAudio();audio.context=context;audio.master={};audio.enabled=true;audio.next=Infinity;audio.tick(false);audio.mute();audio.enabled=true;audio.tick(true);assert.equal(audio.nodes.size,0);audio.tick(false);audio.tick(true);assert.equal(audio.nodes.size,DUSK_SWELL.length);
 });
+test('visitorHush plays a subtle threshold tap once per hush window',()=>{
+ const {context}=graph();context.createBufferSource=()=>({buffer:null,connect(){},disconnect(){},start(){},stop(){}});
+ context.createBuffer=(ch,len)=>({getChannelData:()=>new Float32Array(len)});
+ const audio=new DollhouseAudio();audio.context=context;audio.master={};audio.enabled=true;audio.next=Infinity;
+ audio.tick(true,false,false,0);assert.equal(audio.nodes.size,0);
+ audio.tick(true,false,false,.05);const afterFirst=audio.nodes.size;assert.ok(afterFirst>0,'plays hush tap');
+ audio.tick(true,false,false,.05);assert.equal(audio.nodes.size,afterFirst,'does not repeat during same hush');
+ audio.tick(true,false,false,0);audio.tick(true,false,false,.05);assert.ok(audio.nodes.size>afterFirst,'resets after hush');
+});

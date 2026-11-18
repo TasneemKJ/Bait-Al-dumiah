@@ -62,6 +62,7 @@ export const houseCommands={
 'place':(app,value,origin)=>{
    const result=sim.place(app.state,value.item,value.room,value.slot);
    if(app.notify(result,'placed')){app.ui.clearPlacement();app.world?.setPlacement(null);app.audio.effect('place');
+   app.dispatch('focus-room',value.room);
    for(const id of result.loved)app.say(app.ui.t(id)+' · '+app.ui.t('lovedPlaced'));
    if(result.wish)app.say(app.ui.t(result.wish)+' · '+app.ui.t('keepsakeWishGranted'))}return;
   },

@@ -57,6 +57,12 @@ function accessPick(data){
 // A touch on the 3D scene: pick an object, a resident, the ghost or a placement slot.
 function pickFromScene(data){
   if(!app.session.entered)return;
+  if(data&&(data.wind||data.keyTo||data.musicKey||data.musicBox||data.roomTap||data.roomTouch||
+    data.nook||data.object||data.doll||data.ghost||data.slot||data.doorTap)){
+    app.audio?.wake?.();
+    if(storage?.getItem?.('bait-al-dumiah.v1.haptics')!=='off')try{globalThis.navigator?.vibrate?.(8)}catch{}
+  }
+  if(data.doorTap){app.audio?.effect?.('door-locked');app.say(app.ui.t('doorTapNote'));return}
   const {storyUI,ui,dispatch}=app,focused=app.host.dataset.focusRoom;
   // A room touched on the whole house opens; a hiding place searches only once its room is the subject.
   // The music box key: carried by a drag (keyTo) or by a touch on it and then on a box or a room; wound by a

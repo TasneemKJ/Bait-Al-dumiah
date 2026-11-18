@@ -42,8 +42,8 @@ export const MILESTONES=[
 export const SEW_SECONDS=40,SEW_DAILY=9,BASKET_MAX=18,WISH_REFRESH_SECONDS=60;
 // The closed door is mended in order; some steps wait for closeness or the whole story.
 export const DOOR_STEPS=[
- {id:'hinge',cost:40},{id:'dust',cost:60},{id:'key',cost:80,needs:'sami-dear'},{id:'lamp',
-   cost:100},{id:'open',cost:150,needs:'all-whispers'},
+ {id:'hinge',cost:25},{id:'dust',cost:40},{id:'key',cost:55,needs:'sami-dear'},{id:'lamp',
+   cost:70},{id:'open',cost:95,needs:'all-whispers'},
 ];
 // After the door opens, one small gift a night is returned with a keepsake of the visitor's own.
 export const GIFT_COST=12;
@@ -85,7 +85,7 @@ export const INTERACTIVE_PROPS=[
    activity:'lullaby',resident:'noor',care:'rest'},
  {id:'moon-mobile',room:'bedroom',position:[-1.70,2.36,-.60],size:[.90,1.00,.30],icon:'music',activity:'lullaby'},
  {id:'parlor-sofa',room:'parlor',position:[.42,.74,-.63],size:[2.5,1.1,1.0],icon:'heart',resident:'lina',care:'play'},
- {id:'mint-tin',room:'kitchen',position:[-.30,1.20,-1.04],size:[.36,.26,.30],icon:'leaf',story:true},
+ {id:'mint-tin',room:'kitchen',position:[-.30,1.20,-1.04],size:[.50,.38,.44],icon:'leaf',story:true},
  {id:'music-cabinet',room:'parlor',position:[1.66,.75,.25],size:[.64,1.18,.60],icon:'music',story:true},
  {id:'wash-basin',room:'kitchen',position:[-1.27,1.08,-1.06],size:[.62,.28,.50],icon:'tea',story:true},
  {id:'jasmine-window',room:'parlor',position:[-.90,1.48,-1.43],size:[.54,.78,.32],icon:'leaf',story:true},

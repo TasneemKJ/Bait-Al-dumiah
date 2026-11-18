@@ -7,6 +7,7 @@
  -webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;
  background:linear-gradient(#f1e7dd99 0,#f1e7dd00 16%,#f1e7dd00 72%,#f1e7ddb8 100%)}
 .intro-layer[data-passive]{pointer-events:none}
+.intro-layer[data-passive] .intro-skip{opacity:0;pointer-events:none}
 .intro-veil{position:absolute;inset:0;background:#f1e7dd;opacity:1;pointer-events:none}
 .intro-caption{position:absolute;inset-inline:24px;bottom:calc(max(24px,env(safe-area-inset-bottom)) + 76px);
  display:flex;justify-content:center;pointer-events:none}

@@ -42,18 +42,19 @@ export function createRoomEffects(parent){
   if(kettleSteam){const lina=state.dolls.find(d=>d.id==='lina');
   kettleSteam.update(state.elapsed,Boolean(lina)&&lina.action==='idle',state.settings.reducedMotion||state.paused)}
   faceFill.intensity=.18+lit*.48;
+  const hushShadow=1-hush*2.2;
   patches.forEach((p,i)=>{p.material.color.set(0xf0d1a0).lerp(new T.Color(0xffae68),dusk*.75)
-   .lerp(new T.Color(0xabc4ef),lit);p.material.opacity=.15+dusk*.035-lit*.065+
-   rainCausticPulse(state.elapsed,rainMix,i,state.settings.reducedMotion||state.paused)});
-  const beam=sunbeamLook(lit,state.clock,rainMix);
+   .lerp(new T.Color(0xabc4ef),lit);p.material.opacity=(.15+dusk*.035-lit*.065+
+   rainCausticPulse(state.elapsed,rainMix,i,state.settings.reducedMotion||state.paused))*hushShadow});
+  const beam=sunbeamLook(lit,state.clock,rainMix),beamOpacity=beam.opacity*(1-hush*2.5);
   beams.forEach(b=>{b.material.color.set(0xffe6be).lerp(new T.Color(0xffb26b),beam.dusk*.82)
-   .lerp(new T.Color(0x9cb8ec),beam.night);b.material.opacity=beam.opacity;b.visible=beam.opacity>.005});
+   .lerp(new T.Color(0x9cb8ec),beam.night);b.material.opacity=beamOpacity;b.visible=beamOpacity>.005});
   if(!state.paused){curtains.forEach((c,i)=>{const g=stirOf(i,state.elapsed),still=state.settings.reducedMotion;
   c.rotation.x=still?0:Math.sin(state.elapsed*.42+i*.8)*.014+g*.10;
   c.rotation.z=still?0:(Math.sin(state.elapsed*.35+i)*.009+Math.abs(g)*.05)*c.userData.curtainSide});
   const t=state.settings.reducedMotion?0:state.elapsed;
-  flames.forEach((f,i)=>{f.scale.y=1+Math.sin(t*1.7+i*2.2)*.055;f.rotation.z=Math.sin(t*.9+i)*.025;
-  f.children[0].material.opacity=.68+lit*.20})}
+  flames.forEach((f,i)=>{f.scale.y=(1+Math.sin(t*1.7+i*2.2)*.055)*(1-hush*1.5);
+  f.rotation.z=Math.sin(t*.9+i)*.025;f.children[0].material.opacity=(.68+lit*.20)*(1-hush*1.8)})}
  }};
 }
 

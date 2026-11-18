@@ -11,7 +11,7 @@ import {avatarMarkup} from './resident-portraits.js';
 import {translate,number} from './i18n.js';
 export function createUI(host,getState,dispatch){
  let panel=null,selected='lina',previousFocus=null,resetConfirm=false,portraits={};
- let activityResult=null,selectedObject=null,toolsExpanded=false,clueExpanded=false,readClue='',renderedPanel=null;
+ let activityResult=null,selectedObject=null,toolsExpanded=false,clueExpanded=true,readClue='',renderedPanel=null;
  const t=key=>translate(getState().settings.locale,key),n=value=>number(getState().settings.locale,value);
  const avatar=id=>avatarMarkup(id,portraits[id]);
  const placer=createPlacementFlow(host,getState,dispatch,{t,n,closeSheet:()=>close()});

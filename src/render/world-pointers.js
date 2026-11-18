@@ -58,7 +58,7 @@ function musicGestures(w,onPick,cast){
 }
 export function bindScenePointers(w,{onPick,onError}){
  const {st,canvas,camera,controls,ray,mouse,residents,objects,ghost,slots,tapGesture,scenePointers,mischief,house,
-   musicBoxes}=w;
+   musicBoxes,courtyard}=w;
  const aim=e=>{const rect=canvas.getBoundingClientRect();
   mouse.set((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1);ray.setFromCamera(mouse,camera);
   return ray};
@@ -70,7 +70,7 @@ export function bindScenePointers(w,{onPick,onError}){
   if(!tapGesture.up(e)||!controls.enabled||st.lost)return;
   const rect=canvas.getBoundingClientRect();aim(e);
   const targets=st.placement?slots.targets:[...residents.targets,...objects.targets,...mischief.targets,
-    ...musicBoxes.targets,...(ghost.root.visible?[ghost.hit]:[])];
+    ...musicBoxes.targets,...(courtyard?.doorHit?[courtyard.doorHit]:[]),...(ghost.root.visible?[ghost.hit]:[])];
   const exact=ray.intersectObjects(targets,false)[0]?.object;
   const hit=exact??(st.placement?null:nearestTarget(targets,camera,rect,e.clientX,e.clientY));
   // On the whole house a prop is a few pixels wide, so a touch on or near one opens its room first

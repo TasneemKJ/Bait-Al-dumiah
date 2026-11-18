@@ -38,7 +38,7 @@ test('for the buyer the remaining mendings cost no buttons; the web keeps its pr
  s.dolls[2].bond=60;sim.mendDoor(s,{free:true});sim.mendDoor(s,{free:true});
  assert.equal(sim.mendDoor(s,{free:true}).needs,'all-whispers');s.journal=[...SECRETS];
  assert.equal(sim.mendDoor(s,{free:true}).opened,true);assert.equal(s.buttons,0);
- const web=sim.createState();web.buttons=39;assert.equal(sim.mendDoor(web).reason,'funds');
+ const web=sim.createState();web.buttons=DOOR_STEPS[0].cost-1;assert.equal(sim.mendDoor(web).reason,'funds');
 });
 test('the door section names what came at once and every remaining wait, in both languages',()=>{
  for(const lang of ['en','ar']){const s=sim.createState();welcomeFifthRoom(s,BOUGHT);

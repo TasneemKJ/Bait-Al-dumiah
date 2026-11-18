@@ -32,14 +32,15 @@ petal.position.set(x+Math.cos(a)*size*.58,y+Math.sin(a)*size*.58,z);petal.scale.
 parent.add(petal)}ball(parent,x,y,z+.008,.012,.012,.009,0xd8b26e)}
 
 function buildTin(root,staticParts){
- const tin=anchor(root,'story-mint-tin','kitchen',[-.30,1.04,-1.04]),enamel=glaze(P.mint);
- cylinder(tin,0,.115,0,.18,.23,enamel);ring(tin,0,.232,0,.181,.012,P.gold,true);
- cylinder(tin,0,.236,0,.159,.008,P.ink);box(tin,0,.125,.178,.16,.10,.012,P.cream);
- // A large pressed leaf reads at phone scale, without tiny typography.
- const emblem=ball(tin,0,.127,.191,.040,.029,.008,enamel);emblem.rotation.z=.5;
+ const tin=anchor(root,'story-mint-tin','kitchen',[-.30,1.04,-1.04]),enamel=glaze(0x2b7657);
+ cylinder(tin,0,.13,0,.20,.26,enamel);ring(tin,0,.262,0,.202,.015,P.gold,true);
+ cylinder(tin,0,.266,0,.178,.010,P.ink);box(tin,0,.135,.198,.18,.11,.014,P.cream);
+ box(tin,.06,.25,.12,.04,.045,.11,0xc64947);
+ const emblem=ball(tin,0,.137,.211,.046,.033,.009,0x3f9669);emblem.rotation.z=.5;
  staticParts(tin);
- const tinLid=group(tin,'story-mint-tin-lid');tinLid.position.set(0,.25,-.155);
- cylinder(tinLid,0,0,.155,.19,.035,enamel);ring(tinLid,0,.019,.155,.185,.009,enamel,true);finish(tinLid);
+ const tinLid=group(tin,'story-mint-tin-lid');tinLid.position.set(0,.28,-.175);
+ cylinder(tinLid,0,0,.175,.21,.038,enamel);ring(tinLid,0,.021,.175,.205,.011,P.gold,true);
+ ball(tinLid,0,.042,.175,.026,.022,.026,P.gold);finish(tinLid);
  return {tinLid};
 }
 
@@ -78,7 +79,7 @@ function buildJasmine(root,staticParts){
 }
 
 function buildBasin(root,staticParts){
- const basin=anchor(root,'story-basin-details','kitchen',[-1.27,1.08,-1.06]);
+ const basin=anchor(root,'story-basin-details','kitchen',[-1.27,1.056,-1.06]);
  const water=new T.Mesh(new T.CircleGeometry(.185,20),
    new T.MeshStandardMaterial({color:0x568f89,roughness:.22,metalness:.12,transparent:true,
    opacity:.80,depthWrite:false}));water.name='story-basin-water';

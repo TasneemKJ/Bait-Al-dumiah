@@ -116,7 +116,9 @@ export function createLevantineSetting(parent){
    doorGlow.rotation.x=-Math.PI/2;doorGlow.position.set(0,.12,-.94);root.add(doorGlow);
  bakeMasonry(staticRoot,[stone,dark],band);
  batch(staticRoot);
- return {root,staticRoot,studioArch,water,shadow,doorGlow,ripple,update(state,mix){
+ const doorHit=new T.Mesh(new T.BoxGeometry(.84,2.18,.24),new T.MeshBasicMaterial({visible:false}));
+ doorHit.position.set(0,1.22,-1.36);doorHit.userData={doorTap:true};root.add(doorHit);
+ return {root,staticRoot,studioArch,water,shadow,doorGlow,doorHit,ripple,update(state,mix){
   const f=nightFrame(state.elapsed,mix,state.settings.reducedMotion);
   shadow.visible=f.shadow>.001;shadow.material.opacity=f.shadow;shadow.position.x=-3.75+f.shadowX;
   // A door that has been mended lets a little warm light under it by day too.

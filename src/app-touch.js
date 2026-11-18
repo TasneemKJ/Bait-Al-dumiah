@@ -4,7 +4,10 @@ import {hapticsOn} from './app-info.js';
 export function pressFeedback(app,event,nav=globalThis.navigator,storage){
  const control=event?.target?.closest?.('button');if(!control||control.disabled)return;
  app.audio?.wake?.();app.audio?.press?.();
- if(hapticsOn(storage))try{nav?.vibrate?.(8)}catch{/* no haptics here */}
+ if(hapticsOn(storage)){
+  try{nav?.vibrate?.(8)}catch{/* no haptics here */}
+  try{globalThis.webkit?.messageHandlers?.app?.postMessage?.({type:'haptic',style:'light'})}catch{/* web */}
+ }
 }
 export function installTouchFeedback(app){
  app.host?.addEventListener?.('click',event=>pressFeedback(app,event),true);

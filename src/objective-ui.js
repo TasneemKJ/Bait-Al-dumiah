@@ -33,6 +33,8 @@ export function nextStep(s,t,n,focusRoom,access=appStore.access()){
  const cost=step&&doorCost(step,access);
  if(step&&fifthRoomOpen(s,access)&&doorReady(s,step)&&canAfford(s,cost))return {copy:t('objectiveDoor'),
    label:cost?t('mend')+' · '+n(cost):t('mend'),ico:'home',action:'panel',value:'journal',focus:'.door-next'};
+ if(step&&fifthRoomOpen(s,access)&&!doorReady(s,step)&&canAfford(s,cost)&&step.needs==='sami-dear')
+  return {copy:t('needs_sami-dear'),label:t('household'),ico:'heart',action:'panel',value:'household'};
  const keepsake=!isNight(s)&&keepsakeWish(s);
  if(keepsake&&canAfford(s,keepsake.price))return {copy:keepsakeWishLine(t,keepsake),label:t('decorate'),ico:'leaf',
    action:'panel',value:'decorate'};

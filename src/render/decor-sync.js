@@ -36,15 +36,18 @@ export function createDecorSync(root){
   add(state){
    for(const d of state.decor)if(!decor.has(d.id)){const obj=makeFurniture(d.item),
      room=ROOMS.find(r=>r.id===d.room),slot=SLOTS[d.slot];
-   obj.position.set(room.x+slot.x,room.y+.13,slot.z);if(d.item==='lamp'){const light=new T.PointLight(0xffc07a,0,3.4,2);
+   obj.position.set(room.x+slot.x,room.y+.13,slot.z);obj.userData.bornAt=state.elapsed>0?state.elapsed:-1;
+   if(d.item==='lamp'){const light=new T.PointLight(0xffc07a,0,3.4,2);
    light.name='owned-keepsake-light';light.position.set(0,1.05,0);light.castShadow=false;obj.add(light);
    obj.userData.ownedLight=light}root.add(obj);decor.set(d.id,obj)}
   },
   place(state,{reducedMotion,nightMix,hiddenId}){
    for(const d of state.decor){const obj=decor.get(d.id),
      room=ROOMS.find(r=>r.id===d.room),slot=SLOTS[d.slot],recent=state.elapsed-(d.lastUse??-10)<5,
-     phase=Math.max(0,state.elapsed-(d.lastUse??-10));obj.position.set(room.x+slot.x,room.y+.13,slot.z);
-   obj.scale.setScalar(d.item==='plant'&&d.tendedDay===state.day?1.08:1);
+     phase=Math.max(0,state.elapsed-(d.lastUse??-10)),age=obj.userData.bornAt>0?state.elapsed-obj.userData.bornAt:1,
+     settle=!reducedMotion&&age>=0&&age<.35?.86+.14*(1-(1-age/.35)**2):1;
+   obj.position.set(room.x+slot.x,room.y+.13,slot.z);
+   obj.scale.setScalar((d.item==='plant'&&d.tendedDay===state.day?1.08:1)*settle);
    obj.rotation.y=(d.rotation??0)*Math.PI/2+(d.item==='musicbox'&&recent?(reducedMotion ? .14 : phase*2.4):0);
    obj.rotation.z=d.item==='mobile'&&recent?(reducedMotion ? .06 : Math.sin(phase*5)*.12):0;
    if(obj.userData.ownedLight){obj.userData.ownedLight.intensity=d.active?(.25+nightMix*2.15):0;

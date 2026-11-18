@@ -54,6 +54,8 @@
  #tea-work-instructions{font-size:12.5px;line-height:1.5}
  #tea-work-status{font-size:11px;line-height:1.5;margin-top:5px}
  .tea-work-detail{font-size:10px;line-height:1.45;margin-top:4px}
+ .tea-cue-full{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+ .tea-cue-short{display:inline}
  .tea-exit{width:52px;min-height:56px;font-size:9.5px}
  [dir=rtl] .tea-heading h2{font-size:18px;line-height:1.45}
  [dir=rtl] #tea-work-instructions{font-size:13px;line-height:1.6}

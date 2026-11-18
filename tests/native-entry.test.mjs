@@ -4,8 +4,12 @@ import {readFileSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
 const root=new URL('../',import.meta.url).pathname;
 function python(source,args=[]){
- let result=spawnSync('python',['-c',source,...args],{cwd:root,encoding:'utf8'});
- if(result.error?.code==='ENOENT')result=spawnSync('python3',['-c',source,...args],{cwd:root,encoding:'utf8'});
+ const bins=process.env.PYTHON?[process.env.PYTHON]:['python3','python'];
+ let result;
+ for(const bin of bins){
+  result=spawnSync(bin,['-c',source,...args],{cwd:root,encoding:'utf8'});
+  if(!result.error)break;
+ }
  assert.equal(result.status,0,result.stdout+'\n'+result.stderr);return result.stdout;
 }
 

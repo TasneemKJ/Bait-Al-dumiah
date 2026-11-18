@@ -74,8 +74,8 @@ const musicApi=(boxes,canvas,camera)=>({holdKey:on=>boxes.hold(on),
   const r=canvas.getBoundingClientRect();return {x:r.left+(p.x+1)/2*r.width,y:r.top+(1-p.y)/2*r.height}}});
 export function createWorld(canvas,{onPick,onError}){
  const parts=buildScene(canvas);
- const {renderer,scene,camera,controls,house,residents,ghost,portraitCache,preview,objects,
-   teaTable,sewingPlay,moonChimes,slots}=parts;
+ const {renderer,scene,camera,controls,house,residents,portraitCache,preview,objects,teaTable,sewingPlay,
+   moonChimes,slots}=parts;
  const st={focusedRoom:null,focusedDoll:null,reducedMotion:false,teaActive:false,stitchActive:false,
    chimeActive:false,chimeSelection:-1,requestedEnabled:true,
    previewPose:null,stitchSections:[],placement:null,disposed:false,lost:false,quality:'',pixelRatio:0,
@@ -100,8 +100,8 @@ export function createWorld(canvas,{onPick,onError}){
  const picking=createWorkPicking({canvas,camera,house,ray,mouse,teaTable,sewingPlay,
    moonChimes,isActive:id=>id==='tea'?st.teaActive:id==='stitch'?
    st.stitchActive:st.chimeActive,isLost:()=>st.lost,sections:()=>st.stitchSections});
- const unbindPointers=bindScenePointers({st,canvas,camera,controls,ray,mouse,residents,objects,ghost,
-   slots,tapGesture,scenePointers,mischief:parts.mischief,musicBoxes:parts.musicBoxes,house},{onPick,onError});
+ const unbindPointers=bindScenePointers({...parts,st,canvas,camera,controls,ray,mouse,slots,tapGesture,
+   scenePointers},{onPick,onError});
  const resize=()=>fitViewport(canvas,camera,renderer,focusPose().height);
  let viewportWidth=0,viewportHeight=0;
  function syncViewport(){

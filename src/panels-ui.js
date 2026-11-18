@@ -21,6 +21,11 @@ function lockedDoorMarkup(s,{t,button}){
  return `<h3 class="section-heading">${t('door')}</h3><p class="sheet-intro">${t('doorLockedIntro')}</p>${button(
    'panel-store',t('doorLockedSee'),'spark','class="wide door-store"')}`;
 }
+function doorNeedCue(s,step,{t,n}){
+ const sami=bondLevel(s.dolls.find(d=>d.id==='sami').bond);
+ const progress=step.needs==='sami-dear'?`${n(sami)}/${n(3)}`:`${n(s.journal.length)}/${n(SECRETS.length)}`;
+ return `${t('needs_'+step.needs)} (${progress})`;
+}
 export function doorMarkup(s,{t,n,button,access=appStore.access()}){
  if(fifthRoomLocked(s,access))return lockedDoorMarkup(s,{t,button});
  const step=nextDoorStep(s),ready=step&&doorReady(s,step),cost=step?doorCost(step,access):0;
@@ -30,7 +35,7 @@ export function doorMarkup(s,{t,n,button,access=appStore.access()}){
      class="entry-number">${icon('check')}</span><div><h3>${t('door_'+d.id+'Title')}</h3
        ><p>${t('door_'+d.id+'Text')}</p></div></article>`).join('');
  const next=step?`<div class="door-next"><div><strong>${t('door_'+step.id+'Title')}</strong><small>${ready?
-   '':t('needs_'+step.needs)}</small></div>${button('mend-door',
+   '':doorNeedCue(s,step,{t,n})}</small></div>${button('mend-door',
      cost?t('mend')+' · '+n(cost):t('mend'),'button',`class="primary" ${ready&&canAfford(s,cost)?
    '':'disabled'}`)}</div><p class="door-progress" aria-hidden="true">${DOOR_STEPS.map((d,
      i)=>`<span class="${i<s.door?'done':''}"></span>`).join('')}</p>`:'';

@@ -3,21 +3,33 @@ import assert from 'node:assert/strict';
 import * as sim from '../src/simulation.js';
 import {DOOR_STEPS,GIFT_COST,VISITOR_GIFTS,SECRETS} from '../src/content.js';
 import {strings} from '../src/i18n.js';
+import {doorMarkup} from '../src/panels-ui.js';
+import {nextStep} from '../src/objective-ui.js';
+import {button} from '../src/shell-markup.js';
 const rich=()=>{const s=sim.createState();s.buttons=9999;return s};
 const night=s=>{if(!sim.isNight(s))sim.changeLight(s)};
 const nextNight=s=>{sim.changeLight(s);night(s)};
 
 test('the closed door is mended in order and spends each step exactly',()=>{
- const s=rich();assert.equal(sim.mendDoor(s).step,'hinge');assert.equal(s.buttons,9999-40);assert.equal(sim.mendDoor(s).step,'dust');assert.equal(s.door,2);
+ const s=rich();assert.equal(sim.mendDoor(s).step,'hinge');assert.equal(s.buttons,9999-25);assert.equal(sim.mendDoor(s).step,'dust');assert.equal(s.door,2);
 });
 test('the key waits for closeness with Sami, and opening waits for the whole story',()=>{
  const s=rich();sim.mendDoor(s);sim.mendDoor(s);
- const blocked=sim.mendDoor(s);assert.equal(blocked.reason,'doorNeeds');assert.equal(blocked.needs,'sami-dear');assert.equal(s.door,2);assert.equal(s.buttons,9999-100);
+ const blocked=sim.mendDoor(s);assert.equal(blocked.reason,'doorNeeds');assert.equal(blocked.needs,'sami-dear');assert.equal(s.door,2);assert.equal(s.buttons,9999-65);
  s.dolls[2].bond=60;assert.equal(sim.mendDoor(s).step,'key');assert.equal(sim.mendDoor(s).step,'lamp');
  assert.equal(sim.mendDoor(s).needs,'all-whispers');s.journal=[...SECRETS];assert.equal(sim.mendDoor(s).step,'open');
  assert.equal(sim.doorOpen(s),true);assert.equal(sim.mendDoor(s).reason,'doorDone');assert.ok(s.achieved.includes('door-open'));
 });
-test('the door requires funds and never goes into debt',()=>{const s=sim.createState();s.buttons=39;assert.equal(sim.mendDoor(s).reason,'funds');assert.equal(s.door,0);assert.equal(s.buttons,39)});
+test('the door requires funds and never goes into debt',()=>{const s=sim.createState();s.buttons=24;assert.equal(sim.mendDoor(s).reason,'funds');assert.equal(s.door,0);assert.equal(s.buttons,24)});
+test('door gates surface progress in the door sheet and Sami closeness in objectives',()=>{
+ const s=rich();sim.mendDoor(s);sim.mendDoor(s);
+ const t=k=>strings.en[k],ctx={t,n:String,button,access:{fifthRoom:true,canary:true}};
+ assert.match(doorMarkup(s,ctx),/\(\d+\/3\)/);
+ s.story.chapter=3;s.wishes=s.dolls.map(d=>d.id);s.decor=[{id:1,item:'plant',room:'kitchen',slot:0}];s.activities.mastery.tea=1;s.restoration.kitchen=1;s.restoration.parlor=1;
+ assert.equal(nextStep(s,t,String,'',{fifthRoom:true,canary:true}).copy,strings.en['needs_sami-dear']);
+ s.dolls[2].bond=60;sim.mendDoor(s);sim.mendDoor(s);
+ assert.match(doorMarkup(s,ctx),/\(0\/6\)/);
+});
 test('gifts need an open door, the night, and one per night',()=>{
  const s=rich();assert.equal(sim.leaveGift(s).reason,'doorClosed');
  s.door=DOOR_STEPS.length;assert.equal(sim.leaveGift(s).reason,'daylight');night(s);

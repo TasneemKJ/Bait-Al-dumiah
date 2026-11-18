@@ -114,11 +114,12 @@ export class DollhouseAudio{
   if(!this.context)return;const t=this.context.currentTime;
   DUSK_SWELL.forEach((f,i)=>this.tone(f,t+i*.35,4,.022,'sine',1.8));
  }
- tick(night,rain=false,dusk=false){
+ tick(night,rain=false,dusk=false,hush=0){
   if(!this.context||!this.enabled||this.paused||this.disposed)return;
   const now=this.context.currentTime;
   if(rain||this.rain){this.rain??=createRainSound(this.context,this.master);this.rain.set(rain)}
   if(!night)this.sawDay=true;
+  if(!night||hush<=.01)this.hushPlayed=false;
   if(this.night!==night){this.night=night;this.nextKnock=night?now+18:Infinity;
   if(night&&this.sawDay){this.sawDay=false;this.duskSwell()}}
   // One current beat only: an idle tab or resumed context never replays backlog.
@@ -128,6 +129,11 @@ export class DollhouseAudio{
      beat.duration,beat.volume,roomCutoff(this.room)));
    if(beat.drone)this.tone((night?146.832:196)/2,now,3.6,.018,'sine');
    this.index++;this.next=now+beat.delay;
+  }
+  if(night&&hush>.02&&!this.hushPlayed){
+   this.hushPlayed=true;
+   this.track(playWoodTap(this.context,this.master,now,.014));
+   this.track(playWoodTap(this.context,this.master,now+.55,.010));
   }
   if(night&&now>=this.nextKnock){
    this.track(playWoodTap(this.context,this.master,now,.023));
@@ -157,6 +163,9 @@ export class DollhouseAudio{
    }
    return;
   }
+  if(kind==='door-locked'){const now=this.context.currentTime;
+   this.track(playWoodTap(this.context,this.master,now,.026));
+   return this.track(playWoodTap(this.context,this.master,now+.17,.017))}
   if(kind==='mint-tin')return this.track(playTinTouch(this.context,this.master,this.context.currentTime));
   if(kind==='porcelain')return this.track(playPorcelainClink(this.context,this.master,this.context.currentTime));
   if(kind==='paper')return this.track(playPaperRustle(this.context,this.master,this.context.currentTime));

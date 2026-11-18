@@ -46,8 +46,8 @@ export const storyCommands={
 'deselect-object':(app,value,origin)=>{app.storyUI?.clear(true);app.world?.clearObjectSelection();return;},
 'story-hint':(app,value,origin)=>{
    const story=sim.storyStatus(app.state);if(story.finished||app.fatal||app.manualPause||app.physicalActivity())return;
-   const o=objectInfo(app.state,'prop:'+story.next.object);
-   if(o){if(app.ui.panel)app.ui.close();app.dispatch('focus-room',o.room)}return;
+   const key='prop:'+story.next.object,o=objectInfo(app.state,key);
+   if(o){if(app.ui.panel)app.ui.close();app.dispatch('select-object',key);app.audio?.effect?.('mobile')}return;
   },
 'story-interact':(app,value)=>interactStory(app,value),
 'carry-start':(app,value,origin)=>{app.carrying=true;app.world?.setEnabled(false);return;},

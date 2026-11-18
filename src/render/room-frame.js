@@ -19,7 +19,7 @@ export function createRoomFrame(parent){
  let focus=null;
  return {root,veils,show(id){const room=ROOMS.find(r=>r.id===id);root.visible=Boolean(room);focus=room?id:null;
  if(room)root.position.set(room.x,room.y+.20,1.84);return root.visible},
- tint(nightMix=0,dt=1/60,still=false){for(const {id,m} of veils){const goal=focus&&id!==focus?.42:0;
+ tint(nightMix=0,dt=1/60,still=false){for(const {id,m} of veils){const goal=focus&&id!==focus?.33:0;
   const o=m.material.opacity;m.material.opacity=still?goal:o+(goal-o)*Math.min(1,dt*4);m.visible=m.material.opacity>.01;
   m.material.color.copy(day).lerp(night,nightMix)}}};
 }

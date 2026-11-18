@@ -15,6 +15,9 @@ export function installView(app){
   const chime=sim.chimeStatus(app.state);
   if(chime?.tone&&chime.tone!==app.lastChimeTone)audio.chime(chime.sounding);
   app.lastChimeTone=chime?.tone??null;
+  const tea=sim.teaStatus(app.state),ready=tea?.phase==='pour'?tea.cups.filter(c=>c.ready&&!c.overfilled).length:0;
+  if(ready>(app.lastTeaReady??0))audio.effect?.('porcelain');
+  app.lastTeaReady=ready;
  }
  // Reattach scene controls synchronously; a slow graphics frame must not hide the UI.
  function refreshUI(){app.ui.refresh();app.updateSaveStatus?.();app.roomViews.update();

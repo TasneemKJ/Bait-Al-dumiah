@@ -122,6 +122,8 @@ export function greeting(v,d,t,still){
  v.greeting=false;if(still||d.action!=='idle')return;
  const age=t-(v.greetedAt??-Infinity);if(age<0||age>1.65)return;
  const weight=smooth(age/.22)*(1-smooth((age-1.25)/.40));v.greeting=weight>.01;
+ v.body.position.y+=Math.sin(Math.min(1,age/.42)*Math.PI)*.045*weight;
+ v.head.rotation.z+=Math.sin(age*8)*.06*weight;
  aimArm(v.arms[1],[.327,.914,.048],weight);v.arms[1].hand.rotation.z=Math.sin(age*12)*.22*weight;
 }
 
