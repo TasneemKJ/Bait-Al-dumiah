@@ -1,0 +1,12 @@
+<!doctype html><!-- Icon lab for scripts/icon_home.py: the live world on a square canvas, no UI. --><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#000}canvas{display:block;width:100vw;height:100vh}</style>
+<script type="importmap">{"imports":{"three":"/vendor/three.module.min.js","three/addons/controls/OrbitControls.js":"/vendor/OrbitControls.js"}}</script></head>
+<body><canvas id="c"></canvas><script type="module">
+import {createWorld} from '/src/render/world.js';
+import {createState,place} from '/src/simulation.js';
+const canvas=document.getElementById('c');
+const s=createState();s.settings.reducedMotion=true;s.introSeen=true;
+window.lab={s,place,ready:false};
+const world=createWorld(canvas,{onPick(){},onError(e){console.error(e)}});world.setEnabled(false);
+window.lab.world=world;window.lab.ready=true;
+window.lab.draw=(n=3)=>{for(let i=0;i<n;i++)world.render(s,1/30,null)};
+</script></body></html>
