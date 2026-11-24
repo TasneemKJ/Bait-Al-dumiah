@@ -5,7 +5,7 @@ import {cameraApi} from './world-camera.js';
 import {renderFrame} from './world-frame.js';
 import {takePicture} from './world-picture.js';
 import {visualStatus} from './world-status.js';
-import {houseFraming} from './house-framing.js';
+import {houseFraming,homeFraming} from './house-framing.js';
 import {portraitFraming} from './doll-camera.js';
 import * as T from 'three';
 import {createWorkPicking} from './work-picking.js';
@@ -23,6 +23,7 @@ function focusPoseFor(st,canvas,residents,house,presentation){
  if(st.stitchActive)return stitchFraming(w,h);
  const p=st.focusedDoll?residents.position(st.focusedDoll):null;
  if(p){p.add(house.root.position);return portraitFraming(w,h,p.toArray())}
+ if(st.homeStage&&!st.focusedRoom)return homeFraming(w,h,st.homeStage);
  return houseFraming(w,h,st.focusedRoom,st.subject?{...presentation.value,subject:st.subject}:presentation.value);
 }
 // The story object under a screen point, or null outside the canvas.
@@ -72,6 +73,11 @@ function fitViewport(canvas,camera,renderer,height){
 const musicApi=(boxes,canvas,camera)=>({holdKey:on=>boxes.hold(on),
  musicPoint(kind,id){const p=boxes.point(kind,id);if(!p)return null;p.project(camera);
   const r=canvas.getBoundingClientRect();return {x:r.left+(p.x+1)/2*r.width,y:r.top+(1-p.y)/2*r.height}}});
+// Home's own framing and room backdrop (house-framing.js, home-backdrop.js); null on Play glides back.
+const homeStageApi=({st,working,resize,cameraMove,focusPose})=>({setHomeStage(stage){
+ const was=JSON.stringify(st.homeStage??null);st.homeStage=stage?{rtl:Boolean(stage.rtl)}:null;
+ if(JSON.stringify(st.homeStage)===was||working())return;
+ resize();cameraMove.moveTo(focusPose(),st.reducedMotion||Boolean(stage))}});
 export function createWorld(canvas,{onPick,onError}){
  const parts=buildScene(canvas);
  const {renderer,scene,camera,controls,house,residents,portraitCache,preview,objects,teaTable,sewingPlay,
@@ -107,7 +113,7 @@ export function createWorld(canvas,{onPick,onError}){
  function syncViewport(){
   const w=canvas.clientWidth,h=canvas.clientHeight;if(w===viewportWidth&&h===viewportHeight)return false;
   viewportWidth=w;viewportHeight=h;scenePointers.clear();tapGesture.cancel();resize();
-  if(st.focusedRoom||st.focusedDoll)applyFraming();return true;
+  if(st.focusedRoom||st.focusedDoll||st.homeStage)applyFraming();return true;
  }
  syncViewport();
  const w={...parts,st,canvas,cameraMove,presentation,picking,working,
@@ -118,7 +124,7 @@ export function createWorld(canvas,{onPick,onError}){
   welcomeBack(times){residents.greetAll(times)},greet(id){residents.greet(id)},
     selectObject(key){return objects.select(key)},clearObjectSelection(){objects.clear()},objectAt,
     objectPositions(){return objects.project(camera,canvas.clientWidth,canvas.clientHeight)},
-  setPresentation(value,viewport){if(!working())presentation.update(value,viewport)},
+  setPresentation(value,viewport){if(!working())presentation.update(value,viewport)},...homeStageApi(w),
   visualStatus(){return visualStatus(w)},getPortraits(){return portraitCache.getAll()},
   ...cameraApi(w),
   setPlacement(item){st.placement=item;slots.setActive(item);if(!item){st.previewPose=null;preview.clear()}},

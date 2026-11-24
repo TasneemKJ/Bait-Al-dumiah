@@ -8,7 +8,7 @@ import {returnGreeting,waveSchedule,waveRoom} from './return-greeting.js';
 function showPlayShell(app){
  app.homeUI.hide();document.querySelector('#app').dataset.screen='play';app.host.hidden=false;app.host.inert=false;
  app.canvas.inert=false;app.canvas.removeAttribute('aria-hidden');app.canvas.setAttribute('tabindex','0');
- app.syncPause();app.world.syncViewport();app.world.setEnabled(!app.state.paused);
+ app.syncPause();app.world.setHomeStage?.(null);app.world.syncViewport();app.world.setEnabled(!app.state.paused);
  app.refreshUI();app.playfieldLayout.measure();
 }
 // The player's own calendar day, for the first week's arc (src/sim-arc.js).

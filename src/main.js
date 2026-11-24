@@ -105,7 +105,8 @@ function buildViews(){
     onTap:call=>dispatch('answer-bell',call)});
   try{
     app.world=createWorld(canvas,{onPick:pickFromScene,onError:app.showError});
-    app.world.setEnabled(false);app.homeUI.ready();document.querySelector('#loading')?.remove();
+    app.world.setEnabled(false);app.world.setHomeStage?.({rtl:getState().settings.locale==='ar'});
+    app.homeUI.ready();document.querySelector('#loading')?.remove();
   }catch(error){console.error('Dollhouse renderer could not start:',error);app.showError('webgl')}
   const world=()=>app.world;
   const sound=createIntroSound(app.audio);

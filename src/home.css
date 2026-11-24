@@ -1,48 +1,78 @@
-/* Dedicated entry surface: the native house has its own stage, never a live HUD. */
-#home{position:absolute;inset:0;z-index:3;color:var(--ink);pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 52%,#eadbd442 100%)}
+/* Dedicated entry surface: the native house has its own stage, never a live HUD.
+   Home (2026-11-24): the canvas fills the screen and draws the room around the miniature (a papered wall, a
+   rosewood table, a lamp pool: src/render/home-backdrop.js). The words keep the space the composition leaves:
+   above the roof and on the table in portrait, beside the house in landscape. A feathered scrim of the wall's
+   own colour sits only behind the words. */
+#home{--home-scrim:#f3e7dcf5;--home-name:#663a44;--home-alt:#6f4b54;--home-line:#5f4850;
+ position:absolute;inset:0;z-index:3;color:var(--ink);pointer-events:none}
 #home[hidden],#home [hidden],#ui[hidden]{display:none!important}
 #home button{pointer-events:auto;min-height:44px;font-family:Georgia,"Times New Roman",serif;font-size:18px;line-height:1.3;transition:transform .14s ease,box-shadow .14s ease}
-#home .home-title{position:absolute;inset-inline:16px;top:max(24px,env(safe-area-inset-top));text-align:center;font-size:clamp(26px,6vw,44px);line-height:1.15;letter-spacing:-.04em;color:#80545d;text-shadow:0 2px 12px #fff8f2cc}
+#home .home-title{position:absolute;inset-inline:16px;top:max(24px,env(safe-area-inset-top));text-align:center;font-size:clamp(26px,6vw,44px);line-height:1.15;letter-spacing:-.04em;color:var(--home-name);text-shadow:0 1px 0 #fff8f2aa;isolation:isolate}
+#home .home-title:before{content:"";position:absolute;z-index:-1;inset:-26px -12px -22px;border-radius:50%;background:radial-gradient(closest-side,var(--home-scrim) 45%,transparent);pointer-events:none}
 #home .home-actions{position:absolute;inset-inline:24px;bottom:max(24px,env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:12px}
-#home .home-play{width:min(286px,100%);min-height:58px;border-radius:32px;font-size:27px;color:#fff7ee;background:linear-gradient(180deg,#8c526e,#6d3a52);border:1.5px solid #c99d7a;outline:1px dashed #edd3b67a;outline-offset:-5px;box-shadow:inset 0 1px 0 #fff4e84a,0 10px 26px #4a2a3b34}
-#home section.home-preferences{width:min(480px,calc(100% - 40px));position:absolute;inset-inline-start:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:stretch;gap:16px}
+#home .home-play{width:min(286px,100%);min-height:58px;border-radius:32px;font-size:27px;color:#fff7ee;background:linear-gradient(180deg,#8c526e,#6d3a52);border:1.5px solid #c99d7a;outline:1px dashed #edd3b67a;outline-offset:-5px;box-shadow:inset 0 1px 0 #fff4e84a,0 10px 26px #2a161f55}
+#home section.home-preferences{width:min(480px,calc(100% - 40px));position:absolute;inset-inline-start:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:stretch;gap:16px;padding:22px 20px;border-radius:22px;background:var(--home-scrim);box-shadow:0 0 40px 24px var(--home-scrim)}
 [dir=rtl] #home section.home-preferences{transform:translate(50%,-50%)}
-#home .home-preferences-title{text-align:center;font-size:30px;line-height:1.2;margin-bottom:12px}
-#home button.home-preferences{position:static;inset:auto;transform:none;width:auto;min-width:160px;border:1px solid #cdb29f;background:#fff8f0eb;color:#6c4850;border-radius:24px;padding:10px 22px;box-shadow:inset 0 1px 0 #fffdf9,0 4px 12px #4a323018}
-#home .home-sound,#home .home-language,#home .home-back{background:transparent;border-color:#bca39a;border-radius:24px;min-height:48px}
-#home .home-back{margin-top:6px;border-color:transparent;text-decoration:underline;text-underline-offset:4px}
+#home .home-preferences-title{text-align:center;font-size:30px;line-height:1.2;margin-bottom:12px;color:var(--home-name)}
+#home button.home-preferences{position:static;inset:auto;transform:none;width:auto;min-width:160px;border:1px solid #cdb29f;background:#fff8f0f2;color:#5f3f47;border-radius:24px;padding:10px 22px;box-shadow:inset 0 1px 0 #fffdf9,0 4px 12px #2a161f33}
+#home .home-sound,#home .home-language,#home .home-back{background:#fff8f0d9;border-color:#bca39a;border-radius:24px;min-height:48px;color:#5f3f47}
+#home .home-back{margin-top:6px;border-color:transparent;background:transparent;text-decoration:underline;text-underline-offset:4px}
 #home .home-notice{position:absolute;inset-inline:16px;top:85px;text-align:center;font-size:13px;line-height:1.5;max-width:420px;margin-inline:auto;background:var(--paper);padding:8px 12px;border-radius:8px}
-#app[data-screen="home"] #world{top:clamp(85px,15svh,140px);left:0;bottom:auto;width:100%;height:calc(100% - clamp(85px,15svh,140px) - 170px);min-height:120px;pointer-events:none}
 #app:has(#home[data-view="preferences"]:not([hidden])) #world{visibility:hidden}
-@media(min-width:700px) and (min-height:561px){#home .home-title{top:5svh}#home .home-actions{bottom:4svh}#app[data-screen="home"] #world{top:110px;height:calc(100% - 290px)}}
+#home .home-title .home-name,#home .home-title .home-name-alt,#home .home-title .home-promise{display:block}
+#home .home-title .home-name-alt{font-size:.5em;letter-spacing:0;margin-top:4px;color:var(--home-alt)}
+#home .home-title .home-promise{font:15px/1.5 "Trebuchet MS",Tahoma,sans-serif;letter-spacing:.2px;color:var(--home-line);margin:10px auto 0;max-width:30ch}
+/* A returning player's own day and hour, set like a date line under the name. */
+#home .home-title .home-promise[data-kind=day]{font:italic 17px/1.4 Georgia,"Times New Roman",serif;letter-spacing:.3px}
+html[lang=ar] #home .home-title .home-promise[data-kind=day]{font:17px/1.6 Tahoma,Arial,sans-serif;letter-spacing:0}
+/* The canvas fills the page on Home in every orientation: the room is the background, with no seam bands. */
+#app[data-screen="home"] #world{top:0;left:0;width:100%;height:100%;bottom:auto;min-height:120px;pointer-events:none}
+#home[data-view=home]:not([hidden]){pointer-events:auto;cursor:pointer}
+
+/* Tablet (iPad): its own type and controls, not a phone column in a big screen. */
+@media(min-width:700px) and (min-height:700px){
+ #home .home-title{top:max(5svh,env(safe-area-inset-top));font-size:clamp(52px,6.4vw,76px)}
+ #home .home-title .home-name-alt{font-size:.46em;margin-top:8px}
+ #home .home-title .home-promise{font-size:21px;max-width:34ch;margin-top:14px}
+ #home .home-title .home-promise[data-kind=day],html[lang=ar] #home .home-title .home-promise[data-kind=day]{font-size:24px}
+ #home .home-actions{bottom:max(5svh,env(safe-area-inset-bottom));gap:16px}
+ #home .home-play{width:min(360px,100%);min-height:70px;border-radius:40px;font-size:33px}
+ #home button.home-preferences,#home .home-sound,#home .home-language,#home .home-back{font-size:22px;min-height:56px;padding-inline:30px}
+ #home section.home-preferences{width:min(560px,calc(100% - 80px));gap:20px}
+ #home .home-preferences-title{font-size:38px}
+ #home .home-notice{top:auto;bottom:calc(max(5svh,env(safe-area-inset-bottom)) + 170px);font-size:16px;max-width:520px}
+}
+/* Landscape (phone or tablet): the house stands on the reading-start side (src/render/house-framing.js
+   homeFraming), and the words take the other side, the title high and the buttons low. */
+@media(orientation:landscape){
+ #home .home-title{inset-inline-start:56%;inset-inline-end:max(20px,env(safe-area-inset-right));top:max(30px,env(safe-area-inset-top),12svh);font-size:clamp(26px,3.6vw,64px);letter-spacing:-.03em}
+ #home .home-actions{inset-inline-start:56%;inset-inline-end:max(22px,env(safe-area-inset-right));bottom:max(30px,env(safe-area-inset-bottom),12svh)}
+ #home .home-notice{inset-inline-start:56%;inset-inline-end:16px}
+}
+@media(orientation:landscape) and (min-height:700px){#home .home-title{font-size:clamp(52px,4.4vw,72px)}}
 @media(orientation:landscape) and (max-height:560px){
- #app[data-screen="home"] #world{top:max(12px,env(safe-area-inset-top));left:0;width:56%;height:calc(100% - 24px)}
- #home .home-title{inset-inline-start:58%;inset-inline-end:max(18px,env(safe-area-inset-right));top:max(30px,env(safe-area-inset-top));font-size:clamp(22px,3vw,32px);letter-spacing:-.03em}
- #home .home-actions{inset-inline-start:60%;inset-inline-end:max(22px,env(safe-area-inset-right));bottom:max(30px,env(safe-area-inset-bottom));gap:10px}
+ #home .home-title{top:max(26px,env(safe-area-inset-top));font-size:clamp(22px,3vw,32px)}
+ #home .home-title .home-promise{font-size:14px;margin-top:6px}
+ #home .home-actions{bottom:max(26px,env(safe-area-inset-bottom));gap:10px}
  #home .home-play{font-size:24px;min-height:52px}
- #home .home-notice{top:80px;inset-inline-start:58%;font-size:12px;padding:5px}
- #home section.home-preferences{gap:8px;width:min(340px,calc(100% - 40px))}
+ #home .home-notice{top:80px;font-size:12px;padding:5px}
+ #home section.home-preferences{gap:8px;width:min(340px,calc(100% - 40px));padding:12px 18px}
  #home .home-preferences-title{font-size:26px;margin-bottom:4px}
  #home .home-back{margin-top:0}
- [dir=rtl] #app[data-screen="home"] #world{left:auto;right:0}
 }
 
-/* Home follows the saved house hour from its first painted frame. The controls
-   stay paper-like, but the surrounding surface belongs to the night house. */
+/* Home follows the saved house hour from its first painted frame: at night the room is plum and lamplit. */
 .night #app[data-screen="home"]{
  background:radial-gradient(ellipse at 50% 40%,#403343 0%,#282635 48%,#171b29 100%);
 }
-.night #home{color:#ead8ca;background:radial-gradient(ellipse at 50% 45%,transparent 50%,#10132268 100%)}
-.night #home .home-title{color:#f0cda9;text-shadow:0 2px 15px #0d1020aa}
+.night #home{--home-scrim:#1d1724b3;--home-name:#f0cda9;--home-alt:#e6c9b6;--home-line:#eadacb;color:#ead8ca}
+.night #home .home-title{text-shadow:0 2px 15px #0d1020aa}
 .night #home .home-play{background:linear-gradient(180deg,#8c5570,#6c3e55);border-color:#cfa582;color:#fff2df;box-shadow:inset 0 1px 0 #fff4e83a,0 10px 28px #080b1670}
 .night #home button.home-preferences,.night #home .home-sound,.night #home .home-language,.night #home .home-back{
- color:#ead8ca;border-color:#9b7d89;background:#282431b8
+ color:#f0dfcf;border-color:#9b7d89;background:#282431e6
 }
+.night #home .home-back{background:transparent}
 .night #home .home-notice{background:#2b2635eb;color:#f0dfcf;border:1px solid #8e748566}
 .night #home .home-preferences-title{color:#f0dfcf}
-#home .home-title .home-name,#home .home-title .home-name-alt,#home .home-title .home-promise{display:block}
-#home .home-title .home-name-alt{font-size:.5em;letter-spacing:0;margin-top:4px;color:#9a7480}
-#home .home-title .home-promise{font:15px/1.5 "Trebuchet MS",Tahoma,sans-serif;letter-spacing:.2px;color:var(--muted);margin:10px auto 0;max-width:30ch}
-/* The canvas fills the page on Home: the house's own painted backdrop is the background, with no seam bands. */
-#app[data-screen="home"] #world{top:0;height:100%}
-#home[data-view=home]:not([hidden]){pointer-events:auto;cursor:pointer}
+/* Arabic letters join: no tracking on Arabic lines. */
+html[lang=ar] #home .home-title,html[lang=ar] #home .home-title .home-promise{letter-spacing:0}

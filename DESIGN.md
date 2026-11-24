@@ -148,6 +148,7 @@ The night has gentle unease (knocks inside the wall, footprints that do not lead
 ## First minute polish — hand-play notes (2026-11-13)
 - A first launch speaks the device's language (Arabic device → Arabic; any other → English); Preferences and a saved choice still win.
 - Home: both names (the current language's large, the other beneath) and one line of promise; the canvas fills the page so the house's painted backdrop is the whole background (no seam bands).
+- Home, 1.4 (2026-11-24): the miniature stands on a rosewood table against a papered wall (cream with rose stripes and small gold eight-point stars; plum and lamplit at the saved night hour), drawn by the backdrop shader (`src/render/home-backdrop.js`) and eased out on Play. A returning player reads their own day and hour under the names instead of the promise. Wide screens stand the house on the reading-start side and give the words the other side; the iPad has its own type and button sizes. A feathered scrim of the wall colour sits only behind the words. `scripts/home_check.py` holds every line to 4.5:1 on real pixels.
 - A selected room is the subject: the neighbouring rooms recede behind a soft paper veil (plum at night), so they peek rather than share the screen. The whole-house view is never veiled.
 
 ## Keepsake wishes and an honest ending — owner override (2026-11-13)

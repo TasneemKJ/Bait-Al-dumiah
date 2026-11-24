@@ -15,7 +15,7 @@
     "preview": "node scripts/serve.mjs dist",
     "test:browser": "npm run build:debug && python scripts/play_check.py && python scripts/story_smoke.py",
     "lint": "eslint src tests scripts eslint.config.js",
-    "test:ui": "npm run build:debug && python scripts/ui_check.py && python scripts/tools_ui_checks.py"
+    "test:ui": "npm run build:debug && python scripts/ui_check.py && python scripts/tools_ui_checks.py && python scripts/home_check.py"
   },
   "dependencies": {
     "three": "0.180.0"

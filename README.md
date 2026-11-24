@@ -68,6 +68,7 @@ python -m pip install -r requirements.txt
 python -m playwright install --with-deps chromium
 npm run test:browser
 python scripts/ui_check.py
+PORT=4419 python scripts/home_check.py   # Home at 8 phone/iPad sizes, EN and AR, new/returning/Preferences: AA contrast on real pixels, 44pt, no overlaps, iPad type (in test:ui)
 python scripts/art_check.py
 python scripts/expansion_check.py
 python scripts/story_check.py

@@ -1,4 +1,5 @@
-import {translate} from './i18n.js';
+import {translate,number} from './i18n.js';
+import {isNight} from './simulation.js';
 
 // Home owns only entry and preferences. Gameplay HUD and commands stay separate.
 export function createHomeUI(root,getState,dispatch,{canContinue=false,loadStatus='new'}={}){
@@ -29,7 +30,8 @@ export function createHomeUI(root,getState,dispatch,{canContinue=false,loadStatu
  function refresh(){
   const locale=getState().settings.locale,t=key=>translate(locale,key);
   name.textContent=t('title');altName.textContent=translate(locale==='ar'?'en':'ar','title');
-  altName.setAttribute('lang',locale==='ar'?'en':'ar');promise.textContent=t('homePromise');
+  altName.setAttribute('lang',locale==='ar'?'en':'ar');promise.textContent=homeLine(getState(),canContinue,t);
+  promise.dataset.kind=canContinue?'day':'promise';
   heading.textContent=t('homePreferences');
   play.textContent=t(reloadRequired?'reload':canContinue?'homeContinue':'homePlay');
   options.textContent=t('homePreferences');
@@ -53,4 +55,10 @@ export function createHomeUI(root,getState,dispatch,{canContinue=false,loadStatu
  play.setAttribute('data-home-action','reload');refresh();
  play.focus({preventScroll:true})},ready(){play.disabled=false},hide(){root.hidden=true;
  root.inert=true},notify(message){notice.textContent=message;notice.hidden=false}};
+}
+// A returning player's Home says where their own house stands (the HUD's own day and hour words); a new player
+// reads the promise.
+export function homeLine(state,canContinue,t){
+ if(!canContinue)return t('homePromise');
+ return t('day')+' '+number(state.settings.locale,state.day)+' · '+t(isNight(state)?'evening':'morning');
 }

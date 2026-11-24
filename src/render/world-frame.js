@@ -38,7 +38,8 @@ export function renderFrame(w,state,dt,selected){
  w.firstWeek.update(state,dt,st.reducedMotion);
  applyLighting({renderer,depthFog,hemi,key,fill,house,courtyard},{state,
    nightMix:st.nightMix,focusedRoom:st.focusedRoom,lampFocus:st.lampFocus,rainMix:w.firstWeek.rainMix});
- details.update(st.nightMix);atmosphere.update(state,st.nightMix,st.quality);
+ st.homeMix=st.homeStage?1:state.settings.reducedMotion?0:Math.max(0,(st.homeMix??0)-dt/.7);
+ details.update(st.nightMix);atmosphere.update(state,st.nightMix,st.quality,{mix:st.homeMix,camera,renderer});
  roomEffects.update(state,st.nightMix,{lampFocus:st.lampFocus,rainMix:w.firstWeek.rainMix});
  restoration.update(state,st.nightMix);
  storyProps.update(state,st.nightMix);teaTable.update(state);sewingPlay.update(state);
