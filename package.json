@@ -18,11 +18,11 @@
     "test:ui": "npm run build:debug && python scripts/ui_check.py && python scripts/tools_ui_checks.py && python scripts/home_check.py"
   },
   "dependencies": {
-    "three": "0.180.0"
+    "three": "0.187.0"
   },
   "devDependencies": {
-    "esbuild": "0.25.10",
-    "eslint": "^9.39.5",
-    "globals": "^17.13.0"
+    "esbuild": "0.28.2",
+    "eslint": "^10.15.0",
+    "globals": "^17.14.0"
   }
 }
